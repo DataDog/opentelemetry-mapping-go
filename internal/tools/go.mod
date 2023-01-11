@@ -1,6 +1,6 @@
 module github.com/DataDog/opentelemetry-mapping-go/internal/tools
 
-go 1.19
+go 1.18
 
 require go.opentelemetry.io/build-tools/chloggen v0.4.0
 
