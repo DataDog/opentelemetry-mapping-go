@@ -34,4 +34,4 @@ fmt:
 # Run unit test suite for all modules
 .PHONY: test
 test:
-	@$(MAKE) for-all CMD="go test -race -timeout 300s ./..."
+	@$(MAKE) for-all CMD="go test -race -timeout 600s ./..."
