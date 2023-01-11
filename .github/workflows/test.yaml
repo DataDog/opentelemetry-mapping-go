@@ -1,0 +1,93 @@
+name: test
+on:
+  push:
+    branches: [main]
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+*"
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup-environment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+      - name: Cache Go
+        id: go-cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+      - name: Install dependencies
+        if: steps.go-cache.outputs.cache-hit != 'true'
+        run: make for-all CMD="go mod download"
+      - name: Install Tools
+        if: steps.go-cache.outputs.cache-hit != 'true'
+        run: make install-tools
+
+  unittest:
+    strategy:
+      matrix:
+        go-version: [1.19, 1.18]
+    runs-on: ubuntu-latest
+    needs: [setup-environment]
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Cache Go
+        id: go-cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+      - name: Cache Build
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/go-build
+          key: unittest-${{ runner.os }}-go-build-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
+      - name: Run Unit Tests
+        run: make test
+
+  lint:
+    runs-on: ubuntu-latest
+    needs: [setup-environment]
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+      - name: Cache Go
+        id: go-cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+      - name: Cache Build
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/go-build
+          key: lint-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+      - name: Check go mod tidy
+        run: make tidy && git diff -s --exit-code || (echo "make tidy needed"; exit 1)
+      - name: Check gofmt
+        run: make fmt  && git diff -s --exit-code || (echo  "make fmt needed"; exit 1)
