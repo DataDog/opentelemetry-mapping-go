@@ -1,7 +1,5 @@
 # Deprecation policy
 
-All Go modules in this repository are officially supported for usage in Datadog products only.
-
 Module versioning follows [semantic versioning][1] with a definition of breaking changes aligned with the [Go compatibility promise][2]. Currently, all modules are published under a `0.x` versioning scheme, which means that breaking changes may happen at any time. To ensure upgrades are easy for dependent projects, we ask contributors to abide by a simple deprecation policy, which is inspired by the [OpenTelemetry Collector breaking changes policy][3].
 
 When making a breaking change to the public API follow these recommendations:

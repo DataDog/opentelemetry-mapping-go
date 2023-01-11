@@ -15,3 +15,6 @@ When submitting a pull request, take into account the following guidelines:
 - Ensure your contribution is properly tested and that tests pass locally.
 - Open your PR against the `main` branch.
 - If your PR results in user-facing changes, add a changelog note with `make chlog-new`.
+- If making breaking changes, follow the [deprecation policy][1].
+
+[1]: /docs/dev/deprecation.md
