@@ -10,7 +10,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/DataDog/datadog-agent/pkg/quantile/summary"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
 
 	"github.com/stretchr/testify/require"
 )

@@ -1,4 +1,4 @@
-module github.com/DataDog/datadog-agent/pkg/quantile
+module github.com/DataDog/opentelemetry-mapping-go/pkg/quantile
 
 go 1.18
 
