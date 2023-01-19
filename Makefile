@@ -3,6 +3,8 @@ TOOLS_MOD_DIR := ./internal/tools
 .PHONY: install-tools
 install-tools:
 	cd $(TOOLS_MOD_DIR) && go install go.opentelemetry.io/build-tools/chloggen
+	cd $(TOOLS_MOD_DIR) && go install github.com/frapposelli/wwhrd
+	cd $(TOOLS_MOD_DIR)/generate-license-file && go install .
 
 
 FILENAME?=$(shell git branch --show-current).yaml
@@ -35,3 +37,8 @@ fmt:
 .PHONY: test
 test:
 	@$(MAKE) for-all CMD="go test -race -timeout 600s ./..."
+
+# Generate licenses file for compliance. 
+.PHONY: gen-licenses
+gen-licenses:
+	generate-license-file
