@@ -24,7 +24,7 @@ var (
 func main() {
 	f, err := os.Create("LICENSE-3rdparty.csv")
 	if err != nil {
-		log.Fatalln("Failed to open file", err)
+		log.Fatalln("Failed to open 'LICENSE-3rdparty.csv' file", err)
 	}
 
 	w := csv.NewWriter(f)
@@ -76,7 +76,7 @@ func findDependenciesOf(module string) (packages []Package, err error) {
 	}
 
 	if err = os.Chdir(module); err != nil {
-		return
+		return nil, fmt.Errorf("failed to changed directory to %q: %w", module, err)
 	}
 	// restore directory after exit
 	defer func() { err = multierr.Append(err, os.Chdir(cwd)) }()
@@ -84,7 +84,7 @@ func findDependenciesOf(module string) (packages []Package, err error) {
 	// wwhrd needs vendored dependencies.
 	cmd := exec.Command("go", "mod", "vendor")
 	if err = cmd.Run(); err != nil {
-		return
+		return nil, fmt.Errorf("failed to run 'go mod vendor': %w", err)
 	}
 	// remove vendored dependencies after exit
 	defer func() { err = multierr.Append(err, os.RemoveAll("vendor/")) }()
@@ -93,7 +93,7 @@ func findDependenciesOf(module string) (packages []Package, err error) {
 	var out bytes.Buffer
 	cmd.Stderr = &out
 	if err = cmd.Run(); err != nil {
-		return
+		return nil, fmt.Errorf("failed to run 'wwhrd list': %w", err)
 	}
 
 	// Parse wwhrd output

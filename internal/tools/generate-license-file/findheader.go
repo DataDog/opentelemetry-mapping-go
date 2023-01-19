@@ -3,10 +3,13 @@ package main
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"os"
 	"path"
 	"regexp"
 	"strings"
+
+	"go.uber.org/multierr"
 )
 
 var (
@@ -76,15 +79,15 @@ func mapLines(fullPath string, fn func(line string) (string, bool)) ([]string, e
 			return nil, nil
 		} else {
 			// true error. bubble up.
-			return nil, err
+			return nil, fmt.Errorf("failed to stat %q: %w", fullPath, err)
 		}
 	}
 
 	file, err := os.Open(fullPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open %q: %w", fullPath, err)
 	}
-	defer file.Close()
+	defer func() { err = multierr.Append(err, file.Close()) }()
 
 	var notices []string
 
@@ -96,7 +99,7 @@ func mapLines(fullPath string, fn func(line string) (string, bool)) ([]string, e
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to scan %q: %w", fullPath, err)
 	}
 
 	return notices, nil
