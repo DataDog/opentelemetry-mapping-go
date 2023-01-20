@@ -3,6 +3,7 @@ TOOLS_MOD_DIR := ./internal/tools
 .PHONY: install-tools
 install-tools:
 	cd $(TOOLS_MOD_DIR) && go install go.opentelemetry.io/build-tools/chloggen
+	cd $(TOOLS_MOD_DIR) && go install go.opentelemetry.io/build-tools/multimod
 
 
 FILENAME?=$(shell git branch --show-current).yaml
@@ -35,3 +36,17 @@ fmt:
 .PHONY: test
 test:
 	@$(MAKE) for-all CMD="go test -race -timeout 600s ./..."
+
+# Do PR for preparing a release
+.PHONY: prerelease
+prerelease:
+	multimod verify && multimod prerelease -m pkgs
+
+# Push tags 
+.PHONY: push-tags
+push-tags:
+	multimod verify
+	set -e; for tag in `multimod tag -m pkgs -c HEAD --print-tags | grep -v "Using" `; do \
+		echo "pushing tag $${tag}"; \
+		git push git@github.com:DataDog/opentelemetry-mapping-go.git $${tag}; \
+	done;
