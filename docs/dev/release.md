@@ -6,7 +6,7 @@ As a prerequisite, run `make install-tools` to ensure the necessary tooling is a
 To make a new release, follow these steps:
 
 0. Make sure CI passes and there are no release blockers.
-1. Choose the new version number, `${VERSION}`. We follow semantic versioning and are currently doing `0.x` releases.
+1. Choose the new version number, `${VERSION}`. We follow semantic versioning and are currently doing `v0.x.y` releases.
 2. Checkout to a new branch.
 3. Update the version number on `versions.yaml` and commit the changes.
 4. Run `chloggen update -v ${VERSION}` to update the changelog and commit the changes.
