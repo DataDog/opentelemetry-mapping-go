@@ -5,7 +5,7 @@
 
 module-sets:
   pkgs:
-    version: v0.1.0
+    version: v0.1.0-alpha.1
     modules:
       - github.com/DataDog/opentelemetry-mapping-go/pkg/quantile
 excluded-modules:
