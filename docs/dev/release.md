@@ -9,7 +9,7 @@ To make a new release, follow these steps:
 1. Choose the new version number, `${VERSION}`. We follow semantic versioning and are currently doing `0.x` releases.
 2. Checkout to a new branch.
 3. Update the version number on `versions.yaml` and commit the changes.
-4. If there are user-facing changes, run `chloggen update -v ${VERSION}` to update the changelog and commit the changes.
+4. Run `chloggen update -v ${VERSION}` to update the changelog and commit the changes.
 5. Run `make prerelease` and checkout to the branch created by this step. Open a PR to `main` from this branch and get it merged.
 6. Checkout and pull the main branch locally. Make sure that it points to the commit from the previously merged PR.
 7. Run `make push-tags` to push the tags.
