@@ -3,9 +3,9 @@ TOOLS_MOD_DIR := ./internal/tools
 .PHONY: install-tools
 install-tools:
 	cd $(TOOLS_MOD_DIR) && go install go.opentelemetry.io/build-tools/chloggen
+	cd $(TOOLS_MOD_DIR) && go install go.opentelemetry.io/build-tools/multimod
 	cd $(TOOLS_MOD_DIR) && go install github.com/frapposelli/wwhrd
 	cd $(TOOLS_MOD_DIR)/generate-license-file && go install .
-
 
 FILENAME?=$(shell git branch --show-current).yaml
 .PHONY: chlog-new
@@ -42,3 +42,17 @@ test:
 .PHONY: gen-licenses
 gen-licenses:
 	generate-license-file
+
+# Do PR for preparing a release
+.PHONY: prerelease
+prerelease:
+	multimod verify && multimod prerelease -m pkgs
+
+# Push tags 
+.PHONY: push-tags
+push-tags:
+	multimod verify
+	set -e; for tag in `multimod tag -m pkgs -c HEAD --print-tags | grep -v "Using" `; do \
+		echo "pushing tag $${tag}"; \
+		git push git@github.com:DataDog/opentelemetry-mapping-go.git $${tag}; \
+	done;

@@ -14,4 +14,5 @@ package tools
 import (
 	_ "github.com/frapposelli/wwhrd"
 	_ "go.opentelemetry.io/build-tools/chloggen"
+	_ "go.opentelemetry.io/build-tools/multimod"
 )
