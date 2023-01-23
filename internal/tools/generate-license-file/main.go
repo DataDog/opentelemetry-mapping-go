@@ -14,6 +14,8 @@ import (
 	"go.uber.org/multierr"
 )
 
+const licensesCSV = "LICENSE-3rdparty.csv"
+
 var (
 	// modules on this repository.
 	modules = []string{
@@ -22,9 +24,9 @@ var (
 )
 
 func main() {
-	f, err := os.Create("LICENSE-3rdparty.csv")
+	f, err := os.Create(licensesCSV)
 	if err != nil {
-		log.Fatalln("Failed to open 'LICENSE-3rdparty.csv' file", err)
+		log.Fatalf("Failed to open %q file: %s\n", licensesCSV, err)
 	}
 
 	w := csv.NewWriter(f)
