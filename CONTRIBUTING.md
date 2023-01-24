@@ -15,3 +15,9 @@ When submitting a pull request, take into account the following guidelines:
 - Ensure your contribution is properly tested and that tests pass locally.
 - Open your PR against the `main` branch.
 - If your PR results in user-facing changes, add a changelog note with `make chlog-new`.
+
+## Releasing a new version
+
+See [docs/dev/release.md][1] for instructions on how to do a new release.
+
+[1]: docs/dev/release.md
