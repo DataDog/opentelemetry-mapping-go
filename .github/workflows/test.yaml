@@ -27,7 +27,7 @@ jobs:
           path: |
             ~/go/bin
             ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
       - name: Install dependencies
         if: steps.go-cache.outputs.cache-hit != 'true'
         run: make for-all CMD="go mod download"
@@ -55,12 +55,12 @@ jobs:
           path: |
             ~/go/bin
             ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
       - name: Cache Build
         uses: actions/cache@v3
         with:
           path: ~/.cache/go-build
-          key: unittest-${{ runner.os }}-go-build-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
+          key: unittest-${{ runner.os }}-go-build-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
       - name: Run Unit Tests
         run: make test
 
@@ -81,13 +81,15 @@ jobs:
           path: |
             ~/go/bin
             ~/go/pkg/mod
-          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
       - name: Cache Build
         uses: actions/cache@v3
         with:
           path: ~/.cache/go-build
-          key: lint-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          key: lint-${{ runner.os }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
       - name: Check go mod tidy
         run: make tidy && git diff -s --exit-code || (echo "make tidy needed"; exit 1)
       - name: Check gofmt
         run: make fmt  && git diff -s --exit-code || (echo  "make fmt needed"; exit 1)
+      - name: Check licenses file
+        run: make gen-licenses && git diff -s --exit-code || (echo "make gen-licenses needed"; exit 1)

@@ -17,4 +17,9 @@ When submitting a pull request, take into account the following guidelines:
 - If your PR results in user-facing changes, add a changelog note with `make chlog-new`.
 - If making breaking changes, follow the [deprecation policy][1].
 
+## Releasing a new version
+
+See [docs/dev/release.md][2] for instructions on how to do a new release.
+
 [1]: /docs/dev/deprecation.md
+[2]: /docs/dev/release.md
