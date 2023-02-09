@@ -8,4 +8,4 @@ component: pkg/otlp/attributes
 note: Add new module pkg/otlp/attributes
 
 # The PR related to this change
-issues: []
+issues: [9]
