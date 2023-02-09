@@ -20,6 +20,7 @@ var (
 	// modules on this repository.
 	modules = []string{
 		"pkg/quantile",
+		"pkg/otlp/attributes",
 	}
 )
 

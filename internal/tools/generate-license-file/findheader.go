@@ -38,6 +38,10 @@ var (
 // findCopyrightNotices on a given dependency.
 // The dependency is passed by its full path, e.g. github.com/DataDog/sketches-go.
 func findCopyrightNotices(origin string) (copyrightHeaders []string, err error) {
+	if headers, ok := globalOverrides.CopyrightNotice(origin); ok {
+		return headers, nil
+	}
+
 	if strings.Contains(origin, "/") {
 		parentHeaders, err := findCopyrightNotices(origin[:strings.LastIndex(origin, "/")])
 		if err != nil {
