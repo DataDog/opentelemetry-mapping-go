@@ -1,0 +1,12 @@
+# this file contains overrides for the automatic determination of copyright
+# implemented in tasks/licenses.py.  The table keys are the golang package name
+# or pattern, and the value is either a copyright owner or a list of owners.
+#
+# Package patterns may end with a `*`.  When multiple patterns match, the longer
+# is preferred.
+#
+# Copyright statements should reflect the copyright exactly as it is shown on
+# the original component.
+
+go.opentelemetry.io/*: Copyright The OpenTelemetry Authors
+google.golang.org/genproto/*: Copyright 2020 Google LLC
