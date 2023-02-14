@@ -21,6 +21,7 @@ var (
 	modules = []string{
 		"pkg/quantile",
 		"pkg/otlp/attributes",
+		"pkg/otlp/metrics",
 	}
 )
 
