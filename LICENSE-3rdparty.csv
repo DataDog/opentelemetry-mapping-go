@@ -31,3 +31,118 @@ pkg/quantile,google.golang.org/protobuf/reflect/protoreflect,BSD-3-Clause,Copyri
 pkg/quantile,google.golang.org/protobuf/reflect/protoregistry,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/runtime/protoiface,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/runtime/protoimpl,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,github.com/gogo/protobuf/gogoproto,BSD-3-Clause,"Copyright (c) 2013, The GoGo Authors. All rights reserved | Copyright 2010 The Go Authors.  All rights reserved | Sendgrid, Inc | Vastech SA (PTY) LTD | Walter Schulze <awalterschulze@gmail.com> | Anton Povarov <anton.povarov@gmail.com> | Brian Goff <cpuguy83@gmail.com> | Clayton Coleman <ccoleman@redhat.com> | Denis Smirnov <denis.smirnov.91@gmail.com> | DongYun Kang <ceram1000@gmail.com> | Dwayne Schultz <dschultz@pivotal.io> | Georg Apitz <gapitz@pivotal.io> | Gustav Paul <gustav.paul@gmail.com> | Johan Brandhorst <johan.brandhorst@gmail.com> | John Shahid <jvshahid@gmail.com> | John Tuley <john@tuley.org> | Laurent <laurent@adyoulike.com> | Patrick Lee <patrick@dropbox.com> | Peter Edge <peter.edge@gmail.com> | Roger Johansson <rogeralsing@gmail.com> | Sam Nguyen <sam.nguyen@sendgrid.com> | Sergio Arbeo <serabe@gmail.com> | Stephen J Day <stephen.day@docker.com> | Tamir Duberstein <tamird@gmail.com> | Todd Eisenberger <teisenberger@dropbox.com> | Tormod Erevik Lea <tormodlea@gmail.com> | Vyacheslav Kim <kane@sendgrid.com> | Walter Schulze <awalterschulze@gmail.com>"
+pkg/otlp/attributes,github.com/gogo/protobuf/proto,BSD-3-Clause,"Copyright (c) 2013, The GoGo Authors. All rights reserved | Copyright 2010 The Go Authors.  All rights reserved | Sendgrid, Inc | Vastech SA (PTY) LTD | Walter Schulze <awalterschulze@gmail.com> | Anton Povarov <anton.povarov@gmail.com> | Brian Goff <cpuguy83@gmail.com> | Clayton Coleman <ccoleman@redhat.com> | Denis Smirnov <denis.smirnov.91@gmail.com> | DongYun Kang <ceram1000@gmail.com> | Dwayne Schultz <dschultz@pivotal.io> | Georg Apitz <gapitz@pivotal.io> | Gustav Paul <gustav.paul@gmail.com> | Johan Brandhorst <johan.brandhorst@gmail.com> | John Shahid <jvshahid@gmail.com> | John Tuley <john@tuley.org> | Laurent <laurent@adyoulike.com> | Patrick Lee <patrick@dropbox.com> | Peter Edge <peter.edge@gmail.com> | Roger Johansson <rogeralsing@gmail.com> | Sam Nguyen <sam.nguyen@sendgrid.com> | Sergio Arbeo <serabe@gmail.com> | Stephen J Day <stephen.day@docker.com> | Tamir Duberstein <tamird@gmail.com> | Todd Eisenberger <teisenberger@dropbox.com> | Tormod Erevik Lea <tormodlea@gmail.com> | Vyacheslav Kim <kane@sendgrid.com> | Walter Schulze <awalterschulze@gmail.com>"
+pkg/otlp/attributes,github.com/gogo/protobuf/protoc-gen-gogo/descriptor,BSD-3-Clause,"Copyright (c) 2013, The GoGo Authors. All rights reserved | Copyright 2010 The Go Authors.  All rights reserved | Sendgrid, Inc | Vastech SA (PTY) LTD | Walter Schulze <awalterschulze@gmail.com> | Anton Povarov <anton.povarov@gmail.com> | Brian Goff <cpuguy83@gmail.com> | Clayton Coleman <ccoleman@redhat.com> | Denis Smirnov <denis.smirnov.91@gmail.com> | DongYun Kang <ceram1000@gmail.com> | Dwayne Schultz <dschultz@pivotal.io> | Georg Apitz <gapitz@pivotal.io> | Gustav Paul <gustav.paul@gmail.com> | Johan Brandhorst <johan.brandhorst@gmail.com> | John Shahid <jvshahid@gmail.com> | John Tuley <john@tuley.org> | Laurent <laurent@adyoulike.com> | Patrick Lee <patrick@dropbox.com> | Peter Edge <peter.edge@gmail.com> | Roger Johansson <rogeralsing@gmail.com> | Sam Nguyen <sam.nguyen@sendgrid.com> | Sergio Arbeo <serabe@gmail.com> | Stephen J Day <stephen.day@docker.com> | Tamir Duberstein <tamird@gmail.com> | Todd Eisenberger <teisenberger@dropbox.com> | Tormod Erevik Lea <tormodlea@gmail.com> | Vyacheslav Kim <kane@sendgrid.com> | Walter Schulze <awalterschulze@gmail.com>"
+pkg/otlp/attributes,github.com/golang/protobuf/jsonpb,BSD-3-Clause,Copyright 2010 The Go Authors.  All rights reserved
+pkg/otlp/attributes,github.com/golang/protobuf/proto,BSD-3-Clause,Copyright 2010 The Go Authors.  All rights reserved
+pkg/otlp/attributes,github.com/golang/protobuf/ptypes,BSD-3-Clause,Copyright 2010 The Go Authors.  All rights reserved
+pkg/otlp/attributes,github.com/golang/protobuf/ptypes/any,BSD-3-Clause,Copyright 2010 The Go Authors.  All rights reserved
+pkg/otlp/attributes,github.com/golang/protobuf/ptypes/duration,BSD-3-Clause,Copyright 2010 The Go Authors.  All rights reserved
+pkg/otlp/attributes,github.com/golang/protobuf/ptypes/timestamp,BSD-3-Clause,Copyright 2010 The Go Authors.  All rights reserved
+pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal/data,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal/data/protogen/collector/logs/v1,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal/data/protogen/collector/metrics/v1,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal/data/protogen/collector/trace/v1,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal/data/protogen/common/v1,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal/data/protogen/logs/v1,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal/data/protogen/metrics/v1,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal/data/protogen/resource/v1,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal/data/protogen/trace/v1,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/pcommon,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/otlp/attributes,go.opentelemetry.io/collector/semconv/v1.6.1,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/otlp/attributes,go.uber.org/atomic,MIT,"Copyright (c) 2016 Uber Technologies, Inc"
+pkg/otlp/attributes,go.uber.org/multierr,MIT,"Copyright (c) 2017-2021 Uber Technologies, Inc"
+pkg/otlp/attributes,golang.org/x/net/http/httpguts,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
+pkg/otlp/attributes,golang.org/x/net/http2,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
+pkg/otlp/attributes,golang.org/x/net/http2/hpack,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
+pkg/otlp/attributes,golang.org/x/net/idna,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
+pkg/otlp/attributes,golang.org/x/net/internal/timeseries,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
+pkg/otlp/attributes,golang.org/x/net/trace,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
+pkg/otlp/attributes,golang.org/x/sys/unix,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
+pkg/otlp/attributes,golang.org/x/text/secure/bidirule,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
+pkg/otlp/attributes,golang.org/x/text/transform,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
+pkg/otlp/attributes,golang.org/x/text/unicode/bidi,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
+pkg/otlp/attributes,golang.org/x/text/unicode/norm,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/genproto/googleapis/rpc/status,Apache-2.0,Copyright 2020 Google LLC
+pkg/otlp/attributes,google.golang.org/grpc,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/attributes,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/backoff,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/balancer,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/balancer/base,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/balancer/grpclb/state,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/balancer/roundrobin,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/binarylog/grpc_binarylog_v1,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/channelz,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/codes,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/connectivity,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/credentials,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/credentials/insecure,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/encoding,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/encoding/proto,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/grpclog,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/backoff,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/balancer/gracefulswitch,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/balancerload,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/binarylog,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/buffer,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/channelz,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/credentials,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/envconfig,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/grpclog,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/grpcrand,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/grpcsync,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/grpcutil,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/metadata,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/pretty,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/resolver,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/resolver/dns,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/resolver/passthrough,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/resolver/unix,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/serviceconfig,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/status,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/syscall,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/transport,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/transport/networktype,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/keepalive,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/metadata,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/peer,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/resolver,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/serviceconfig,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/stats,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/status,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/tap,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/protobuf/encoding/protojson,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/encoding/prototext,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/encoding/protowire,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/descfmt,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/descopts,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/detrand,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/encoding/defval,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/encoding/json,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/encoding/messageset,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/encoding/tag,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/encoding/text,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/errors,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/filedesc,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/filetype,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/flags,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/genid,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/impl,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/order,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/pragma,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/set,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/strs,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/version,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/proto,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/reflect/protodesc,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/reflect/protoreflect,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/reflect/protoregistry,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/runtime/protoiface,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/runtime/protoimpl,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/types/descriptorpb,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/types/known/anypb,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/types/known/durationpb,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/types/known/timestamppb,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved

@@ -8,6 +8,7 @@ module-sets:
     version: v0.1.0
     modules:
       - github.com/DataDog/opentelemetry-mapping-go/pkg/quantile
+      - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes
 excluded-modules:
   - github.com/DataDog/opentelemetry-mapping-go/internal/tools
   - github.com/DataDog/opentelemetry-mapping-go/internal/tools/generate-license-file
