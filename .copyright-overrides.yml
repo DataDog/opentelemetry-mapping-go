@@ -10,3 +10,6 @@
 
 go.opentelemetry.io/*: Copyright The OpenTelemetry Authors
 google.golang.org/genproto/*: Copyright 2020 Google LLC
+github.com/DataDog/opentelemetry-mapping-go/*: Copyright [2023-Present] Datadog, Inc.
+github.com/modern-go/concurrent: Copyright (c) 2018 Tao Wen
+github.com/modern-go/reflect2: Copyright (c) 2018 Tao Wen
