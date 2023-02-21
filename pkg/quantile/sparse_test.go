@@ -173,6 +173,34 @@ func TestQuantile(t *testing.T) {
 	}
 }
 
+func IsClose(t *testing.T, expected, actual float64) {
+	t.Helper()
+	min := expected - math.Abs(expected*defaultEps)
+	max := expected + math.Abs(expected*defaultEps)
+	if actual < min {
+		t.Fatalf("actual %v is greater than min allowed: %v", actual, min)
+	}
+	if actual > max {
+		t.Fatalf("actual %v is greater than max allowed: %v", actual, max)
+	}
+}
+
+func TestQuantileDDGo(t *testing.T) {
+	c := Default()
+	t.Run("Test count greater than sum of bins", func(t *testing.T) {
+		ta := require.New(t)
+
+		s := arange(t, c, 1, 101)
+		q := s.Quantile(c, .99)
+		ta.NotEqual(s.Basic.Max, q, "should not be max from sketch")
+
+		// Count bigger than sum of bin counts
+		s.count = 200
+		q = s.Quantile(c, .99)
+		ta.Equal(s.Basic.Max, q, "should be max from sketch")
+	})
+}
+
 func TestRank(t *testing.T) {
 	t.Run("101", func(t *testing.T) {
 		// when cnt=101:
