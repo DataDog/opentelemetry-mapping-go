@@ -10,7 +10,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/stretchr/testify v1.8.1
-	go.opentelemetry.io/collector/pdata v1.0.0-rc4
+	go.opentelemetry.io/collector/pdata v1.0.0-rc5
 	go.uber.org/zap v1.24.0
 )
 
@@ -24,7 +24,7 @@ require (
 	github.com/philhofer/fwd v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/tinylib/msgp v1.1.6 // indirect
-	go.opentelemetry.io/collector/semconv v0.70.0 // indirect
+	go.opentelemetry.io/collector/semconv v0.71.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/net v0.5.0 // indirect
