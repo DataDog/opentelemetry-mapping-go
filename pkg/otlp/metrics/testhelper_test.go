@@ -3,7 +3,7 @@
 // This product includes software developed at Datadog (https://www.datadoghq.com/).
 // Copyright 2022-present Datadog, Inc.
 
-package translator
+package metrics
 
 import (
 	"context"
@@ -50,7 +50,7 @@ type TestSketch struct {
 
 type TestTimeSeries struct {
 	TestDimensions
-	Type      MetricDataType
+	Type      DataType
 	Timestamp uint64
 	Value     float64
 }
@@ -127,7 +127,7 @@ func (t *testConsumer) ConsumeAPMStats(_ pb.ClientStatsPayload) {
 func (t *testConsumer) ConsumeTimeSeries(
 	_ context.Context,
 	dimensions *Dimensions,
-	typ MetricDataType,
+	typ DataType,
 	timestamp uint64,
 	value float64,
 ) {
@@ -216,7 +216,7 @@ func TestAssertTranslatorMapFailure(t *testing.T) {
 	// Compare OTLP file with incorrect output
 	ddogfile := "testdata/datadogdata/histogram/simple-delta_nobuckets-cs.json"
 
-	translator, err := New(zap.NewNop(), WithHistogramMode(HistogramModeDistributions))
+	translator, err := NewTranslator(zap.NewNop(), WithHistogramMode(HistogramModeDistributions))
 	require.NoError(t, err)
 	mockTesting := &testingTMock{t}
 	assert.False(t, AssertTranslatorMap(mockTesting, translator, otlpfile, ddogfile), "AssertTranslatorMap should have failed but did not")

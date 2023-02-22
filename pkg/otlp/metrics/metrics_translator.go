@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package translator
+package metrics
 
 import (
 	"context"
@@ -50,8 +50,8 @@ type Translator struct {
 	cfg     translatorConfig
 }
 
-// New creates a new translator with given options.
-func New(logger *zap.Logger, options ...Option) (*Translator, error) {
+// NewTranslator creates a new translator with given options.
+func NewTranslator(logger *zap.Logger, options ...TranslatorOption) (*Translator, error) {
 	cfg := translatorConfig{
 		HistMode:                             HistogramModeDistributions,
 		SendCountSum:                         false,
@@ -108,7 +108,7 @@ func (t *Translator) mapNumberMetrics(
 	ctx context.Context,
 	consumer TimeSeriesConsumer,
 	dims *Dimensions,
-	dt MetricDataType,
+	dt DataType,
 	slice pmetric.NumberDataPointSlice,
 ) {
 

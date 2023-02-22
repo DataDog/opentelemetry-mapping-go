@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package translator
+package metrics
 
 import (
 	"context"
@@ -97,14 +97,14 @@ func (t testProvider) Source(context.Context) (source.Source, error) {
 	}, nil
 }
 
-func newTranslator(t *testing.T, logger *zap.Logger, opts ...Option) *Translator {
-	options := append([]Option{
+func newTranslator(t *testing.T, logger *zap.Logger, opts ...TranslatorOption) *Translator {
+	options := append([]TranslatorOption{
 		WithFallbackSourceProvider(testProvider(fallbackHostname)),
 		WithHistogramMode(HistogramModeDistributions),
 		WithNumberMode(NumberModeCumulativeToDelta),
 	}, opts...)
 
-	tr, err := New(
+	tr, err := NewTranslator(
 		logger,
 		options...,
 	)
@@ -115,7 +115,7 @@ func newTranslator(t *testing.T, logger *zap.Logger, opts ...Option) *Translator
 
 type metric struct {
 	name      string
-	typ       MetricDataType
+	typ       DataType
 	timestamp uint64
 	value     float64
 	tags      []string
@@ -139,7 +139,7 @@ type mockTimeSeriesConsumer struct {
 func (m *mockTimeSeriesConsumer) ConsumeTimeSeries(
 	_ context.Context,
 	dimensions *Dimensions,
-	typ MetricDataType,
+	typ DataType,
 	ts uint64,
 	val float64,
 ) {

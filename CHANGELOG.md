@@ -3,3 +3,14 @@
 # Changelog
 
 <!-- next version -->
+
+## v0.1.1
+
+### 🚀 New components 🚀
+
+- `pkg/otlp/attributes`: Add new module pkg/otlp/attributes (#9)
+- `pkg/otlp/metrics`: Add new module pkg/otlp/metrics (#10)
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/quantile`: Handle edge case where total count exceeds sum of bins after conversion from other formats. (#11)

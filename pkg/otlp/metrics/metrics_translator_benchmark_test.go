@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package translator
+package metrics
 
 import (
 	"context"
@@ -28,14 +28,14 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 )
 
-func newBenchmarkTranslator(b *testing.B, logger *zap.Logger, opts ...Option) *Translator {
-	options := append([]Option{
+func newBenchmarkTranslator(b *testing.B, logger *zap.Logger, opts ...TranslatorOption) *Translator {
+	options := append([]TranslatorOption{
 		WithFallbackSourceProvider(testProvider("fallbackHostname")),
 		WithHistogramMode(HistogramModeDistributions),
 		WithNumberMode(NumberModeCumulativeToDelta),
 	}, opts...)
 
-	tr, err := New(
+	tr, err := NewTranslator(
 		logger,
 		options...,
 	)
