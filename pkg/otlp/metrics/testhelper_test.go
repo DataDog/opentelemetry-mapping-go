@@ -50,7 +50,7 @@ type TestSketch struct {
 
 type TestTimeSeries struct {
 	TestDimensions
-	Type      MetricDataType
+	Type      DataType
 	Timestamp uint64
 	Value     float64
 }
@@ -127,7 +127,7 @@ func (t *testConsumer) ConsumeAPMStats(_ pb.ClientStatsPayload) {
 func (t *testConsumer) ConsumeTimeSeries(
 	_ context.Context,
 	dimensions *Dimensions,
-	typ MetricDataType,
+	typ DataType,
 	timestamp uint64,
 	value float64,
 ) {

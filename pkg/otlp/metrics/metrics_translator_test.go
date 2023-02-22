@@ -115,7 +115,7 @@ func newTranslator(t *testing.T, logger *zap.Logger, opts ...Option) *Translator
 
 type metric struct {
 	name      string
-	typ       MetricDataType
+	typ       DataType
 	timestamp uint64
 	value     float64
 	tags      []string
@@ -139,7 +139,7 @@ type mockTimeSeriesConsumer struct {
 func (m *mockTimeSeriesConsumer) ConsumeTimeSeries(
 	_ context.Context,
 	dimensions *Dimensions,
-	typ MetricDataType,
+	typ DataType,
 	ts uint64,
 	val float64,
 ) {

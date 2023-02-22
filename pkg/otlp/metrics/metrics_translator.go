@@ -108,7 +108,7 @@ func (t *Translator) mapNumberMetrics(
 	ctx context.Context,
 	consumer TimeSeriesConsumer,
 	dims *Dimensions,
-	dt MetricDataType,
+	dt DataType,
 	slice pmetric.NumberDataPointSlice,
 ) {
 

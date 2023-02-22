@@ -23,21 +23,21 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 )
 
-// MetricDataType is a timeseries-style metric type.
-type MetricDataType int
+// DataType is a timeseries-style metric type.
+type DataType int
 
-var _ encoding.TextUnmarshaler = (*MetricDataType)(nil)
-var _ encoding.TextMarshaler = (MetricDataType)(Gauge)
+var _ encoding.TextUnmarshaler = (*DataType)(nil)
+var _ encoding.TextMarshaler = (DataType)(Gauge)
 
 const (
 	// Gauge is the Datadog Gauge metric type.
-	Gauge MetricDataType = iota
+	Gauge DataType = iota
 	// Count is the Datadog Count metric type.
 	Count
 )
 
 // UnmarshalText implements encoding.TextUnmarshaler.
-func (t *MetricDataType) UnmarshalText(text []byte) error {
+func (t *DataType) UnmarshalText(text []byte) error {
 	switch string(text) {
 	case "gauge":
 		*t = Gauge
@@ -50,7 +50,7 @@ func (t *MetricDataType) UnmarshalText(text []byte) error {
 }
 
 // MarshalText implements encoding.TextMarshaler.
-func (t MetricDataType) MarshalText() ([]byte, error) {
+func (t DataType) MarshalText() ([]byte, error) {
 	switch t {
 	case Gauge:
 		return []byte("gauge"), nil
@@ -67,7 +67,7 @@ type TimeSeriesConsumer interface {
 	ConsumeTimeSeries(
 		ctx context.Context,
 		dimensions *Dimensions,
-		typ MetricDataType,
+		typ DataType,
 		timestamp uint64,
 		value float64,
 	)
