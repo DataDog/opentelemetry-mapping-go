@@ -28,8 +28,8 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 )
 
-func newBenchmarkTranslator(b *testing.B, logger *zap.Logger, opts ...Option) *Translator {
-	options := append([]Option{
+func newBenchmarkTranslator(b *testing.B, logger *zap.Logger, opts ...TranslatorOption) *Translator {
+	options := append([]TranslatorOption{
 		WithFallbackSourceProvider(testProvider("fallbackHostname")),
 		WithHistogramMode(HistogramModeDistributions),
 		WithNumberMode(NumberModeCumulativeToDelta),

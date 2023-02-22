@@ -42,12 +42,12 @@ type translatorConfig struct {
 	fallbackSourceProvider        source.Provider
 }
 
-// Option is a translator creation option.
-type Option func(*translatorConfig) error
+// TranslatorOption is a translator creation option.
+type TranslatorOption func(*translatorConfig) error
 
 // WithDeltaTTL sets the delta TTL for cumulative metrics datapoints.
 // By default, 3600 seconds are used.
-func WithDeltaTTL(deltaTTL int64) Option {
+func WithDeltaTTL(deltaTTL int64) TranslatorOption {
 	return func(t *translatorConfig) error {
 		if deltaTTL <= 0 {
 			return fmt.Errorf("time to live must be positive: %d", deltaTTL)
@@ -63,7 +63,7 @@ func WithDeltaTTL(deltaTTL int64) Option {
 
 // WithFallbackSourceProvider sets the fallback source provider.
 // By default, an empty hostname is used as a fallback.
-func WithFallbackSourceProvider(provider source.Provider) Option {
+func WithFallbackSourceProvider(provider source.Provider) TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.fallbackSourceProvider = provider
 		return nil
@@ -71,7 +71,7 @@ func WithFallbackSourceProvider(provider source.Provider) Option {
 }
 
 // WithPreviewHostnameFromAttributes enables the preview hostname algorithm.
-func WithPreviewHostnameFromAttributes() Option {
+func WithPreviewHostnameFromAttributes() TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.previewHostnameFromAttributes = true
 		return nil
@@ -79,7 +79,7 @@ func WithPreviewHostnameFromAttributes() Option {
 }
 
 // WithQuantiles enables quantiles exporting for summary metrics.
-func WithQuantiles() Option {
+func WithQuantiles() TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.Quantiles = true
 		return nil
@@ -87,7 +87,7 @@ func WithQuantiles() Option {
 }
 
 // WithResourceAttributesAsTags sets resource attributes as tags.
-func WithResourceAttributesAsTags() Option {
+func WithResourceAttributesAsTags() TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.ResourceAttributesAsTags = true
 		return nil
@@ -95,7 +95,7 @@ func WithResourceAttributesAsTags() Option {
 }
 
 // WithInstrumentationLibraryMetadataAsTags sets instrumentation library metadata as tags.
-func WithInstrumentationLibraryMetadataAsTags() Option {
+func WithInstrumentationLibraryMetadataAsTags() TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.InstrumentationLibraryMetadataAsTags = true
 		return nil
@@ -103,7 +103,7 @@ func WithInstrumentationLibraryMetadataAsTags() Option {
 }
 
 // WithInstrumentationScopeMetadataAsTags sets instrumentation scope metadata as tags.
-func WithInstrumentationScopeMetadataAsTags() Option {
+func WithInstrumentationScopeMetadataAsTags() TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.InstrumentationScopeMetadataAsTags = true
 		return nil
@@ -124,7 +124,7 @@ const (
 
 // WithHistogramMode sets the histograms mode.
 // The default mode is HistogramModeOff.
-func WithHistogramMode(mode HistogramMode) Option {
+func WithHistogramMode(mode HistogramMode) TranslatorOption {
 	return func(t *translatorConfig) error {
 
 		switch mode {
@@ -138,7 +138,7 @@ func WithHistogramMode(mode HistogramMode) Option {
 }
 
 // WithCountSumMetrics exports .count and .sum histogram metrics.
-func WithCountSumMetrics() Option {
+func WithCountSumMetrics() TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.SendCountSum = true
 		return nil
@@ -161,7 +161,7 @@ const (
 
 // WithNumberMode sets the number mode.
 // The default mode is NumberModeCumulativeToDelta.
-func WithNumberMode(mode NumberMode) Option {
+func WithNumberMode(mode NumberMode) TranslatorOption {
 	return func(t *translatorConfig) error {
 		switch mode {
 		case NumberModeCumulativeToDelta:
