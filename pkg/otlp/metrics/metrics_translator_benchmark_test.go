@@ -35,7 +35,7 @@ func newBenchmarkTranslator(b *testing.B, logger *zap.Logger, opts ...Option) *T
 		WithNumberMode(NumberModeCumulativeToDelta),
 	}, opts...)
 
-	tr, err := New(
+	tr, err := NewTranslator(
 		logger,
 		options...,
 	)

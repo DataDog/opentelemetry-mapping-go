@@ -104,7 +104,7 @@ func newTranslator(t *testing.T, logger *zap.Logger, opts ...Option) *Translator
 		WithNumberMode(NumberModeCumulativeToDelta),
 	}, opts...)
 
-	tr, err := New(
+	tr, err := NewTranslator(
 		logger,
 		options...,
 	)

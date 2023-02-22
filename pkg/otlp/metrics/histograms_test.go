@@ -69,7 +69,7 @@ func TestDeltaHistogramOptions(t *testing.T) {
 
 	for _, testinstance := range tests {
 		t.Run(testinstance.name, func(t *testing.T) {
-			translator, err := New(zap.NewNop(), testinstance.options...)
+			translator, err := NewTranslator(zap.NewNop(), testinstance.options...)
 			require.NoError(t, err)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 		})
@@ -130,7 +130,7 @@ func TestCumulativeHistogramOptions(t *testing.T) {
 
 	for _, testinstance := range tests {
 		t.Run(testinstance.name, func(t *testing.T) {
-			translator, err := New(zap.NewNop(), testinstance.options...)
+			translator, err := NewTranslator(zap.NewNop(), testinstance.options...)
 			require.NoError(t, err)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 		})
@@ -246,7 +246,7 @@ func TestExponentialHistogramOptions(t *testing.T) {
 		t.Run(testinstance.name, func(t *testing.T) {
 			core, observed := observer.New(zapcore.DebugLevel)
 			testLogger := zap.New(core)
-			translator, err := New(testLogger, testinstance.options...)
+			translator, err := NewTranslator(testLogger, testinstance.options...)
 			require.NoError(t, err)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 			assert.Equal(t, testinstance.expectedUnknownMetricType, observed.FilterMessage("Unknown or unsupported metric type").Len())

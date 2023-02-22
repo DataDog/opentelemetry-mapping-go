@@ -50,8 +50,8 @@ type Translator struct {
 	cfg     translatorConfig
 }
 
-// New creates a new translator with given options.
-func New(logger *zap.Logger, options ...Option) (*Translator, error) {
+// NewTranslator creates a new translator with given options.
+func NewTranslator(logger *zap.Logger, options ...Option) (*Translator, error) {
 	cfg := translatorConfig{
 		HistMode:                             HistogramModeDistributions,
 		SendCountSum:                         false,
