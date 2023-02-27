@@ -4,8 +4,8 @@ go 1.18
 
 require (
 	github.com/DataDog/datadog-agent/pkg/trace v0.43.0-rc.3.0.20230206114529-17c7dfde736c
-	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.1.1
-	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.1.1
+	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.1.2
+	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.1.2
 	github.com/DataDog/sketches-go v1.4.1
 	github.com/golang/protobuf v1.5.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
