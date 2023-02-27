@@ -581,10 +581,9 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 							cp.SetName(mp.mappedName)
 							break
 						}
-						switch mp.metricType {
-						case pmetric.MetricTypeSum:
+						if mp.metricType == pmetric.MetricTypeSum {
 							mapSumMetricWithAttributes(md, metricsArray, mp)
-						case pmetric.MetricTypeGauge:
+						} else if mp.metricType == pmetric.MetricTypeGauge {
 							mapGaugeMetricWithAttributes(md, metricsArray, mp)
 						}
 					}
