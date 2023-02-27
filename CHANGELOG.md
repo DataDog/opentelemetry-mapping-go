@@ -4,6 +4,9 @@
 
 <!-- next version -->
 
+## v0.1.2
+- Add support for OTel Go runtime metrics
+
 ## v0.1.1
 
 ### 🚀 New components 🚀
