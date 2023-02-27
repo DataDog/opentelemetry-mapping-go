@@ -396,6 +396,48 @@ func TestMapIntMonotonicReportDiffForFirstValue(t *testing.T) {
 	)
 }
 
+func TestMapRuntimeMetricsHasMapping(t *testing.T) {
+	ctx := context.Background()
+	tr := newTranslator(t, zap.NewNop())
+	consumer := &mockFullConsumer{}
+	exampleDims = newDims("process.runtime.go.goroutines")
+	mappedDims := newDims("runtime.go.num_goroutine")
+	if err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer); err != nil {
+		t.Fatal(err)
+	}
+	startTs := int(getProcessStartTime()) + 1
+	assert.ElementsMatch(t,
+		consumer.metrics,
+		[]metric{
+			newCountWithHost(exampleDims, uint64(seconds(startTs+1)), 10, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+2)), 5, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
+			newCountWithHost(mappedDims, uint64(seconds(startTs+1)), 10, fallbackHostname),
+			newCountWithHost(mappedDims, uint64(seconds(startTs+2)), 5, fallbackHostname),
+			newCountWithHost(mappedDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
+		},
+	)
+}
+
+func TestMapRuntimeMetricsNoMapping(t *testing.T) {
+	ctx := context.Background()
+	tr := newTranslator(t, zap.NewNop())
+	consumer := &mockFullConsumer{}
+	exampleDims = newDims("runtime.go.mem.live_objects")
+	if err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer); err != nil {
+		t.Fatal(err)
+	}
+	startTs := int(getProcessStartTime()) + 1
+	assert.ElementsMatch(t,
+		consumer.metrics,
+		[]metric{
+			newCountWithHost(exampleDims, uint64(seconds(startTs+1)), 10, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+2)), 5, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
+		},
+	)
+}
+
 func TestMapIntMonotonicOutOfOrder(t *testing.T) {
 	stamps := []int{1, 0, 2, 3}
 	values := []int64{0, 1, 2, 3}
