@@ -33,20 +33,67 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 )
 
+type mapping struct {
+	mappedName     string
+	attribute      string
+	attributeValue string
+	metricType     pmetric.MetricType
+}
+
 // runtimeMetricsMappings defines the mappings from OTel runtime metric names to their
 // equivalent Datadog runtime metric names
-var runtimeMetricsMappings = map[string]string{
-	"process.runtime.go.goroutines":        "runtime.go.num_goroutine",
-	"process.runtime.go.cgo.calls":         "runtime.go.num_cgo_call",
-	"process.runtime.go.lookups":           "runtime.go.mem_stats.lookups",
-	"process.runtime.go.mem.heap_alloc":    "runtime.go.mem_stats.heap_alloc",
-	"process.runtime.go.mem.heap_sys":      "runtime.go.mem_stats.heap_sys",
-	"process.runtime.go.mem.heap_idle":     "runtime.go.mem_stats.heap_idle",
-	"process.runtime.go.mem.heap_inuse":    "runtime.go.mem_stats.heap_inuse",
-	"process.runtime.go.mem.heap_released": "runtime.go.mem_stats.heap_released",
-	"process.runtime.go.mem.heap_objects":  "runtime.go.mem_stats.heap_objects",
-	"process.runtime.go.gc.pause_total_ns": "runtime.go.mem_stats.pause_total_ns",
-	"process.runtime.go.gc.count":          "runtime.go.mem_stats.num_gc",
+var runtimeMetricsMappings = map[string][]mapping{
+	"process.runtime.go.goroutines":                        {{mappedName: "runtime.go.num_goroutine"}},
+	"process.runtime.go.cgo.calls":                         {{mappedName: "runtime.go.num_cgo_call"}},
+	"process.runtime.go.lookups":                           {{mappedName: "runtime.go.mem_stats.lookups"}},
+	"process.runtime.go.mem.heap_alloc":                    {{mappedName: "runtime.go.mem_stats.heap_alloc"}},
+	"process.runtime.go.mem.heap_sys":                      {{mappedName: "runtime.go.mem_stats.heap_sys"}},
+	"process.runtime.go.mem.heap_idle":                     {{mappedName: "runtime.go.mem_stats.heap_idle"}},
+	"process.runtime.go.mem.heap_inuse":                    {{mappedName: "runtime.go.mem_stats.heap_inuse"}},
+	"process.runtime.go.mem.heap_released":                 {{mappedName: "runtime.go.mem_stats.heap_released"}},
+	"process.runtime.go.mem.heap_objects":                  {{mappedName: "runtime.go.mem_stats.heap_objects"}},
+	"process.runtime.go.gc.pause_total_ns":                 {{mappedName: "runtime.go.mem_stats.pause_total_ns"}},
+	"process.runtime.go.gc.count":                          {{mappedName: "runtime.go.mem_stats.num_gc"}},
+	"process.runtime.dotnet.thread_pool.threads.count":     {{mappedName: "runtime.dotnet.threads.count"}},
+	"process.runtime.dotnet.monitor.lock_contention.count": {{mappedName: "runtime.dotnet.threads.contention_count"}},
+	"process.runtime.dotnet.exceptions.count":              {{mappedName: "runtime.dotnet.exceptions.count"}},
+	"process.runtime.dotnet.gc.heap.size": {{
+		mappedName:     "runtime.dotnet.gc.size.gen0",
+		attribute:      "generation",
+		attributeValue: "gen0",
+		metricType:     pmetric.MetricTypeGauge,
+	}, {
+		mappedName:     "runtime.dotnet.gc.size.gen1",
+		attribute:      "generation",
+		attributeValue: "gen1",
+		metricType:     pmetric.MetricTypeGauge,
+	}, {
+		mappedName:     "runtime.dotnet.gc.size.gen2",
+		attribute:      "generation",
+		attributeValue: "gen2",
+		metricType:     pmetric.MetricTypeGauge,
+	}, {
+		mappedName:     "runtime.dotnet.gc.size.loh",
+		attribute:      "generation",
+		attributeValue: "loh",
+		metricType:     pmetric.MetricTypeGauge,
+	}},
+	"process.runtime.dotnet.gc.collections.count": {{
+		mappedName:     "runtime.dotnet.gc.count.gen0",
+		attribute:      "generation",
+		attributeValue: "gen0",
+		metricType:     pmetric.MetricTypeSum,
+	}, {
+		mappedName:     "runtime.dotnet.gc.count.gen1",
+		attribute:      "generation",
+		attributeValue: "gen1",
+		metricType:     pmetric.MetricTypeSum,
+	}, {
+		mappedName:     "runtime.dotnet.gc.count.gen2",
+		attribute:      "generation",
+		attributeValue: "gen2",
+		metricType:     pmetric.MetricTypeSum,
+	}},
 }
 
 const metricName string = "metric name"
@@ -451,6 +498,31 @@ func (t *Translator) source(m pcommon.Map) (source.Source, error) {
 	return src, nil
 }
 
+func mapGaugeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp mapping) {
+	cp := metricsArray.AppendEmpty()
+	cp.SetEmptyGauge()
+	for i := 0; i < md.Gauge().DataPoints().Len(); i++ {
+		attribute, _ := md.Gauge().DataPoints().At(i).Attributes().Get(mp.attribute)
+		if attribute.AsString() == mp.attributeValue {
+			md.Gauge().DataPoints().At(i).CopyTo(cp.Gauge().DataPoints().AppendEmpty())
+			cp.SetName(mp.mappedName)
+		}
+	}
+}
+
+func mapSumMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp mapping) {
+	for i := 0; i < md.Sum().DataPoints().Len(); i++ {
+		attribute, _ := md.Sum().DataPoints().At(i).Attributes().Get(mp.attribute)
+		cp := metricsArray.AppendEmpty()
+		cp.SetEmptySum()
+
+		if attribute.AsString() == mp.attributeValue {
+			md.Sum().DataPoints().At(i).CopyTo(cp.Sum().DataPoints().AppendEmpty())
+			cp.SetName(mp.mappedName)
+		}
+	}
+}
+
 // MapMetrics maps OTLP metrics into the DataDog format
 func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consumer Consumer) error {
 	rms := md.ResourceMetrics()
@@ -501,10 +573,21 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			for k := 0; k < metricsArray.Len(); k++ {
 				md := metricsArray.At(k)
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
-					// duplicate runtime metrics as Datadog runtime metrics
-					cp := metricsArray.AppendEmpty()
-					md.CopyTo(cp)
-					cp.SetName(v)
+					for _, mp := range v {
+						if mp.attribute == "" {
+							// duplicate runtime metrics as Datadog runtime metrics
+							cp := metricsArray.AppendEmpty()
+							md.CopyTo(cp)
+							cp.SetName(mp.mappedName)
+							break
+						}
+						switch mp.metricType {
+						case pmetric.MetricTypeSum:
+							mapSumMetricWithAttributes(md, metricsArray, mp)
+						case pmetric.MetricTypeGauge:
+							mapGaugeMetricWithAttributes(md, metricsArray, mp)
+						}
+					}
 				}
 				baseDims := &Dimensions{
 					name:     md.Name(),
