@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.1.2
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics`: The OTLP metrics converter now maps OpenTelemetry Go runtime metrics to their Datadog counterparts. (#14)
+
 ## v0.1.1
 
 ### 🚀 New components 🚀
