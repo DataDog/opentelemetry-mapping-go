@@ -577,8 +577,12 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 
 			for k := 0; k < metricsArray.Len(); k++ {
 				md := metricsArray.At(k)
+				fmt.Printf("---------- IN MAP METRICS -----------\n")
+				fmt.Printf("---------- md.name: %v -----------\n", md.Name())
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
 					for _, mp := range v {
+						fmt.Printf("---------- mp.attribute: %v -----------\n", mp.attribute)
+						fmt.Printf("---------- mp.metricType: %v -----------\n", mp.metricType)
 						if mp.attribute == "" {
 							// duplicate runtime metrics as Datadog runtime metrics
 							cp := metricsArray.AppendEmpty()
