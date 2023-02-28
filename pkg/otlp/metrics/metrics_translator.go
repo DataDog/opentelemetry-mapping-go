@@ -33,10 +33,12 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 )
 
+// runtimeMetricMapping defines the fields needed to map OTel runtime metrics to their equivalent
+// Datadog runtime metrics
 type runtimeMetricMapping struct {
-	mappedName     string
-	attribute      string
-	attributeValue string
+	mappedName     string // the Datadog runtime metric name
+	attribute      string // the name of the attribute this metric originates from
+	attributeValue string // the value of the above attribute that corresponds with this metric
 	metricType     pmetric.MetricType
 }
 
@@ -498,7 +500,8 @@ func (t *Translator) source(m pcommon.Map) (source.Source, error) {
 	return src, nil
 }
 
-func mapGaugeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
+// mapGaugeRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Gauge metric
+func mapGaugeRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
 	cp := metricsArray.AppendEmpty()
 	cp.SetEmptyGauge()
 	for i := 0; i < md.Gauge().DataPoints().Len(); i++ {
@@ -510,17 +513,14 @@ func mapGaugeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.Metric
 	}
 }
 
-func mapSumMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
-	fmt.Printf("-------- IN MAP SUM METRIC ----------\n")
-	fmt.Printf("-------- md.name: %v ----------\n", md.Name())
-	fmt.Printf("-------- mp: %+v ----------\n", mp)
+// mapSumRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Sum metric
+func mapSumRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
 	cp := metricsArray.AppendEmpty()
 	cp.SetEmptySum()
 	cp.Sum().SetAggregationTemporality(md.Sum().AggregationTemporality())
 	cp.Sum().SetIsMonotonic(md.Sum().IsMonotonic())
 	for i := 0; i < md.Sum().DataPoints().Len(); i++ {
 		attribute, _ := md.Sum().DataPoints().At(i).Attributes().Get(mp.attribute)
-		fmt.Printf("-------- attribute: %v ----------\n", attribute.AsString())
 		if attribute.AsString() == mp.attributeValue {
 			md.Sum().DataPoints().At(i).CopyTo(cp.Sum().DataPoints().AppendEmpty())
 			cp.SetName(mp.mappedName)
@@ -577,12 +577,8 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 
 			for k := 0; k < metricsArray.Len(); k++ {
 				md := metricsArray.At(k)
-				fmt.Printf("---------- IN MAP METRICS -----------\n")
-				fmt.Printf("---------- md.name: %v -----------\n", md.Name())
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
 					for _, mp := range v {
-						fmt.Printf("---------- mp.attribute: %v -----------\n", mp.attribute)
-						fmt.Printf("---------- mp.metricType: %v -----------\n", mp.metricType)
 						if mp.attribute == "" {
 							// duplicate runtime metrics as Datadog runtime metrics
 							cp := metricsArray.AppendEmpty()
@@ -591,9 +587,9 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 							break
 						}
 						if mp.metricType == pmetric.MetricTypeSum {
-							mapSumMetricWithAttributes(md, metricsArray, mp)
+							mapSumRuntimeMetricWithAttributes(md, metricsArray, mp)
 						} else if mp.metricType == pmetric.MetricTypeGauge {
-							mapGaugeMetricWithAttributes(md, metricsArray, mp)
+							mapGaugeRuntimeMetricWithAttributes(md, metricsArray, mp)
 						}
 					}
 				}
