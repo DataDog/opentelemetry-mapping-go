@@ -514,13 +514,13 @@ func mapSumMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSl
 	fmt.Printf("-------- IN MAP SUM METRIC ----------\n")
 	fmt.Printf("-------- md.name: %v ----------\n", md.Name())
 	fmt.Printf("-------- mp: %+v ----------\n", mp)
-
+	cp := metricsArray.AppendEmpty()
+	cp.SetEmptySum()
+	cp.Sum().SetAggregationTemporality(md.Sum().AggregationTemporality())
+	cp.Sum().SetIsMonotonic(md.Sum().IsMonotonic())
 	for i := 0; i < md.Sum().DataPoints().Len(); i++ {
 		attribute, _ := md.Sum().DataPoints().At(i).Attributes().Get(mp.attribute)
 		fmt.Printf("-------- attribute: %v ----------\n", attribute.AsString())
-		cp := metricsArray.AppendEmpty()
-		cp.SetEmptySum()
-
 		if attribute.AsString() == mp.attributeValue {
 			md.Sum().DataPoints().At(i).CopyTo(cp.Sum().DataPoints().AppendEmpty())
 			cp.SetName(mp.mappedName)
