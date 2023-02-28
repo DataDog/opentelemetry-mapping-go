@@ -33,7 +33,7 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 )
 
-type mapping struct {
+type runtimeMetricMapping struct {
 	mappedName     string
 	attribute      string
 	attributeValue string
@@ -42,7 +42,7 @@ type mapping struct {
 
 // runtimeMetricsMappings defines the mappings from OTel runtime metric names to their
 // equivalent Datadog runtime metric names
-var runtimeMetricsMappings = map[string][]mapping{
+var runtimeMetricsMappings = map[string][]runtimeMetricMapping{
 	"process.runtime.go.goroutines":                        {{mappedName: "runtime.go.num_goroutine"}},
 	"process.runtime.go.cgo.calls":                         {{mappedName: "runtime.go.num_cgo_call"}},
 	"process.runtime.go.lookups":                           {{mappedName: "runtime.go.mem_stats.lookups"}},
@@ -498,7 +498,7 @@ func (t *Translator) source(m pcommon.Map) (source.Source, error) {
 	return src, nil
 }
 
-func mapGaugeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp mapping) {
+func mapGaugeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
 	cp := metricsArray.AppendEmpty()
 	cp.SetEmptyGauge()
 	for i := 0; i < md.Gauge().DataPoints().Len(); i++ {
@@ -510,7 +510,7 @@ func mapGaugeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.Metric
 	}
 }
 
-func mapSumMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp mapping) {
+func mapSumMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
 	fmt.Printf("-------- IN MAP SUM METRIC ----------\n")
 	fmt.Printf("-------- md.name: %v ----------\n", md.Name())
 	fmt.Printf("-------- mp: %+v ----------\n", mp)
