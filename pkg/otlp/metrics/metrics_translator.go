@@ -511,8 +511,13 @@ func mapGaugeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.Metric
 }
 
 func mapSumMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp mapping) {
+	fmt.Printf("-------- IN MAP SUM METRIC ----------\n")
+	fmt.Printf("-------- md.name: %v ----------\n", md.Name())
+	fmt.Printf("-------- mp: %+v ----------\n", mp)
+
 	for i := 0; i < md.Sum().DataPoints().Len(); i++ {
 		attribute, _ := md.Sum().DataPoints().At(i).Attributes().Get(mp.attribute)
+		fmt.Printf("-------- attribute: %v ----------\n", attribute.AsString())
 		cp := metricsArray.AppendEmpty()
 		cp.SetEmptySum()
 
