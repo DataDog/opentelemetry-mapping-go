@@ -505,8 +505,8 @@ func mapGaugeRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric
 	cp := metricsArray.AppendEmpty()
 	cp.SetEmptyGauge()
 	for i := 0; i < md.Gauge().DataPoints().Len(); i++ {
-		attribute, _ := md.Gauge().DataPoints().At(i).Attributes().Get(mp.attribute)
-		if attribute.AsString() == mp.attributeValue {
+		attribute, res := md.Gauge().DataPoints().At(i).Attributes().Get(mp.attribute)
+		if res && attribute.AsString() == mp.attributeValue {
 			md.Gauge().DataPoints().At(i).CopyTo(cp.Gauge().DataPoints().AppendEmpty())
 			cp.SetName(mp.mappedName)
 		}
@@ -520,8 +520,8 @@ func mapSumRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.M
 	cp.Sum().SetAggregationTemporality(md.Sum().AggregationTemporality())
 	cp.Sum().SetIsMonotonic(md.Sum().IsMonotonic())
 	for i := 0; i < md.Sum().DataPoints().Len(); i++ {
-		attribute, _ := md.Sum().DataPoints().At(i).Attributes().Get(mp.attribute)
-		if attribute.AsString() == mp.attributeValue {
+		attribute, res := md.Sum().DataPoints().At(i).Attributes().Get(mp.attribute)
+		if res && attribute.AsString() == mp.attributeValue {
 			md.Sum().DataPoints().At(i).CopyTo(cp.Sum().DataPoints().AppendEmpty())
 			cp.SetName(mp.mappedName)
 		}
