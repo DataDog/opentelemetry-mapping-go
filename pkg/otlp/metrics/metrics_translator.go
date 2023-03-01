@@ -548,6 +548,9 @@ func (t *Translator) source(m pcommon.Map) (source.Source, error) {
 
 // mapGaugeRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Gauge metric
 func mapGaugeRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
+	fmt.Println("IN MAP GAUGE")
+	fmt.Printf("--------- md.name: %v --------\n", md.Name())
+	fmt.Printf("--------- mp: %+v --------\n", mp)
 	cp := metricsArray.AppendEmpty()
 	cp.SetEmptyGauge()
 	for i := 0; i < md.Gauge().DataPoints().Len(); i++ {
@@ -561,6 +564,9 @@ func mapGaugeRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric
 
 // mapSumRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Sum metric
 func mapSumRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
+	fmt.Println("IN MAP SUM")
+	fmt.Printf("--------- md.name: %v --------\n", md.Name())
+	fmt.Printf("--------- mp: %+v --------\n", mp)
 	cp := metricsArray.AppendEmpty()
 	cp.SetEmptySum()
 	cp.Sum().SetAggregationTemporality(md.Sum().AggregationTemporality())
@@ -624,6 +630,9 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			for k := 0; k < metricsArray.Len(); k++ {
 				md := metricsArray.At(k)
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
+					fmt.Println("IN MAP METRICS")
+					fmt.Printf("--------- md.name: %v --------\n", md.Name())
+
 					for _, mp := range v {
 						if mp.attribute == "" {
 							// duplicate runtime metrics as Datadog runtime metrics
