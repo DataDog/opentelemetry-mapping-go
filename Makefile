@@ -5,6 +5,7 @@ install-tools:
 	cd $(TOOLS_MOD_DIR) && go install go.opentelemetry.io/build-tools/chloggen
 	cd $(TOOLS_MOD_DIR) && go install go.opentelemetry.io/build-tools/multimod
 	cd $(TOOLS_MOD_DIR) && go install github.com/frapposelli/wwhrd
+	cd $(TOOLS_MOD_DIR) && go install github.com/golangci/golangci-lint/cmd/golangci-lint
 	cd $(TOOLS_MOD_DIR)/generate-license-file && go install .
 
 FILENAME?=$(shell git branch --show-current).yaml
@@ -37,6 +38,12 @@ fmt:
 .PHONY: test
 test:
 	@$(MAKE) for-all CMD="go test -race -timeout 600s ./..."
+
+# Run linters for all modules
+# Use 'make lint OPTS="--fix"' to autofix issues.
+.PHONY: lint
+lint:
+	@$(MAKE) for-all CMD="golangci-lint run ./... $(OPTS)"
 
 # Generate licenses file for compliance. 
 .PHONY: gen-licenses

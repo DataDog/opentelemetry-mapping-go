@@ -32,7 +32,9 @@ func main() {
 	}
 
 	w := csv.NewWriter(f)
-	w.Write([]string{"Component", "Origin", "License", "Copyright"})
+	if err := w.Write([]string{"Component", "Origin", "License", "Copyright"}); err != nil {
+		log.Fatalln("error writing record to csv:", err)
+	}
 
 	for _, module := range modules {
 		deps, err := findDependenciesOf(module)

@@ -30,7 +30,7 @@ func TestAgent(t *testing.T) {
 		sampleRate float64 // apply this rate to the sample
 	}
 
-	setup := func(t *testing.T, tt testcase) {
+	setup := func(tt testcase) {
 		for i := 0; i < tt.ninsert; i++ {
 			a.Insert(float64(i), tt.sampleRate)
 		}
@@ -82,7 +82,7 @@ func TestAgent(t *testing.T) {
 		{binsum: 20, ninsert: 2, flush: true, sampleRate: .1},
 		{binsum: 22, ninsert: 2, flush: true, sampleRate: 1},
 	} {
-		setup(t, tt)
+		setup(tt)
 		check(t, tt)
 	}
 }

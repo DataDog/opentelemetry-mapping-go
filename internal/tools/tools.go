@@ -13,6 +13,7 @@ package tools
 
 import (
 	_ "github.com/frapposelli/wwhrd"
+	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
 	_ "go.opentelemetry.io/build-tools/chloggen"
 	_ "go.opentelemetry.io/build-tools/multimod"
 )

@@ -43,7 +43,8 @@ func findCopyrightNotices(origin string) (copyrightHeaders []string, err error) 
 	}
 
 	if strings.Contains(origin, "/") {
-		parentHeaders, err := findCopyrightNotices(origin[:strings.LastIndex(origin, "/")])
+		var parentHeaders []string
+		parentHeaders, err = findCopyrightNotices(origin[:strings.LastIndex(origin, "/")])
 		if err != nil {
 			return nil, err
 		}
@@ -87,6 +88,7 @@ func mapLines(fullPath string, fn func(line string) (string, bool)) ([]string, e
 		}
 	}
 
+	//nolint:gosec // (G304) Path comes from fixed list
 	file, err := os.Open(fullPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open %q: %w", fullPath, err)

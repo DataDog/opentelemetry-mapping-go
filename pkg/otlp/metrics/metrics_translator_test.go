@@ -97,12 +97,12 @@ func (t testProvider) Source(context.Context) (source.Source, error) {
 	}, nil
 }
 
-func newTranslator(t *testing.T, logger *zap.Logger, opts ...TranslatorOption) *Translator {
-	options := append([]TranslatorOption{
+func newTranslator(t *testing.T, logger *zap.Logger) *Translator {
+	options := []TranslatorOption{
 		WithFallbackSourceProvider(testProvider(fallbackHostname)),
 		WithHistogramMode(HistogramModeDistributions),
 		WithNumberMode(NumberModeCumulativeToDelta),
-	}, opts...)
+	}
 
 	tr, err := NewTranslator(
 		logger,

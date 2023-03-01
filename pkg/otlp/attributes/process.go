@@ -39,13 +39,14 @@ func (pattrs *processAttributes) extractTags() []string {
 	// We don't want to add all of them to avoid unnecessarily increasing the number of tags attached to a metric.
 
 	// TODO: check if this order should be changed.
-	if pattrs.ExecutableName != "" { // otelcol
+	switch {
+	case pattrs.ExecutableName != "": // otelcol
 		tags = append(tags, fmt.Sprintf("%s:%s", conventions.AttributeProcessExecutableName, pattrs.ExecutableName))
-	} else if pattrs.ExecutablePath != "" { // /usr/bin/cmd/otelcol
+	case pattrs.ExecutablePath != "": // /usr/bin/cmd/otelcol
 		tags = append(tags, fmt.Sprintf("%s:%s", conventions.AttributeProcessExecutablePath, pattrs.ExecutablePath))
-	} else if pattrs.Command != "" { // cmd/otelcol
+	case pattrs.Command != "": // cmd/otelcol
 		tags = append(tags, fmt.Sprintf("%s:%s", conventions.AttributeProcessCommand, pattrs.Command))
-	} else if pattrs.CommandLine != "" { // cmd/otelcol --config="/path/to/config.yaml"
+	case pattrs.CommandLine != "": // cmd/otelcol --config="/path/to/config.yaml"
 		tags = append(tags, fmt.Sprintf("%s:%s", conventions.AttributeProcessCommandLine, pattrs.CommandLine))
 	}
 
