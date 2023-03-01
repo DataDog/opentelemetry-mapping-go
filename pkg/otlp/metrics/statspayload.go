@@ -129,7 +129,7 @@ func appendSum(mslice pmetric.MetricSlice, name string, val int64, start, end ui
 	dp := sum.DataPoints().AppendEmpty()
 	dp.SetStartTimestamp(pcommon.Timestamp(start))
 	dp.SetTimestamp(pcommon.Timestamp(end))
-	dp.SetIntValue(int64(val))
+	dp.SetIntValue(val)
 	putGroupedStatsAttr(dp.Attributes(), tags)
 }
 
@@ -414,8 +414,8 @@ func (t *Translator) extractSketch(eh pmetric.ExponentialHistogram, buck *pb.Cli
 		return dp.Attributes(), nil
 	}
 	sketch := ddsketch.NewDDSketch(index, positive, negative)
-	if err := sketch.AddWithCount(0, float64(dp.ZeroCount())); err != nil {
-		t.logger.Debug("Error adding zero counts.", zap.Error(err))
+	if addErr := sketch.AddWithCount(0, float64(dp.ZeroCount())); addErr != nil {
+		t.logger.Debug("Error adding zero counts.", zap.Error(addErr))
 		return dp.Attributes(), nil
 	}
 	pb := sketch.ToProto()

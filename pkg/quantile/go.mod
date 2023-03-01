@@ -1,6 +1,6 @@
 module github.com/DataDog/opentelemetry-mapping-go/pkg/quantile
 
-go 1.18
+go 1.19
 
 require (
 	github.com/DataDog/sketches-go v1.4.1

@@ -96,8 +96,8 @@ func TestCreateDDSketchWithSketchMapping(t *testing.T) {
 				q := (float64(i)) / 100.0
 				expectedValue := test.quantile(q)
 
-				quantileValue, err := sketch.GetValueAtQuantile(q)
-				require.NoError(t, err)
+				quantileValue, qerr := sketch.GetValueAtQuantile(q)
+				require.NoError(t, qerr)
 
 				// Test that the quantile value returned by the sketch is vithin the relative accuracy
 				// of the expected quantile value
@@ -239,8 +239,8 @@ func TestConvertDDSketchIntoSketch(t *testing.T) {
 				q := (float64(i)) / 100.0
 				expectedValue := test.quantile(q)
 
-				quantileValue, err := sketch.GetValueAtQuantile(q)
-				require.NoError(t, err)
+				quantileValue, qerr := sketch.GetValueAtQuantile(q)
+				require.NoError(t, qerr)
 				// Test that the quantile value returned by the sketch is vithin the relative accuracy
 				// of the expected quantile value
 				if expectedValue == 0.0 {

@@ -114,11 +114,12 @@ func unsanitizedHostnameFromAttributes(attrs pcommon.Map, usePreviewRules bool) 
 	}
 
 	cloudProvider, ok := attrs.Get(conventions.AttributeCloudProvider)
-	if ok && cloudProvider.Str() == conventions.AttributeCloudProviderAWS {
+	switch {
+	case ok && cloudProvider.Str() == conventions.AttributeCloudProviderAWS:
 		return ec2.HostnameFromAttributes(attrs, usePreviewRules)
-	} else if ok && cloudProvider.Str() == conventions.AttributeCloudProviderGCP {
+	case ok && cloudProvider.Str() == conventions.AttributeCloudProviderGCP:
 		return gcp.HostnameFromAttributes(attrs, usePreviewRules)
-	} else if ok && cloudProvider.Str() == conventions.AttributeCloudProviderAzure {
+	case ok && cloudProvider.Str() == conventions.AttributeCloudProviderAzure:
 		return azure.HostnameFromAttributes(attrs, usePreviewRules)
 	}
 

@@ -27,7 +27,7 @@ import (
 type DataType int
 
 var _ encoding.TextUnmarshaler = (*DataType)(nil)
-var _ encoding.TextMarshaler = (DataType)(Gauge)
+var _ encoding.TextMarshaler = Gauge
 
 const (
 	// Gauge is the Datadog Gauge metric type.

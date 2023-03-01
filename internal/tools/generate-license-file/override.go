@@ -43,6 +43,7 @@ func (c *CopyrightOverride) CopyrightNotice(dependency string) ([]string, bool) 
 }
 
 func NewOverrideFromFile(path string) (*CopyrightOverride, error) {
+	//nolint:gosec // (G304) Path is fixed.
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read %q: %w", path, err)
