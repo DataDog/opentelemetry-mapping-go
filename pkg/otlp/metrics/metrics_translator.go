@@ -96,6 +96,52 @@ var runtimeMetricsMappings = map[string][]runtimeMetricMapping{
 		attributeValue: "gen2",
 		metricType:     pmetric.MetricTypeSum,
 	}},
+	"process.runtime.jvm.threads.count": {{mappedName: "jvm.thread_count"}},
+	"process.runtime.jvm.gc.duration":   {{mappedName: "jvm.gc.parnew.time"}},
+	"process.runtime.jvm.memory.usage": {{
+		mappedName:     "jvm.heap_memory",
+		attribute:      "type",
+		attributeValue: "heap",
+		metricType:     pmetric.MetricTypeGauge,
+	}, {
+		mappedName:     "jvm.non_heap_memory",
+		attribute:      "type",
+		attributeValue: "nonheap",
+		metricType:     pmetric.MetricTypeGauge,
+	}},
+	"process.runtime.jvm.memory.committed": {{
+		mappedName:     "jvm.heap_memory_committed",
+		attribute:      "type",
+		attributeValue: "heap",
+		metricType:     pmetric.MetricTypeGauge,
+	}, {
+		mappedName:     "jvm.non_heap_memory_committed",
+		attribute:      "type",
+		attributeValue: "nonheap",
+		metricType:     pmetric.MetricTypeGauge,
+	}},
+	"process.runtime.jvm.memory.init": {{
+		mappedName:     "jvm.heap_memory_init",
+		attribute:      "type",
+		attributeValue: "heap",
+		metricType:     pmetric.MetricTypeGauge,
+	}, {
+		mappedName:     "jvm.non_heap_memory_init",
+		attribute:      "type",
+		attributeValue: "nonheap",
+		metricType:     pmetric.MetricTypeGauge,
+	}},
+	"process.runtime.jvm.memory.limit": {{
+		mappedName:     "jvm.heap_memory_max",
+		attribute:      "type",
+		attributeValue: "heap",
+		metricType:     pmetric.MetricTypeGauge,
+	}, {
+		mappedName:     "jvm.non_heap_memory_max",
+		attribute:      "type",
+		attributeValue: "nonheap",
+		metricType:     pmetric.MetricTypeGauge,
+	}},
 }
 
 const metricName string = "metric name"
