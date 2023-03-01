@@ -550,7 +550,12 @@ func (t *Translator) source(m pcommon.Map) (source.Source, error) {
 func mapGaugeRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
 	fmt.Println("IN MAP GAUGE")
 	fmt.Printf("--------- md.name: %v --------\n", md.Name())
+	fmt.Printf("--------- md.Type(): %v --------\n", md.Type())
 	fmt.Printf("--------- mp: %+v --------\n", mp)
+	fmt.Printf("--------- md.Gauge(): %v --------\n", md.Gauge())
+	fmt.Printf("--------- md.Gauge().DataPoints(): %v --------\n", md.Gauge().DataPoints())
+	fmt.Printf("--------- md.Gauge().DataPoints().At(0): %v --------\n", md.Gauge().DataPoints().At(0))
+	fmt.Printf("--------- md.Gauge().DataPoints().Len(): %v --------\n", md.Gauge().DataPoints().Len())
 	cp := metricsArray.AppendEmpty()
 	cp.SetEmptyGauge()
 	for i := 0; i < md.Gauge().DataPoints().Len(); i++ {
