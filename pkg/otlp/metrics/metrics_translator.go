@@ -39,7 +39,6 @@ type runtimeMetricMapping struct {
 	mappedName     string // the Datadog runtime metric name
 	attribute      string // the name of the attribute this metric originates from
 	attributeValue string // the value of the above attribute that corresponds with this metric
-	metricType     pmetric.MetricType
 }
 
 // runtimeMetricsMappings defines the mappings from OTel runtime metric names to their
@@ -63,38 +62,31 @@ var runtimeMetricsMappings = map[string][]runtimeMetricMapping{
 		mappedName:     "runtime.dotnet.gc.size.gen0",
 		attribute:      "generation",
 		attributeValue: "gen0",
-		metricType:     pmetric.MetricTypeGauge,
 	}, {
 		mappedName:     "runtime.dotnet.gc.size.gen1",
 		attribute:      "generation",
 		attributeValue: "gen1",
-		metricType:     pmetric.MetricTypeGauge,
 	}, {
 		mappedName:     "runtime.dotnet.gc.size.gen2",
 		attribute:      "generation",
 		attributeValue: "gen2",
-		metricType:     pmetric.MetricTypeGauge,
 	}, {
 		mappedName:     "runtime.dotnet.gc.size.loh",
 		attribute:      "generation",
 		attributeValue: "loh",
-		metricType:     pmetric.MetricTypeGauge,
 	}},
 	"process.runtime.dotnet.gc.collections.count": {{
 		mappedName:     "runtime.dotnet.gc.count.gen0",
 		attribute:      "generation",
 		attributeValue: "gen0",
-		metricType:     pmetric.MetricTypeSum,
 	}, {
 		mappedName:     "runtime.dotnet.gc.count.gen1",
 		attribute:      "generation",
 		attributeValue: "gen1",
-		metricType:     pmetric.MetricTypeSum,
 	}, {
 		mappedName:     "runtime.dotnet.gc.count.gen2",
 		attribute:      "generation",
 		attributeValue: "gen2",
-		metricType:     pmetric.MetricTypeSum,
 	}},
 	"process.runtime.jvm.threads.count": {{mappedName: "jvm.thread_count"}},
 	"process.runtime.jvm.gc.duration":   {{mappedName: "jvm.gc.parnew.time"}},
@@ -102,45 +94,37 @@ var runtimeMetricsMappings = map[string][]runtimeMetricMapping{
 		mappedName:     "jvm.heap_memory",
 		attribute:      "type",
 		attributeValue: "heap",
-		metricType:     pmetric.MetricTypeGauge,
 	}, {
 		mappedName:     "jvm.non_heap_memory",
 		attribute:      "type",
-		attributeValue: "nonheap",
-		metricType:     pmetric.MetricTypeGauge,
+		attributeValue: "non_heap",
 	}},
 	"process.runtime.jvm.memory.committed": {{
 		mappedName:     "jvm.heap_memory_committed",
 		attribute:      "type",
 		attributeValue: "heap",
-		metricType:     pmetric.MetricTypeGauge,
 	}, {
 		mappedName:     "jvm.non_heap_memory_committed",
 		attribute:      "type",
-		attributeValue: "nonheap",
-		metricType:     pmetric.MetricTypeGauge,
+		attributeValue: "non_heap",
 	}},
 	"process.runtime.jvm.memory.init": {{
 		mappedName:     "jvm.heap_memory_init",
 		attribute:      "type",
 		attributeValue: "heap",
-		metricType:     pmetric.MetricTypeGauge,
 	}, {
 		mappedName:     "jvm.non_heap_memory_init",
 		attribute:      "type",
-		attributeValue: "nonheap",
-		metricType:     pmetric.MetricTypeGauge,
+		attributeValue: "non_heap",
 	}},
 	"process.runtime.jvm.memory.limit": {{
 		mappedName:     "jvm.heap_memory_max",
 		attribute:      "type",
 		attributeValue: "heap",
-		metricType:     pmetric.MetricTypeGauge,
 	}, {
 		mappedName:     "jvm.non_heap_memory_max",
 		attribute:      "type",
-		attributeValue: "nonheap",
-		metricType:     pmetric.MetricTypeGauge,
+		attributeValue: "non_heap",
 	}},
 }
 
@@ -548,14 +532,6 @@ func (t *Translator) source(m pcommon.Map) (source.Source, error) {
 
 // mapGaugeRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Gauge metric
 func mapGaugeRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
-	fmt.Println("IN MAP GAUGE")
-	fmt.Printf("--------- md.name: %v --------\n", md.Name())
-	fmt.Printf("--------- md.Type(): %v --------\n", md.Type())
-	fmt.Printf("--------- mp: %+v --------\n", mp)
-	fmt.Printf("--------- md.Gauge(): %v --------\n", md.Gauge())
-	fmt.Printf("--------- md.Gauge().DataPoints(): %v --------\n", md.Gauge().DataPoints())
-	fmt.Printf("--------- md.Gauge().DataPoints().At(0): %v --------\n", md.Gauge().DataPoints().At(0))
-	fmt.Printf("--------- md.Gauge().DataPoints().Len(): %v --------\n", md.Gauge().DataPoints().Len())
 	cp := metricsArray.AppendEmpty()
 	cp.SetEmptyGauge()
 	for i := 0; i < md.Gauge().DataPoints().Len(); i++ {
@@ -569,9 +545,6 @@ func mapGaugeRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric
 
 // mapSumRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Sum metric
 func mapSumRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
-	fmt.Println("IN MAP SUM")
-	fmt.Printf("--------- md.name: %v --------\n", md.Name())
-	fmt.Printf("--------- mp: %+v --------\n", mp)
 	cp := metricsArray.AppendEmpty()
 	cp.SetEmptySum()
 	cp.Sum().SetAggregationTemporality(md.Sum().AggregationTemporality())
@@ -635,9 +608,6 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			for k := 0; k < metricsArray.Len(); k++ {
 				md := metricsArray.At(k)
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
-					fmt.Println("IN MAP METRICS")
-					fmt.Printf("--------- md.name: %v --------\n", md.Name())
-
 					for _, mp := range v {
 						if mp.attribute == "" {
 							// duplicate runtime metrics as Datadog runtime metrics
