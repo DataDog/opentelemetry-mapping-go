@@ -161,7 +161,7 @@ func newDims(name string) *Dimensions {
 }
 
 func newGauge(dims *Dimensions, ts uint64, val float64) metric {
-	return metric{name: dims.name, typ: Gauge, timestamp: ts, value: val, tags: dims.tags}
+	return newGaugeWithHost(dims, ts, val, "")
 }
 
 func newGaugeWithHost(dims *Dimensions, ts uint64, val float64, host string) metric {
