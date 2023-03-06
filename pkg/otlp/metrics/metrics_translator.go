@@ -39,23 +39,23 @@ type runtimeMetricMapping struct {
 	mappedName     string // the Datadog runtime metric name
 	attribute      string // the name of the attribute this metric originates from
 	attributeValue string // the value of the above attribute that corresponds with this metric
-	metricType     pmetric.MetricType
 }
 
-// runtimeMetricsMappings defines the mappings from OTel runtime metric names to their
-// equivalent Datadog runtime metric names
-var runtimeMetricsMappings = map[string][]runtimeMetricMapping{
-	"process.runtime.go.goroutines":                        {{mappedName: "runtime.go.num_goroutine"}},
-	"process.runtime.go.cgo.calls":                         {{mappedName: "runtime.go.num_cgo_call"}},
-	"process.runtime.go.lookups":                           {{mappedName: "runtime.go.mem_stats.lookups"}},
-	"process.runtime.go.mem.heap_alloc":                    {{mappedName: "runtime.go.mem_stats.heap_alloc"}},
-	"process.runtime.go.mem.heap_sys":                      {{mappedName: "runtime.go.mem_stats.heap_sys"}},
-	"process.runtime.go.mem.heap_idle":                     {{mappedName: "runtime.go.mem_stats.heap_idle"}},
-	"process.runtime.go.mem.heap_inuse":                    {{mappedName: "runtime.go.mem_stats.heap_inuse"}},
-	"process.runtime.go.mem.heap_released":                 {{mappedName: "runtime.go.mem_stats.heap_released"}},
-	"process.runtime.go.mem.heap_objects":                  {{mappedName: "runtime.go.mem_stats.heap_objects"}},
-	"process.runtime.go.gc.pause_total_ns":                 {{mappedName: "runtime.go.mem_stats.pause_total_ns"}},
-	"process.runtime.go.gc.count":                          {{mappedName: "runtime.go.mem_stats.num_gc"}},
+var goRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
+	"process.runtime.go.goroutines":        {{mappedName: "runtime.go.num_goroutine"}},
+	"process.runtime.go.cgo.calls":         {{mappedName: "runtime.go.num_cgo_call"}},
+	"process.runtime.go.lookups":           {{mappedName: "runtime.go.mem_stats.lookups"}},
+	"process.runtime.go.mem.heap_alloc":    {{mappedName: "runtime.go.mem_stats.heap_alloc"}},
+	"process.runtime.go.mem.heap_sys":      {{mappedName: "runtime.go.mem_stats.heap_sys"}},
+	"process.runtime.go.mem.heap_idle":     {{mappedName: "runtime.go.mem_stats.heap_idle"}},
+	"process.runtime.go.mem.heap_inuse":    {{mappedName: "runtime.go.mem_stats.heap_inuse"}},
+	"process.runtime.go.mem.heap_released": {{mappedName: "runtime.go.mem_stats.heap_released"}},
+	"process.runtime.go.mem.heap_objects":  {{mappedName: "runtime.go.mem_stats.heap_objects"}},
+	"process.runtime.go.gc.pause_total_ns": {{mappedName: "runtime.go.mem_stats.pause_total_ns"}},
+	"process.runtime.go.gc.count":          {{mappedName: "runtime.go.mem_stats.num_gc"}},
+}
+
+var dotnetRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
 	"process.runtime.dotnet.thread_pool.threads.count":     {{mappedName: "runtime.dotnet.threads.count"}},
 	"process.runtime.dotnet.monitor.lock_contention.count": {{mappedName: "runtime.dotnet.threads.contention_count"}},
 	"process.runtime.dotnet.exceptions.count":              {{mappedName: "runtime.dotnet.exceptions.count"}},
@@ -63,40 +63,92 @@ var runtimeMetricsMappings = map[string][]runtimeMetricMapping{
 		mappedName:     "runtime.dotnet.gc.size.gen0",
 		attribute:      "generation",
 		attributeValue: "gen0",
-		metricType:     pmetric.MetricTypeGauge,
 	}, {
 		mappedName:     "runtime.dotnet.gc.size.gen1",
 		attribute:      "generation",
 		attributeValue: "gen1",
-		metricType:     pmetric.MetricTypeGauge,
 	}, {
 		mappedName:     "runtime.dotnet.gc.size.gen2",
 		attribute:      "generation",
 		attributeValue: "gen2",
-		metricType:     pmetric.MetricTypeGauge,
 	}, {
 		mappedName:     "runtime.dotnet.gc.size.loh",
 		attribute:      "generation",
 		attributeValue: "loh",
-		metricType:     pmetric.MetricTypeGauge,
 	}},
 	"process.runtime.dotnet.gc.collections.count": {{
 		mappedName:     "runtime.dotnet.gc.count.gen0",
 		attribute:      "generation",
 		attributeValue: "gen0",
-		metricType:     pmetric.MetricTypeSum,
 	}, {
 		mappedName:     "runtime.dotnet.gc.count.gen1",
 		attribute:      "generation",
 		attributeValue: "gen1",
-		metricType:     pmetric.MetricTypeSum,
 	}, {
 		mappedName:     "runtime.dotnet.gc.count.gen2",
 		attribute:      "generation",
 		attributeValue: "gen2",
-		metricType:     pmetric.MetricTypeSum,
 	}},
 }
+
+var javaRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
+	"process.runtime.jvm.threads.count": {{mappedName: "jvm.thread_count"}},
+	"process.runtime.jvm.gc.duration":   {{mappedName: "jvm.gc.parnew.time"}},
+	"process.runtime.jvm.memory.usage": {{
+		mappedName:     "jvm.heap_memory",
+		attribute:      "type",
+		attributeValue: "heap",
+	}, {
+		mappedName:     "jvm.non_heap_memory",
+		attribute:      "type",
+		attributeValue: "non_heap",
+	}},
+	"process.runtime.jvm.memory.committed": {{
+		mappedName:     "jvm.heap_memory_committed",
+		attribute:      "type",
+		attributeValue: "heap",
+	}, {
+		mappedName:     "jvm.non_heap_memory_committed",
+		attribute:      "type",
+		attributeValue: "non_heap",
+	}},
+	"process.runtime.jvm.memory.init": {{
+		mappedName:     "jvm.heap_memory_init",
+		attribute:      "type",
+		attributeValue: "heap",
+	}, {
+		mappedName:     "jvm.non_heap_memory_init",
+		attribute:      "type",
+		attributeValue: "non_heap",
+	}},
+	"process.runtime.jvm.memory.limit": {{
+		mappedName:     "jvm.heap_memory_max",
+		attribute:      "type",
+		attributeValue: "heap",
+	}, {
+		mappedName:     "jvm.non_heap_memory_max",
+		attribute:      "type",
+		attributeValue: "non_heap",
+	}},
+}
+
+func getRuntimeMetricsMappings() map[string][]runtimeMetricMapping {
+	res := map[string][]runtimeMetricMapping{}
+	for k, v := range goRuntimeMetricsMappings {
+		res[k] = v
+	}
+	for k, v := range dotnetRuntimeMetricsMappings {
+		res[k] = v
+	}
+	for k, v := range javaRuntimeMetricsMappings {
+		res[k] = v
+	}
+	return res
+}
+
+// runtimeMetricsMappings defines the mappings from OTel runtime metric names to their
+// equivalent Datadog runtime metric names
+var runtimeMetricsMappings = getRuntimeMetricsMappings()
 
 const metricName string = "metric name"
 
@@ -586,9 +638,9 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 							cp.SetName(mp.mappedName)
 							break
 						}
-						if mp.metricType == pmetric.MetricTypeSum {
+						if md.Type() == pmetric.MetricTypeSum {
 							mapSumRuntimeMetricWithAttributes(md, metricsArray, mp)
-						} else if mp.metricType == pmetric.MetricTypeGauge {
+						} else if md.Type() == pmetric.MetricTypeGauge {
 							mapGaugeRuntimeMetricWithAttributes(md, metricsArray, mp)
 						}
 					}

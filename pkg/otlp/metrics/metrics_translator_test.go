@@ -16,7 +16,6 @@ package metrics
 
 import (
 	"context"
-	"fmt"
 	"math"
 	"testing"
 	"time"
@@ -428,7 +427,7 @@ func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes(false, "process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, "generation", "gen"), consumer); err != nil {
+	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes(false, "process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, "generation", []string{"gen0", "gen1", "gen2"}), consumer); err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -447,7 +446,7 @@ func TestMapGaugeRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes(false, "process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeGauge, "generation", "gen"), consumer); err != nil {
+	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes(false, "process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeGauge, "generation", []string{"gen0", "gen1", "gen2"}), consumer); err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -460,6 +459,27 @@ func TestMapGaugeRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 			newGaugeWithHost(newDims("runtime.dotnet.gc.size.gen0").AddTags("generation:gen0"), uint64(seconds(startTs+1)), 10, fallbackHostname),
 			newGaugeWithHost(newDims("runtime.dotnet.gc.size.gen1").AddTags("generation:gen1"), uint64(seconds(startTs+2)), 15, fallbackHostname),
 			newGaugeWithHost(newDims("runtime.dotnet.gc.size.gen2").AddTags("generation:gen2"), uint64(seconds(startTs+3)), 20, fallbackHostname),
+		},
+	)
+}
+
+func TestMapGaugeRuntimeMetricWithInvalidAttributes(t *testing.T) {
+	ctx := context.Background()
+	tr := newTranslator(t, zap.NewNop())
+	consumer := &mockFullConsumer{}
+	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes(false, "process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, "type", []string{"heap", "heap1", "heap2", "non_heap"}), consumer); err != nil {
+		t.Fatal(err)
+	}
+	startTs := int(getProcessStartTime()) + 1
+	assert.ElementsMatch(t,
+		consumer.metrics,
+		[]metric{
+			newGaugeWithHost(newDims("process.runtime.jvm.memory.usage").AddTags("type:heap"), uint64(seconds(startTs+1)), 10, fallbackHostname),
+			newGaugeWithHost(newDims("process.runtime.jvm.memory.usage").AddTags("type:heap1"), uint64(seconds(startTs+2)), 15, fallbackHostname),
+			newGaugeWithHost(newDims("process.runtime.jvm.memory.usage").AddTags("type:heap2"), uint64(seconds(startTs+3)), 20, fallbackHostname),
+			newGaugeWithHost(newDims("process.runtime.jvm.memory.usage").AddTags("type:non_heap"), uint64(seconds(startTs+4)), 25, fallbackHostname),
+			newGaugeWithHost(newDims("jvm.heap_memory").AddTags("type:heap"), uint64(seconds(startTs+1)), 10, fallbackHostname),
+			newGaugeWithHost(newDims("jvm.non_heap_memory").AddTags("type:non_heap"), uint64(seconds(startTs+4)), 25, fallbackHostname),
 		},
 	)
 }
@@ -827,7 +847,7 @@ func createTestDoubleCumulativeMonotonicMetrics(tsmatch bool) pmetric.Metrics {
 	return md
 }
 
-func createTestMetricWithAttributes(tsmatch bool, metricName string, metricType pmetric.MetricType, attribute string, attributeValue string) pmetric.Metrics {
+func createTestMetricWithAttributes(tsmatch bool, metricName string, metricType pmetric.MetricType, attribute string, attributeValues []string) pmetric.Metrics {
 	md := pmetric.NewMetrics()
 	met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 	met.SetName(metricName)
@@ -841,12 +861,16 @@ func createTestMetricWithAttributes(tsmatch bool, metricName string, metricType 
 		met.SetEmptyGauge()
 		dpsInt = met.Gauge().DataPoints()
 	}
-	values := []int64{10, 15, 20}
+
+	var values []int64
+	for i := range attributeValues {
+		values = append(values, int64(10+(i*5)))
+	}
 	dpsInt.EnsureCapacity(len(values))
 	startTs := int(getProcessStartTime()) + 1
 	for i, val := range values {
 		dpInt := dpsInt.AppendEmpty()
-		dpInt.Attributes().PutStr(attribute, fmt.Sprintf("%v%v", attributeValue, i))
+		dpInt.Attributes().PutStr(attribute, attributeValues[i])
 		dpInt.SetStartTimestamp(seconds(startTs))
 		if tsmatch {
 			dpInt.SetTimestamp(seconds(startTs))
