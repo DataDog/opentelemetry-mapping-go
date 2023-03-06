@@ -41,20 +41,21 @@ type runtimeMetricMapping struct {
 	attributeValue string // the value of the above attribute that corresponds with this metric
 }
 
-// runtimeMetricsMappings defines the mappings from OTel runtime metric names to their
-// equivalent Datadog runtime metric names
-var runtimeMetricsMappings = map[string][]runtimeMetricMapping{
-	"process.runtime.go.goroutines":                        {{mappedName: "runtime.go.num_goroutine"}},
-	"process.runtime.go.cgo.calls":                         {{mappedName: "runtime.go.num_cgo_call"}},
-	"process.runtime.go.lookups":                           {{mappedName: "runtime.go.mem_stats.lookups"}},
-	"process.runtime.go.mem.heap_alloc":                    {{mappedName: "runtime.go.mem_stats.heap_alloc"}},
-	"process.runtime.go.mem.heap_sys":                      {{mappedName: "runtime.go.mem_stats.heap_sys"}},
-	"process.runtime.go.mem.heap_idle":                     {{mappedName: "runtime.go.mem_stats.heap_idle"}},
-	"process.runtime.go.mem.heap_inuse":                    {{mappedName: "runtime.go.mem_stats.heap_inuse"}},
-	"process.runtime.go.mem.heap_released":                 {{mappedName: "runtime.go.mem_stats.heap_released"}},
-	"process.runtime.go.mem.heap_objects":                  {{mappedName: "runtime.go.mem_stats.heap_objects"}},
-	"process.runtime.go.gc.pause_total_ns":                 {{mappedName: "runtime.go.mem_stats.pause_total_ns"}},
-	"process.runtime.go.gc.count":                          {{mappedName: "runtime.go.mem_stats.num_gc"}},
+var goRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
+	"process.runtime.go.goroutines":        {{mappedName: "runtime.go.num_goroutine"}},
+	"process.runtime.go.cgo.calls":         {{mappedName: "runtime.go.num_cgo_call"}},
+	"process.runtime.go.lookups":           {{mappedName: "runtime.go.mem_stats.lookups"}},
+	"process.runtime.go.mem.heap_alloc":    {{mappedName: "runtime.go.mem_stats.heap_alloc"}},
+	"process.runtime.go.mem.heap_sys":      {{mappedName: "runtime.go.mem_stats.heap_sys"}},
+	"process.runtime.go.mem.heap_idle":     {{mappedName: "runtime.go.mem_stats.heap_idle"}},
+	"process.runtime.go.mem.heap_inuse":    {{mappedName: "runtime.go.mem_stats.heap_inuse"}},
+	"process.runtime.go.mem.heap_released": {{mappedName: "runtime.go.mem_stats.heap_released"}},
+	"process.runtime.go.mem.heap_objects":  {{mappedName: "runtime.go.mem_stats.heap_objects"}},
+	"process.runtime.go.gc.pause_total_ns": {{mappedName: "runtime.go.mem_stats.pause_total_ns"}},
+	"process.runtime.go.gc.count":          {{mappedName: "runtime.go.mem_stats.num_gc"}},
+}
+
+var dotnetRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
 	"process.runtime.dotnet.thread_pool.threads.count":     {{mappedName: "runtime.dotnet.threads.count"}},
 	"process.runtime.dotnet.monitor.lock_contention.count": {{mappedName: "runtime.dotnet.threads.contention_count"}},
 	"process.runtime.dotnet.exceptions.count":              {{mappedName: "runtime.dotnet.exceptions.count"}},
@@ -88,6 +89,9 @@ var runtimeMetricsMappings = map[string][]runtimeMetricMapping{
 		attribute:      "generation",
 		attributeValue: "gen2",
 	}},
+}
+
+var javaRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
 	"process.runtime.jvm.threads.count": {{mappedName: "jvm.thread_count"}},
 	"process.runtime.jvm.gc.duration":   {{mappedName: "jvm.gc.parnew.time"}},
 	"process.runtime.jvm.memory.usage": {{
@@ -127,6 +131,24 @@ var runtimeMetricsMappings = map[string][]runtimeMetricMapping{
 		attributeValue: "non_heap",
 	}},
 }
+
+func getRuntimeMetricsMappings() map[string][]runtimeMetricMapping {
+	res := map[string][]runtimeMetricMapping{}
+	for k, v := range goRuntimeMetricsMappings {
+		res[k] = v
+	}
+	for k, v := range dotnetRuntimeMetricsMappings {
+		res[k] = v
+	}
+	for k, v := range javaRuntimeMetricsMappings {
+		res[k] = v
+	}
+	return res
+}
+
+// runtimeMetricsMappings defines the mappings from OTel runtime metric names to their
+// equivalent Datadog runtime metric names
+var runtimeMetricsMappings = getRuntimeMetricsMappings()
 
 const metricName string = "metric name"
 
