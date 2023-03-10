@@ -133,7 +133,7 @@ var javaRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
 }
 
 var pythonRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
-	"runtime.cpu.time": {{
+	"runtime.cpython.cpu_time": {{
 		mappedName:     "runtime.python.cpu.time.sys",
 		attribute:      "type",
 		attributeValue: "sys",
@@ -142,7 +142,20 @@ var pythonRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
 		attribute:      "type",
 		attributeValue: "user",
 	}},
-	"runtime.memory": {{
+	"runtime.cpython.gc_count": {{
+		mappedName:     "runtime.python.gc.count.gen0",
+		attribute:      "count",
+		attributeValue: "0",
+	}, {
+		mappedName:     "runtime.python.gc.count.gen1",
+		attribute:      "count",
+		attributeValue: "1",
+	}, {
+		mappedName:     "runtime.python.gc.count.gen2",
+		attribute:      "count",
+		attributeValue: "2",
+	}},
+	"runtime.cpython.memory": {{
 		mappedName:     "runtime.python.mem.rss",
 		attribute:      "type",
 		attributeValue: "rss",
