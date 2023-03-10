@@ -132,6 +132,23 @@ var javaRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
 	}},
 }
 
+var pythonRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
+	"runtime.cpu.time": {{
+		mappedName:     "runtime.python.cpu.time.sys",
+		attribute:      "type",
+		attributeValue: "sys",
+	}, {
+		mappedName:     "runtime.python.cpu.time.user",
+		attribute:      "type",
+		attributeValue: "user",
+	}},
+	"runtime.memory": {{
+		mappedName:     "runtime.python.mem.rss",
+		attribute:      "type",
+		attributeValue: "rss",
+	}},
+}
+
 func getRuntimeMetricsMappings() map[string][]runtimeMetricMapping {
 	res := map[string][]runtimeMetricMapping{}
 	for k, v := range goRuntimeMetricsMappings {
@@ -141,6 +158,9 @@ func getRuntimeMetricsMappings() map[string][]runtimeMetricMapping {
 		res[k] = v
 	}
 	for k, v := range javaRuntimeMetricsMappings {
+		res[k] = v
+	}
+	for k, v := range pythonRuntimeMetricsMappings {
 		res[k] = v
 	}
 	return res
