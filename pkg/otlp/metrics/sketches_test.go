@@ -68,6 +68,8 @@ func newHistogramMetric(p pmetric.HistogramDataPoint) pmetric.Metrics {
 	np := dps.AppendEmpty()
 	np.SetCount(p.Count())
 	np.SetSum(p.Sum())
+	np.SetMin(p.Min())
+	np.SetMax(p.Max())
 	p.BucketCounts().CopyTo(np.BucketCounts())
 	p.ExplicitBounds().CopyTo(np.ExplicitBounds())
 	np.SetTimestamp(p.Timestamp())
@@ -101,6 +103,8 @@ func TestHistogramSketches(t *testing.T) {
 		p.ExplicitBounds().FromRaw(bounds)
 		p.BucketCounts().FromRaw(buckets)
 		p.SetCount(count)
+		p.SetMin(0)
+		p.SetMax(cdf(float64(N-1)) - cdf(float64(N-2)))
 		return newHistogramMetric(p)
 	}
 
@@ -160,6 +164,10 @@ func TestHistogramSketches(t *testing.T) {
 
 			cumulSum := uint64(0)
 			p := md.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().At(0).Histogram().DataPoints().At(0)
+			assert.Equal(t, sk.Basic.Min, p.Min())
+			assert.Equal(t, sk.Basic.Max, p.Max())
+			assert.Equal(t, uint64(sk.Basic.Cnt), p.Count())
+			assert.Equal(t, sk.Basic.Sum, p.Sum())
 			for i := 0; i < p.BucketCounts().Len()-3; i++ {
 				{
 					q := float64(cumulSum) / float64(p.Count()) * (1 - tol)
@@ -187,21 +195,27 @@ func TestHistogramSketches(t *testing.T) {
 	}
 }
 
-func TestExactSumCount(t *testing.T) {
+func TestExactSummaryStatistics(t *testing.T) {
 	tests := []struct {
-		name    string
-		getHist func() pmetric.Metrics
-		sum     float64
-		count   uint64
+		name        string
+		getHist     func() pmetric.Metrics
+		sum         float64
+		count       uint64
+		testExtrema bool
+		min         float64
+		max         float64
 	}{}
 
 	// Add tests for issue 6129: https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/6129
 	tests = append(tests,
 		struct {
-			name    string
-			getHist func() pmetric.Metrics
-			sum     float64
-			count   uint64
+			name        string
+			getHist     func() pmetric.Metrics
+			sum         float64
+			count       uint64
+			testExtrema bool
+			min         float64
+			max         float64
 		}{
 			name: "Uniform distribution (delta)",
 			getHist: func() pmetric.Metrics {
@@ -222,17 +236,25 @@ func TestExactSumCount(t *testing.T) {
 				p.BucketCounts().FromRaw([]uint64{0, 1, 1, 1, 1, 1})
 				p.SetCount(5)
 				p.SetSum(50_000)
+				p.SetMin(0)
+				p.SetMax(20_000)
 				return md
 			},
-			sum:   50_000,
-			count: 5,
+			sum:         50_000,
+			count:       5,
+			testExtrema: true,
+			min:         0,
+			max:         20_000,
 		},
 
 		struct {
-			name    string
-			getHist func() pmetric.Metrics
-			sum     float64
-			count   uint64
+			name        string
+			getHist     func() pmetric.Metrics
+			sum         float64
+			count       uint64
+			testExtrema bool
+			min         float64
+			max         float64
 		}{
 			name: "Uniform distribution (cumulative)",
 			getHist: func() pmetric.Metrics {
@@ -256,6 +278,8 @@ func TestExactSumCount(t *testing.T) {
 					p.BucketCounts().FromRaw([]uint64{0, cnt, cnt, cnt, cnt, cnt})
 					p.SetCount(uint64(5 * i))
 					p.SetSum(float64(50_000 * i))
+					p.SetMin(0)
+					p.SetMax(20_000)
 				}
 				return md
 			},
@@ -268,10 +292,13 @@ func TestExactSumCount(t *testing.T) {
 		pos := pos
 		val := val
 		tests = append(tests, struct {
-			name    string
-			getHist func() pmetric.Metrics
-			sum     float64
-			count   uint64
+			name        string
+			getHist     func() pmetric.Metrics
+			sum         float64
+			count       uint64
+			testExtrema bool
+			min         float64
+			max         float64
 		}{
 			name: fmt.Sprintf("Issue 7065 (%d, %f)", pos, val),
 			getHist: func() pmetric.Metrics {
@@ -298,6 +325,8 @@ func TestExactSumCount(t *testing.T) {
 					p.BucketCounts().FromRaw(counts)
 					p.SetCount(uint64(i))
 					p.SetSum(val * float64(i))
+					p.SetMin(val)
+					p.SetMax(val)
 				}
 				return md
 			},
@@ -317,6 +346,12 @@ func TestExactSumCount(t *testing.T) {
 
 			assert.Equal(t, testInstance.count, uint64(sk.Basic.Cnt), "counts differ")
 			assert.Equal(t, testInstance.sum, sk.Basic.Sum, "sums differ")
+
+			// We only assert on min/max for delta histograms
+			if testInstance.testExtrema {
+				assert.Equal(t, testInstance.min, sk.Basic.Min, "min differs")
+				assert.Equal(t, testInstance.max, sk.Basic.Max, "max differs")
+			}
 			avg := testInstance.sum / float64(testInstance.count)
 			assert.Equal(t, avg, sk.Basic.Avg, "averages differ")
 		})
@@ -337,6 +372,8 @@ func TestInfiniteBounds(t *testing.T) {
 				p.BucketCounts().FromRaw([]uint64{100})
 				p.SetCount(100)
 				p.SetSum(0)
+				p.SetMin(-100)
+				p.SetMax(100)
 				return newHistogramMetric(p)
 			},
 		},
@@ -348,6 +385,8 @@ func TestInfiniteBounds(t *testing.T) {
 				p.BucketCounts().FromRaw([]uint64{100, 100})
 				p.SetCount(200)
 				p.SetSum(0)
+				p.SetMin(-100)
+				p.SetMax(100)
 				return newHistogramMetric(p)
 			},
 		},
@@ -359,6 +398,8 @@ func TestInfiniteBounds(t *testing.T) {
 				p.BucketCounts().FromRaw([]uint64{100, 10, 100})
 				p.SetCount(210)
 				p.SetSum(0)
+				p.SetMin(-100)
+				p.SetMax(100)
 				return newHistogramMetric(p)
 			},
 		},
@@ -376,6 +417,8 @@ func TestInfiniteBounds(t *testing.T) {
 			p := md.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().At(0).Histogram().DataPoints().At(0)
 			assert.InDelta(t, sk.Basic.Sum, p.Sum(), 1)
 			assert.Equal(t, uint64(sk.Basic.Cnt), p.Count())
+			assert.Equal(t, sk.Basic.Min, p.Min())
+			assert.Equal(t, sk.Basic.Max, p.Max())
 		})
 	}
 
