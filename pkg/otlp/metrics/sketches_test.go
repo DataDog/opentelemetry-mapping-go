@@ -365,6 +365,17 @@ func TestInfiniteBounds(t *testing.T) {
 		getHist func() pmetric.Metrics
 	}{
 		{
+			name: "(-inf, inf): 0",
+			getHist: func() pmetric.Metrics {
+				p := pmetric.NewHistogramDataPoint()
+				p.ExplicitBounds().FromRaw([]float64{})
+				p.BucketCounts().FromRaw([]uint64{0})
+				p.SetCount(0)
+				p.SetSum(0)
+				return newHistogramMetric(p)
+			},
+		},
+		{
 			name: "(-inf, inf): 100",
 			getHist: func() pmetric.Metrics {
 				p := pmetric.NewHistogramDataPoint()
@@ -415,6 +426,12 @@ func TestInfiniteBounds(t *testing.T) {
 			sk := consumer.sk
 
 			p := md.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().At(0).Histogram().DataPoints().At(0)
+			if p.Count() == 0 {
+				// Check that no point is produced if the count is zero.
+				assert.Nil(t, sk)
+				// Nothing to assert, end early
+				return
+			}
 			assert.InDelta(t, sk.Basic.Sum, p.Sum(), 1)
 			assert.Equal(t, uint64(sk.Basic.Cnt), p.Count())
 			assert.Equal(t, sk.Basic.Min, p.Min())
