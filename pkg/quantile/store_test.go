@@ -6,8 +6,10 @@
 package quantile
 
 import (
+	"math"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -190,4 +192,31 @@ func TestStore(t *testing.T) {
 		}
 	})
 
+}
+
+func TestCols(t *testing.T) {
+	for _, tt := range []struct {
+		store string
+		k     []int32
+		n     []uint32
+	}{
+		{
+			store: "",
+		},
+		{
+			store: "0:1 1:1 2:2 3:1 4:1 5:1 8:1 9:1 10:max",
+			k:     []int32{0, 1, 2, 3, 4, 5, 8, 9, 10},
+			n:     []uint32{1, 1, 2, 1, 1, 1, 1, 1, math.MaxUint16},
+		},
+		{
+			store: "0:1 0:max",
+			k:     []int32{0, 0},
+			n:     []uint32{1, math.MaxUint16},
+		},
+	} {
+		st := buildStore(t, tt.store)
+		k, n := st.Cols()
+		assert.Equal(t, k, tt.k, "keys don't match")
+		assert.Equal(t, n, tt.n, "values don't match")
+	}
 }

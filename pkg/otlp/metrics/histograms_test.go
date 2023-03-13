@@ -21,6 +21,7 @@ func TestDeltaHistogramTranslatorOptions(t *testing.T) {
 		otlpfile string
 		ddogfile string
 		options  []TranslatorOption
+		err      string
 	}{
 		{
 			name:     "distributions",
@@ -65,11 +66,22 @@ func TestDeltaHistogramTranslatorOptions(t *testing.T) {
 				WithCountSumMetrics(),
 			},
 		},
+		{
+			name: "no-count-sum-no-buckets",
+			options: []TranslatorOption{
+				WithHistogramMode(HistogramModeNoBuckets),
+			},
+			err: errNoBucketsNoSumCount,
+		},
 	}
 
 	for _, testinstance := range tests {
 		t.Run(testinstance.name, func(t *testing.T) {
 			translator, err := NewTranslator(zap.NewNop(), testinstance.options...)
+			if testinstance.err != "" {
+				assert.EqualError(t, err, testinstance.err)
+				return
+			}
 			require.NoError(t, err)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 		})

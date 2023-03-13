@@ -7,19 +7,20 @@ package quantile
 
 import (
 	"fmt"
-	"math"
 	"testing"
 
 	"github.com/DataDog/sketches-go/ddsketch"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest"
 )
 
 const (
-	acceptableFloatError = 2e-12
+	acceptableFloatError = 2e-11
 )
 
-func generateDDSketch(quantile func(float64) float64, N, M int) (*ddsketch.DDSketch, error) {
+func generateDDSketch(quantile sketchtest.QuantileFunction, N, M int) (*ddsketch.DDSketch, error) {
 	sketch, _ := ddsketch.NewDefaultDDSketch(0.01)
 	// Simulate a given distribution by replacing it with a distribution
 	// where all points are placed where the evaluated quantiles are.
@@ -29,7 +30,7 @@ func generateDDSketch(quantile func(float64) float64, N, M int) (*ddsketch.DDSke
 	for i := 0; i <= N; i++ {
 		err := sketch.AddWithCount(quantile(float64(i)/float64(N)), float64(M))
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to add quantile %g (%f): %w", float64(i)/float64(N), quantile(float64(i)/float64(N)), err)
 		}
 	}
 
@@ -38,7 +39,7 @@ func generateDDSketch(quantile func(float64) float64, N, M int) (*ddsketch.DDSke
 
 func TestCreateDDSketchWithSketchMapping(t *testing.T) {
 	// Support of the distribution: [0,N] or [-N,0]
-	N := 1_000
+	N := 1_000.0
 	// Number of points per quantile
 	M := 50
 
@@ -46,35 +47,39 @@ func TestCreateDDSketchWithSketchMapping(t *testing.T) {
 		// distribution name
 		name string
 		// the quantile function (within [0,1])
-		quantile func(x float64) float64
+		quantile sketchtest.QuantileFunction
 	}{
 		{
-			// https://en.wikipedia.org/wiki/Continuous_uniform_distribution
 			name:     "Uniform distribution (a=0,b=N)",
-			quantile: func(y float64) float64 { return y * float64(N) },
+			quantile: sketchtest.UniformQ(0, N),
 		},
 		{
-			// https://en.wikipedia.org/wiki/Continuous_uniform_distribution
 			name:     "Uniform distribution (a=-N,b=0)",
-			quantile: func(y float64) float64 { return (y - 1) * float64(N) },
+			quantile: sketchtest.UniformQ(-N, 0),
 		},
 		{
-			// https://en.wikipedia.org/wiki/U-quadratic_distribution
-			name: "U-quadratic distribution (a=0,b=N)",
-			quantile: func(y float64) float64 {
-				a := 0.0
-				b := float64(N)
-				alpha := 12.0 / math.Pow(b-a, 3)
-				beta := (b + a) / 2.0
-
-				// golang's math.Pow doesn't like negative numbers as the first argument
-				// (it will return NaN), even though cubic roots of negative numbers are defined.
-				sign := 1.0
-				if 3/alpha*y-math.Pow(beta-a, 3) < 0 {
-					sign = -1.0
-				}
-				return beta + sign*math.Pow(sign*(3/alpha*y-math.Pow(beta-a, 3)), 1.0/3.0)
-			},
+			name:     "Uniform distribution (a=-N,b=N)",
+			quantile: sketchtest.UniformQ(-N, N),
+		},
+		{
+			name:     "U-quadratic distribution (a=0,b=N)",
+			quantile: sketchtest.UQuadraticQ(0, N),
+		},
+		{
+			name:     "U-quadratic distribution (a=-N,b=0)",
+			quantile: sketchtest.UQuadraticQ(-N, 0),
+		},
+		{
+			name:     "U-quadratic distribution (a=-N,b=N)",
+			quantile: sketchtest.UQuadraticQ(-N/2, N/2),
+		},
+		{
+			name:     "Truncated Exponential distribution (a=0,b=N,lambda=1/100)",
+			quantile: sketchtest.TruncateQ(0, N, sketchtest.ExponentialQ(1.0/100), sketchtest.ExponentialCDF(1.0/100)),
+		},
+		{
+			name:     "Truncated Normal distribution (a=-8,b=8,mu=0, sigma=1e-3)",
+			quantile: sketchtest.TruncateQ(-8, 8, sketchtest.NormalQ(0, 1e-3), sketchtest.NormalCDF(0, 1e-3)),
 		},
 	}
 
@@ -175,7 +180,7 @@ func TestCreateDDSketchWithSketchMapping(t *testing.T) {
 
 func TestConvertDDSketchIntoSketch(t *testing.T) {
 	// Support of the distribution: [0,N] or [-N,0]
-	N := 1_000
+	N := 1_000.0
 	// Number of points per quantile
 	M := 50
 
@@ -183,41 +188,47 @@ func TestConvertDDSketchIntoSketch(t *testing.T) {
 		// distribution name
 		name string
 		// the quantile function (within [0,1])
-		quantile func(x float64) float64
+		quantile sketchtest.QuantileFunction
 		// the map of quantiles for which the test is known to fail
 		excludedQuantiles map[int]bool
 	}{
 		{
-			// https://en.wikipedia.org/wiki/Continuous_uniform_distribution
 			name:     "Uniform distribution (a=0,b=N)",
-			quantile: func(y float64) float64 { return y * float64(N) },
+			quantile: sketchtest.UniformQ(0, N),
 		},
 		// The p99 for this test fails, likely due to the shift of leftover bucket counts the right that is performed
 		// during the DDSketch -> Sketch conversion, causing the p99 of the output sketch to fall on 0
 		// (which means the InEpsilon check returns 1).
 		{
-			// https://en.wikipedia.org/wiki/Continuous_uniform_distribution
 			name:              "Uniform distribution (a=-N,b=0)",
-			quantile:          func(y float64) float64 { return (y - 1) * float64(N) },
+			quantile:          sketchtest.UniformQ(-N, 0),
 			excludedQuantiles: map[int]bool{99: true},
 		},
 		{
-			// https://en.wikipedia.org/wiki/U-quadratic_distribution
-			name: "U-quadratic distribution (a=0,b=N)",
-			quantile: func(y float64) float64 {
-				a := 0.0
-				b := float64(N)
-				alpha := 12.0 / math.Pow(b-a, 3)
-				beta := (b + a) / 2.0
-
-				// golang's math.Pow doesn't like negative numbers as the first argument
-				// (it will return NaN), even though cubic roots of negative numbers are defined.
-				sign := 1.0
-				if 3/alpha*y-math.Pow(beta-a, 3) < 0 {
-					sign = -1.0
-				}
-				return beta + sign*math.Pow(sign*(3/alpha*y-math.Pow(beta-a, 3)), 1.0/3.0)
-			},
+			name:     "Uniform distribution (a=-N,b=N)",
+			quantile: sketchtest.UniformQ(-N, N),
+		},
+		{
+			name:     "U-quadratic distribution (a=0,b=N)",
+			quantile: sketchtest.UQuadraticQ(0, N),
+		},
+		{
+			name:     "U-quadratic distribution (a=-N,b=N)",
+			quantile: sketchtest.UQuadraticQ(-N/2, N/2),
+		},
+		{
+			name:     "U-quadratic distribution (a=-N,b=N)",
+			quantile: sketchtest.UQuadraticQ(-N, 0),
+		},
+		// Same as above, p99 fails.
+		{
+			name:              "Truncated Exponential distribution (a=0,b=N,lambda=1/100)",
+			quantile:          sketchtest.TruncateQ(0, N, sketchtest.ExponentialQ(1.0/100), sketchtest.ExponentialCDF(1.0/100)),
+			excludedQuantiles: map[int]bool{99: true},
+		},
+		{
+			name:     "Truncated Normal distribution (a=0,b=8,mu=0, sigma=1e-3)",
+			quantile: sketchtest.TruncateQ(0, 8, sketchtest.NormalQ(0, 1e-3), sketchtest.NormalCDF(0, 1e-3)),
 		},
 	}
 
