@@ -3,7 +3,7 @@
 // This product includes software developed at Datadog (https://www.datadoghq.com/).
 // Copyright 2022-present Datadog, Inc.
 
-// package distrotest is an internal module with test helpers for generating points from a given distribution.
+// package sketchtest is an internal module with test helpers for generating points from a given distribution.
 package sketchtest
 
 import "math"

@@ -200,7 +200,7 @@ func TestHistogramSketches(t *testing.T) {
 	}
 }
 
-func TestExactSummaryStatistics(t *testing.T) {
+func TestExactHistogramStats(t *testing.T) {
 	tests := []struct {
 		name        string
 		getHist     func() pmetric.Metrics
@@ -368,6 +368,7 @@ func TestInfiniteBounds(t *testing.T) {
 	tests := []struct {
 		name    string
 		getHist func() pmetric.Metrics
+		isEmpty bool
 	}{
 		{
 			name: "(-inf, inf): 0",
@@ -379,6 +380,7 @@ func TestInfiniteBounds(t *testing.T) {
 				p.SetSum(0)
 				return newHistogramMetric(p)
 			},
+			isEmpty: true,
 		},
 		{
 			name: "(-inf, inf): 100",
@@ -431,12 +433,14 @@ func TestInfiniteBounds(t *testing.T) {
 			sk := consumer.sk
 
 			p := md.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().At(0).Histogram().DataPoints().At(0)
-			if p.Count() == 0 {
+			if testInstance.isEmpty {
 				// Check that no point is produced if the count is zero.
+				assert.Zero(t, p.Count())
 				assert.Nil(t, sk)
-				// Nothing to assert, end early
+				// Nothing else to assert, end early
 				return
 			}
+			require.NotNil(t, sk)
 			assert.InDelta(t, sk.Basic.Sum, p.Sum(), 1)
 			assert.Equal(t, uint64(sk.Basic.Cnt), p.Count())
 			assert.Equal(t, sk.Basic.Min, p.Min())
