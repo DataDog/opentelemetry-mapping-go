@@ -4,12 +4,14 @@ go 1.19
 
 require (
 	github.com/DataDog/datadog-agent/pkg/trace v0.43.0-rc.3.0.20230206114529-17c7dfde736c
+	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.0.0-00010101000000-000000000000
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.1.2
 	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.1.2
 	github.com/DataDog/sketches-go v1.4.1
 	github.com/golang/protobuf v1.5.2
+	github.com/lightstep/go-expohisto v1.0.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	go.opentelemetry.io/collector/pdata v1.0.0-rc5
 	go.uber.org/zap v1.24.0
 )
@@ -37,6 +39,7 @@ require (
 )
 
 replace (
+	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest => ../../internal/sketchtest
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes => ../attributes
 	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile => ../../quantile
 )

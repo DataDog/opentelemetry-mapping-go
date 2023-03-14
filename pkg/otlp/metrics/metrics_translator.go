@@ -98,7 +98,10 @@ var runtimeMetricsMappings = map[string][]runtimeMetricMapping{
 	}},
 }
 
-const metricName string = "metric name"
+const (
+	metricName             string = "metric name"
+	errNoBucketsNoSumCount string = "no buckets mode and no send count sum are incompatible"
+)
 
 var _ source.Provider = (*noSourceProvider)(nil)
 
@@ -137,7 +140,7 @@ func NewTranslator(logger *zap.Logger, options ...TranslatorOption) (*Translator
 	}
 
 	if cfg.HistMode == HistogramModeNoBuckets && !cfg.SendCountSum {
-		return nil, errors.New("no buckets mode and no send count sum are incompatible")
+		return nil, errors.New(errNoBucketsNoSumCount)
 	}
 
 	cache := newTTLCache(cfg.sweepInterval, cfg.deltaTTL)
