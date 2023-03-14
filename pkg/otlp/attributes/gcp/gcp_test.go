@@ -124,3 +124,47 @@ func TestInfoFromAttributes(t *testing.T) {
 		})
 	}
 }
+
+func TestInfoFromAttrs(t *testing.T) {
+	tags := []string{"instance-id:hostID", "zone:zone", "instance-type:machineType", "project:projectID"}
+	tests := []struct {
+		name  string
+		attrs pcommon.Map
+
+		ok          bool
+		hostname    string
+		hostAliases []string
+		gcpTags     []string
+	}{
+		{
+			name:  "no hostname",
+			attrs: testutils.NewAttributeMap(map[string]string{}),
+		},
+		{
+			name:     "hostname",
+			attrs:    testFullMap,
+			ok:       true,
+			hostname: testGCPIntegrationHostname,
+			gcpTags:  tags,
+		},
+		{
+			name:     "bad hostname",
+			attrs:    testFullBadMap,
+			ok:       true,
+			hostname: testGCPIntegrationBadHostname,
+			gcpTags:  tags,
+		},
+	}
+
+	for _, testInstance := range tests {
+		t.Run(testInstance.name, func(t *testing.T) {
+			hostname, ok := HostnameFromAttrs(testInstance.attrs)
+			assert.Equal(t, testInstance.ok, ok)
+			assert.Equal(t, testInstance.hostname, hostname)
+
+			hostInfo := HostInfoFromAttrs(testInstance.attrs)
+			assert.ElementsMatch(t, testInstance.hostAliases, hostInfo.HostAliases)
+			assert.ElementsMatch(t, testInstance.gcpTags, hostInfo.GCPTags)
+		})
+	}
+}

@@ -53,6 +53,29 @@ func TestHostnameFromAttributes(t *testing.T) {
 	assert.Equal(t, hostname, testInstanceID)
 }
 
+func TestHostnameFromAttrs(t *testing.T) {
+	t.Run("host id", func(t *testing.T) {
+		attrs := testutils.NewAttributeMap(map[string]string{
+			conventions.AttributeCloudProvider: conventions.AttributeCloudProviderAWS,
+			conventions.AttributeHostID:        testInstanceID,
+			conventions.AttributeHostName:      testIP,
+		})
+		hostname, ok := HostnameFromAttrs(attrs)
+		assert.True(t, ok)
+		assert.Equal(t, hostname, testInstanceID)
+	})
+
+	t.Run("no host id", func(t *testing.T) {
+		attrs := testutils.NewAttributeMap(map[string]string{
+			conventions.AttributeCloudProvider: conventions.AttributeCloudProviderAWS,
+			conventions.AttributeHostName:      testIP,
+		})
+		hostname, ok := HostnameFromAttrs(attrs)
+		assert.False(t, ok)
+		assert.Equal(t, hostname, "")
+	})
+}
+
 func TestHostInfoFromAttributes(t *testing.T) {
 	attrs := testutils.NewAttributeMap(map[string]string{
 		conventions.AttributeCloudProvider: conventions.AttributeCloudProviderAWS,
