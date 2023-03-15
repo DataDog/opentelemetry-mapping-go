@@ -3,7 +3,7 @@ module github.com/DataDog/opentelemetry-mapping-go/pkg/quantile
 go 1.19
 
 require (
-	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.0.0-00010101000000-000000000000
+	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.1.3
 	github.com/DataDog/sketches-go v1.4.1
 	github.com/dustin/go-humanize v1.0.0
 	github.com/stretchr/testify v1.8.2

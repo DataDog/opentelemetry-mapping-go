@@ -1,8 +1,0 @@
-# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
-change_type: enhancement
-
-# The name of the component (e.g. pkg/quantile)
-component: pkg/otlp/metrics
-
-# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: The OTLP metrics converter now maps OpenTelemetry Go runtime metrics to their Datadog counterparts.

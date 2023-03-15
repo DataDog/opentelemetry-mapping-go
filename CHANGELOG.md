@@ -4,6 +4,16 @@
 
 <!-- next version -->
 
+## v0.1.3
+
+### 🚩 Deprecations 🚩
+
+- `pkg/otlp/attributes`: Deprecate and replace functions which have usePreviewRules parameter in preparation to graduate the exporter.datadog.hostname.preview feature gate to stable. (#21)
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics`: The OTLP metrics converter now maps OpenTelemetry Go runtime metrics to their Datadog counterparts. (#14)
+
 ## v0.1.2
 
 ### 💡 Enhancements 💡
