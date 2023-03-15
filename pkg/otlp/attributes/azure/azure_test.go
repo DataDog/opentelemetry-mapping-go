@@ -111,3 +111,45 @@ func TestClusterNameFromAttributes(t *testing.T) {
 	_, ok = ClusterNameFromAttributes(testutils.NewAttributeMap(map[string]string{}))
 	assert.False(t, ok)
 }
+
+func TestHostnameFromAttrs(t *testing.T) {
+	tests := []struct {
+		name  string
+		attrs pcommon.Map
+
+		ok       bool
+		hostname string
+	}{
+		{
+			name:  "all attributes",
+			attrs: testAttrs,
+
+			ok:       true,
+			hostname: testVMID,
+		},
+		{
+			name: "no host id",
+			attrs: testutils.NewAttributeMap(map[string]string{
+				conventions.AttributeCloudProvider: conventions.AttributeCloudProviderAzure,
+				conventions.AttributeHostName:      testHostname,
+			}),
+			ok:       true,
+			hostname: testHostname,
+		},
+		{
+			name:  "empty",
+			attrs: testEmpty,
+		},
+	}
+
+	for _, testInstance := range tests {
+		t.Run(testInstance.name, func(t *testing.T) {
+			hostname, ok := HostnameFromAttrs(testInstance.attrs)
+
+			assert.Equal(t, testInstance.ok, ok)
+			if testInstance.ok || ok {
+				assert.Equal(t, testInstance.hostname, hostname)
+			}
+		})
+	}
+}

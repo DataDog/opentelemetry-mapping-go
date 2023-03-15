@@ -53,7 +53,9 @@ func getGCPIntegrationHostname(attrs pcommon.Map) (string, bool) {
 }
 
 // HostnameFromAttributes gets a valid hostname from labels
-// if available
+// if available.
+// Deprecated: HostnameFromAttributes is deprecated in favor of
+// HostnameFromAttrs which removes parameter usePreviewRules.
 func HostnameFromAttributes(attrs pcommon.Map, usePreviewRules bool) (string, bool) {
 	if usePreviewRules {
 		return getGCPIntegrationHostname(attrs)
@@ -66,8 +68,16 @@ func HostnameFromAttributes(attrs pcommon.Map, usePreviewRules bool) (string, bo
 	return "", false
 }
 
+// HostnameFromAttrs gets a valid hostname from labels
+// if available.
+func HostnameFromAttrs(attrs pcommon.Map) (string, bool) {
+	return getGCPIntegrationHostname(attrs)
+}
+
 // HostInfoFromAttributes gets GCP host info from attributes following
-// OpenTelemetry semantic conventions
+// OpenTelemetry semantic conventions.
+// Deprecated: HostInfoFromAttributes is deprecated in favor of
+// HostInfoFromAttrs which removes parameter usePreviewRules.
 func HostInfoFromAttributes(attrs pcommon.Map, usePreviewRules bool) (hostInfo *HostInfo) {
 	hostInfo = &HostInfo{}
 
@@ -89,6 +99,30 @@ func HostInfoFromAttributes(attrs pcommon.Map, usePreviewRules bool) (hostInfo *
 
 	if alias, ok := getGCPIntegrationHostname(attrs); ok && !usePreviewRules {
 		hostInfo.HostAliases = append(hostInfo.HostAliases, alias)
+	}
+
+	return
+}
+
+// HostInfoFromAttrs gets GCP host info from attributes following
+// OpenTelemetry semantic conventions
+func HostInfoFromAttrs(attrs pcommon.Map) (hostInfo *HostInfo) {
+	hostInfo = &HostInfo{}
+
+	if hostID, ok := attrs.Get(conventions.AttributeHostID); ok {
+		hostInfo.GCPTags = append(hostInfo.GCPTags, fmt.Sprintf("instance-id:%s", hostID.Str()))
+	}
+
+	if cloudZone, ok := attrs.Get(conventions.AttributeCloudAvailabilityZone); ok {
+		hostInfo.GCPTags = append(hostInfo.GCPTags, fmt.Sprintf("zone:%s", cloudZone.Str()))
+	}
+
+	if hostType, ok := attrs.Get(conventions.AttributeHostType); ok {
+		hostInfo.GCPTags = append(hostInfo.GCPTags, fmt.Sprintf("instance-type:%s", hostType.Str()))
+	}
+
+	if cloudAccount, ok := attrs.Get(conventions.AttributeCloudAccountID); ok {
+		hostInfo.GCPTags = append(hostInfo.GCPTags, fmt.Sprintf("project:%s", cloudAccount.Str()))
 	}
 
 	return
