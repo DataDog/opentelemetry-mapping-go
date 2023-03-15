@@ -5,7 +5,7 @@ change_type: deprecation
 component: pkg/otlp/attributes
 
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: Deprecate and replace functions which have usePreviewRules parameter.
+note: Deprecate and replace functions which have usePreviewRules parameter in preparation to graduate the exporter.datadog.hostname.preview feature gate to stable.
 
 # The PR related to this change
 issues: [21]
