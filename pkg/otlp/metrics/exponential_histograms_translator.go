@@ -119,10 +119,21 @@ func (t *Translator) mapExponentialHistogramMetrics(
 			histInfo.ok = false
 		}
 
-		if t.cfg.SendCountSum && histInfo.ok {
+		if t.cfg.SendHistogramAggregations && histInfo.ok {
 			// We only send the sum and count if both values were ok.
 			consumer.ConsumeTimeSeries(ctx, countDims, Count, ts, float64(histInfo.count))
 			consumer.ConsumeTimeSeries(ctx, sumDims, Count, ts, histInfo.sum)
+
+			if delta {
+				if p.HasMin() {
+					minDims := pointDims.WithSuffix("min")
+					consumer.ConsumeTimeSeries(ctx, minDims, Gauge, ts, p.Min())
+				}
+				if p.HasMax() {
+					maxDims := pointDims.WithSuffix("max")
+					consumer.ConsumeTimeSeries(ctx, maxDims, Gauge, ts, p.Max())
+				}
+			}
 		}
 
 		expHistDDSketch, err := t.exponentialHistogramToDDSketch(p, delta)

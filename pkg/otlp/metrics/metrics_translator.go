@@ -122,7 +122,7 @@ type Translator struct {
 func NewTranslator(logger *zap.Logger, options ...TranslatorOption) (*Translator, error) {
 	cfg := translatorConfig{
 		HistMode:                             HistogramModeDistributions,
-		SendCountSum:                         false,
+		SendHistogramAggregations:            false,
 		Quantiles:                            false,
 		SendMonotonic:                        true,
 		ResourceAttributesAsTags:             false,
@@ -139,7 +139,7 @@ func NewTranslator(logger *zap.Logger, options ...TranslatorOption) (*Translator
 		}
 	}
 
-	if cfg.HistMode == HistogramModeNoBuckets && !cfg.SendCountSum {
+	if cfg.HistMode == HistogramModeNoBuckets && !cfg.SendHistogramAggregations {
 		return nil, errors.New(errNoBucketsNoSumCount)
 	}
 
@@ -401,10 +401,21 @@ func (t *Translator) mapHistogramMetrics(
 			histInfo.ok = false
 		}
 
-		if t.cfg.SendCountSum && histInfo.ok {
+		if t.cfg.SendHistogramAggregations && histInfo.ok {
 			// We only send the sum and count if both values were ok.
 			consumer.ConsumeTimeSeries(ctx, countDims, Count, ts, float64(histInfo.count))
 			consumer.ConsumeTimeSeries(ctx, sumDims, Count, ts, histInfo.sum)
+
+			if delta {
+				if p.HasMin() {
+					minDims := pointDims.WithSuffix("min")
+					consumer.ConsumeTimeSeries(ctx, minDims, Gauge, ts, p.Min())
+				}
+				if p.HasMax() {
+					maxDims := pointDims.WithSuffix("max")
+					consumer.ConsumeTimeSeries(ctx, maxDims, Gauge, ts, p.Max())
+				}
+			}
 		}
 
 		switch t.cfg.HistMode {
