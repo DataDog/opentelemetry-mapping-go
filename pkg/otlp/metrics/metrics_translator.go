@@ -39,7 +39,6 @@ type runtimeMetricMapping struct {
 	mappedName     string // the Datadog runtime metric name
 	attribute      string // the name of the attribute this metric originates from
 	attributeValue string // the value of the above attribute that corresponds with this metric
-	metricType     pmetric.MetricType
 }
 
 // runtimeMetricsMappings defines the mappings from OTel runtime metric names to their
@@ -63,38 +62,31 @@ var runtimeMetricsMappings = map[string][]runtimeMetricMapping{
 		mappedName:     "runtime.dotnet.gc.size.gen0",
 		attribute:      "generation",
 		attributeValue: "gen0",
-		metricType:     pmetric.MetricTypeGauge,
 	}, {
 		mappedName:     "runtime.dotnet.gc.size.gen1",
 		attribute:      "generation",
 		attributeValue: "gen1",
-		metricType:     pmetric.MetricTypeGauge,
 	}, {
 		mappedName:     "runtime.dotnet.gc.size.gen2",
 		attribute:      "generation",
 		attributeValue: "gen2",
-		metricType:     pmetric.MetricTypeGauge,
 	}, {
 		mappedName:     "runtime.dotnet.gc.size.loh",
 		attribute:      "generation",
 		attributeValue: "loh",
-		metricType:     pmetric.MetricTypeGauge,
 	}},
 	"process.runtime.dotnet.gc.collections.count": {{
 		mappedName:     "runtime.dotnet.gc.count.gen0",
 		attribute:      "generation",
 		attributeValue: "gen0",
-		metricType:     pmetric.MetricTypeSum,
 	}, {
 		mappedName:     "runtime.dotnet.gc.count.gen1",
 		attribute:      "generation",
 		attributeValue: "gen1",
-		metricType:     pmetric.MetricTypeSum,
 	}, {
 		mappedName:     "runtime.dotnet.gc.count.gen2",
 		attribute:      "generation",
 		attributeValue: "gen2",
-		metricType:     pmetric.MetricTypeSum,
 	}},
 }
 
@@ -600,9 +592,9 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 							cp.SetName(mp.mappedName)
 							break
 						}
-						if mp.metricType == pmetric.MetricTypeSum {
+						if md.Type() == pmetric.MetricTypeSum {
 							mapSumRuntimeMetricWithAttributes(md, metricsArray, mp)
-						} else if mp.metricType == pmetric.MetricTypeGauge {
+						} else if md.Type() == pmetric.MetricTypeGauge {
 							mapGaugeRuntimeMetricWithAttributes(md, metricsArray, mp)
 						}
 					}
