@@ -4,6 +4,19 @@
 
 <!-- next version -->
 
+## v0.1.4
+
+### 🚩 Deprecations 🚩
+
+- `pkg/otlp/metrics`: Deprecate metrics.WithCountSumMetrics translator option. (#23)
+  - metrics.WithCountSumMetrics will now send min and max metrics when available.
+  - Use metrics.WithHistogramAggregations instead.
+  
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics`: Send min and max for delta histograms and delta exponential histograms when metrics.WithHistogramAggregations is used. (#23)
+
 ## v0.1.3
 
 ### 🚩 Deprecations 🚩
