@@ -22,11 +22,11 @@ import (
 
 type translatorConfig struct {
 	// metrics export behavior
-	HistMode                 HistogramMode
-	SendCountSum             bool
-	Quantiles                bool
-	SendMonotonic            bool
-	ResourceAttributesAsTags bool
+	HistMode                  HistogramMode
+	SendHistogramAggregations bool
+	Quantiles                 bool
+	SendMonotonic             bool
+	ResourceAttributesAsTags  bool
 	// Deprecated: use InstrumentationScopeMetadataAsTags instead in favor of
 	// https://github.com/open-telemetry/opentelemetry-proto/releases/tag/v0.15.0
 	// Both must not be enabled at the same time.
@@ -138,9 +138,15 @@ func WithHistogramMode(mode HistogramMode) TranslatorOption {
 }
 
 // WithCountSumMetrics exports .count and .sum histogram metrics.
+// Deprecated: Use WithHistogramAggregations instead.
 func WithCountSumMetrics() TranslatorOption {
+	return WithHistogramAggregations()
+}
+
+// WithHistogramAggregations exports .count, .sum, .min and .max histogram metrics when available.
+func WithHistogramAggregations() TranslatorOption {
 	return func(t *translatorConfig) error {
-		t.SendCountSum = true
+		t.SendHistogramAggregations = true
 		return nil
 	}
 }
