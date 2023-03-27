@@ -49,6 +49,23 @@ func (t *ttlCache) MonotonicDiff(dimensions *Dimensions, startTs, ts uint64, val
 	return t.putAndGetDiff(dimensions, true, startTs, ts, val)
 }
 
+// isNotFirstPoint determines if this is NOT the first point on a cumulative series:
+// https://github.com/open-telemetry/opentelemetry-specification/blob/v1.19.0/specification/metrics/data-model.md#resets-and-gaps
+func isNotFirstPoint(startTs, ts, oldStartTs uint64) (isNotFirst bool) {
+	// This is written down as an 'if' because I feel it is easier to understand than with a boolean expression.
+	if startTs == 0 {
+		// We don't know the start time, assume the sequence has not been restarted.
+		isNotFirst = true
+	} else if startTs != ts && startTs == oldStartTs {
+		// Since startTs != 0 we know the start time, thus we apply the following rules from the spec:
+		//  - "When StartTimeUnixNano equals TimeUnixNano, a new unbroken sequence of observations begins with a reset at an unknown start time."
+		//  - "[for cumulative series] the StartTimeUnixNano of each point matches the StartTimeUnixNano of the initial observation."
+		isNotFirst = true
+	}
+
+	return
+}
+
 // putAndGetDiff submits a new value for a given metric and returns the difference with the
 // last submitted value (ordered by timestamp). The diff value is only valid if `ok` is true.
 func (t *ttlCache) putAndGetDiff(
@@ -66,26 +83,9 @@ func (t *ttlCache) putAndGetDiff(
 			return 0, false
 		}
 		dx = val - cnt.value
-
-		// Determine if this is the first point on a cumulative series:
-		// https://github.com/open-telemetry/opentelemetry-specification/blob/v1.7.0/specification/metrics/datamodel.md#resets-and-gaps
-		//
-		// This is written down as an 'if' because I feel it is easier to understand than with a boolean expression.
-		if startTs == 0 {
-			// We don't know the start time, assume the sequence has not been restarted.
-			ok = true
-		} else if startTs != ts && startTs == cnt.startTs {
-			// Since startTs != 0 we know the start time, thus we apply the following rules from the spec:
-			//  - "When StartTimeUnixNano equals TimeUnixNano, a new unbroken sequence of observations begins with a reset at an unknown start time."
-			//  - "[for cumulative series] the StartTimeUnixNano of each point matches the StartTimeUnixNano of the initial observation."
-			ok = true
-		}
-
 		// If sequence is monotonic and diff is negative, there has been a reset.
 		// This must never happen if we know the startTs; we also override the value in this case.
-		if monotonic && dx < 0 {
-			ok = false
-		}
+		ok = isNotFirstPoint(startTs, ts, cnt.startTs) && !(monotonic && dx < 0)
 	}
 
 	t.cache.Set(
@@ -98,4 +98,63 @@ func (t *ttlCache) putAndGetDiff(
 		gocache.DefaultExpiration,
 	)
 	return
+}
+
+type extrema struct {
+	ts            uint64
+	startTs       uint64
+	storedExtrema float64
+}
+
+// putAndCheckExtrema stores a new extrema for a cumulative timeseries and checks if the
+// extrema is the one from the last time window. The min flag indicates whether it is a minimum extrema (true) or a maximum extrema (false).
+func (t *ttlCache) putAndCheckExtrema(
+	dimensions *Dimensions,
+	startTs, ts uint64,
+	curExtrema float64,
+	min bool,
+) (assumeFromLastWindow bool) {
+	key := dimensions.String()
+	if c, found := t.cache.Get(key); found {
+		cnt := c.(extrema)
+		if cnt.ts > ts {
+			// We were given a point older than the one in memory so we drop it
+			// We keep the existing point in memory since it is the most recent
+			// Don't use the extrema, we don't have enough information.
+			return false
+		}
+
+		isNotFirst := isNotFirstPoint(startTs, ts, cnt.startTs)
+		if min {
+			// We assume the minimum comes from the last time window if either of the following is true:
+			// - the point is NOT the first in the timeseries AND is lower than the previous one
+			// - the global minimum is bigger than the stored minimum (and therefore a reset must have happened)
+			assumeFromLastWindow = (isNotFirst && curExtrema < cnt.storedExtrema) || (curExtrema > cnt.storedExtrema)
+		} else { // not min, therefore max
+			// symmetric to the min
+			assumeFromLastWindow = (isNotFirst && curExtrema > cnt.storedExtrema) || (curExtrema < cnt.storedExtrema)
+		}
+
+	}
+
+	t.cache.Set(key,
+		extrema{
+			startTs:       startTs,
+			ts:            ts,
+			storedExtrema: curExtrema,
+		},
+		gocache.DefaultExpiration,
+	)
+
+	return
+}
+
+// PutAndCheckMin stores a minimum and checks whether the minimum is from the last time window.
+func (t *ttlCache) PutAndCheckMin(dimensions *Dimensions, startTs, ts uint64, curMin float64) (isMinFromLastTimeWindow bool) {
+	return t.putAndCheckExtrema(dimensions, startTs, ts, curMin, true)
+}
+
+// PutAndCheckMax stores a maximum and checks whether the maximum is from the last time window.
+func (t *ttlCache) PutAndCheckMax(dimensions *Dimensions, startTs, ts uint64, curMax float64) (isMaxFromLastTimeWindow bool) {
+	return t.putAndCheckExtrema(dimensions, startTs, ts, curMax, false)
 }

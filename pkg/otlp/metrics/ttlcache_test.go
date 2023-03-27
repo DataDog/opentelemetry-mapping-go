@@ -112,3 +112,78 @@ func TestDiffKnownStart(t *testing.T) {
 	assert.True(t, ok, "expected diff: same startTs, not monotonic")
 	assert.Equal(t, 9.0, dx, "expected diff 9.0 with (6,7,1) value")
 }
+
+func TestPutAndGetExtrema(t *testing.T) {
+	points := []struct {
+		min                  float64
+		resetTimeseries      bool
+		assumeFromLastWindow bool
+		reason               string
+	}{
+		{
+			min:                  -10,
+			assumeFromLastWindow: false,
+			reason:               "there are no points in cache",
+		},
+		{
+			min:                  -10,
+			assumeFromLastWindow: false,
+			reason:               "value is the same as in previous point",
+		},
+		{
+			min:                  -11,
+			assumeFromLastWindow: true,
+			reason:               "value changed from previous point",
+		},
+		{
+			min:                  -11,
+			assumeFromLastWindow: false,
+			reason:               "value is the same as in previous point",
+		},
+		{
+			min:                  -9,
+			assumeFromLastWindow: true,
+			reason:               "minimum is bigger than the stored one so there must have been a reset",
+		},
+		{
+			min:                  -9,
+			assumeFromLastWindow: false,
+			reason:               "value is the same as in previous point",
+		},
+		{
+			min:                  -20,
+			resetTimeseries:      true,
+			assumeFromLastWindow: false,
+			reason:               "Timeseries was reset",
+		},
+	}
+
+	startTs := uint64(1)
+	prevPts := newTestCache()
+	minDims := dims.WithSuffix("min")
+	maxDims := dims.WithSuffix("max")
+	for i, points := range points {
+		ts := uint64(i + 1)
+		if points.resetTimeseries {
+			startTs = ts
+		}
+
+		{
+			// Check assertion for the minimum
+			assumeMinFromLastWindow := prevPts.PutAndCheckMin(minDims, startTs, ts, points.min)
+			assert.Equal(t, points.assumeFromLastWindow, assumeMinFromLastWindow,
+				"Point #%d failed for min; expected %v because %q", i, points.assumeFromLastWindow, points.reason,
+			)
+		}
+
+		{
+			// Now do the same for the maximum; use the opposite of min to reverse comparisons.
+			max := -points.min
+			assumeMaxFromLastWindow := prevPts.PutAndCheckMax(maxDims, startTs, ts, max)
+			assert.Equal(t, points.assumeFromLastWindow, assumeMaxFromLastWindow,
+				"Point #%d failed for max; expected %v because %q", i, points.assumeFromLastWindow, points.reason,
+			)
+		}
+
+	}
+}
