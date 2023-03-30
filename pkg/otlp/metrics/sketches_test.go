@@ -19,12 +19,17 @@ import (
 	"fmt"
 	"math"
 	"testing"
+	"time"
 
+	"github.com/lightstep/go-expohisto/structure"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 
 	"github.com/DataDog/datadog-agent/pkg/trace/pb"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 )
 
@@ -68,6 +73,8 @@ func newHistogramMetric(p pmetric.HistogramDataPoint) pmetric.Metrics {
 	np := dps.AppendEmpty()
 	np.SetCount(p.Count())
 	np.SetSum(p.Sum())
+	np.SetMin(p.Min())
+	np.SetMax(p.Max())
 	p.BucketCounts().CopyTo(np.BucketCounts())
 	p.ExplicitBounds().CopyTo(np.ExplicitBounds())
 	np.SetTimestamp(p.Timestamp())
@@ -101,6 +108,8 @@ func TestHistogramSketches(t *testing.T) {
 		p.ExplicitBounds().FromRaw(bounds)
 		p.BucketCounts().FromRaw(buckets)
 		p.SetCount(count)
+		p.SetMin(0)
+		p.SetMax(cdf(float64(N-1)) - cdf(float64(N-2)))
 		return newHistogramMetric(p)
 	}
 
@@ -160,6 +169,10 @@ func TestHistogramSketches(t *testing.T) {
 
 			cumulSum := uint64(0)
 			p := md.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().At(0).Histogram().DataPoints().At(0)
+			assert.Equal(t, sk.Basic.Min, p.Min())
+			assert.Equal(t, sk.Basic.Max, p.Max())
+			assert.Equal(t, uint64(sk.Basic.Cnt), p.Count())
+			assert.Equal(t, sk.Basic.Sum, p.Sum())
 			for i := 0; i < p.BucketCounts().Len()-3; i++ {
 				{
 					q := float64(cumulSum) / float64(p.Count()) * (1 - tol)
@@ -187,21 +200,27 @@ func TestHistogramSketches(t *testing.T) {
 	}
 }
 
-func TestExactSumCount(t *testing.T) {
+func TestExactHistogramStats(t *testing.T) {
 	tests := []struct {
-		name    string
-		getHist func() pmetric.Metrics
-		sum     float64
-		count   uint64
+		name        string
+		getHist     func() pmetric.Metrics
+		sum         float64
+		count       uint64
+		testExtrema bool
+		min         float64
+		max         float64
 	}{}
 
 	// Add tests for issue 6129: https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/6129
 	tests = append(tests,
 		struct {
-			name    string
-			getHist func() pmetric.Metrics
-			sum     float64
-			count   uint64
+			name        string
+			getHist     func() pmetric.Metrics
+			sum         float64
+			count       uint64
+			testExtrema bool
+			min         float64
+			max         float64
 		}{
 			name: "Uniform distribution (delta)",
 			getHist: func() pmetric.Metrics {
@@ -222,17 +241,25 @@ func TestExactSumCount(t *testing.T) {
 				p.BucketCounts().FromRaw([]uint64{0, 1, 1, 1, 1, 1})
 				p.SetCount(5)
 				p.SetSum(50_000)
+				p.SetMin(0)
+				p.SetMax(20_000)
 				return md
 			},
-			sum:   50_000,
-			count: 5,
+			sum:         50_000,
+			count:       5,
+			testExtrema: true,
+			min:         0,
+			max:         20_000,
 		},
 
 		struct {
-			name    string
-			getHist func() pmetric.Metrics
-			sum     float64
-			count   uint64
+			name        string
+			getHist     func() pmetric.Metrics
+			sum         float64
+			count       uint64
+			testExtrema bool
+			min         float64
+			max         float64
 		}{
 			name: "Uniform distribution (cumulative)",
 			getHist: func() pmetric.Metrics {
@@ -256,6 +283,8 @@ func TestExactSumCount(t *testing.T) {
 					p.BucketCounts().FromRaw([]uint64{0, cnt, cnt, cnt, cnt, cnt})
 					p.SetCount(uint64(5 * i))
 					p.SetSum(float64(50_000 * i))
+					p.SetMin(0)
+					p.SetMax(20_000)
 				}
 				return md
 			},
@@ -268,10 +297,13 @@ func TestExactSumCount(t *testing.T) {
 		pos := pos
 		val := val
 		tests = append(tests, struct {
-			name    string
-			getHist func() pmetric.Metrics
-			sum     float64
-			count   uint64
+			name        string
+			getHist     func() pmetric.Metrics
+			sum         float64
+			count       uint64
+			testExtrema bool
+			min         float64
+			max         float64
 		}{
 			name: fmt.Sprintf("Issue 7065 (%d, %f)", pos, val),
 			getHist: func() pmetric.Metrics {
@@ -298,6 +330,8 @@ func TestExactSumCount(t *testing.T) {
 					p.BucketCounts().FromRaw(counts)
 					p.SetCount(uint64(i))
 					p.SetSum(val * float64(i))
+					p.SetMin(val)
+					p.SetMax(val)
 				}
 				return md
 			},
@@ -317,6 +351,12 @@ func TestExactSumCount(t *testing.T) {
 
 			assert.Equal(t, testInstance.count, uint64(sk.Basic.Cnt), "counts differ")
 			assert.Equal(t, testInstance.sum, sk.Basic.Sum, "sums differ")
+
+			// We only assert on min/max for delta histograms
+			if testInstance.testExtrema {
+				assert.Equal(t, testInstance.min, sk.Basic.Min, "min differs")
+				assert.Equal(t, testInstance.max, sk.Basic.Max, "max differs")
+			}
 			avg := testInstance.sum / float64(testInstance.count)
 			assert.Equal(t, avg, sk.Basic.Avg, "averages differ")
 		})
@@ -328,7 +368,20 @@ func TestInfiniteBounds(t *testing.T) {
 	tests := []struct {
 		name    string
 		getHist func() pmetric.Metrics
+		isEmpty bool
 	}{
+		{
+			name: "(-inf, inf): 0",
+			getHist: func() pmetric.Metrics {
+				p := pmetric.NewHistogramDataPoint()
+				p.ExplicitBounds().FromRaw([]float64{})
+				p.BucketCounts().FromRaw([]uint64{0})
+				p.SetCount(0)
+				p.SetSum(0)
+				return newHistogramMetric(p)
+			},
+			isEmpty: true,
+		},
 		{
 			name: "(-inf, inf): 100",
 			getHist: func() pmetric.Metrics {
@@ -337,6 +390,8 @@ func TestInfiniteBounds(t *testing.T) {
 				p.BucketCounts().FromRaw([]uint64{100})
 				p.SetCount(100)
 				p.SetSum(0)
+				p.SetMin(-100)
+				p.SetMax(100)
 				return newHistogramMetric(p)
 			},
 		},
@@ -348,6 +403,8 @@ func TestInfiniteBounds(t *testing.T) {
 				p.BucketCounts().FromRaw([]uint64{100, 100})
 				p.SetCount(200)
 				p.SetSum(0)
+				p.SetMin(-100)
+				p.SetMax(100)
 				return newHistogramMetric(p)
 			},
 		},
@@ -359,6 +416,8 @@ func TestInfiniteBounds(t *testing.T) {
 				p.BucketCounts().FromRaw([]uint64{100, 10, 100})
 				p.SetCount(210)
 				p.SetSum(0)
+				p.SetMin(-100)
+				p.SetMax(100)
 				return newHistogramMetric(p)
 			},
 		},
@@ -374,9 +433,173 @@ func TestInfiniteBounds(t *testing.T) {
 			sk := consumer.sk
 
 			p := md.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().At(0).Histogram().DataPoints().At(0)
+			if testInstance.isEmpty {
+				// Check that no point is produced if the count is zero.
+				assert.Zero(t, p.Count())
+				assert.Nil(t, sk)
+				// Nothing else to assert, end early
+				return
+			}
+			require.NotNil(t, sk)
 			assert.InDelta(t, sk.Basic.Sum, p.Sum(), 1)
 			assert.Equal(t, uint64(sk.Basic.Cnt), p.Count())
+			assert.Equal(t, sk.Basic.Min, p.Min())
+			assert.Equal(t, sk.Basic.Max, p.Max())
 		})
 	}
+}
 
+// fromGoExpoHisto builds a delta exponential histogram from a go-expohisto.
+// Adapted from https://github.com/open-telemetry/opentelemetry-collector-contrib/commit/a2f9e1
+func fromGoExpoHisto(name string, agg *structure.Histogram[float64], startTime, timeNow time.Time) (md pmetric.Metrics) {
+	md = pmetric.NewMetrics()
+	nm := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
+	nm.SetName(name)
+	expo := nm.SetEmptyExponentialHistogram()
+	expo.SetAggregationTemporality(pmetric.AggregationTemporalityDelta)
+
+	dp := expo.DataPoints().AppendEmpty()
+
+	dp.SetCount(agg.Count())
+	dp.SetSum(agg.Sum())
+	if agg.Count() != 0 {
+		dp.SetMin(agg.Min())
+		dp.SetMax(agg.Max())
+	}
+
+	dp.SetStartTimestamp(pcommon.NewTimestampFromTime(startTime))
+	dp.SetTimestamp(pcommon.NewTimestampFromTime(timeNow))
+
+	dp.SetZeroCount(agg.ZeroCount())
+	dp.SetScale(agg.Scale())
+
+	for _, half := range []struct {
+		inFunc  func() *structure.Buckets
+		outFunc func() pmetric.ExponentialHistogramDataPointBuckets
+	}{
+		{agg.Positive, dp.Positive},
+		{agg.Negative, dp.Negative},
+	} {
+		in := half.inFunc()
+		out := half.outFunc()
+		out.SetOffset(in.Offset())
+
+		out.BucketCounts().EnsureCapacity(int(in.Len()))
+
+		for i := uint32(0); i < in.Len(); i++ {
+			out.BucketCounts().Append(in.At(i))
+		}
+	}
+	return
+}
+
+// fromQuantile builds a delta exponential histogram from the quantile function of a known distribution.
+func fromQuantile(name string, startTime, timeNow time.Time, quantile sketchtest.QuantileFunction, N, M uint64) pmetric.Metrics {
+	agg := new(structure.Histogram[float64])
+	// Increase maximum size since contrast on test distributions can be big.
+	agg.Init(structure.NewConfig(structure.WithMaxSize(1_000)))
+	for i := 0; i <= int(N); i++ {
+		agg.UpdateByIncr(quantile(float64(i)/float64(N)), M)
+	}
+
+	return fromGoExpoHisto(name, agg, startTime, timeNow)
+}
+
+func TestKnownDistributionsQuantile(t *testing.T) {
+	timeNow := time.Now()
+	startTime := timeNow.Add(-10 * time.Second)
+	name := "example.histo"
+	const (
+		N uint64 = 1_000
+		M uint64 = 100
+	)
+
+	fN := float64(N)
+
+	// acceptableRelativeError for quantile estimation.
+	// Right now it is set to 4%. Anything below 5% is acceptable based on the SDK defaults.
+	// The relative error depends on the scale as well as the range of the distribution.
+	const acceptableRelativeError = 0.04
+
+	ctx := context.Background()
+	tr := newTranslator(t, zap.NewNop())
+
+	for _, tt := range []struct {
+		name     string
+		quantile sketchtest.QuantileFunction
+		// the map of quantiles for which the test is known to fail
+		excludedQuantiles map[int]struct{}
+	}{
+		{
+			name:     "Uniform distribution (a=0,b=N)",
+			quantile: sketchtest.UniformQ(0, fN),
+		},
+		{
+			name:     "Uniform distribution (a=-N,b=0)",
+			quantile: sketchtest.UniformQ(-fN, 0),
+		},
+		{
+			name:     "Uniform distribution (a=-N,b=N)",
+			quantile: sketchtest.UniformQ(-fN, fN),
+		},
+		{
+			name:     "U-quadratic distribution (a=0,b=N)",
+			quantile: sketchtest.UQuadraticQ(0, fN),
+		},
+		{
+			name:     "U-quadratic distribution (a=-N,b=0)",
+			quantile: sketchtest.UQuadraticQ(-fN, 0),
+			// Similar to the pkg/quantile tests, the p99 for this test fails, likely due to the shift of leftover bucket counts the right that is performed
+			// during the DDSketch -> quantile.Sketch conversion, causing the p99 of the output sketch to fall on 0
+			// (which means the InEpsilon check returns 1).
+			excludedQuantiles: map[int]struct{}{99: {}},
+		},
+		{
+			name:     "U-quadratic distribution (a=-N,b=N)",
+			quantile: sketchtest.UQuadraticQ(-fN/2, fN/2),
+		},
+		{
+			name:     "Truncated Exponential distribution (a=0,b=N,lambda=1/100)",
+			quantile: sketchtest.TruncateQ(0, fN, sketchtest.ExponentialQ(1.0/100), sketchtest.ExponentialCDF(1.0/100)),
+		},
+		{
+			name:     "Truncated Normal distribution (a=-8,b=8,mu=0, sigma=1e-3)",
+			quantile: sketchtest.TruncateQ(-8, 8, sketchtest.NormalQ(0, 1e-3), sketchtest.NormalCDF(0, 1e-3)),
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			md := fromQuantile(name, startTime, timeNow, tt.quantile, N, M)
+			consumer := &sketchConsumer{}
+			require.NoError(t, tr.MapMetrics(ctx, md, consumer))
+			require.NotNil(t, consumer.sk)
+
+			sketchConfig := quantile.Default()
+			for i := 0; i <= 100; i++ {
+				if _, ok := tt.excludedQuantiles[i]; ok {
+					// skip excluded quantile
+					continue
+				}
+				q := float64(i) / 100.0
+				expectedValue := tt.quantile(q)
+				quantileValue := consumer.sk.Quantile(sketchConfig, q)
+				if expectedValue == 0.0 {
+					// If the expected value is 0, we can't use InEpsilon, so we directly check that
+					// the value is equal (within a small float precision error margin).
+					assert.InDelta(
+						t,
+						expectedValue,
+						quantileValue,
+						2e-11,
+					)
+				} else {
+					assert.InEpsilon(t,
+						expectedValue,
+						quantileValue,
+						acceptableRelativeError,
+						fmt.Sprintf("error too high for p%d", i),
+					)
+				}
+			}
+		})
+	}
 }

@@ -46,7 +46,7 @@ func getClusterName(attrs pcommon.Map) (string, bool) {
 	return "", false
 }
 
-// HostnameFromAttributes tries to get a valid hostname from attributes by checking, in order:
+// hostnameFromAttributes tries to get a valid hostname from attributes by checking, in order:
 //
 //  1. a custom Datadog hostname provided by the "datadog.host.name" attribute
 //
@@ -150,6 +150,7 @@ func unsanitizedHostnameFromAttributes(attrs pcommon.Map, usePreviewRules bool) 
 }
 
 // SourceFromAttributes gets a telemetry signal source from its attributes.
+// Deprecated: SourceFromAttributes is deprecated in favor of SourceFromAttrs which removes parameter usePreviewRules.
 func SourceFromAttributes(attrs pcommon.Map, usePreviewRules bool) (source.Source, bool) {
 	if launchType, ok := attrs.Get(conventions.AttributeAWSECSLaunchtype); ok && launchType.Str() == conventions.AttributeAWSECSLaunchtypeFargate {
 		if taskARN, ok := attrs.Get(conventions.AttributeAWSECSTaskARN); ok {
@@ -158,6 +159,21 @@ func SourceFromAttributes(attrs pcommon.Map, usePreviewRules bool) (source.Sourc
 	}
 
 	if host, ok := hostnameFromAttributes(attrs, usePreviewRules); ok {
+		return source.Source{Kind: source.HostnameKind, Identifier: host}, true
+	}
+
+	return source.Source{}, false
+}
+
+// SourceFromAttrs gets a telemetry signal source from its attributes.
+func SourceFromAttrs(attrs pcommon.Map) (source.Source, bool) {
+	if launchType, ok := attrs.Get(conventions.AttributeAWSECSLaunchtype); ok && launchType.Str() == conventions.AttributeAWSECSLaunchtypeFargate {
+		if taskARN, ok := attrs.Get(conventions.AttributeAWSECSTaskARN); ok {
+			return source.Source{Kind: source.AWSECSFargateKind, Identifier: taskARN.Str()}, true
+		}
+	}
+
+	if host, ok := hostnameFromAttributes(attrs, true); ok {
 		return source.Source{Kind: source.HostnameKind, Identifier: host}, true
 	}
 

@@ -21,6 +21,7 @@ func TestDeltaHistogramTranslatorOptions(t *testing.T) {
 		otlpfile string
 		ddogfile string
 		options  []TranslatorOption
+		err      string
 	}{
 		{
 			name:     "distributions",
@@ -36,7 +37,7 @@ func TestDeltaHistogramTranslatorOptions(t *testing.T) {
 			ddogfile: "testdata/datadogdata/histogram/simple-delta_dist-cs.json",
 			options: []TranslatorOption{
 				WithHistogramMode(HistogramModeDistributions),
-				WithCountSumMetrics(),
+				WithHistogramAggregations(),
 			},
 		},
 		{
@@ -53,7 +54,7 @@ func TestDeltaHistogramTranslatorOptions(t *testing.T) {
 			ddogfile: "testdata/datadogdata/histogram/simple-delta_counters-cs.json",
 			options: []TranslatorOption{
 				WithHistogramMode(HistogramModeCounters),
-				WithCountSumMetrics(),
+				WithHistogramAggregations(),
 			},
 		},
 		{
@@ -62,14 +63,25 @@ func TestDeltaHistogramTranslatorOptions(t *testing.T) {
 			ddogfile: "testdata/datadogdata/histogram/simple-delta_nobuckets-cs.json",
 			options: []TranslatorOption{
 				WithHistogramMode(HistogramModeNoBuckets),
-				WithCountSumMetrics(),
+				WithHistogramAggregations(),
 			},
+		},
+		{
+			name: "no-count-sum-no-buckets",
+			options: []TranslatorOption{
+				WithHistogramMode(HistogramModeNoBuckets),
+			},
+			err: errNoBucketsNoSumCount,
 		},
 	}
 
 	for _, testinstance := range tests {
 		t.Run(testinstance.name, func(t *testing.T) {
 			translator, err := NewTranslator(zap.NewNop(), testinstance.options...)
+			if testinstance.err != "" {
+				assert.EqualError(t, err, testinstance.err)
+				return
+			}
 			require.NoError(t, err)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 		})
@@ -97,7 +109,7 @@ func TestCumulativeHistogramTranslatorOptions(t *testing.T) {
 			ddogfile: "testdata/datadogdata/histogram/simple-cumulative_dist-cs.json",
 			options: []TranslatorOption{
 				WithHistogramMode(HistogramModeDistributions),
-				WithCountSumMetrics(),
+				WithHistogramAggregations(),
 			},
 		},
 		{
@@ -114,7 +126,7 @@ func TestCumulativeHistogramTranslatorOptions(t *testing.T) {
 			ddogfile: "testdata/datadogdata/histogram/simple-cumulative_counters-cs.json",
 			options: []TranslatorOption{
 				WithHistogramMode(HistogramModeCounters),
-				WithCountSumMetrics(),
+				WithHistogramAggregations(),
 			},
 		},
 		{
@@ -123,7 +135,7 @@ func TestCumulativeHistogramTranslatorOptions(t *testing.T) {
 			ddogfile: "testdata/datadogdata/histogram/simple-cumulative_nobuckets-cs.json",
 			options: []TranslatorOption{
 				WithHistogramMode(HistogramModeNoBuckets),
-				WithCountSumMetrics(),
+				WithHistogramAggregations(),
 			},
 		},
 	}
@@ -168,7 +180,7 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_cs.json",
 			options: []TranslatorOption{
-				WithCountSumMetrics(),
+				WithHistogramAggregations(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 1,
@@ -198,7 +210,7 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_cs-ilmd-tags.json",
 			options: []TranslatorOption{
-				WithCountSumMetrics(),
+				WithHistogramAggregations(),
 				WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
@@ -220,7 +232,7 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_cs-both-tags.json",
 			options: []TranslatorOption{
-				WithCountSumMetrics(),
+				WithHistogramAggregations(),
 				WithResourceAttributesAsTags(),
 				WithInstrumentationLibraryMetadataAsTags(),
 			},
@@ -232,7 +244,7 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_all.json",
 			options: []TranslatorOption{
-				WithCountSumMetrics(),
+				WithHistogramAggregations(),
 				WithResourceAttributesAsTags(),
 				WithInstrumentationLibraryMetadataAsTags(),
 				WithInstrumentationScopeMetadataAsTags(),

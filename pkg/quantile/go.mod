@@ -3,9 +3,10 @@ module github.com/DataDog/opentelemetry-mapping-go/pkg/quantile
 go 1.19
 
 require (
+	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.1.4
 	github.com/DataDog/sketches-go v1.4.1
 	github.com/dustin/go-humanize v1.0.0
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 )
 
 require (
@@ -14,3 +15,5 @@ require (
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest => ../internal/sketchtest

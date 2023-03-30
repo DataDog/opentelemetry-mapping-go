@@ -150,7 +150,10 @@ func getRuntimeMetricsMappings() map[string][]runtimeMetricMapping {
 // equivalent Datadog runtime metric names
 var runtimeMetricsMappings = getRuntimeMetricsMappings()
 
-const metricName string = "metric name"
+const (
+	metricName             string = "metric name"
+	errNoBucketsNoSumCount string = "no buckets mode and no send count sum are incompatible"
+)
 
 var _ source.Provider = (*noSourceProvider)(nil)
 
@@ -171,7 +174,7 @@ type Translator struct {
 func NewTranslator(logger *zap.Logger, options ...TranslatorOption) (*Translator, error) {
 	cfg := translatorConfig{
 		HistMode:                             HistogramModeDistributions,
-		SendCountSum:                         false,
+		SendHistogramAggregations:            false,
 		Quantiles:                            false,
 		SendMonotonic:                        true,
 		ResourceAttributesAsTags:             false,
@@ -188,8 +191,8 @@ func NewTranslator(logger *zap.Logger, options ...TranslatorOption) (*Translator
 		}
 	}
 
-	if cfg.HistMode == HistogramModeNoBuckets && !cfg.SendCountSum {
-		return nil, errors.New("no buckets mode and no send count sum are incompatible")
+	if cfg.HistMode == HistogramModeNoBuckets && !cfg.SendHistogramAggregations {
+		return nil, errors.New(errNoBucketsNoSumCount)
 	}
 
 	cache := newTTLCache(cfg.sweepInterval, cfg.deltaTTL)
@@ -450,10 +453,21 @@ func (t *Translator) mapHistogramMetrics(
 			histInfo.ok = false
 		}
 
-		if t.cfg.SendCountSum && histInfo.ok {
+		if t.cfg.SendHistogramAggregations && histInfo.ok {
 			// We only send the sum and count if both values were ok.
 			consumer.ConsumeTimeSeries(ctx, countDims, Count, ts, float64(histInfo.count))
 			consumer.ConsumeTimeSeries(ctx, sumDims, Count, ts, histInfo.sum)
+
+			if delta {
+				if p.HasMin() {
+					minDims := pointDims.WithSuffix("min")
+					consumer.ConsumeTimeSeries(ctx, minDims, Gauge, ts, p.Min())
+				}
+				if p.HasMax() {
+					maxDims := pointDims.WithSuffix("max")
+					consumer.ConsumeTimeSeries(ctx, maxDims, Gauge, ts, p.Max())
+				}
+			}
 		}
 
 		switch t.cfg.HistMode {
