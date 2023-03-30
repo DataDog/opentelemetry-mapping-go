@@ -55,7 +55,6 @@ var runtimeMetricsMappings = map[string][]runtimeMetricMapping{
 	"process.runtime.go.mem.heap_objects":                  {{mappedName: "runtime.go.mem_stats.heap_objects"}},
 	"process.runtime.go.gc.pause_total_ns":                 {{mappedName: "runtime.go.mem_stats.pause_total_ns"}},
 	"process.runtime.go.gc.count":                          {{mappedName: "runtime.go.mem_stats.num_gc"}},
-	"process.runtime.dotnet.thread_pool.threads.count":     {{mappedName: "runtime.dotnet.threads.count"}},
 	"process.runtime.dotnet.monitor.lock_contention.count": {{mappedName: "runtime.dotnet.threads.contention_count"}},
 	"process.runtime.dotnet.exceptions.count":              {{mappedName: "runtime.dotnet.exceptions.count"}},
 	"process.runtime.dotnet.gc.heap.size": {{
