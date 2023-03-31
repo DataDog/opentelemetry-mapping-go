@@ -95,3 +95,33 @@ jobs:
         run: make gen-licenses && git diff -s --exit-code || (echo "make gen-licenses needed"; exit 1)
       - name: Check golangci-lint
         run: make lint
+
+  breaking-changes:
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'breaking-change')}}
+    needs: [setup-environment]
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v3
+        with: 
+          ref: ${{ github.base_ref }}
+          path: ${{ github.base_ref }}
+
+      - name: Cache Go
+        id: go-cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
+      
+      - name: Generate-States
+        run: |
+          cd ${{ github.base_ref }}
+          make apidiff-generate APIHEADERS=internal/apidiff-data
+          
+      - name: Compare-States
+        run: |
+          make apidiff-compare APIHEADERS=${{ github.base_ref }}/internal/apidiff-data
+

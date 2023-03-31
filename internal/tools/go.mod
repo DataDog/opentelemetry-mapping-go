@@ -7,6 +7,7 @@ require (
 	github.com/golangci/golangci-lint v1.51.2
 	go.opentelemetry.io/build-tools/chloggen v0.4.0
 	go.opentelemetry.io/build-tools/multimod v0.5.0
+	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e
 )
 
 require (
@@ -185,7 +186,6 @@ require (
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.21.0 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
-	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e // indirect
 	golang.org/x/exp/typeparams v0.0.0-20230203172020-98cc5a0785f9 // indirect
 	golang.org/x/mod v0.8.0 // indirect
 	golang.org/x/net v0.6.0 // indirect
