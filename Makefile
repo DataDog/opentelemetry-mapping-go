@@ -1,4 +1,3 @@
-SHELL := bash
 TOOLS_MOD_DIR := ./internal/tools
 
 .PHONY: install-tools
