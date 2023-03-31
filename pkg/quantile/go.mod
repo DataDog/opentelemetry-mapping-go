@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.1.4
 	github.com/DataDog/sketches-go v1.4.1
-	github.com/dustin/go-humanize v1.0.0
+	github.com/dustin/go-humanize v1.0.1
 	github.com/stretchr/testify v1.8.2
 )
 
