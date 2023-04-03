@@ -5,14 +5,13 @@
 # for all non-internal packages in the module.
 set -eo pipefail
 
-BASE_DIR=$(pwd)
 pushd "$1" > /dev/null
 for pkg in $(go list ./...); do
     if [[ "$pkg" =~ .*"/internal/".* ]]; then
         # Internal packages don't have breaking changes
         continue
     fi
-    GCEXPORT_DIR=$BASE_DIR/$2/$pkg
+    GCEXPORT_DIR=$2/$pkg
     changes=$(apidiff "$GCEXPORT_DIR/apidiff.state" "$pkg")
     if [[ -n "$changes" ]]; then
         echo "Changes for $pkg:"
