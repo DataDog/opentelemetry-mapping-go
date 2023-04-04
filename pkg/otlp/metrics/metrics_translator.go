@@ -25,6 +25,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
+	"golang.org/x/exp/slices"
 
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
@@ -614,28 +615,62 @@ func (t *Translator) source(m pcommon.Map) (source.Source, error) {
 
 // mapGaugeRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Gauge metric
 func mapGaugeRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
-	cp := metricsArray.AppendEmpty()
-	cp.SetEmptyGauge()
 	for i := 0; i < md.Gauge().DataPoints().Len(); i++ {
-		attribute, res := md.Gauge().DataPoints().At(i).Attributes().Get(mp.attribute)
-		if res && attribute.AsString() == mp.attributeValue {
-			md.Gauge().DataPoints().At(i).CopyTo(cp.Gauge().DataPoints().AppendEmpty())
+		matchesAttributes := true
+		for _, attribute := range mp.attributes {
+			attributeValue, res := md.Gauge().DataPoints().At(i).Attributes().Get(attribute.key)
+			if !res || !slices.Contains(attribute.values, attributeValue.AsString()) {
+				matchesAttributes = false
+				break
+			}
+		}
+		if matchesAttributes {
+			cp := metricsArray.AppendEmpty()
+			cp.SetEmptyGauge()
+			dataPoint := cp.Gauge().DataPoints().AppendEmpty()
+			md.Gauge().DataPoints().At(i).CopyTo(dataPoint)
+			dataPoint.Attributes().RemoveIf(func(s string, value pcommon.Value) bool {
+				for _, attribute := range mp.attributes {
+					if s == attribute.key {
+						return true
+					}
+				}
+				return false
+			})
 			cp.SetName(mp.mappedName)
+			break
 		}
 	}
 }
 
 // mapSumRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Sum metric
 func mapSumRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
-	cp := metricsArray.AppendEmpty()
-	cp.SetEmptySum()
-	cp.Sum().SetAggregationTemporality(md.Sum().AggregationTemporality())
-	cp.Sum().SetIsMonotonic(md.Sum().IsMonotonic())
 	for i := 0; i < md.Sum().DataPoints().Len(); i++ {
-		attribute, res := md.Sum().DataPoints().At(i).Attributes().Get(mp.attribute)
-		if res && attribute.AsString() == mp.attributeValue {
-			md.Sum().DataPoints().At(i).CopyTo(cp.Sum().DataPoints().AppendEmpty())
+		matchesAttributes := true
+		for _, attribute := range mp.attributes {
+			attributeValue, res := md.Sum().DataPoints().At(i).Attributes().Get(attribute.key)
+			if !res || !slices.Contains(attribute.values, attributeValue.AsString()) {
+				matchesAttributes = false
+				break
+			}
+		}
+		if matchesAttributes {
+			cp := metricsArray.AppendEmpty()
+			cp.SetEmptySum()
+			cp.Sum().SetAggregationTemporality(md.Sum().AggregationTemporality())
+			cp.Sum().SetIsMonotonic(md.Sum().IsMonotonic())
+			dataPoint := cp.Sum().DataPoints().AppendEmpty()
+			md.Sum().DataPoints().At(i).CopyTo(dataPoint)
+			dataPoint.Attributes().RemoveIf(func(s string, value pcommon.Value) bool {
+				for _, attribute := range mp.attributes {
+					if s == attribute.key {
+						return true
+					}
+				}
+				return false
+			})
 			cp.SetName(mp.mappedName)
+			break
 		}
 	}
 }
@@ -691,7 +726,7 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 				md := metricsArray.At(k)
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
 					for _, mp := range v {
-						if mp.attribute == "" {
+						if mp.attributes == nil {
 							// duplicate runtime metrics as Datadog runtime metrics
 							cp := metricsArray.AppendEmpty()
 							md.CopyTo(cp)
