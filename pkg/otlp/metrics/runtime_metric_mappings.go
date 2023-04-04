@@ -80,8 +80,11 @@ var dotnetRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
 }
 
 var javaRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
-	"process.runtime.jvm.threads.count": {{mappedName: "jvm.thread_count"}},
-	"process.runtime.jvm.gc.duration":   {{mappedName: "jvm.gc.parnew.time"}},
+	"process.runtime.jvm.threads.count":          {{mappedName: "jvm.thread_count"}},
+	"process.runtime.jvm.classes.loaded":         {{mappedName: "jvm.loaded_classes"}},
+	"process.runtime.jvm.system.cpu.utilization": {{mappedName: "jvm.cpu_load.system"}},
+	"process.runtime.jvm.cpu.utilization":        {{mappedName: "jvm.cpu_load.process"}},
+	"process.runtime.jvm.gc.duration":            {{mappedName: "jvm.gc.parnew.time"}},
 	"process.runtime.jvm.memory.usage": {{
 		mappedName: "jvm.heap_memory",
 		attributes: []runtimeMetricAttribute{{
@@ -98,10 +101,37 @@ var javaRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
 		mappedName: "jvm.gc.old_gen_size",
 		attributes: []runtimeMetricAttribute{{
 			key:    "pool",
-			values: []string{"g1_old_gen", "ps_old_gen", "tenured_gen"},
+			values: []string{"g1_old_gen", "tenured_gen", "ps_old_gen"},
 		}, {
 			key:    "type",
 			values: []string{"heap"},
+		}},
+	}, {
+		mappedName: "jvm.gc.eden_size",
+		attributes: []runtimeMetricAttribute{{
+			key:    "pool",
+			values: []string{"g1_eden_space", "eden_space", "par_eden_space", "ps_eden_space"},
+		}, {
+			key:    "type",
+			values: []string{"heap"},
+		}},
+	}, {
+		mappedName: "jvm.gc.survivor_size",
+		attributes: []runtimeMetricAttribute{{
+			key:    "pool",
+			values: []string{"g1_survivor_space", "survivor_space", "par_survivor_space", "ps_survivor_space"},
+		}, {
+			key:    "type",
+			values: []string{"heap"},
+		}},
+	}, {
+		mappedName: "jvm.gc.metaspace_size",
+		attributes: []runtimeMetricAttribute{{
+			key:    "pool",
+			values: []string{"metaspace"},
+		}, {
+			key:    "type",
+			values: []string{"non_heap"},
 		}},
 	}},
 	"process.runtime.jvm.memory.committed": {{
@@ -141,6 +171,45 @@ var javaRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
 		attributes: []runtimeMetricAttribute{{
 			key:    "type",
 			values: []string{"non_heap"},
+		}},
+	}},
+	"process.runtime.jvm.buffer.usage": {{
+		mappedName: "jvm.buffer_pool.direct.used",
+		attributes: []runtimeMetricAttribute{{
+			key:    "pool",
+			values: []string{"direct"},
+		}},
+	}, {
+		mappedName: "jvm.buffer_pool.mapped.used",
+		attributes: []runtimeMetricAttribute{{
+			key:    "pool",
+			values: []string{"mapped"},
+		}},
+	}},
+	"process.runtime.jvm.buffer.count": {{
+		mappedName: "jvm.buffer_pool.direct.count",
+		attributes: []runtimeMetricAttribute{{
+			key:    "pool",
+			values: []string{"direct"},
+		}},
+	}, {
+		mappedName: "jvm.buffer_pool.mapped.count",
+		attributes: []runtimeMetricAttribute{{
+			key:    "pool",
+			values: []string{"mapped"},
+		}},
+	}},
+	"process.runtime.jvm.buffer.limit": {{
+		mappedName: "jvm.buffer_pool.direct.limit",
+		attributes: []runtimeMetricAttribute{{
+			key:    "pool",
+			values: []string{"direct"},
+		}},
+	}, {
+		mappedName: "jvm.buffer_pool.mapped.limit",
+		attributes: []runtimeMetricAttribute{{
+			key:    "pool",
+			values: []string{"mapped"},
 		}},
 	}},
 }

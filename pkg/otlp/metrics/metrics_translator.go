@@ -512,6 +512,37 @@ func mapSumRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.M
 	}
 }
 
+// mapHistogramRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Histogram metric
+func mapHistogramRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
+	for i := 0; i < md.Histogram().DataPoints().Len(); i++ {
+		matchesAttributes := true
+		for _, attribute := range mp.attributes {
+			attributeValue, res := md.Histogram().DataPoints().At(i).Attributes().Get(attribute.key)
+			if !res || !slices.Contains(attribute.values, attributeValue.AsString()) {
+				matchesAttributes = false
+				break
+			}
+		}
+		if matchesAttributes {
+			cp := metricsArray.AppendEmpty()
+			cp.SetEmptyHistogram()
+			cp.Histogram().SetAggregationTemporality(md.Histogram().AggregationTemporality())
+			dataPoint := cp.Histogram().DataPoints().AppendEmpty()
+			md.Histogram().DataPoints().At(i).CopyTo(dataPoint)
+			dataPoint.Attributes().RemoveIf(func(s string, value pcommon.Value) bool {
+				for _, attribute := range mp.attributes {
+					if s == attribute.key {
+						return true
+					}
+				}
+				return false
+			})
+			cp.SetName(mp.mappedName)
+			break
+		}
+	}
+}
+
 // MapMetrics maps OTLP metrics into the DataDog format
 func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consumer Consumer) error {
 	rms := md.ResourceMetrics()
@@ -574,6 +605,8 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 							mapSumRuntimeMetricWithAttributes(md, metricsArray, mp)
 						} else if md.Type() == pmetric.MetricTypeGauge {
 							mapGaugeRuntimeMetricWithAttributes(md, metricsArray, mp)
+						} else if md.Type() == pmetric.MetricTypeHistogram {
+							mapHistogramRuntimeMetricWithAttributes(md, metricsArray, mp)
 						}
 					}
 				}
