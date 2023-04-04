@@ -6,7 +6,6 @@
 
 set -eo pipefail
 
-BASE_DIR=$(pwd)
 pushd "$1" > /dev/null
 for pkg in $(go list ./...); do
     if [[ "$pkg" =~ .*"/internal/".* ]]; then
@@ -15,7 +14,7 @@ for pkg in $(go list ./...); do
     fi
 
     # Write gcexport data into $2/<package path>/apidiff.state
-    OUT_DIR=$BASE_DIR/$2/$pkg
+    OUT_DIR=$2/$pkg
     mkdir -p "$OUT_DIR"
     apidiff -w "$OUT_DIR/apidiff.state" "$pkg"
 done
