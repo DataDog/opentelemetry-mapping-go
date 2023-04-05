@@ -86,11 +86,11 @@ func TestContainerTagFromAttributes(t *testing.T) {
 		"task_family":         "sample_task_family",
 		"ecs_cluster_name":    "sample_ecs_cluster_name",
 		"ecs_container_name":  "sample_ecs_container_name",
-	}, ContainerTagFromAttributes(attributeMap))
+	}, ContainerTagFromAttributesRenamed(attributeMap))
 }
 
 func TestContainerTagFromAttributesEmpty(t *testing.T) {
-	assert.Empty(t, ContainerTagFromAttributes(map[string]string{}))
+	assert.Empty(t, ContainerTagFromAttributesRenamed(map[string]string{}))
 }
 
 func TestOriginIDFromAttributes(t *testing.T) {

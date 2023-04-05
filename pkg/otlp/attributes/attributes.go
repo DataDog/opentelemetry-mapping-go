@@ -171,9 +171,8 @@ func OriginIDFromAttributes(attrs pcommon.Map) (originID string) {
 	return
 }
 
-// ContainerTagFromAttributes extracts the value of _dd.tags.container from the given
-// set of attributes.
-func ContainerTagFromAttributes(attr map[string]string) map[string]string {
+// ContainerTagFromAttributesRenamed is a breaking change!
+func ContainerTagFromAttributesRenamed(attr map[string]string) map[string]string {
 	ddtags := make(map[string]string)
 	for _, key := range containerTagsAttributes {
 		val, ok := attr[key]
