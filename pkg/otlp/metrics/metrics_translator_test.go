@@ -433,7 +433,7 @@ func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen0"},
 	}}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes(false, "process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes), consumer); err != nil {
+	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes), consumer); err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -454,7 +454,7 @@ func TestMapGaugeRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen1"},
 	}}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes(false, "process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeGauge, attributes), consumer); err != nil {
+	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeGauge, attributes), consumer); err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -473,7 +473,7 @@ func TestMapHistogramRuntimeMetricHasMapping(t *testing.T) {
 	consumer := &mockFullConsumer{}
 	fmt.Println(consumer.metrics)
 
-	if err := tr.MapMetrics(ctx, createTestHistogramMetric(false, "process.runtime.jvm.gc.duration"), consumer); err != nil {
+	if err := tr.MapMetrics(ctx, createTestHistogramMetric("process.runtime.jvm.gc.duration"), consumer); err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -500,7 +500,7 @@ func TestMapHistogramRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen1"},
 	}}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes(false, "process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeHistogram, attributes), consumer); err != nil {
+	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeHistogram, attributes), consumer); err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -530,7 +530,7 @@ func TestMapRuntimeMetricWithTwoAttributesHasMapping(t *testing.T) {
 		key:    "type",
 		values: []string{"heap"},
 	}}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes(false, "process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes), consumer); err != nil {
+	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes), consumer); err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -552,7 +552,7 @@ func TestMapGaugeRuntimeMetricWithInvalidAttributes(t *testing.T) {
 		key:    "type",
 		values: []string{"heap2"},
 	}}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes(false, "process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes), consumer); err != nil {
+	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes), consumer); err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -927,7 +927,7 @@ func createTestDoubleCumulativeMonotonicMetrics(tsmatch bool) pmetric.Metrics {
 	return md
 }
 
-func createTestHistogramMetric(tsmatch bool, metricName string) pmetric.Metrics {
+func createTestHistogramMetric(metricName string) pmetric.Metrics {
 	md := pmetric.NewMetrics()
 	met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 	met.SetName(metricName)
@@ -939,11 +939,7 @@ func createTestHistogramMetric(tsmatch bool, metricName string) pmetric.Metrics 
 	startTs := int(getProcessStartTime()) + 1
 	hpCount := hpsCount.AppendEmpty()
 	hpCount.SetStartTimestamp(seconds(startTs))
-	if tsmatch {
-		hpCount.SetTimestamp(seconds(startTs))
-	} else {
-		hpCount.SetTimestamp(seconds(startTs + 1))
-	}
+	hpCount.SetTimestamp(seconds(startTs + 1))
 	hpCount.ExplicitBounds().FromRaw([]float64{})
 	hpCount.BucketCounts().FromRaw([]uint64{100})
 	hpCount.SetCount(100)
@@ -953,7 +949,7 @@ func createTestHistogramMetric(tsmatch bool, metricName string) pmetric.Metrics 
 	return md
 }
 
-func createTestMetricWithAttributes(tsmatch bool, metricName string, metricType pmetric.MetricType, attributes []runtimeMetricAttribute) pmetric.Metrics {
+func createTestMetricWithAttributes(metricName string, metricType pmetric.MetricType, attributes []runtimeMetricAttribute) pmetric.Metrics {
 	md := pmetric.NewMetrics()
 	met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 	met.SetName(metricName)
@@ -981,11 +977,7 @@ func createTestMetricWithAttributes(tsmatch bool, metricName string, metricType 
 			dpInt.Attributes().PutStr(attr.key, attr.values[0])
 		}
 		dpInt.SetStartTimestamp(seconds(startTs))
-		if tsmatch {
-			dpInt.SetTimestamp(seconds(startTs))
-		} else {
-			dpInt.SetTimestamp(seconds(startTs + 1))
-		}
+		dpInt.SetTimestamp(seconds(startTs + 1))
 		dpInt.SetIntValue(10)
 		return md
 	}
@@ -997,11 +989,7 @@ func createTestMetricWithAttributes(tsmatch bool, metricName string, metricType 
 		hpCount.Attributes().PutStr(attr.key, attr.values[0])
 	}
 	hpCount.SetStartTimestamp(seconds(startTs))
-	if tsmatch {
-		hpCount.SetTimestamp(seconds(startTs))
-	} else {
-		hpCount.SetTimestamp(seconds(startTs + 1))
-	}
+	hpCount.SetTimestamp(seconds(startTs + 1))
 	hpCount.ExplicitBounds().FromRaw([]float64{})
 	hpCount.BucketCounts().FromRaw([]uint64{100})
 	hpCount.SetCount(100)
