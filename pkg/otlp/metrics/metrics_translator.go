@@ -495,7 +495,7 @@ func (t *Translator) mapSummaryMetrics(
 }
 
 func (t *Translator) source(m pcommon.Map) (source.Source, error) {
-	src, ok := attributes.SourceFromAttributes(m, t.cfg.previewHostnameFromAttributes)
+	src, ok := attributes.SourceFromAttrs(m)
 	if !ok {
 		var err error
 		src, err = t.cfg.fallbackSourceProvider.Source(context.Background())

@@ -37,9 +37,7 @@ type translatorConfig struct {
 	sweepInterval int64
 	deltaTTL      int64
 
-	// hostname provider configuration
-	previewHostnameFromAttributes bool
-	fallbackSourceProvider        source.Provider
+	fallbackSourceProvider source.Provider
 }
 
 // TranslatorOption is a translator creation option.
@@ -71,9 +69,10 @@ func WithFallbackSourceProvider(provider source.Provider) TranslatorOption {
 }
 
 // WithPreviewHostnameFromAttributes enables the preview hostname algorithm.
+//
+// Deprecated: The hostname preview is always enabled. This is a no-op.
 func WithPreviewHostnameFromAttributes() TranslatorOption {
 	return func(t *translatorConfig) error {
-		t.previewHostnameFromAttributes = true
 		return nil
 	}
 }
