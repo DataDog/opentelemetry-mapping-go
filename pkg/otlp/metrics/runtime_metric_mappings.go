@@ -105,7 +105,7 @@ var javaRuntimeMetricsMappings = runtimeMetricMappingList{
 		mappedName: "jvm.gc.old_gen_size",
 		attributes: []runtimeMetricAttribute{{
 			key:    "pool",
-			values: []string{"g1_old_gen", "tenured_gen", "ps_old_gen"},
+			values: []string{"G1 Old Gen", "Tenured Gen", "PS Old Gen"},
 		}, {
 			key:    "type",
 			values: []string{"heap"},
@@ -114,7 +114,7 @@ var javaRuntimeMetricsMappings = runtimeMetricMappingList{
 		mappedName: "jvm.gc.eden_size",
 		attributes: []runtimeMetricAttribute{{
 			key:    "pool",
-			values: []string{"g1_eden_space", "eden_space", "par_eden_space", "ps_eden_space"},
+			values: []string{"G1 Eden Space", "Eden Space", "Par Eden Space", "PS Eden Space"},
 		}, {
 			key:    "type",
 			values: []string{"heap"},
@@ -123,7 +123,7 @@ var javaRuntimeMetricsMappings = runtimeMetricMappingList{
 		mappedName: "jvm.gc.survivor_size",
 		attributes: []runtimeMetricAttribute{{
 			key:    "pool",
-			values: []string{"g1_survivor_space", "survivor_space", "par_survivor_space", "ps_survivor_space"},
+			values: []string{"G1 Survivor Space", "Survivor Space", "Par Survivor Space", "PS Survivor Space"},
 		}, {
 			key:    "type",
 			values: []string{"heap"},
@@ -132,7 +132,7 @@ var javaRuntimeMetricsMappings = runtimeMetricMappingList{
 		mappedName: "jvm.gc.metaspace_size",
 		attributes: []runtimeMetricAttribute{{
 			key:    "pool",
-			values: []string{"metaspace"},
+			values: []string{"Metaspace"},
 		}, {
 			key:    "type",
 			values: []string{"non_heap"},

@@ -458,11 +458,11 @@ func mapGaugeRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric
 			attributeValue, res := md.Gauge().DataPoints().At(i).Attributes().Get(attribute.key)
 			fmt.Println("-----------------------")
 			fmt.Printf("md.Name: %v\n", md.Name())
-			fmt.Printf("attributeValue: %v\n", attributeValue.Str())
+			fmt.Printf("attributeValue: %v\n", attributeValue.AsString())
 			fmt.Printf("attribute.key: %v\n", attribute.key)
 			fmt.Printf("attribute.values: %v\n", attribute.values)
 			fmt.Println("-----------------------")
-			if !res || !slices.Contains(attribute.values, attributeValue.Str()) {
+			if !res || !slices.Contains(attribute.values, attributeValue.AsString()) {
 				matchesAttributes = false
 				fmt.Println("matchesAttributes false")
 				break
@@ -493,13 +493,13 @@ func mapSumRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.M
 		matchesAttributes := true
 		for _, attribute := range mp.attributes {
 			attributeValue, res := md.Sum().DataPoints().At(i).Attributes().Get(attribute.key)
-			fmt.Println("-----------------------")
-			fmt.Printf("md.Name: %v\n", md.Name())
-			fmt.Printf("attributeValue: %v\n", attributeValue.Str())
-			fmt.Printf("attribute.key: %v\n", attribute.key)
-			fmt.Printf("attribute.values: %v\n", attribute.values)
-			fmt.Println("-----------------------")
-			if !res || !slices.Contains(attribute.values, attributeValue.Str()) {
+			//fmt.Println("-----------------------")
+			//fmt.Printf("md.Name: %v\n", md.Name())
+			//fmt.Printf("attributeValue: %v\n", attributeValue.AsString())
+			//fmt.Printf("attribute.key: %v\n", attribute.key)
+			//fmt.Printf("attribute.values: %v\n", attribute.values)
+			//fmt.Println("-----------------------")
+			if !res || !slices.Contains(attribute.values, attributeValue.AsString()) {
 				fmt.Println("matchesAttributes false")
 				matchesAttributes = false
 				break
@@ -532,7 +532,7 @@ func mapHistogramRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pme
 		matchesAttributes := true
 		for _, attribute := range mp.attributes {
 			attributeValue, res := md.Histogram().DataPoints().At(i).Attributes().Get(attribute.key)
-			if !res || !slices.Contains(attribute.values, attributeValue.Str()) {
+			if !res || !slices.Contains(attribute.values, attributeValue.AsString()) {
 				matchesAttributes = false
 				break
 			}
