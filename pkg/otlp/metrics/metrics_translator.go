@@ -252,7 +252,16 @@ type histogramInfo struct {
 	sum float64
 	// count of histogram (exact)
 	count uint64
-	// ok to use
+
+	// hasMinFromLastTimeWindow indicates whether the minimum was reached in the last time window.
+	// If the minimum is NOT available, its value is false.
+	hasMinFromLastTimeWindow bool
+
+	// hasMaxFromLastTimeWindow indicates whether the maximum was reached in the last time window.
+	// If the maximum is NOT available, its value is false.
+	hasMaxFromLastTimeWindow bool
+
+	// ok to use sum/count.
 	ok bool
 }
 
@@ -304,11 +313,21 @@ func (t *Translator) getSketchBuckets(
 			sketch.Basic.Sum = histInfo.sum
 			sketch.Basic.Avg = sketch.Basic.Sum / float64(sketch.Basic.Cnt)
 		}
-		if delta && p.HasMin() {
+
+		if histInfo.hasMinFromLastTimeWindow {
+			// We know exact minimum for the last time window.
 			sketch.Basic.Min = p.Min()
+		} else if p.HasMin() {
+			// Clamp minimum with the global minimum (p.Min()) to account for sketch mapping error.
+			sketch.Basic.Min = math.Max(p.Min(), sketch.Basic.Min)
 		}
-		if delta && p.HasMax() {
+
+		if histInfo.hasMaxFromLastTimeWindow {
+			// We know exact maximum for the last time window.
 			sketch.Basic.Max = p.Max()
+		} else if p.HasMax() {
+			// Clamp maximum with global maximum (p.Max()) to account for sketch mapping error.
+			sketch.Basic.Max = math.Min(p.Max(), sketch.Basic.Max)
 		}
 
 		consumer.ConsumeSketch(ctx, pointDims, ts, sketch)
@@ -393,18 +412,31 @@ func (t *Translator) mapHistogramMetrics(
 			histInfo.ok = false
 		}
 
+		minDims := pointDims.WithSuffix("min")
+		if p.HasMin() {
+			histInfo.hasMinFromLastTimeWindow = delta || t.prevPts.PutAndCheckMin(minDims, startTs, ts, p.Min())
+		}
+
+		maxDims := pointDims.WithSuffix("max")
+		if p.HasMax() {
+			histInfo.hasMaxFromLastTimeWindow = delta || t.prevPts.PutAndCheckMax(maxDims, startTs, ts, p.Max())
+		}
+
 		if t.cfg.SendHistogramAggregations && histInfo.ok {
 			// We only send the sum and count if both values were ok.
 			consumer.ConsumeTimeSeries(ctx, countDims, Count, ts, float64(histInfo.count))
 			consumer.ConsumeTimeSeries(ctx, sumDims, Count, ts, histInfo.sum)
 
 			if delta {
+				// We could check is[Min/Max]FromLastTimeWindow here, and report the minimum/maximum
+				// for cumulative timeseries when we know it. These would be metrics with progressively
+				// less frequency which would be confusing, so we limit reporting these metrics to delta points,
+				// where the min/max is (pressumably) available in either all or none of the points.
+
 				if p.HasMin() {
-					minDims := pointDims.WithSuffix("min")
 					consumer.ConsumeTimeSeries(ctx, minDims, Gauge, ts, p.Min())
 				}
 				if p.HasMax() {
-					maxDims := pointDims.WithSuffix("max")
 					consumer.ConsumeTimeSeries(ctx, maxDims, Gauge, ts, p.Max())
 				}
 			}
