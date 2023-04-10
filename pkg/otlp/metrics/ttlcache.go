@@ -52,7 +52,6 @@ func (t *ttlCache) MonotonicDiff(dimensions *Dimensions, startTs, ts uint64, val
 // isNotFirstPoint determines if this is NOT the first point on a cumulative series:
 // https://github.com/open-telemetry/opentelemetry-specification/blob/v1.19.0/specification/metrics/data-model.md#resets-and-gaps
 func isNotFirstPoint(startTs, ts, oldStartTs uint64) (isNotFirst bool) {
-	// This is written down as an 'if' because I feel it is easier to understand than with a boolean expression.
 	if startTs == 0 {
 		// We don't know the start time, assume the sequence has not been restarted.
 		isNotFirst = true
