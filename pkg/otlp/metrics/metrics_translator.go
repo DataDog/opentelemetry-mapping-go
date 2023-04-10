@@ -456,8 +456,16 @@ func mapGaugeRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric
 		matchesAttributes := true
 		for _, attribute := range mp.attributes {
 			attributeValue, res := md.Gauge().DataPoints().At(i).Attributes().Get(attribute.key)
+			if md.Name() == "process.runtime.jvm.memory.usage" {
+				fmt.Println("-----------------------")
+				fmt.Printf("attributeValue: %v\n", attributeValue.AsString())
+				fmt.Printf("attribute.key: %v\n", attribute.key)
+				fmt.Printf("attribute.values: %v\n", attribute.values)
+				fmt.Println("-----------------------")
+			}
 			if !res || !slices.Contains(attribute.values, attributeValue.AsString()) {
 				matchesAttributes = false
+				fmt.Println("matchesAttributes false")
 				break
 			}
 		}
