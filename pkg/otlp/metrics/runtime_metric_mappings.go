@@ -15,7 +15,11 @@ type runtimeMetricAttribute struct {
 	values []string // the attribute value, or multiple values if there is more than one value for the same mapping
 }
 
-var goRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
+// runtimeMetricMappingList defines the structure for a list of runtime metric mappings where the key
+// represents the OTel metric name and the runtimeMetricMapping contains the Datadog metric name
+type runtimeMetricMappingList map[string][]runtimeMetricMapping
+
+var goRuntimeMetricsMappings = runtimeMetricMappingList{
 	"process.runtime.go.goroutines":        {{mappedName: "runtime.go.num_goroutine"}},
 	"process.runtime.go.cgo.calls":         {{mappedName: "runtime.go.num_cgo_call"}},
 	"process.runtime.go.lookups":           {{mappedName: "runtime.go.mem_stats.lookups"}},
@@ -29,7 +33,7 @@ var goRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
 	"process.runtime.go.gc.count":          {{mappedName: "runtime.go.mem_stats.num_gc"}},
 }
 
-var dotnetRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
+var dotnetRuntimeMetricsMappings = runtimeMetricMappingList{
 	"process.runtime.dotnet.thread_pool.threads.count":     {{mappedName: "runtime.dotnet.threads.count"}},
 	"process.runtime.dotnet.monitor.lock_contention.count": {{mappedName: "runtime.dotnet.threads.contention_count"}},
 	"process.runtime.dotnet.exceptions.count":              {{mappedName: "runtime.dotnet.exceptions.count"}},
@@ -79,7 +83,7 @@ var dotnetRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
 	}},
 }
 
-var javaRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
+var javaRuntimeMetricsMappings = runtimeMetricMappingList{
 	"process.runtime.jvm.threads.count":          {{mappedName: "jvm.thread_count"}},
 	"process.runtime.jvm.classes.loaded":         {{mappedName: "jvm.loaded_classes"}},
 	"process.runtime.jvm.system.cpu.utilization": {{mappedName: "jvm.cpu_load.system"}},
@@ -214,8 +218,8 @@ var javaRuntimeMetricsMappings = map[string][]runtimeMetricMapping{
 	}},
 }
 
-func getRuntimeMetricsMappings() map[string][]runtimeMetricMapping {
-	res := map[string][]runtimeMetricMapping{}
+func getRuntimeMetricsMappings() runtimeMetricMappingList {
+	res := runtimeMetricMappingList{}
 	for k, v := range goRuntimeMetricsMappings {
 		res[k] = v
 	}
