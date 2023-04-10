@@ -525,7 +525,7 @@ func TestMapRuntimeMetricWithTwoAttributesHasMapping(t *testing.T) {
 	consumer := &mockFullConsumer{}
 	attributes := []runtimeMetricAttribute{{
 		key:    "pool",
-		values: []string{"g1_old_gen"},
+		values: []string{"G1 Old Gen"},
 	}, {
 		key:    "type",
 		values: []string{"heap"},
@@ -537,8 +537,8 @@ func TestMapRuntimeMetricWithTwoAttributesHasMapping(t *testing.T) {
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
-			newGaugeWithHost(newDims("process.runtime.jvm.memory.usage").AddTags("pool:g1_old_gen", "type:heap"), uint64(seconds(startTs+1)), 10, fallbackHostname),
-			newGaugeWithHost(newDims("jvm.heap_memory").AddTags("pool:g1_old_gen"), uint64(seconds(startTs+1)), 10, fallbackHostname),
+			newGaugeWithHost(newDims("process.runtime.jvm.memory.usage").AddTags("pool:G1 Old Gen", "type:heap"), uint64(seconds(startTs+1)), 10, fallbackHostname),
+			newGaugeWithHost(newDims("jvm.heap_memory").AddTags("pool:G1 Old Gen"), uint64(seconds(startTs+1)), 10, fallbackHostname),
 			newGaugeWithHost(newDims("jvm.gc.old_gen_size"), uint64(seconds(startTs+1)), 10, fallbackHostname),
 		},
 	)
