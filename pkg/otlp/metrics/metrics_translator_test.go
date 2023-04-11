@@ -433,7 +433,7 @@ func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen0"},
 	}}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes), consumer); err != nil {
+	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes, 1), consumer); err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -454,7 +454,7 @@ func TestMapGaugeRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen1"},
 	}}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeGauge, attributes), consumer); err != nil {
+	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeGauge, attributes, 1), consumer); err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -500,7 +500,7 @@ func TestMapHistogramRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen1"},
 	}}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeHistogram, attributes), consumer); err != nil {
+	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeHistogram, attributes, 1), consumer); err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -530,7 +530,7 @@ func TestMapRuntimeMetricWithTwoAttributesHasMapping(t *testing.T) {
 		key:    "type",
 		values: []string{"heap"},
 	}}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes), consumer); err != nil {
+	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 1), consumer); err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -544,6 +544,37 @@ func TestMapRuntimeMetricWithTwoAttributesHasMapping(t *testing.T) {
 	)
 }
 
+func TestMapRuntimeMetricWithTwoAttributesMultipleDataPointsHasMapping(t *testing.T) {
+	ctx := context.Background()
+	tr := newTranslator(t, zap.NewNop())
+	consumer := &mockFullConsumer{}
+	attributes := []runtimeMetricAttribute{{
+		key:    "pool",
+		values: []string{"G1 Old Gen", "G1 Survivor Space", "G1 Eden Space"},
+	}, {
+		key:    "type",
+		values: []string{"heap", "heap", "heap"},
+	}}
+	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 3), consumer); err != nil {
+		t.Fatal(err)
+	}
+	startTs := int(getProcessStartTime()) + 1
+	assert.ElementsMatch(t,
+		consumer.metrics,
+		[]metric{
+			newGaugeWithHost(newDims("process.runtime.jvm.memory.usage").AddTags("pool:G1 Old Gen", "type:heap"), uint64(seconds(startTs+1)), 10, fallbackHostname),
+			newGaugeWithHost(newDims("process.runtime.jvm.memory.usage").AddTags("pool:G1 Survivor Space", "type:heap"), uint64(seconds(startTs+2)), 20, fallbackHostname),
+			newGaugeWithHost(newDims("process.runtime.jvm.memory.usage").AddTags("pool:G1 Eden Space", "type:heap"), uint64(seconds(startTs+3)), 30, fallbackHostname),
+			newGaugeWithHost(newDims("jvm.heap_memory").AddTags("pool:G1 Old Gen"), uint64(seconds(startTs+1)), 10, fallbackHostname),
+			newGaugeWithHost(newDims("jvm.heap_memory").AddTags("pool:G1 Survivor Space"), uint64(seconds(startTs+2)), 20, fallbackHostname),
+			newGaugeWithHost(newDims("jvm.heap_memory").AddTags("pool:G1 Eden Space"), uint64(seconds(startTs+3)), 30, fallbackHostname),
+			newGaugeWithHost(newDims("jvm.gc.old_gen_size"), uint64(seconds(startTs+1)), 10, fallbackHostname),
+			newGaugeWithHost(newDims("jvm.gc.survivor_size"), uint64(seconds(startTs+2)), 20, fallbackHostname),
+			newGaugeWithHost(newDims("jvm.gc.eden_size"), uint64(seconds(startTs+3)), 30, fallbackHostname),
+		},
+	)
+}
+
 func TestMapGaugeRuntimeMetricWithInvalidAttributes(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
@@ -552,7 +583,7 @@ func TestMapGaugeRuntimeMetricWithInvalidAttributes(t *testing.T) {
 		key:    "type",
 		values: []string{"heap2"},
 	}}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes), consumer); err != nil {
+	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 1), consumer); err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -949,7 +980,7 @@ func createTestHistogramMetric(metricName string) pmetric.Metrics {
 	return md
 }
 
-func createTestMetricWithAttributes(metricName string, metricType pmetric.MetricType, attributes []runtimeMetricAttribute) pmetric.Metrics {
+func createTestMetricWithAttributes(metricName string, metricType pmetric.MetricType, attributes []runtimeMetricAttribute, dataPoints int) pmetric.Metrics {
 	md := pmetric.NewMetrics()
 	met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 	met.SetName(metricName)
@@ -970,32 +1001,36 @@ func createTestMetricWithAttributes(metricName string, metricType pmetric.Metric
 	}
 
 	if metricType != pmetric.MetricTypeHistogram {
-		dpsInt.EnsureCapacity(1)
-		startTs := int(getProcessStartTime()) + 1
-		dpInt := dpsInt.AppendEmpty()
-		for _, attr := range attributes {
-			dpInt.Attributes().PutStr(attr.key, attr.values[0])
+		dpsInt.EnsureCapacity(dataPoints)
+		for i := 0; i < dataPoints; i++ {
+			startTs := int(getProcessStartTime()) + 1
+			dpInt := dpsInt.AppendEmpty()
+			for _, attr := range attributes {
+				dpInt.Attributes().PutStr(attr.key, attr.values[i])
+			}
+			dpInt.SetStartTimestamp(seconds(startTs))
+			dpInt.SetTimestamp(seconds(startTs + 1 + i))
+			dpInt.SetIntValue(int64(10 * (1 + i)))
 		}
-		dpInt.SetStartTimestamp(seconds(startTs))
-		dpInt.SetTimestamp(seconds(startTs + 1))
-		dpInt.SetIntValue(10)
 		return md
 	}
 
-	hpsCount.EnsureCapacity(1)
-	startTs := int(getProcessStartTime()) + 1
-	hpCount := hpsCount.AppendEmpty()
-	for _, attr := range attributes {
-		hpCount.Attributes().PutStr(attr.key, attr.values[0])
+	hpsCount.EnsureCapacity(dataPoints)
+	for i := 0; i < dataPoints; i++ {
+		startTs := int(getProcessStartTime()) + 1
+		hpCount := hpsCount.AppendEmpty()
+		for _, attr := range attributes {
+			hpCount.Attributes().PutStr(attr.key, attr.values[i])
+		}
+		hpCount.SetStartTimestamp(seconds(startTs))
+		hpCount.SetTimestamp(seconds(startTs + 1 + i))
+		hpCount.ExplicitBounds().FromRaw([]float64{})
+		hpCount.BucketCounts().FromRaw([]uint64{100})
+		hpCount.SetCount(100)
+		hpCount.SetSum(0)
+		hpCount.SetMin(-100)
+		hpCount.SetMax(100)
 	}
-	hpCount.SetStartTimestamp(seconds(startTs))
-	hpCount.SetTimestamp(seconds(startTs + 1))
-	hpCount.ExplicitBounds().FromRaw([]float64{})
-	hpCount.BucketCounts().FromRaw([]uint64{100})
-	hpCount.SetCount(100)
-	hpCount.SetSum(0)
-	hpCount.SetMin(-100)
-	hpCount.SetMax(100)
 	return md
 }
 

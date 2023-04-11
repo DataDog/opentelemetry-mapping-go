@@ -475,7 +475,6 @@ func mapGaugeRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric
 				return false
 			})
 			cp.SetName(mp.mappedName)
-			break
 		}
 	}
 }
@@ -507,7 +506,6 @@ func mapSumRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.M
 				return false
 			})
 			cp.SetName(mp.mappedName)
-			break
 		}
 	}
 }
