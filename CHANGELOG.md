@@ -4,6 +4,15 @@
 
 <!-- next version -->
 
+## v0.1.5
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics`: Use minimum and maximum values from cumulative OTLP Histograms. (#26)
+  - Values are used only when we can assume they are from the last time window or otherwise to clamp estimates.
+
+- `pkg/otlp/attributes`: Deprecate and remove usage of WithPreviewHostnameFromAttributes (#48)
+
 ## v0.1.4
 
 ### 🚩 Deprecations 🚩
