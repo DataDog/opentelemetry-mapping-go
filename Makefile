@@ -69,12 +69,12 @@ APIHEADERS := internal/apidiff-data
 
 .PHONY: apidiff-generate
 apidiff-generate:
-	for mod in $(GOMODULES); do \
+	set -e; for mod in $(GOMODULES); do \
 		./internal/scripts/apidiff-generate.sh $$mod $(APIHEADERS); \
 	done
 
 .PHONY: apidiff-compare
 apidiff-compare:
-	for mod in $(GOMODULES); do \
+	set -e; for mod in $(GOMODULES); do \
 		./internal/scripts/apidiff-compare.sh $$mod $(APIHEADERS); \
 	done
