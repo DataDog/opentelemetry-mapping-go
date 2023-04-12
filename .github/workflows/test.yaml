@@ -99,7 +99,7 @@ jobs:
 
   breaking-changes:
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'breaking-change')}}
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'breaking-change') && github.event_name == 'pull_request'}}
     needs: [setup-environment]
     steps:
       - name: Checkout base branch
