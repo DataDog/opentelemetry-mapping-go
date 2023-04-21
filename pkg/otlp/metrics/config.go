@@ -68,15 +68,6 @@ func WithFallbackSourceProvider(provider source.Provider) TranslatorOption {
 	}
 }
 
-// WithPreviewHostnameFromAttributes enables the preview hostname algorithm.
-//
-// Deprecated: The hostname preview is always enabled. This is a no-op.
-func WithPreviewHostnameFromAttributes() TranslatorOption {
-	return func(t *translatorConfig) error {
-		return nil
-	}
-}
-
 // WithQuantiles enables quantiles exporting for summary metrics.
 func WithQuantiles() TranslatorOption {
 	return func(t *translatorConfig) error {

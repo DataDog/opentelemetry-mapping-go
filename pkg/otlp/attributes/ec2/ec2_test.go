@@ -38,21 +38,6 @@ func TestDefaultHostname(t *testing.T) {
 	assert.False(t, isDefaultHostname(customHost))
 }
 
-func TestHostnameFromAttributes(t *testing.T) {
-	attrs := testutils.NewAttributeMap(map[string]string{
-		conventions.AttributeCloudProvider: conventions.AttributeCloudProviderAWS,
-		conventions.AttributeHostID:        testInstanceID,
-		conventions.AttributeHostName:      testIP,
-	})
-	hostname, ok := HostnameFromAttributes(attrs, false)
-	assert.True(t, ok)
-	assert.Equal(t, hostname, testInstanceID)
-
-	hostname, ok = HostnameFromAttributes(attrs, true)
-	assert.True(t, ok)
-	assert.Equal(t, hostname, testInstanceID)
-}
-
 func TestHostnameFromAttrs(t *testing.T) {
 	t.Run("host id", func(t *testing.T) {
 		attrs := testutils.NewAttributeMap(map[string]string{
