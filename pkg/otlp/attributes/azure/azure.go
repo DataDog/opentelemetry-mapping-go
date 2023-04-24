@@ -31,38 +31,9 @@ type HostInfo struct {
 	HostAliases []string
 }
 
-// HostInfoFromAttributes gets Azure host info from attributes following OpenTelemetry
-// semantic conventions.
-// Deprecated: AttributeHostID will be used as the hostname once the preview rule is stable.
-func HostInfoFromAttributes(attrs pcommon.Map, usePreviewRules bool) (hostInfo *HostInfo) {
-	hostInfo = &HostInfo{}
-
-	// Add Azure VM ID as a host alias if available for compatibility with Azure integration
-	if vmID, ok := attrs.Get(conventions.AttributeHostID); ok && !usePreviewRules {
-		hostInfo.HostAliases = append(hostInfo.HostAliases, vmID.Str())
-	}
-
-	return
-}
-
 // HostnameFromAttrs gets the Azure hostname from attributes.
 func HostnameFromAttrs(attrs pcommon.Map) (string, bool) {
 	if vmID, ok := attrs.Get(conventions.AttributeHostID); ok {
-		return vmID.Str(), true
-	}
-
-	if hostname, ok := attrs.Get(conventions.AttributeHostName); ok {
-		return hostname.Str(), true
-	}
-
-	return "", false
-}
-
-// HostnameFromAttributes gets the Azure hostname from attributes.
-// Deprecated: HostnameFromAttributes is deprecated in favor of HostnameFromAttrs which removes parameter
-// usePreviewRules.
-func HostnameFromAttributes(attrs pcommon.Map, usePreviewRules bool) (string, bool) {
-	if vmID, ok := attrs.Get(conventions.AttributeHostID); usePreviewRules && ok {
 		return vmID.Str(), true
 	}
 
