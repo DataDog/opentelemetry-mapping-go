@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/frapposelli/wwhrd v0.4.0
 	github.com/golangci/golangci-lint v1.52.2
-	go.opentelemetry.io/build-tools/chloggen v0.6.0
+	go.opentelemetry.io/build-tools/chloggen v0.7.0
 	go.opentelemetry.io/build-tools/multimod v0.6.0
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // No tagged version available
 )
@@ -89,7 +89,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
-	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jessevdk/go-flags v1.5.0 // indirect
 	github.com/jgautheron/goconst v1.5.1 // indirect
@@ -156,7 +156,7 @@ require (
 	github.com/sourcegraph/go-diff v0.7.0 // indirect
 	github.com/spf13/afero v1.9.3 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
-	github.com/spf13/cobra v1.6.1 // indirect
+	github.com/spf13/cobra v1.7.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.15.0 // indirect
