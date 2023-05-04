@@ -27,6 +27,7 @@ import (
 )
 
 const (
+	testLiteralHost            = "literal-host"
 	testHostID                 = "example-host-id"
 	testHostName               = "example-host-name"
 	testContainerID            = "example-container-id"
@@ -46,6 +47,20 @@ func TestSourceFromAttrs(t *testing.T) {
 		ok  bool
 		src source.Source
 	}{
+		{
+			name: "literal 'host' tag",
+			attrs: testutils.NewAttributeMap(map[string]string{
+				AttributeHost:                       testLiteralHost,
+				AttributeDatadogHostname:            testCustomName,
+				AttributeK8sNodeName:                testNodeName,
+				conventions.AttributeK8SClusterName: testClusterName,
+				conventions.AttributeContainerID:    testContainerID,
+				conventions.AttributeHostID:         testHostID,
+				conventions.AttributeHostName:       testHostName,
+			}),
+			ok:  true,
+			src: source.Source{Kind: source.HostnameKind, Identifier: testLiteralHost},
+		},
 		{
 			name: "custom hostname",
 			attrs: testutils.NewAttributeMap(map[string]string{
@@ -146,6 +161,14 @@ func TestSourceFromAttrs(t *testing.T) {
 		})
 
 	}
+}
+
+func TestLiteralHostNonString(t *testing.T) {
+	attrs := pcommon.NewMap()
+	attrs.PutInt(AttributeHost, 1000)
+	src, ok := SourceFromAttrs(attrs)
+	assert.True(t, ok)
+	assert.Equal(t, source.Source{Kind: source.HostnameKind, Identifier: "1000"}, src)
 }
 
 func TestGetClusterName(t *testing.T) {

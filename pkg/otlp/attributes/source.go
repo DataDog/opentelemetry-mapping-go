@@ -29,6 +29,9 @@ const (
 	AttributeDatadogHostname = "datadog.host.name"
 	// AttributeK8sNodeName the datadog k8s node name attribute
 	AttributeK8sNodeName = "k8s.node.name"
+	// Attribute host is a literal host tag.
+	// We check for this to avoid double tagging.
+	AttributeHost = "host"
 )
 
 func getClusterName(attrs pcommon.Map) (string, bool) {
@@ -48,15 +51,17 @@ func getClusterName(attrs pcommon.Map) (string, bool) {
 
 // hostnameFromAttributes tries to get a valid hostname from attributes by checking, in order:
 //
-//  1. a custom Datadog hostname provided by the "datadog.host.name" attribute
+//  1. the "host" attribute to avoid double tagging if present.
 //
-//  2. cloud provider specific hostname for AWS, Azure or GCP,
+//  2. a custom Datadog hostname provided by the "datadog.host.name" attribute
 //
-//  3. the Kubernetes node name (and cluster name if available),
+//  3. cloud provider specific hostname for AWS, Azure or GCP,
 //
-//  4. the cloud provider host ID and
+//  4. the Kubernetes node name (and cluster name if available),
 //
-//  5. the host.name attribute.
+//  5. the cloud provider host ID and
+//
+//  6. the host.name attribute.
 //
 //     It returns a boolean value indicated if any name was found
 func hostnameFromAttributes(attrs pcommon.Map) (string, bool) {
@@ -92,6 +97,13 @@ func k8sHostnameFromAttributes(attrs pcommon.Map) (string, bool) {
 }
 
 func unsanitizedHostnameFromAttributes(attrs pcommon.Map) (string, bool) {
+	// Literal 'host' tag. Check and use to avoid double tagging.
+	if literalHost, ok := attrs.Get(AttributeHost); ok {
+		// Use even if not a string, so that we avoid double tagging if
+		// `resource_attributes_as_tags` is true and 'host' has a non-string value.
+		return literalHost.AsString(), true
+	}
+
 	// Custom hostname: useful for overriding in k8s/cloud envs
 	if customHostname, ok := attrs.Get(AttributeDatadogHostname); ok {
 		return customHostname.Str(), true
