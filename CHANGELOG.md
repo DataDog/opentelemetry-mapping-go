@@ -21,8 +21,8 @@
 
 ### 🧰 Bug fixes 🧰
 
-- `pkg/otlp/attributes`: Handle literal 'host' attribute to avoid double tagging. (#66)
-  This avoids double tagging when using `metrics::resource_attributes_as_tags` metrics, or in all cases for traces/logs.
+- `pkg/otlp/attributes`: Handle literal 'host' attribute to avoid double tagging. (#65)
+  This avoids double tagging when using `metrics::resource_attributes_as_tags` for metrics, or in all cases for traces/logs.
 
 ## v0.1.5
 
