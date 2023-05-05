@@ -4,6 +4,26 @@
 
 <!-- next version -->
 
+## v0.2.0
+
+### 🛑 Breaking changes 🛑
+
+- `pkg/otlp/attributes`: Removed deprecated functions which use preview rules parameter. (#55)
+  Full list of removed functions can be found below.
+  - [pkg/otlp/attributes] SourceFromAttributes (=> Replaced by SourceFromAttrs)
+  - [pkg/otlp/attributes/azure] HostnameFromAttributes (=> Replaced by HostnameFromAttrs)
+  - [pkg/otlp/attributes/azure] HostInfoFromAttributes (No replacement)
+  - [pkg/otlp/attributes/ec2] HostnameFromAttributes (=> Replaced by HostnameFromAttrs)
+  - [pkg/otlp/attributes/gcp] HostnameFromAttributes (=> Replaced by HostnameFromAttrs)
+  - [pkg/otlp/attributes/gcp] HostInfoFromAttributes (=> Replaced by HostInfoFromAttrs)
+  
+- `pkg/otlp/metrics`: Removed deprecated function WithPreviewHostnameFromAttributes. (#55)
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/otlp/attributes`: Handle literal 'host' attribute to avoid double tagging. (#66)
+  This avoids double tagging when using `metrics::resource_attributes_as_tags` metrics, or in all cases for traces/logs.
+
 ## v0.1.5
 
 ### 🚩 Deprecations 🚩
