@@ -142,3 +142,43 @@ jobs:
         run: |
           cd ${{ github.head_ref }}
           make apidiff-compare APIHEADERS=~/apidiff-data
+
+  system-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install pip and aws cli
+        run: sudo apt-get install pip && pip install awscli
+      - name: Checkout Repo
+        run: cd ~ && git clone https://github.com/DataDog/system-tests.git
+      - name: Pull mitmproxy image
+        run: docker pull mitmproxy/mitmproxy
+      - name: Build
+        id: build
+        run: cd ~/system-tests && SYSTEM_TEST_BUILD_ATTEMPTS=3 ./build.sh java_otel
+      - name: Set up env vars
+        run: |
+          # oldstate="$(shopt -po xtrace)"
+          set +x
+          DD_API_KEY=$(aws ssm get-parameter --region us-east-1 --name ci.opentelemetry-mapping-go.system-tests-dd-api-key --with-decryption --query "Parameter.Value" --out text)
+          DD_APP_KEY=$(aws ssm get-parameter --region us-east-1 --name ci.opentelemetry-mapping-go.system-tests-dd-app-key --with-decryption --query "Parameter.Value" --out text)
+          DD_API_KEY_2=$(aws ssm get-parameter --region us-east-1 --name ci.opentelemetry-mapping-go.system-tests-dd-api-key-2 --with-decryption --query "Parameter.Value" --out text)
+          DD_APP_KEY_2=$(aws ssm get-parameter --region us-east-1 --name ci.opentelemetry-mapping-go.system-tests-dd-app-key-2 --with-decryption --query "Parameter.Value" --out text)
+          DD_API_KEY_3=$(aws ssm get-parameter --region us-east-1 --name ci.opentelemetry-mapping-go.system-tests-dd-api-key-3 --with-decryption --query "Parameter.Value" --out text)
+          DD_APP_KEY_3=$(aws ssm get-parameter --region us-east-1 --name ci.opentelemetry-mapping-go.system-tests-dd-app-key-3 --with-decryption --query "Parameter.Value" --out text)
+          # eval "$oldstate"
+      - name: Run OTEL_TRACING_E2E scenario
+        if: always() && steps.build.outcome == 'success'
+        run: cd ~/system-tests && ./run.sh OTEL_TRACING_E2E
+      - name: Compress logs
+        if: always() && steps.build.outcome == 'success'
+        run: tar -czvf artifact.tar.gz $(ls | grep logs)
+      - name: Upload artifact
+        if: always() && steps.build.outcome == 'success'
+        uses: actions/upload-artifact@v3
+        with:
+          name: logs_java-otel_spring-boot-native_prod
+          path: artifact.tar.gz
