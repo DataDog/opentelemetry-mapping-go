@@ -159,20 +159,17 @@ jobs:
       - name: Build
         id: build
         run: cd ~/system-tests && SYSTEM_TEST_BUILD_ATTEMPTS=3 ./build.sh java_otel
-      - name: Set up env vars
-        run: |
-          # oldstate="$(shopt -po xtrace)"
-          set +x
-          DD_API_KEY=$(aws ssm get-parameter --region us-east-1 --name ci.opentelemetry-mapping-go.system-tests-dd-api-key --with-decryption --query "Parameter.Value" --out text)
-          DD_APP_KEY=$(aws ssm get-parameter --region us-east-1 --name ci.opentelemetry-mapping-go.system-tests-dd-app-key --with-decryption --query "Parameter.Value" --out text)
-          DD_API_KEY_2=$(aws ssm get-parameter --region us-east-1 --name ci.opentelemetry-mapping-go.system-tests-dd-api-key-2 --with-decryption --query "Parameter.Value" --out text)
-          DD_APP_KEY_2=$(aws ssm get-parameter --region us-east-1 --name ci.opentelemetry-mapping-go.system-tests-dd-app-key-2 --with-decryption --query "Parameter.Value" --out text)
-          DD_API_KEY_3=$(aws ssm get-parameter --region us-east-1 --name ci.opentelemetry-mapping-go.system-tests-dd-api-key-3 --with-decryption --query "Parameter.Value" --out text)
-          DD_APP_KEY_3=$(aws ssm get-parameter --region us-east-1 --name ci.opentelemetry-mapping-go.system-tests-dd-app-key-3 --with-decryption --query "Parameter.Value" --out text)
-          # eval "$oldstate"
       - name: Run OTEL_TRACING_E2E scenario
         if: always() && steps.build.outcome == 'success'
         run: cd ~/system-tests && ./run.sh OTEL_TRACING_E2E
+        env:
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          DD_APPLICATION_KEY: ${{ secrets.DD_APP_KEY }}
+          DD_APP_KEY: ${{ secrets.DD_APP_KEY }}
+          DD_API_KEY_2: ${{ secrets.DD_API_KEY_2 }}
+          DD_APP_KEY_2: ${{ secrets.DD_APP_KEY_2 }}
+          DD_API_KEY_3: ${{ secrets.DD_API_KEY_3 }}
+          DD_APP_KEY_3: ${{ secrets.DD_APP_KEY_3 }}
       - name: Compress logs
         if: always() && steps.build.outcome == 'success'
         run: tar -czvf artifact.tar.gz $(ls | grep logs)
