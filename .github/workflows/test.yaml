@@ -170,12 +170,3 @@ jobs:
           DD_APP_KEY_2: ${{ secrets.DD_APP_KEY_2 }}
           DD_API_KEY_3: ${{ secrets.DD_API_KEY_3 }}
           DD_APP_KEY_3: ${{ secrets.DD_APP_KEY_3 }}
-      - name: Compress logs
-        if: always() && steps.build.outcome == 'success'
-        run: tar -czvf artifact.tar.gz $(ls | grep logs)
-      - name: Upload artifact
-        if: always() && steps.build.outcome == 'success'
-        uses: actions/upload-artifact@v3
-        with:
-          name: logs_java-otel_spring-boot-native_prod
-          path: artifact.tar.gz
