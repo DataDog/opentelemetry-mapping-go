@@ -4,6 +4,37 @@
 
 <!-- next version -->
 
+## v0.2.0
+
+### 🛑 Breaking changes 🛑
+
+- `pkg/otlp/attributes`: Removed deprecated functions which use preview rules parameter. (#55)
+  Full list of removed functions can be found below.
+  - [pkg/otlp/attributes] SourceFromAttributes (=> Replaced by SourceFromAttrs)
+  - [pkg/otlp/attributes/azure] HostnameFromAttributes (=> Replaced by HostnameFromAttrs)
+  - [pkg/otlp/attributes/azure] HostInfoFromAttributes (No replacement)
+  - [pkg/otlp/attributes/ec2] HostnameFromAttributes (=> Replaced by HostnameFromAttrs)
+  - [pkg/otlp/attributes/gcp] HostnameFromAttributes (=> Replaced by HostnameFromAttrs)
+  - [pkg/otlp/attributes/gcp] HostInfoFromAttributes (=> Replaced by HostInfoFromAttrs)
+  
+- `pkg/otlp/metrics`: Removed deprecated function WithPreviewHostnameFromAttributes. (#55)
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/otlp/attributes`: Handle literal 'host' attribute to avoid double tagging. (#65)
+  This avoids double tagging when using `metrics::resource_attributes_as_tags` for metrics, or in all cases for traces/logs.
+
+## v0.1.5
+
+### 🚩 Deprecations 🚩
+
+- `pkg/otlp/metrics`: Deprecate and remove usage of WithPreviewHostnameFromAttributes (#48)
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics`: Use minimum and maximum values from cumulative OTLP Histograms. (#26)
+  - Values are used only when we can assume they are from the last time window or otherwise to clamp estimates.
+
 ## v0.1.4
 
 ### 🚩 Deprecations 🚩

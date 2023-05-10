@@ -16,4 +16,5 @@ import (
 	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
 	_ "go.opentelemetry.io/build-tools/chloggen"
 	_ "go.opentelemetry.io/build-tools/multimod"
+	_ "golang.org/x/exp/cmd/apidiff"
 )

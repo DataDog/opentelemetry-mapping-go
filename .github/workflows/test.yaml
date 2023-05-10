@@ -5,6 +5,7 @@ on:
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+*"
   pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
@@ -17,7 +18,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
       - name: Setup Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
           go-version: 1.19
       - name: Cache Go
@@ -45,7 +46,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
       - name: Setup Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go-version }}
       - name: Cache Go
@@ -71,7 +72,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
       - name: Setup Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
           go-version: 1.19
       - name: Cache Go
@@ -95,3 +96,49 @@ jobs:
         run: make gen-licenses && git diff -s --exit-code || (echo "make gen-licenses needed"; exit 1)
       - name: Check golangci-lint
         run: make lint
+
+  breaking-changes:
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'breaking-change') && github.event_name == 'pull_request'}}
+    needs: [setup-environment]
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v3
+        with: 
+          ref: ${{ github.base_ref }}
+          path: ${{ github.base_ref }}
+
+      - name: Checkout HEAD
+        uses: actions/checkout@v3
+        with: 
+          ref: ${{ github.head_ref }}
+          path: ${{ github.head_ref }}
+
+      - name: Cache Go
+        id: go-cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/bin
+            ~/go/pkg/mod
+          key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.19
+
+      - name: Install tools
+        run: |
+          cd ${{ github.head_ref }}
+          make install-tools
+
+      - name: Generate-States
+        run: |
+          cd ${{ github.base_ref }}
+          make apidiff-generate APIHEADERS=~/apidiff-data
+          
+      - name: Compare-States
+        run: |
+          cd ${{ github.head_ref }}
+          make apidiff-compare APIHEADERS=~/apidiff-data

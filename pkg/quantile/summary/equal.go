@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	ulpLimit = 128
+	ulpLimit = 256
 )
 
 // ulpDistance is the absolute difference in units of least precision.

@@ -17,7 +17,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	conventions "go.opentelemetry.io/collector/semconv/v1.6.1"
 
@@ -37,58 +36,6 @@ var (
 	})
 	testEmpty = testutils.NewAttributeMap(map[string]string{})
 )
-
-func TestHostInfoFromAttributes(t *testing.T) {
-	tests := []struct {
-		name       string
-		attrs      pcommon.Map
-		usePreview bool
-
-		ok       bool
-		hostname string
-		aliases  []string
-	}{
-		{
-			name:  "all attributes",
-			attrs: testAttrs,
-
-			ok:       true,
-			hostname: testHostname,
-			aliases:  []string{testVMID},
-		},
-		{
-			name:  "empty",
-			attrs: testEmpty,
-		},
-		{
-			name:       "all attributes with preview",
-			attrs:      testAttrs,
-			usePreview: true,
-
-			ok:       true,
-			hostname: testVMID,
-		},
-		{
-			name:       "empty with preview",
-			attrs:      testEmpty,
-			usePreview: true,
-		},
-	}
-
-	for _, testInstance := range tests {
-		t.Run(testInstance.name, func(t *testing.T) {
-			hostInfo := HostInfoFromAttributes(testInstance.attrs, testInstance.usePreview)
-			require.NotNil(t, hostInfo)
-			assert.ElementsMatch(t, testInstance.aliases, hostInfo.HostAliases)
-			hostname, ok := HostnameFromAttributes(testInstance.attrs, testInstance.usePreview)
-
-			assert.Equal(t, testInstance.ok, ok)
-			if testInstance.ok || ok {
-				assert.Equal(t, testInstance.hostname, hostname)
-			}
-		})
-	}
-}
 
 func TestClusterNameFromAttributes(t *testing.T) {
 	cluster, ok := ClusterNameFromAttributes(testutils.NewAttributeMap(map[string]string{

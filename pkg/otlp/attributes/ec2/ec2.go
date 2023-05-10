@@ -46,24 +46,6 @@ func isDefaultHostname(hostname string) bool {
 	return false
 }
 
-// HostnameFromAttributes gets a valid hostname from labels if
-// available.
-// Deprecated: HostnameFromAttributes is deprecated in favor of
-// HostnameFromAttrs which removes parameter usePreviewRules.
-func HostnameFromAttributes(attrs pcommon.Map, usePreviewRules bool) (string, bool) {
-	hostName, ok := attrs.Get(conventions.AttributeHostName)
-	// With hostname preview rules, return the EC2 instance id always.
-	if !usePreviewRules && ok && !isDefaultHostname(hostName.Str()) {
-		return hostName.Str(), true
-	}
-
-	if hostID, ok := attrs.Get(conventions.AttributeHostID); ok {
-		return hostID.Str(), true
-	}
-
-	return "", false
-}
-
 // HostnameFromAttrs gets a valid hostname from labels
 // if available
 func HostnameFromAttrs(attrs pcommon.Map) (string, bool) {

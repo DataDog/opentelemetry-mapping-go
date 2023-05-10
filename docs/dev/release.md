@@ -5,15 +5,15 @@ As a prerequisite, run `make install-tools` to ensure the necessary tooling is a
 
 To make a new release, follow these steps:
 
-0. Make sure CI passes and there are no release blockers.
+0. Make sure CI passes on [main](https://github.com/DataDog/opentelemetry-mapping-go/actions/workflows/test.yaml?query=branch%3Amain) and there are no release blockers.
 1. Choose the new version number, `${VERSION}`. We follow semantic versioning and are currently doing `v0.x.y` releases.
 2. Checkout to a new branch.
 3. Update the version number on `versions.yaml` and commit the changes.
 4. Run `chloggen update -v ${VERSION}` to update the changelog and commit the changes.
 5. Run `make prerelease` and checkout to the branch created by this step. Open a PR to `main` from this branch and get it merged.
-6. Checkout and pull the main branch locally. Make sure that it points to the commit from the previously merged PR.
+6. Checkout and pull the main branch locally. Run `git show HEAD` and make sure that it points to the commit from the previously merged PR.
 7. Run `make push-tags` to push the tags.
-8. Check that the new version is available on the Github repository.
+8. Check that the new version is available on the [Github repository](https://github.com/DataDog/opentelemetry-mapping-go/tags).
 
 ## What to do if something goes wrong
 

@@ -25,6 +25,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
+	"golang.org/x/exp/slices"
 
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
@@ -32,62 +33,6 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics/internal/instrumentationscope"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 )
-
-// runtimeMetricMapping defines the fields needed to map OTel runtime metrics to their equivalent
-// Datadog runtime metrics
-type runtimeMetricMapping struct {
-	mappedName     string // the Datadog runtime metric name
-	attribute      string // the name of the attribute this metric originates from
-	attributeValue string // the value of the above attribute that corresponds with this metric
-}
-
-// runtimeMetricsMappings defines the mappings from OTel runtime metric names to their
-// equivalent Datadog runtime metric names
-var runtimeMetricsMappings = map[string][]runtimeMetricMapping{
-	"process.runtime.go.goroutines":                        {{mappedName: "runtime.go.num_goroutine"}},
-	"process.runtime.go.cgo.calls":                         {{mappedName: "runtime.go.num_cgo_call"}},
-	"process.runtime.go.lookups":                           {{mappedName: "runtime.go.mem_stats.lookups"}},
-	"process.runtime.go.mem.heap_alloc":                    {{mappedName: "runtime.go.mem_stats.heap_alloc"}},
-	"process.runtime.go.mem.heap_sys":                      {{mappedName: "runtime.go.mem_stats.heap_sys"}},
-	"process.runtime.go.mem.heap_idle":                     {{mappedName: "runtime.go.mem_stats.heap_idle"}},
-	"process.runtime.go.mem.heap_inuse":                    {{mappedName: "runtime.go.mem_stats.heap_inuse"}},
-	"process.runtime.go.mem.heap_released":                 {{mappedName: "runtime.go.mem_stats.heap_released"}},
-	"process.runtime.go.mem.heap_objects":                  {{mappedName: "runtime.go.mem_stats.heap_objects"}},
-	"process.runtime.go.gc.pause_total_ns":                 {{mappedName: "runtime.go.mem_stats.pause_total_ns"}},
-	"process.runtime.go.gc.count":                          {{mappedName: "runtime.go.mem_stats.num_gc"}},
-	"process.runtime.dotnet.monitor.lock_contention.count": {{mappedName: "runtime.dotnet.threads.contention_count"}},
-	"process.runtime.dotnet.exceptions.count":              {{mappedName: "runtime.dotnet.exceptions.count"}},
-	"process.runtime.dotnet.gc.heap.size": {{
-		mappedName:     "runtime.dotnet.gc.size.gen0",
-		attribute:      "generation",
-		attributeValue: "gen0",
-	}, {
-		mappedName:     "runtime.dotnet.gc.size.gen1",
-		attribute:      "generation",
-		attributeValue: "gen1",
-	}, {
-		mappedName:     "runtime.dotnet.gc.size.gen2",
-		attribute:      "generation",
-		attributeValue: "gen2",
-	}, {
-		mappedName:     "runtime.dotnet.gc.size.loh",
-		attribute:      "generation",
-		attributeValue: "loh",
-	}},
-	"process.runtime.dotnet.gc.collections.count": {{
-		mappedName:     "runtime.dotnet.gc.count.gen0",
-		attribute:      "generation",
-		attributeValue: "gen0",
-	}, {
-		mappedName:     "runtime.dotnet.gc.count.gen1",
-		attribute:      "generation",
-		attributeValue: "gen1",
-	}, {
-		mappedName:     "runtime.dotnet.gc.count.gen2",
-		attribute:      "generation",
-		attributeValue: "gen2",
-	}},
-}
 
 const (
 	metricName             string = "metric name"
@@ -251,7 +196,16 @@ type histogramInfo struct {
 	sum float64
 	// count of histogram (exact)
 	count uint64
-	// ok to use
+
+	// hasMinFromLastTimeWindow indicates whether the minimum was reached in the last time window.
+	// If the minimum is NOT available, its value is false.
+	hasMinFromLastTimeWindow bool
+
+	// hasMaxFromLastTimeWindow indicates whether the maximum was reached in the last time window.
+	// If the maximum is NOT available, its value is false.
+	hasMaxFromLastTimeWindow bool
+
+	// ok to use sum/count.
 	ok bool
 }
 
@@ -303,11 +257,21 @@ func (t *Translator) getSketchBuckets(
 			sketch.Basic.Sum = histInfo.sum
 			sketch.Basic.Avg = sketch.Basic.Sum / float64(sketch.Basic.Cnt)
 		}
-		if delta && p.HasMin() {
+
+		if histInfo.hasMinFromLastTimeWindow {
+			// We know exact minimum for the last time window.
 			sketch.Basic.Min = p.Min()
+		} else if p.HasMin() {
+			// Clamp minimum with the global minimum (p.Min()) to account for sketch mapping error.
+			sketch.Basic.Min = math.Max(p.Min(), sketch.Basic.Min)
 		}
-		if delta && p.HasMax() {
+
+		if histInfo.hasMaxFromLastTimeWindow {
+			// We know exact maximum for the last time window.
 			sketch.Basic.Max = p.Max()
+		} else if p.HasMax() {
+			// Clamp maximum with global maximum (p.Max()) to account for sketch mapping error.
+			sketch.Basic.Max = math.Min(p.Max(), sketch.Basic.Max)
 		}
 
 		consumer.ConsumeSketch(ctx, pointDims, ts, sketch)
@@ -392,18 +356,31 @@ func (t *Translator) mapHistogramMetrics(
 			histInfo.ok = false
 		}
 
+		minDims := pointDims.WithSuffix("min")
+		if p.HasMin() {
+			histInfo.hasMinFromLastTimeWindow = delta || t.prevPts.PutAndCheckMin(minDims, startTs, ts, p.Min())
+		}
+
+		maxDims := pointDims.WithSuffix("max")
+		if p.HasMax() {
+			histInfo.hasMaxFromLastTimeWindow = delta || t.prevPts.PutAndCheckMax(maxDims, startTs, ts, p.Max())
+		}
+
 		if t.cfg.SendHistogramAggregations && histInfo.ok {
 			// We only send the sum and count if both values were ok.
 			consumer.ConsumeTimeSeries(ctx, countDims, Count, ts, float64(histInfo.count))
 			consumer.ConsumeTimeSeries(ctx, sumDims, Count, ts, histInfo.sum)
 
 			if delta {
+				// We could check is[Min/Max]FromLastTimeWindow here, and report the minimum/maximum
+				// for cumulative timeseries when we know it. These would be metrics with progressively
+				// less frequency which would be confusing, so we limit reporting these metrics to delta points,
+				// where the min/max is (pressumably) available in either all or none of the points.
+
 				if p.HasMin() {
-					minDims := pointDims.WithSuffix("min")
 					consumer.ConsumeTimeSeries(ctx, minDims, Gauge, ts, p.Min())
 				}
 				if p.HasMax() {
-					maxDims := pointDims.WithSuffix("max")
 					consumer.ConsumeTimeSeries(ctx, maxDims, Gauge, ts, p.Max())
 				}
 			}
@@ -494,7 +471,7 @@ func (t *Translator) mapSummaryMetrics(
 }
 
 func (t *Translator) source(m pcommon.Map) (source.Source, error) {
-	src, ok := attributes.SourceFromAttributes(m, t.cfg.previewHostnameFromAttributes)
+	src, ok := attributes.SourceFromAttrs(m)
 	if !ok {
 		var err error
 		src, err = t.cfg.fallbackSourceProvider.Source(context.Background())
@@ -507,12 +484,28 @@ func (t *Translator) source(m pcommon.Map) (source.Source, error) {
 
 // mapGaugeRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Gauge metric
 func mapGaugeRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
-	cp := metricsArray.AppendEmpty()
-	cp.SetEmptyGauge()
 	for i := 0; i < md.Gauge().DataPoints().Len(); i++ {
-		attribute, res := md.Gauge().DataPoints().At(i).Attributes().Get(mp.attribute)
-		if res && attribute.AsString() == mp.attributeValue {
-			md.Gauge().DataPoints().At(i).CopyTo(cp.Gauge().DataPoints().AppendEmpty())
+		matchesAttributes := true
+		for _, attribute := range mp.attributes {
+			attributeValue, res := md.Gauge().DataPoints().At(i).Attributes().Get(attribute.key)
+			if !res || !slices.Contains(attribute.values, attributeValue.AsString()) {
+				matchesAttributes = false
+				break
+			}
+		}
+		if matchesAttributes {
+			cp := metricsArray.AppendEmpty()
+			cp.SetEmptyGauge()
+			dataPoint := cp.Gauge().DataPoints().AppendEmpty()
+			md.Gauge().DataPoints().At(i).CopyTo(dataPoint)
+			dataPoint.Attributes().RemoveIf(func(s string, value pcommon.Value) bool {
+				for _, attribute := range mp.attributes {
+					if s == attribute.key {
+						return true
+					}
+				}
+				return false
+			})
 			cp.SetName(mp.mappedName)
 		}
 	}
@@ -520,15 +513,62 @@ func mapGaugeRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric
 
 // mapSumRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Sum metric
 func mapSumRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
-	cp := metricsArray.AppendEmpty()
-	cp.SetEmptySum()
-	cp.Sum().SetAggregationTemporality(md.Sum().AggregationTemporality())
-	cp.Sum().SetIsMonotonic(md.Sum().IsMonotonic())
 	for i := 0; i < md.Sum().DataPoints().Len(); i++ {
-		attribute, res := md.Sum().DataPoints().At(i).Attributes().Get(mp.attribute)
-		if res && attribute.AsString() == mp.attributeValue {
-			md.Sum().DataPoints().At(i).CopyTo(cp.Sum().DataPoints().AppendEmpty())
+		matchesAttributes := true
+		for _, attribute := range mp.attributes {
+			attributeValue, res := md.Sum().DataPoints().At(i).Attributes().Get(attribute.key)
+			if !res || !slices.Contains(attribute.values, attributeValue.AsString()) {
+				matchesAttributes = false
+				break
+			}
+		}
+		if matchesAttributes {
+			cp := metricsArray.AppendEmpty()
+			cp.SetEmptySum()
+			cp.Sum().SetAggregationTemporality(md.Sum().AggregationTemporality())
+			cp.Sum().SetIsMonotonic(md.Sum().IsMonotonic())
+			dataPoint := cp.Sum().DataPoints().AppendEmpty()
+			md.Sum().DataPoints().At(i).CopyTo(dataPoint)
+			dataPoint.Attributes().RemoveIf(func(s string, value pcommon.Value) bool {
+				for _, attribute := range mp.attributes {
+					if s == attribute.key {
+						return true
+					}
+				}
+				return false
+			})
 			cp.SetName(mp.mappedName)
+		}
+	}
+}
+
+// mapHistogramRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Histogram metric
+func mapHistogramRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
+	for i := 0; i < md.Histogram().DataPoints().Len(); i++ {
+		matchesAttributes := true
+		for _, attribute := range mp.attributes {
+			attributeValue, res := md.Histogram().DataPoints().At(i).Attributes().Get(attribute.key)
+			if !res || !slices.Contains(attribute.values, attributeValue.AsString()) {
+				matchesAttributes = false
+				break
+			}
+		}
+		if matchesAttributes {
+			cp := metricsArray.AppendEmpty()
+			cp.SetEmptyHistogram()
+			cp.Histogram().SetAggregationTemporality(md.Histogram().AggregationTemporality())
+			dataPoint := cp.Histogram().DataPoints().AppendEmpty()
+			md.Histogram().DataPoints().At(i).CopyTo(dataPoint)
+			dataPoint.Attributes().RemoveIf(func(s string, value pcommon.Value) bool {
+				for _, attribute := range mp.attributes {
+					if s == attribute.key {
+						return true
+					}
+				}
+				return false
+			})
+			cp.SetName(mp.mappedName)
+			break
 		}
 	}
 }
@@ -584,7 +624,7 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 				md := metricsArray.At(k)
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
 					for _, mp := range v {
-						if mp.attribute == "" {
+						if mp.attributes == nil {
 							// duplicate runtime metrics as Datadog runtime metrics
 							cp := metricsArray.AppendEmpty()
 							md.CopyTo(cp)
@@ -595,6 +635,8 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 							mapSumRuntimeMetricWithAttributes(md, metricsArray, mp)
 						} else if md.Type() == pmetric.MetricTypeGauge {
 							mapGaugeRuntimeMetricWithAttributes(md, metricsArray, mp)
+						} else if md.Type() == pmetric.MetricTypeHistogram {
+							mapHistogramRuntimeMetricWithAttributes(md, metricsArray, mp)
 						}
 					}
 				}

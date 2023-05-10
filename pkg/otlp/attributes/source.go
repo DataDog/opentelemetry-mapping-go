@@ -29,6 +29,9 @@ const (
 	AttributeDatadogHostname = "datadog.host.name"
 	// AttributeK8sNodeName the datadog k8s node name attribute
 	AttributeK8sNodeName = "k8s.node.name"
+	// Attribute host is a literal host tag.
+	// We check for this to avoid double tagging.
+	AttributeHost = "host"
 )
 
 func getClusterName(attrs pcommon.Map) (string, bool) {
@@ -48,20 +51,20 @@ func getClusterName(attrs pcommon.Map) (string, bool) {
 
 // hostnameFromAttributes tries to get a valid hostname from attributes by checking, in order:
 //
-//  1. a custom Datadog hostname provided by the "datadog.host.name" attribute
+//  1. the "host" attribute to avoid double tagging if present.
 //
-//  2. the Kubernetes node name (and cluster name if available),
+//  2. a custom Datadog hostname provided by the "datadog.host.name" attribute
 //
-//  3. cloud provider specific hostname for AWS or GCP
+//  3. cloud provider specific hostname for AWS, Azure or GCP,
 //
-//  4. the container ID,
+//  4. the Kubernetes node name (and cluster name if available),
 //
 //  5. the cloud provider host ID and
 //
 //  6. the host.name attribute.
 //
 //     It returns a boolean value indicated if any name was found
-func hostnameFromAttributes(attrs pcommon.Map, usePreviewRules bool) (string, bool) {
+func hostnameFromAttributes(attrs pcommon.Map) (string, bool) {
 	// Check if the host is localhost or 0.0.0.0, if so discard it.
 	// We don't do the more strict validation done for metadata,
 	// to avoid breaking users existing invalid-but-accepted hostnames.
@@ -74,7 +77,7 @@ func hostnameFromAttributes(attrs pcommon.Map, usePreviewRules bool) (string, bo
 		"ip6-localhost":           {},
 	}
 
-	candidateHost, ok := unsanitizedHostnameFromAttributes(attrs, usePreviewRules)
+	candidateHost, ok := unsanitizedHostnameFromAttributes(attrs)
 	if _, invalid := invalidHosts[candidateHost]; invalid {
 		return "", false
 	}
@@ -93,7 +96,14 @@ func k8sHostnameFromAttributes(attrs pcommon.Map) (string, bool) {
 	return node.Str(), true
 }
 
-func unsanitizedHostnameFromAttributes(attrs pcommon.Map, usePreviewRules bool) (string, bool) {
+func unsanitizedHostnameFromAttributes(attrs pcommon.Map) (string, bool) {
+	// Literal 'host' tag. Check and use to avoid double tagging.
+	if literalHost, ok := attrs.Get(AttributeHost); ok {
+		// Use even if not a string, so that we avoid double tagging if
+		// `resource_attributes_as_tags` is true and 'host' has a non-string value.
+		return literalHost.AsString(), true
+	}
+
 	// Custom hostname: useful for overriding in k8s/cloud envs
 	if customHostname, ok := attrs.Get(AttributeDatadogHostname); ok {
 		return customHostname.Str(), true
@@ -104,28 +114,19 @@ func unsanitizedHostnameFromAttributes(attrs pcommon.Map, usePreviewRules bool) 
 		return "", false
 	}
 
-	// Kubernetes: node-cluster if cluster name is available, else node
-	k8sName, k8sOk := k8sHostnameFromAttributes(attrs)
-
-	// If not using the preview rules, return the Kubernetes node name
-	// before cloud provider names to preserve the current behavior.
-	if !usePreviewRules && k8sOk {
-		return k8sName, true
-	}
-
 	cloudProvider, ok := attrs.Get(conventions.AttributeCloudProvider)
 	switch {
 	case ok && cloudProvider.Str() == conventions.AttributeCloudProviderAWS:
-		return ec2.HostnameFromAttributes(attrs, usePreviewRules)
+		return ec2.HostnameFromAttrs(attrs)
 	case ok && cloudProvider.Str() == conventions.AttributeCloudProviderGCP:
-		return gcp.HostnameFromAttributes(attrs, usePreviewRules)
+		return gcp.HostnameFromAttrs(attrs)
 	case ok && cloudProvider.Str() == conventions.AttributeCloudProviderAzure:
-		return azure.HostnameFromAttributes(attrs, usePreviewRules)
+		return azure.HostnameFromAttrs(attrs)
 	}
 
-	// If using the preview rules, the cloud provider names take precedence.
-	// This is to report the same hostname as Datadog cloud integrations.
-	if usePreviewRules && k8sOk {
+	// Kubernetes: node-cluster if cluster name is available, else node
+	k8sName, k8sOk := k8sHostnameFromAttributes(attrs)
+	if k8sOk {
 		return k8sName, true
 	}
 
@@ -139,30 +140,7 @@ func unsanitizedHostnameFromAttributes(attrs pcommon.Map, usePreviewRules bool) 
 		return hostName.Str(), true
 	}
 
-	if !usePreviewRules {
-		// container id (e.g. from Docker)
-		if containerID, ok := attrs.Get(conventions.AttributeContainerID); ok {
-			return containerID.Str(), true
-		}
-	}
-
 	return "", false
-}
-
-// SourceFromAttributes gets a telemetry signal source from its attributes.
-// Deprecated: SourceFromAttributes is deprecated in favor of SourceFromAttrs which removes parameter usePreviewRules.
-func SourceFromAttributes(attrs pcommon.Map, usePreviewRules bool) (source.Source, bool) {
-	if launchType, ok := attrs.Get(conventions.AttributeAWSECSLaunchtype); ok && launchType.Str() == conventions.AttributeAWSECSLaunchtypeFargate {
-		if taskARN, ok := attrs.Get(conventions.AttributeAWSECSTaskARN); ok {
-			return source.Source{Kind: source.AWSECSFargateKind, Identifier: taskARN.Str()}, true
-		}
-	}
-
-	if host, ok := hostnameFromAttributes(attrs, usePreviewRules); ok {
-		return source.Source{Kind: source.HostnameKind, Identifier: host}, true
-	}
-
-	return source.Source{}, false
 }
 
 // SourceFromAttrs gets a telemetry signal source from its attributes.
@@ -173,7 +151,7 @@ func SourceFromAttrs(attrs pcommon.Map) (source.Source, bool) {
 		}
 	}
 
-	if host, ok := hostnameFromAttributes(attrs, true); ok {
+	if host, ok := hostnameFromAttributes(attrs); ok {
 		return source.Source{Kind: source.HostnameKind, Identifier: host}, true
 	}
 
