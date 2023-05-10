@@ -34,7 +34,6 @@ var goRuntimeMetricsMappings = runtimeMetricMappingList{
 }
 
 var dotnetRuntimeMetricsMappings = runtimeMetricMappingList{
-	"process.runtime.dotnet.thread_pool.threads.count":     {{mappedName: "runtime.dotnet.threads.count"}},
 	"process.runtime.dotnet.monitor.lock_contention.count": {{mappedName: "runtime.dotnet.threads.contention_count"}},
 	"process.runtime.dotnet.exceptions.count":              {{mappedName: "runtime.dotnet.exceptions.count"}},
 	"process.runtime.dotnet.gc.heap.size": {{
