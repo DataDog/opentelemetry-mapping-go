@@ -428,3 +428,27 @@ func BenchmarkMapDeltaSumMetrics10000000(b *testing.B) {
 
 	benchmarkMapMetrics(metrics, b)
 }
+
+func BenchmarkMapRuntimeMetricsHasMapping(b *testing.B) {
+	ctx := context.Background()
+	tr := newBenchmarkTranslator(b, zap.NewNop())
+	consumer := &mockFullConsumer{}
+	exampleDims = newDims("process.runtime.go.goroutines")
+	for i := 0; i < b.N; i++ {
+		if err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkMapRuntimeMetricsHasNoMapping(b *testing.B) {
+	ctx := context.Background()
+	tr := newBenchmarkTranslator(b, zap.NewNop())
+	consumer := &mockFullConsumer{}
+	exampleDims = newDims("process.runtime.java.goroutines")
+	for i := 0; i < b.N; i++ {
+		if err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
