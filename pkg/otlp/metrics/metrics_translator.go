@@ -49,9 +49,10 @@ func (*noSourceProvider) Source(context.Context) (source.Source, error) {
 
 // Translator is a metrics translator.
 type Translator struct {
-	prevPts *ttlCache
-	logger  *zap.Logger
-	cfg     translatorConfig
+	prevPts           *ttlCache
+	logger            *zap.Logger
+	cfg               translatorConfig
+	hasRuntimeMetrics bool
 }
 
 // NewTranslator creates a new translator with given options.
@@ -81,9 +82,10 @@ func NewTranslator(logger *zap.Logger, options ...TranslatorOption) (*Translator
 
 	cache := newTTLCache(cfg.sweepInterval, cfg.deltaTTL)
 	return &Translator{
-		prevPts: cache,
-		logger:  logger.With(zap.String("component", "metrics translator")),
-		cfg:     cfg,
+		prevPts:           cache,
+		logger:            logger.With(zap.String("component", "metrics translator")),
+		cfg:               cfg,
+		hasRuntimeMetrics: false,
 	}, nil
 }
 
@@ -575,6 +577,7 @@ func mapHistogramRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pme
 
 // MapMetrics maps OTLP metrics into the DataDog format
 func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consumer Consumer) error {
+	t.hasRuntimeMetrics = false
 	rms := md.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
@@ -623,6 +626,7 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			for k := 0; k < metricsArray.Len(); k++ {
 				md := metricsArray.At(k)
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
+					t.hasRuntimeMetrics = true
 					for _, mp := range v {
 						if mp.attributes == nil {
 							// duplicate runtime metrics as Datadog runtime metrics
