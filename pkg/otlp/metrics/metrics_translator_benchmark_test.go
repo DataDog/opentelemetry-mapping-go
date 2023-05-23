@@ -28,6 +28,11 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 )
 
+const (
+	runtimeMetricWithMapping = "process.runtime.dotnet.gc.heap.size"
+	runtimeMetricNoMapping   = "dotnet.gc.heap.size"
+)
+
 var inputTable = []struct {
 	input int
 }{
@@ -502,10 +507,10 @@ func BenchmarkMapDeltaSumMetrics10000000(b *testing.B) {
 func BenchmarkMapSumRuntimeMetric(b *testing.B) {
 	for _, v := range inputTable {
 		b.Run(fmt.Sprintf("BenchmarkMapRuntimeMetricsHasMapping-%d", v.input), func(b *testing.B) {
-			benchmarkMapMetrics(createBenchmarkRuntimeMetric("process.runtime.go.goroutines", pmetric.MetricTypeSum, nil, v.input), b)
+			benchmarkMapMetrics(createBenchmarkRuntimeMetric(runtimeMetricWithMapping, pmetric.MetricTypeSum, nil, v.input), b)
 		})
 		b.Run(fmt.Sprintf("BenchmarkMapRuntimeMetricsNoMapping-%d", v.input), func(b *testing.B) {
-			benchmarkMapMetrics(createBenchmarkRuntimeMetric("go.goroutines", pmetric.MetricTypeSum, nil, v.input), b)
+			benchmarkMapMetrics(createBenchmarkRuntimeMetric(runtimeMetricNoMapping, pmetric.MetricTypeSum, nil, v.input), b)
 		})
 	}
 }
@@ -518,10 +523,10 @@ func BenchmarkMapGaugeRuntimeMetricWithAttributesHasMapping(b *testing.B) {
 
 	for _, v := range inputTable {
 		b.Run(fmt.Sprintf("BenchmarkMapGaugeRuntimeMetricWithAttributesHasMapping-%d", v.input), func(b *testing.B) {
-			benchmarkMapMetrics(createBenchmarkRuntimeMetric("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeGauge, attr, v.input), b)
+			benchmarkMapMetrics(createBenchmarkRuntimeMetric(runtimeMetricWithMapping, pmetric.MetricTypeGauge, attr, v.input), b)
 		})
 		b.Run(fmt.Sprintf("BenchmarkMapGaugeRuntimeMetricWithAttributesNoMapping-%d", v.input), func(b *testing.B) {
-			benchmarkMapMetrics(createBenchmarkRuntimeMetric("dotnet.gc.heap.size", pmetric.MetricTypeGauge, attr, v.input), b)
+			benchmarkMapMetrics(createBenchmarkRuntimeMetric(runtimeMetricNoMapping, pmetric.MetricTypeGauge, attr, v.input), b)
 		})
 	}
 }
@@ -537,10 +542,10 @@ func BenchmarkMapGaugeRuntimeMetricWith10AttributesHasMapping(b *testing.B) {
 
 	for _, v := range inputTable {
 		b.Run(fmt.Sprintf("BenchmarkMapGaugeRuntimeMetricWith10AttributesHasMapping-%d", v.input), func(b *testing.B) {
-			benchmarkMapMetrics(createBenchmarkRuntimeMetric("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeGauge, attr, v.input), b)
+			benchmarkMapMetrics(createBenchmarkRuntimeMetric(runtimeMetricWithMapping, pmetric.MetricTypeGauge, attr, v.input), b)
 		})
 		b.Run(fmt.Sprintf("BenchmarkMapGaugeRuntimeMetricWith10AttributesNoMapping-%d", v.input), func(b *testing.B) {
-			benchmarkMapMetrics(createBenchmarkRuntimeMetric("dotnet.gc.heap.size", pmetric.MetricTypeGauge, attr, v.input), b)
+			benchmarkMapMetrics(createBenchmarkRuntimeMetric(runtimeMetricNoMapping, pmetric.MetricTypeGauge, attr, v.input), b)
 		})
 	}
 }
@@ -556,10 +561,10 @@ func BenchmarkMapGaugeRuntimeMetricWith100AttributesHasMapping(b *testing.B) {
 
 	for _, v := range inputTable {
 		b.Run(fmt.Sprintf("BenchmarkMapGaugeRuntimeMetricWith100AttributesHasMapping-%d", v.input), func(b *testing.B) {
-			benchmarkMapMetrics(createBenchmarkRuntimeMetric("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeGauge, attr, v.input), b)
+			benchmarkMapMetrics(createBenchmarkRuntimeMetric(runtimeMetricWithMapping, pmetric.MetricTypeGauge, attr, v.input), b)
 		})
 		b.Run(fmt.Sprintf("BenchmarkMapGaugeRuntimeMetricWith100AttributesNoMapping-%d", v.input), func(b *testing.B) {
-			benchmarkMapMetrics(createBenchmarkRuntimeMetric("dotnet.gc.heap.size", pmetric.MetricTypeGauge, attr, v.input), b)
+			benchmarkMapMetrics(createBenchmarkRuntimeMetric(runtimeMetricNoMapping, pmetric.MetricTypeGauge, attr, v.input), b)
 		})
 	}
 }
