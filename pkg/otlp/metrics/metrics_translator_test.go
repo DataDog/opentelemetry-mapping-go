@@ -16,7 +16,6 @@ package metrics
 
 import (
 	"context"
-	"fmt"
 	"math"
 	"testing"
 	"time"
@@ -471,7 +470,6 @@ func TestMapHistogramRuntimeMetricHasMapping(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	fmt.Println(consumer.metrics)
 
 	if err := tr.MapMetrics(ctx, createTestHistogramMetric("process.runtime.jvm.gc.duration"), consumer); err != nil {
 		t.Fatal(err)
