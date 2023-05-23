@@ -49,10 +49,9 @@ func (*noSourceProvider) Source(context.Context) (source.Source, error) {
 
 // Translator is a metrics translator.
 type Translator struct {
-	prevPts           *ttlCache
-	logger            *zap.Logger
-	cfg               translatorConfig
-	hasRuntimeMetrics bool
+	prevPts *ttlCache
+	logger  *zap.Logger
+	cfg     translatorConfig
 }
 
 // NewTranslator creates a new translator with given options.
@@ -82,10 +81,9 @@ func NewTranslator(logger *zap.Logger, options ...TranslatorOption) (*Translator
 
 	cache := newTTLCache(cfg.sweepInterval, cfg.deltaTTL)
 	return &Translator{
-		prevPts:           cache,
-		logger:            logger.With(zap.String("component", "metrics translator")),
-		cfg:               cfg,
-		hasRuntimeMetrics: false,
+		prevPts: cache,
+		logger:  logger.With(zap.String("component", "metrics translator")),
+		cfg:     cfg,
 	}, nil
 }
 
@@ -576,8 +574,8 @@ func mapHistogramRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pme
 }
 
 // MapMetrics maps OTLP metrics into the DataDog format
-func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consumer Consumer) error {
-	t.hasRuntimeMetrics = false
+func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consumer Consumer) (bool, error) {
+	hasRuntimeMetrics := false
 	rms := md.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
@@ -585,14 +583,14 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			// these resource metrics are an APM Stats payload; consume it as such
 			sp, err := t.statsPayloadFromMetrics(rm)
 			if err != nil {
-				return fmt.Errorf("error extracting APM Stats from Metrics: %w", err)
+				return hasRuntimeMetrics, fmt.Errorf("error extracting APM Stats from Metrics: %w", err)
 			}
 			consumer.ConsumeAPMStats(sp)
 			continue
 		}
 		src, err := t.source(rm.Resource().Attributes())
 		if err != nil {
-			return err
+			return hasRuntimeMetrics, err
 		}
 		var host string
 		switch src.Kind {
@@ -626,7 +624,7 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			for k := 0; k < metricsArray.Len(); k++ {
 				md := metricsArray.At(k)
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
-					t.hasRuntimeMetrics = true
+					hasRuntimeMetrics = true
 					for _, mp := range v {
 						if mp.attributes == nil {
 							// duplicate runtime metrics as Datadog runtime metrics
@@ -703,5 +701,5 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			}
 		}
 	}
-	return nil
+	return hasRuntimeMetrics, nil
 }
