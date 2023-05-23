@@ -573,7 +573,7 @@ func mapHistogramRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pme
 	}
 }
 
-// MapMetrics maps OTLP metrics into the DataDog format
+// MapMetrics maps OTLP metrics into the DataDog format, returns true if mapping runtime metrics
 func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consumer Consumer) (bool, error) {
 	hasRuntimeMetrics := false
 	rms := md.ResourceMetrics()
