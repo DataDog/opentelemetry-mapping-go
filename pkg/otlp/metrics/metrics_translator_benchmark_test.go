@@ -160,7 +160,7 @@ func benchmarkMapMetrics(metrics pmetric.Metrics, b *testing.B) {
 		ctx := context.Background()
 		tr := newBenchmarkTranslator(b, zap.NewNop())
 		consumer := &mockFullConsumer{}
-		err := tr.MapMetrics(ctx, metrics, consumer)
+		_, err := tr.MapMetrics(ctx, metrics, consumer)
 		assert.NoError(b, err)
 	}
 }

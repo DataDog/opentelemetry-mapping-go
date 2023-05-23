@@ -150,7 +150,8 @@ func TestHistogramSketches(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			md := fromCDF(test.cdf)
 			consumer := &sketchConsumer{}
-			assert.NoError(t, tr.MapMetrics(ctx, md, consumer))
+			_, err := tr.MapMetrics(ctx, md, consumer)
+			assert.NoError(t, err)
 			sk := consumer.sk
 
 			// Check the minimum is 0.0
@@ -346,7 +347,8 @@ func TestExactHistogramStats(t *testing.T) {
 		t.Run(testInstance.name, func(t *testing.T) {
 			md := testInstance.getHist()
 			consumer := &sketchConsumer{}
-			assert.NoError(t, tr.MapMetrics(ctx, md, consumer))
+			_, err := tr.MapMetrics(ctx, md, consumer)
+			assert.NoError(t, err)
 			sk := consumer.sk
 
 			assert.Equal(t, testInstance.count, uint64(sk.Basic.Cnt), "counts differ")
@@ -429,7 +431,8 @@ func TestInfiniteBounds(t *testing.T) {
 		t.Run(testInstance.name, func(t *testing.T) {
 			md := testInstance.getHist()
 			consumer := &sketchConsumer{}
-			assert.NoError(t, tr.MapMetrics(ctx, md, consumer))
+			_, err := tr.MapMetrics(ctx, md, consumer)
+			assert.NoError(t, err)
 			sk := consumer.sk
 
 			p := md.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().At(0).Histogram().DataPoints().At(0)
@@ -570,7 +573,8 @@ func TestKnownDistributionsQuantile(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			md := fromQuantile(name, startTime, timeNow, tt.quantile, N, M)
 			consumer := &sketchConsumer{}
-			require.NoError(t, tr.MapMetrics(ctx, md, consumer))
+			_, err := tr.MapMetrics(ctx, md, consumer)
+			require.NoError(t, err)
 			require.NotNil(t, consumer.sk)
 
 			sketchConfig := quantile.Default()
