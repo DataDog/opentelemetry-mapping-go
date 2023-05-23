@@ -451,6 +451,54 @@ func BenchmarkMapDeltaSumMetrics10(b *testing.B) {
 	benchmarkMapMetrics(metrics, b)
 }
 
+func BenchmarkMapDeltaSumMetrics100(b *testing.B) {
+	metrics := createBenchmarkDeltaSumMetrics(100, map[string]string{
+		"attribute_tag": "attribute_value",
+	})
+
+	benchmarkMapMetrics(metrics, b)
+}
+
+func BenchmarkMapDeltaSumMetrics1000(b *testing.B) {
+	metrics := createBenchmarkDeltaSumMetrics(1000, map[string]string{
+		"attribute_tag": "attribute_value",
+	})
+
+	benchmarkMapMetrics(metrics, b)
+}
+
+func BenchmarkMapDeltaSumMetrics10000(b *testing.B) {
+	metrics := createBenchmarkDeltaSumMetrics(10000, map[string]string{
+		"attribute_tag": "attribute_value",
+	})
+
+	benchmarkMapMetrics(metrics, b)
+}
+
+func BenchmarkMapDeltaSumMetrics100000(b *testing.B) {
+	metrics := createBenchmarkDeltaSumMetrics(100000, map[string]string{
+		"attribute_tag": "attribute_value",
+	})
+
+	benchmarkMapMetrics(metrics, b)
+}
+
+func BenchmarkMapDeltaSumMetrics1000000(b *testing.B) {
+	metrics := createBenchmarkDeltaSumMetrics(1000000, map[string]string{
+		"attribute_tag": "attribute_value",
+	})
+
+	benchmarkMapMetrics(metrics, b)
+}
+
+func BenchmarkMapDeltaSumMetrics10000000(b *testing.B) {
+	metrics := createBenchmarkDeltaSumMetrics(10000000, map[string]string{
+		"attribute_tag": "attribute_value",
+	})
+
+	benchmarkMapMetrics(metrics, b)
+}
+
 func BenchmarkMapSumRuntimeMetric(b *testing.B) {
 	for _, v := range inputTable {
 		b.Run(fmt.Sprintf("BenchmarkMapRuntimeMetricsHasMapping-%d", v.input), func(b *testing.B) {
