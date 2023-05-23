@@ -490,13 +490,13 @@ func (t *Translator) source(m pcommon.Map) (source.Source, error) {
 }
 
 // extractLanguageTag edits the given languageTags slice if a new language tag is found from the given name
-func extractLanguageTag(name string, languageTags []string) {
+func extractLanguageTag(name string, languageTags []string) []string {
 	for prefix, lang := range runtimeMetricPrefixLanguageMap {
 		if strings.HasPrefix(name, prefix) && !slices.Contains(languageTags, lang) {
-			languageTags = append(languageTags, lang)
-			return
+			return append(languageTags, lang)
 		}
 	}
+	return languageTags
 }
 
 // mapGaugeRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Gauge metric
@@ -645,7 +645,7 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 				md := metricsArray.At(k)
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
 					runtimeMetricsTelemetry.hasRuntimeMetrics = true
-					extractLanguageTag(md.Name(), runtimeMetricsTelemetry.languageTags)
+					runtimeMetricsTelemetry.languageTags = extractLanguageTag(md.Name(), runtimeMetricsTelemetry.languageTags)
 					for _, mp := range v {
 						if mp.attributes == nil {
 							// duplicate runtime metrics as Datadog runtime metrics
