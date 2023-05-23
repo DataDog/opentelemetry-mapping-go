@@ -5,7 +5,7 @@ change_type: breaking
 component: pkg/otlp/metrics
 
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: Changes MapMetrics function to add a new boolean return value `hasRuntimeMetrics`, which is true if runtime metrics are being mapped.
+note: Changes MapMetrics function to add a new return value `RuntimeMetricsTelemetry`, which provides runtime metrics information on a MapMetrics run.
 
 # The PR related to this change
 issues: [81]
