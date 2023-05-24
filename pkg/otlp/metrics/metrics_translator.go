@@ -57,8 +57,8 @@ type Translator struct {
 
 // RuntimeMetricsTelemetry provides runtime metrics information on a MapMetrics run
 type RuntimeMetricsTelemetry struct {
-	hasRuntimeMetrics bool
-	languageTags      []string
+	HasRuntimeMetrics bool
+	LanguageTags      []string
 }
 
 // NewTranslator creates a new translator with given options.
@@ -593,8 +593,8 @@ func mapHistogramRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pme
 // MapMetrics maps OTLP metrics into the DataDog format
 func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consumer Consumer) (RuntimeMetricsTelemetry, error) {
 	runtimeMetricsTelemetry := RuntimeMetricsTelemetry{
-		hasRuntimeMetrics: false,
-		languageTags:      []string{},
+		HasRuntimeMetrics: false,
+		LanguageTags:      []string{},
 	}
 	rms := md.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
@@ -644,8 +644,8 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			for k := 0; k < metricsArray.Len(); k++ {
 				md := metricsArray.At(k)
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
-					runtimeMetricsTelemetry.hasRuntimeMetrics = true
-					runtimeMetricsTelemetry.languageTags = extractLanguageTag(md.Name(), runtimeMetricsTelemetry.languageTags)
+					runtimeMetricsTelemetry.HasRuntimeMetrics = true
+					runtimeMetricsTelemetry.LanguageTags = extractLanguageTag(md.Name(), runtimeMetricsTelemetry.LanguageTags)
 					for _, mp := range v {
 						if mp.attributes == nil {
 							// duplicate runtime metrics as Datadog runtime metrics
