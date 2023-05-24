@@ -362,7 +362,7 @@ func TestMapIntMonotonicReportFirstValue(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer)
+	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer)
 	startTs := int(getProcessStartTime()) + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -372,14 +372,18 @@ func TestMapIntMonotonicReportFirstValue(t *testing.T) {
 			newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
 		},
 	)
+	assert.False(t, rmt.hasRuntimeMetrics)
+	assert.Empty(t, rmt.languageTags)
 }
 
 func TestMapIntMonotonicNotReportFirstValueIfStartTSMatchTS(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(true), consumer)
+	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(true), consumer)
 	assert.Empty(t, consumer.metrics)
+	assert.False(t, rmt.hasRuntimeMetrics)
+	assert.Empty(t, rmt.languageTags)
 }
 
 func TestMapIntMonotonicReportDiffForFirstValue(t *testing.T) {
@@ -390,7 +394,7 @@ func TestMapIntMonotonicReportDiffForFirstValue(t *testing.T) {
 	startTs := int(getProcessStartTime()) + 1
 	// Add an entry to the cache about the timeseries, in this case we send the diff (9) rather than the first value (10).
 	tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+1)), 1)
-	tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer)
+	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer)
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -399,6 +403,8 @@ func TestMapIntMonotonicReportDiffForFirstValue(t *testing.T) {
 			newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
 		},
 	)
+	assert.False(t, rmt.hasRuntimeMetrics)
+	assert.Empty(t, rmt.languageTags)
 }
 
 func TestMapRuntimeMetricsHasMapping(t *testing.T) {
@@ -407,7 +413,8 @@ func TestMapRuntimeMetricsHasMapping(t *testing.T) {
 	consumer := &mockFullConsumer{}
 	exampleDims = newDims("process.runtime.go.goroutines")
 	mappedDims := newDims("runtime.go.num_goroutine")
-	if err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer); err != nil {
+	rmt, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer)
+	if err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -422,6 +429,8 @@ func TestMapRuntimeMetricsHasMapping(t *testing.T) {
 			newCountWithHost(mappedDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
 		},
 	)
+	assert.True(t, rmt.hasRuntimeMetrics)
+	assert.Equal(t, []string{"go"}, rmt.languageTags)
 }
 
 func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
@@ -432,7 +441,8 @@ func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen0"},
 	}}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes, 1), consumer); err != nil {
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes, 1), consumer)
+	if err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -443,6 +453,8 @@ func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 			newCountWithHost(newDims("runtime.dotnet.gc.count.gen0"), uint64(seconds(startTs+1)), 10, fallbackHostname),
 		},
 	)
+	assert.True(t, rmt.hasRuntimeMetrics)
+	assert.Equal(t, []string{"dotnet"}, rmt.languageTags)
 }
 
 func TestMapGaugeRuntimeMetricWithAttributesHasMapping(t *testing.T) {
@@ -453,7 +465,8 @@ func TestMapGaugeRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen1"},
 	}}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeGauge, attributes, 1), consumer); err != nil {
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeGauge, attributes, 1), consumer)
+	if err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -464,6 +477,8 @@ func TestMapGaugeRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 			newGaugeWithHost(newDims("runtime.dotnet.gc.size.gen1"), uint64(seconds(startTs+1)), 10, fallbackHostname),
 		},
 	)
+	assert.True(t, rmt.hasRuntimeMetrics)
+	assert.Equal(t, []string{"dotnet"}, rmt.languageTags)
 }
 
 func TestMapHistogramRuntimeMetricHasMapping(t *testing.T) {
@@ -471,7 +486,8 @@ func TestMapHistogramRuntimeMetricHasMapping(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
 
-	if err := tr.MapMetrics(ctx, createTestHistogramMetric("process.runtime.jvm.gc.duration"), consumer); err != nil {
+	rmt, err := tr.MapMetrics(ctx, createTestHistogramMetric("process.runtime.jvm.gc.duration"), consumer)
+	if err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -488,6 +504,8 @@ func TestMapHistogramRuntimeMetricHasMapping(t *testing.T) {
 			newGaugeWithHost(newDims("jvm.gc.parnew.time.max"), uint64(seconds(startTs+1)), 100, fallbackHostname),
 		},
 	)
+	assert.True(t, rmt.hasRuntimeMetrics)
+	assert.Equal(t, []string{"jvm"}, rmt.languageTags)
 }
 
 func TestMapHistogramRuntimeMetricWithAttributesHasMapping(t *testing.T) {
@@ -498,7 +516,8 @@ func TestMapHistogramRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen1"},
 	}}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeHistogram, attributes, 1), consumer); err != nil {
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeHistogram, attributes, 1), consumer)
+	if err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -515,6 +534,8 @@ func TestMapHistogramRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 			newGaugeWithHost(newDims("runtime.dotnet.gc.size.gen1.max"), uint64(seconds(startTs+1)), 100, fallbackHostname),
 		},
 	)
+	assert.True(t, rmt.hasRuntimeMetrics)
+	assert.Equal(t, []string{"dotnet"}, rmt.languageTags)
 }
 
 func TestMapRuntimeMetricWithTwoAttributesHasMapping(t *testing.T) {
@@ -528,7 +549,8 @@ func TestMapRuntimeMetricWithTwoAttributesHasMapping(t *testing.T) {
 		key:    "type",
 		values: []string{"heap"},
 	}}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 1), consumer); err != nil {
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 1), consumer)
+	if err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -540,6 +562,8 @@ func TestMapRuntimeMetricWithTwoAttributesHasMapping(t *testing.T) {
 			newGaugeWithHost(newDims("jvm.gc.old_gen_size"), uint64(seconds(startTs+1)), 10, fallbackHostname),
 		},
 	)
+	assert.True(t, rmt.hasRuntimeMetrics)
+	assert.Equal(t, []string{"jvm"}, rmt.languageTags)
 }
 
 func TestMapRuntimeMetricWithTwoAttributesMultipleDataPointsHasMapping(t *testing.T) {
@@ -553,7 +577,8 @@ func TestMapRuntimeMetricWithTwoAttributesMultipleDataPointsHasMapping(t *testin
 		key:    "type",
 		values: []string{"heap", "heap", "heap"},
 	}}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 3), consumer); err != nil {
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 3), consumer)
+	if err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -571,6 +596,52 @@ func TestMapRuntimeMetricWithTwoAttributesMultipleDataPointsHasMapping(t *testin
 			newGaugeWithHost(newDims("jvm.gc.eden_size"), uint64(seconds(startTs+3)), 30, fallbackHostname),
 		},
 	)
+	assert.True(t, rmt.hasRuntimeMetrics)
+	assert.Equal(t, []string{"jvm"}, rmt.languageTags)
+}
+
+func TestMapRuntimeMetricsMultipleLanguageTags(t *testing.T) {
+	ctx := context.Background()
+	tr := newTranslator(t, zap.NewNop())
+	consumer := &mockFullConsumer{}
+	exampleDims = newDims("process.runtime.go.goroutines")
+	md1 := createTestIntCumulativeMonotonicMetrics(false)
+	rmt, err := tr.MapMetrics(ctx, md1, consumer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.True(t, rmt.hasRuntimeMetrics)
+	assert.Equal(t, []string{"go"}, rmt.languageTags)
+
+	exampleDims = newDims("process.runtime.go.lookups")
+	md2 := createTestIntCumulativeMonotonicMetrics(false)
+	md1.ResourceMetrics().MoveAndAppendTo(md2.ResourceMetrics())
+	rmt, err = tr.MapMetrics(ctx, md2, consumer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.True(t, rmt.hasRuntimeMetrics)
+	assert.Equal(t, []string{"go"}, rmt.languageTags)
+
+	exampleDims = newDims("process.runtime.dotnet.exceptions.count")
+	md3 := createTestIntCumulativeMonotonicMetrics(false)
+	md2.ResourceMetrics().MoveAndAppendTo(md3.ResourceMetrics())
+	rmt, err = tr.MapMetrics(ctx, md3, consumer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.True(t, rmt.hasRuntimeMetrics)
+	assert.ElementsMatch(t, []string{"go", "dotnet"}, rmt.languageTags)
+
+	exampleDims = newDims("process.runtime.jvm.classes.loaded")
+	md4 := createTestIntCumulativeMonotonicMetrics(false)
+	md3.ResourceMetrics().MoveAndAppendTo(md4.ResourceMetrics())
+	rmt, err = tr.MapMetrics(ctx, md4, consumer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.True(t, rmt.hasRuntimeMetrics)
+	assert.ElementsMatch(t, []string{"go", "dotnet", "jvm"}, rmt.languageTags)
 }
 
 func TestMapGaugeRuntimeMetricWithInvalidAttributes(t *testing.T) {
@@ -581,7 +652,8 @@ func TestMapGaugeRuntimeMetricWithInvalidAttributes(t *testing.T) {
 		key:    "type",
 		values: []string{"heap2"},
 	}}
-	if err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 1), consumer); err != nil {
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 1), consumer)
+	if err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -591,6 +663,8 @@ func TestMapGaugeRuntimeMetricWithInvalidAttributes(t *testing.T) {
 			newGaugeWithHost(newDims("process.runtime.jvm.memory.usage").AddTags("type:heap2"), uint64(seconds(startTs+1)), 10, fallbackHostname),
 		},
 	)
+	assert.True(t, rmt.hasRuntimeMetrics)
+	assert.Equal(t, []string{"jvm"}, rmt.languageTags)
 }
 
 func TestMapRuntimeMetricsNoMapping(t *testing.T) {
@@ -598,7 +672,8 @@ func TestMapRuntimeMetricsNoMapping(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
 	exampleDims = newDims("runtime.go.mem.live_objects")
-	if err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer); err != nil {
+	rmt, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer)
+	if err != nil {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
@@ -610,6 +685,8 @@ func TestMapRuntimeMetricsNoMapping(t *testing.T) {
 			newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
 		},
 	)
+	assert.False(t, rmt.hasRuntimeMetrics)
+	assert.Empty(t, rmt.languageTags)
 }
 
 func TestMapIntMonotonicOutOfOrder(t *testing.T) {

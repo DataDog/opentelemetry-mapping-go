@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 	"time"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -52,6 +53,12 @@ type Translator struct {
 	prevPts *ttlCache
 	logger  *zap.Logger
 	cfg     translatorConfig
+}
+
+// RuntimeMetricsTelemetry provides runtime metrics information on a MapMetrics run
+type RuntimeMetricsTelemetry struct {
+	hasRuntimeMetrics bool
+	languageTags      []string
 }
 
 // NewTranslator creates a new translator with given options.
@@ -482,6 +489,16 @@ func (t *Translator) source(m pcommon.Map) (source.Source, error) {
 	return src, nil
 }
 
+// extractLanguageTag appends a new language tag to languageTags if a new language tag is found from the given name
+func extractLanguageTag(name string, languageTags []string) []string {
+	for prefix, lang := range runtimeMetricPrefixLanguageMap {
+		if !slices.Contains(languageTags, lang) && strings.HasPrefix(name, prefix) {
+			return append(languageTags, lang)
+		}
+	}
+	return languageTags
+}
+
 // mapGaugeRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Gauge metric
 func mapGaugeRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
 	for i := 0; i < md.Gauge().DataPoints().Len(); i++ {
@@ -574,7 +591,11 @@ func mapHistogramRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pme
 }
 
 // MapMetrics maps OTLP metrics into the DataDog format
-func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consumer Consumer) error {
+func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consumer Consumer) (RuntimeMetricsTelemetry, error) {
+	runtimeMetricsTelemetry := RuntimeMetricsTelemetry{
+		hasRuntimeMetrics: false,
+		languageTags:      []string{},
+	}
 	rms := md.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
@@ -582,14 +603,14 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			// these resource metrics are an APM Stats payload; consume it as such
 			sp, err := t.statsPayloadFromMetrics(rm)
 			if err != nil {
-				return fmt.Errorf("error extracting APM Stats from Metrics: %w", err)
+				return runtimeMetricsTelemetry, fmt.Errorf("error extracting APM Stats from Metrics: %w", err)
 			}
 			consumer.ConsumeAPMStats(sp)
 			continue
 		}
 		src, err := t.source(rm.Resource().Attributes())
 		if err != nil {
-			return err
+			return runtimeMetricsTelemetry, err
 		}
 		var host string
 		switch src.Kind {
@@ -623,6 +644,8 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			for k := 0; k < metricsArray.Len(); k++ {
 				md := metricsArray.At(k)
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
+					runtimeMetricsTelemetry.hasRuntimeMetrics = true
+					runtimeMetricsTelemetry.languageTags = extractLanguageTag(md.Name(), runtimeMetricsTelemetry.languageTags)
 					for _, mp := range v {
 						if mp.attributes == nil {
 							// duplicate runtime metrics as Datadog runtime metrics
@@ -699,5 +722,5 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			}
 		}
 	}
-	return nil
+	return runtimeMetricsTelemetry, nil
 }

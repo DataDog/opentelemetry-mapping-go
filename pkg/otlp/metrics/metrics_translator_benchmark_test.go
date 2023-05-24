@@ -235,7 +235,7 @@ func benchmarkMapMetrics(metrics pmetric.Metrics, b *testing.B) {
 		// Make deep copy of metrics to avoid mutation affecting benchmark tests
 		metricsCopy := pmetric.NewMetrics()
 		metrics.CopyTo(metricsCopy)
-		err := tr.MapMetrics(ctx, metricsCopy, consumer)
+		_, err := tr.MapMetrics(ctx, metricsCopy, consumer)
 		assert.NoError(b, err)
 	}
 }
