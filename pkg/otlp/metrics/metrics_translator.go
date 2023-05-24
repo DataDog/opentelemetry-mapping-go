@@ -489,7 +489,7 @@ func (t *Translator) source(m pcommon.Map) (source.Source, error) {
 	return src, nil
 }
 
-// extractLanguageTag appends a new language tag to LanguageTags if a new language tag is found from the given name
+// extractLanguageTag appends a new language tag to languageTags if a new language tag is found from the given name
 func extractLanguageTag(name string, languageTags []string) []string {
 	for prefix, lang := range runtimeMetricPrefixLanguageMap {
 		if !slices.Contains(languageTags, lang) && strings.HasPrefix(name, prefix) {
