@@ -8,7 +8,7 @@
 
 ### 🛑 Breaking changes 🛑
 
-- `pkg/otlp/metrics`: Changes MapMetrics function to add a new return value `RuntimeMetricsTelemetry`, which provides runtime metrics information on a MapMetrics run. (#81)
+- `pkg/otlp/metrics`: the MapMetrics method now returns runtime metrics information as well. (#81)
 
 ## v0.2.0
 
