@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.2.2
+
+### 🛑 Breaking changes 🛑
+
+- `pkg/otlp/metrics`: the MapMetrics method now returns runtime metrics information as well. (#81)
+
 ## v0.2.0
 
 ### 🛑 Breaking changes 🛑
