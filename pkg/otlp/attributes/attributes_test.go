@@ -34,6 +34,7 @@ func TestTagsFromAttributes(t *testing.T) {
 		conventions.AttributeOSType:                "linux",
 		conventions.AttributeK8SDaemonSetName:      "daemon_set_name",
 		conventions.AttributeAWSECSClusterARN:      "cluster_arn",
+		conventions.AttributeContainerRuntime:      "cro",
 		"tags.datadoghq.com/service":               "service_name",
 	}
 	attrs := pcommon.NewMap()
@@ -45,6 +46,7 @@ func TestTagsFromAttributes(t *testing.T) {
 		fmt.Sprintf("%s:%s", "kube_daemon_set", "daemon_set_name"),
 		fmt.Sprintf("%s:%s", "ecs_cluster_name", "cluster_arn"),
 		fmt.Sprintf("%s:%s", "service", "service_name"),
+		fmt.Sprintf("%s:%s", "runtime", "cro"),
 	}, TagsFromAttributes(attrs))
 }
 
@@ -58,6 +60,7 @@ func TestContainerTagFromAttributes(t *testing.T) {
 	attributeMap := map[string]string{
 		conventions.AttributeContainerName:         "sample_app",
 		conventions.AttributeContainerImageTag:     "sample_app_image_tag",
+		conventions.AttributeContainerRuntime:      "cro",
 		conventions.AttributeK8SContainerName:      "kube_sample_app",
 		conventions.AttributeK8SReplicaSetName:     "sample_replica_set",
 		conventions.AttributeK8SDaemonSetName:      "sample_daemonset_name",
@@ -76,6 +79,7 @@ func TestContainerTagFromAttributes(t *testing.T) {
 	assert.Equal(t, map[string]string{
 		"container_name":      "sample_app",
 		"image_tag":           "sample_app_image_tag",
+		"runtime":             "cro",
 		"kube_container_name": "kube_sample_app",
 		"kube_replica_set":    "sample_replica_set",
 		"kube_daemon_set":     "sample_daemonset_name",
