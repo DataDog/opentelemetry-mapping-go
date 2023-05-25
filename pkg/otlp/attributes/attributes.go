@@ -36,6 +36,7 @@ var (
 		conventions.AttributeContainerName:      "container_name",
 		conventions.AttributeContainerImageName: "image_name",
 		conventions.AttributeContainerImageTag:  "image_tag",
+		conventions.AttributeContainerRuntime:   "runtime",
 
 		// Cloud conventions
 		// https://www.datadoghq.com/blog/tagging-best-practices/
@@ -71,6 +72,7 @@ var (
 		conventions.AttributeContainerName,
 		conventions.AttributeContainerImageName,
 		conventions.AttributeContainerImageTag,
+		conventions.AttributeContainerRuntime,
 		conventions.AttributeK8SContainerName,
 		conventions.AttributeK8SClusterName,
 		conventions.AttributeK8SDeploymentName,
