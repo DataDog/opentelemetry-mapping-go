@@ -14,6 +14,14 @@ FILENAME?=$(shell git branch --show-current).yaml
 chlog-new:
 	chloggen new --filename $(FILENAME)
 
+.PHONY: chlog-validate
+chlog-validate:
+	chloggen validate
+
+.PHONY: chlog-preview
+chlog-preview:
+	chloggen update --dry
+
 GOMODULES := $(shell find . -type f -name "go.mod" -exec dirname {} \; | sort | egrep  '^./' )
 
 .PHONY: $(GOMODULES)
