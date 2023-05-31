@@ -1,3 +1,7 @@
+# Copyright The OpenTelemetry Authors
+# SPDX-License-Identifier: Apache-2.0
+# Source: github.com/open-telemetry/opentelemetry-collector-contrib/blob/6c71da2/.github/workflows/changelog.yml
+
 # This action requires that any PR targeting the main branch should add a
 # yaml file to the ./.chloggen/ directory. If a CHANGELOG entry is not required,
 # or if performing maintance on the Changelog, add either \"[chore]\" to the title of
