@@ -27,7 +27,7 @@ require (
 	github.com/philhofer/fwd v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/tinylib/msgp v1.1.6 // indirect
-	go.opentelemetry.io/collector/semconv v0.78.1 // indirect
+	go.opentelemetry.io/collector/semconv v0.78.2 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
