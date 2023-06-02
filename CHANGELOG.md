@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.2.4
+
+### 🚀 New components 🚀
+
+- `pkg/otlp/logs`: Create new `pkg/otlp/logs` module for OTLP to DD log translation (#89)
+
 ## v0.2.2
 
 ### 🛑 Breaking changes 🛑
