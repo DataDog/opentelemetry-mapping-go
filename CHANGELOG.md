@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.3.0
+
+### 🛑 Breaking changes 🛑
+
+- `pkg/otlp/metrics`: Renames MapMetrics function return value from `RuntimeMetricsTelemetry` to `Metadata`, renames field `LanguageTags` to `Languages`, and removes field `HasRuntimeMetrics`. (#91)
+
 ## v0.2.4
 
 ### 🚀 New components 🚀
