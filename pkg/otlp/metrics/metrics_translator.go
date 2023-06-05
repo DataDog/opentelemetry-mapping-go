@@ -55,10 +55,10 @@ type Translator struct {
 	cfg     translatorConfig
 }
 
-// RuntimeMetricsTelemetry provides runtime metrics information on a MapMetrics run
-type RuntimeMetricsTelemetry struct {
-	HasRuntimeMetrics bool
-	LanguageTags      []string
+// Metadata specifies information about the outcome of the MapMetrics call.
+type Metadata struct {
+	// Languages specifies a list of languages for which runtime metrics were found.
+	Languages []string
 }
 
 // NewTranslator creates a new translator with given options.
@@ -591,10 +591,9 @@ func mapHistogramRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pme
 }
 
 // MapMetrics maps OTLP metrics into the DataDog format
-func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consumer Consumer) (RuntimeMetricsTelemetry, error) {
-	runtimeMetricsTelemetry := RuntimeMetricsTelemetry{
-		HasRuntimeMetrics: false,
-		LanguageTags:      []string{},
+func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consumer Consumer) (Metadata, error) {
+	metadata := Metadata{
+		Languages: []string{},
 	}
 	rms := md.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
@@ -603,14 +602,14 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			// these resource metrics are an APM Stats payload; consume it as such
 			sp, err := t.statsPayloadFromMetrics(rm)
 			if err != nil {
-				return runtimeMetricsTelemetry, fmt.Errorf("error extracting APM Stats from Metrics: %w", err)
+				return metadata, fmt.Errorf("error extracting APM Stats from Metrics: %w", err)
 			}
 			consumer.ConsumeAPMStats(sp)
 			continue
 		}
 		src, err := t.source(rm.Resource().Attributes())
 		if err != nil {
-			return runtimeMetricsTelemetry, err
+			return metadata, err
 		}
 		var host string
 		switch src.Kind {
@@ -644,8 +643,7 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			for k := 0; k < metricsArray.Len(); k++ {
 				md := metricsArray.At(k)
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
-					runtimeMetricsTelemetry.HasRuntimeMetrics = true
-					runtimeMetricsTelemetry.LanguageTags = extractLanguageTag(md.Name(), runtimeMetricsTelemetry.LanguageTags)
+					metadata.Languages = extractLanguageTag(md.Name(), metadata.Languages)
 					for _, mp := range v {
 						if mp.attributes == nil {
 							// duplicate runtime metrics as Datadog runtime metrics
@@ -722,5 +720,5 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			}
 		}
 	}
-	return runtimeMetricsTelemetry, nil
+	return metadata, nil
 }
