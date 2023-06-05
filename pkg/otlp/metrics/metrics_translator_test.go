@@ -372,8 +372,7 @@ func TestMapIntMonotonicReportFirstValue(t *testing.T) {
 			newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
 		},
 	)
-	assert.False(t, rmt.HasRuntimeMetrics)
-	assert.Empty(t, rmt.LanguageTags)
+	assert.Empty(t, rmt.Languages)
 }
 
 func TestMapIntMonotonicNotReportFirstValueIfStartTSMatchTS(t *testing.T) {
@@ -382,8 +381,7 @@ func TestMapIntMonotonicNotReportFirstValueIfStartTSMatchTS(t *testing.T) {
 	consumer := &mockFullConsumer{}
 	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(true), consumer)
 	assert.Empty(t, consumer.metrics)
-	assert.False(t, rmt.HasRuntimeMetrics)
-	assert.Empty(t, rmt.LanguageTags)
+	assert.Empty(t, rmt.Languages)
 }
 
 func TestMapIntMonotonicReportDiffForFirstValue(t *testing.T) {
@@ -403,8 +401,7 @@ func TestMapIntMonotonicReportDiffForFirstValue(t *testing.T) {
 			newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
 		},
 	)
-	assert.False(t, rmt.HasRuntimeMetrics)
-	assert.Empty(t, rmt.LanguageTags)
+	assert.Empty(t, rmt.Languages)
 }
 
 func TestMapRuntimeMetricsHasMapping(t *testing.T) {
@@ -429,8 +426,7 @@ func TestMapRuntimeMetricsHasMapping(t *testing.T) {
 			newCountWithHost(mappedDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
 		},
 	)
-	assert.True(t, rmt.HasRuntimeMetrics)
-	assert.Equal(t, []string{"go"}, rmt.LanguageTags)
+	assert.Equal(t, []string{"go"}, rmt.Languages)
 }
 
 func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
@@ -453,8 +449,7 @@ func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 			newCountWithHost(newDims("runtime.dotnet.gc.count.gen0"), uint64(seconds(startTs+1)), 10, fallbackHostname),
 		},
 	)
-	assert.True(t, rmt.HasRuntimeMetrics)
-	assert.Equal(t, []string{"dotnet"}, rmt.LanguageTags)
+	assert.Equal(t, []string{"dotnet"}, rmt.Languages)
 }
 
 func TestMapGaugeRuntimeMetricWithAttributesHasMapping(t *testing.T) {
@@ -477,8 +472,7 @@ func TestMapGaugeRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 			newGaugeWithHost(newDims("runtime.dotnet.gc.size.gen1"), uint64(seconds(startTs+1)), 10, fallbackHostname),
 		},
 	)
-	assert.True(t, rmt.HasRuntimeMetrics)
-	assert.Equal(t, []string{"dotnet"}, rmt.LanguageTags)
+	assert.Equal(t, []string{"dotnet"}, rmt.Languages)
 }
 
 func TestMapHistogramRuntimeMetricHasMapping(t *testing.T) {
@@ -504,8 +498,7 @@ func TestMapHistogramRuntimeMetricHasMapping(t *testing.T) {
 			newGaugeWithHost(newDims("jvm.gc.parnew.time.max"), uint64(seconds(startTs+1)), 100, fallbackHostname),
 		},
 	)
-	assert.True(t, rmt.HasRuntimeMetrics)
-	assert.Equal(t, []string{"jvm"}, rmt.LanguageTags)
+	assert.Equal(t, []string{"jvm"}, rmt.Languages)
 }
 
 func TestMapHistogramRuntimeMetricWithAttributesHasMapping(t *testing.T) {
@@ -534,8 +527,7 @@ func TestMapHistogramRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 			newGaugeWithHost(newDims("runtime.dotnet.gc.size.gen1.max"), uint64(seconds(startTs+1)), 100, fallbackHostname),
 		},
 	)
-	assert.True(t, rmt.HasRuntimeMetrics)
-	assert.Equal(t, []string{"dotnet"}, rmt.LanguageTags)
+	assert.Equal(t, []string{"dotnet"}, rmt.Languages)
 }
 
 func TestMapRuntimeMetricWithTwoAttributesHasMapping(t *testing.T) {
@@ -562,8 +554,7 @@ func TestMapRuntimeMetricWithTwoAttributesHasMapping(t *testing.T) {
 			newGaugeWithHost(newDims("jvm.gc.old_gen_size"), uint64(seconds(startTs+1)), 10, fallbackHostname),
 		},
 	)
-	assert.True(t, rmt.HasRuntimeMetrics)
-	assert.Equal(t, []string{"jvm"}, rmt.LanguageTags)
+	assert.Equal(t, []string{"jvm"}, rmt.Languages)
 }
 
 func TestMapRuntimeMetricWithTwoAttributesMultipleDataPointsHasMapping(t *testing.T) {
@@ -596,8 +587,7 @@ func TestMapRuntimeMetricWithTwoAttributesMultipleDataPointsHasMapping(t *testin
 			newGaugeWithHost(newDims("jvm.gc.eden_size"), uint64(seconds(startTs+3)), 30, fallbackHostname),
 		},
 	)
-	assert.True(t, rmt.HasRuntimeMetrics)
-	assert.Equal(t, []string{"jvm"}, rmt.LanguageTags)
+	assert.Equal(t, []string{"jvm"}, rmt.Languages)
 }
 
 func TestMapRuntimeMetricsMultipleLanguageTags(t *testing.T) {
@@ -610,8 +600,7 @@ func TestMapRuntimeMetricsMultipleLanguageTags(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.True(t, rmt.HasRuntimeMetrics)
-	assert.Equal(t, []string{"go"}, rmt.LanguageTags)
+	assert.Equal(t, []string{"go"}, rmt.Languages)
 
 	exampleDims = newDims("process.runtime.go.lookups")
 	md2 := createTestIntCumulativeMonotonicMetrics(false)
@@ -620,8 +609,7 @@ func TestMapRuntimeMetricsMultipleLanguageTags(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.True(t, rmt.HasRuntimeMetrics)
-	assert.Equal(t, []string{"go"}, rmt.LanguageTags)
+	assert.Equal(t, []string{"go"}, rmt.Languages)
 
 	exampleDims = newDims("process.runtime.dotnet.exceptions.count")
 	md3 := createTestIntCumulativeMonotonicMetrics(false)
@@ -630,8 +618,7 @@ func TestMapRuntimeMetricsMultipleLanguageTags(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.True(t, rmt.HasRuntimeMetrics)
-	assert.ElementsMatch(t, []string{"go", "dotnet"}, rmt.LanguageTags)
+	assert.ElementsMatch(t, []string{"go", "dotnet"}, rmt.Languages)
 
 	exampleDims = newDims("process.runtime.jvm.classes.loaded")
 	md4 := createTestIntCumulativeMonotonicMetrics(false)
@@ -640,8 +627,7 @@ func TestMapRuntimeMetricsMultipleLanguageTags(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.True(t, rmt.HasRuntimeMetrics)
-	assert.ElementsMatch(t, []string{"go", "dotnet", "jvm"}, rmt.LanguageTags)
+	assert.ElementsMatch(t, []string{"go", "dotnet", "jvm"}, rmt.Languages)
 }
 
 func TestMapGaugeRuntimeMetricWithInvalidAttributes(t *testing.T) {
@@ -663,8 +649,7 @@ func TestMapGaugeRuntimeMetricWithInvalidAttributes(t *testing.T) {
 			newGaugeWithHost(newDims("process.runtime.jvm.memory.usage").AddTags("type:heap2"), uint64(seconds(startTs+1)), 10, fallbackHostname),
 		},
 	)
-	assert.True(t, rmt.HasRuntimeMetrics)
-	assert.Equal(t, []string{"jvm"}, rmt.LanguageTags)
+	assert.Equal(t, []string{"jvm"}, rmt.Languages)
 }
 
 func TestMapRuntimeMetricsNoMapping(t *testing.T) {
@@ -685,8 +670,7 @@ func TestMapRuntimeMetricsNoMapping(t *testing.T) {
 			newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
 		},
 	)
-	assert.False(t, rmt.HasRuntimeMetrics)
-	assert.Empty(t, rmt.LanguageTags)
+	assert.Empty(t, rmt.Languages)
 }
 
 func TestMapIntMonotonicOutOfOrder(t *testing.T) {
