@@ -118,7 +118,7 @@ type testConsumer struct {
 	testMetrics TestMetrics
 }
 
-func (t *testConsumer) ConsumeAPMStats(_ pb.ClientStatsPayload) {
+func (t *testConsumer) ConsumeAPMStats(_ *pb.ClientStatsPayload) {
 	// not used for this consumer, but do warn the user if they
 	// try to use it
 	panic("(*testConsumer).ConsumeAPMStats not implemented")
