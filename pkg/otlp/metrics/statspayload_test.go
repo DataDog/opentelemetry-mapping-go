@@ -17,7 +17,7 @@ package metrics
 import (
 	"testing"
 
-	"github.com/DataDog/datadog-agent/pkg/trace/pb"
+	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
 	"github.com/DataDog/sketches-go/ddsketch"
 	"github.com/DataDog/sketches-go/ddsketch/store"
 	"github.com/golang/protobuf/proto"
