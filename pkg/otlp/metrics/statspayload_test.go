@@ -169,7 +169,7 @@ func TestAggregations(t *testing.T) {
 	require.True(t, val1 != agg.Value(m2))
 	require.NotEqual(t, val1, agg.Value(m2))
 
-	require.ElementsMatch(t, agg.Stats(), []pb.ClientGroupedStats{
+	require.ElementsMatch(t, agg.Stats(), []*pb.ClientGroupedStats{
 		{
 			Service:        "my-service",
 			Name:           "my-name",
