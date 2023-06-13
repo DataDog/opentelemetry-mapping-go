@@ -829,8 +829,8 @@ func TestMapAPMStats(t *testing.T) {
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 	tr := newTranslator(t, logger)
-	md := tr.StatsPayloadToMetrics(pb.StatsPayload{
-		Stats: []pb.ClientStatsPayload{statsPayloads[0], statsPayloads[1]},
+	md := tr.StatsPayloadToMetrics(&pb.StatsPayload{
+		Stats: []*pb.ClientStatsPayload{&statsPayloads[0], &statsPayloads[1]},
 	})
 
 	ctx := context.Background()
@@ -888,10 +888,10 @@ var _ SketchConsumer = (*mockFullConsumer)(nil)
 type mockFullConsumer struct {
 	mockTimeSeriesConsumer
 	sketches []sketch
-	apmstats []pb.ClientStatsPayload
+	apmstats []*pb.ClientStatsPayload
 }
 
-func (c *mockFullConsumer) ConsumeAPMStats(p pb.ClientStatsPayload) {
+func (c *mockFullConsumer) ConsumeAPMStats(p *pb.ClientStatsPayload) {
 	c.apmstats = append(c.apmstats, p)
 }
 
@@ -1120,11 +1120,11 @@ var statsPayloads = []pb.ClientStatsPayload{
 		Service:          "mysql",
 		ContainerID:      "abcdef123456",
 		Tags:             []string{"a:b", "c:d"},
-		Stats: []pb.ClientStatsBucket{
+		Stats: []*pb.ClientStatsBucket{
 			{
 				Start:    10,
 				Duration: 1,
-				Stats: []pb.ClientGroupedStats{
+				Stats: []*pb.ClientGroupedStats{
 					{
 						Service:        "kafka",
 						Name:           "queue.add",
@@ -1154,11 +1154,11 @@ var statsPayloads = []pb.ClientStatsPayload{
 		Service:          "mysql2",
 		ContainerID:      "abcdef1234562",
 		Tags:             []string{"a:b2", "c:d2"},
-		Stats: []pb.ClientStatsBucket{
+		Stats: []*pb.ClientStatsBucket{
 			{
 				Start:    102,
 				Duration: 12,
-				Stats: []pb.ClientGroupedStats{
+				Stats: []*pb.ClientGroupedStats{
 					{
 						Service:        "kafka2",
 						Name:           "queue.add2",

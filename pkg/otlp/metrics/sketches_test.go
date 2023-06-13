@@ -40,7 +40,7 @@ type sketchConsumer struct {
 	sk *quantile.Sketch
 }
 
-func (c *sketchConsumer) ConsumeAPMStats(_ pb.ClientStatsPayload) {
+func (c *sketchConsumer) ConsumeAPMStats(_ *pb.ClientStatsPayload) {
 	// not used for this consumer, but do warn the user if they
 	// try to use it
 	panic("(*sketchConsumer).ConsumeAPMStats not implemented")

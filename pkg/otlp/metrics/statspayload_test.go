@@ -355,8 +355,8 @@ func testSketchBytes(nums ...float64) []byte {
 }
 
 func TestConversion(t *testing.T) {
-	want := pb.StatsPayload{
-		Stats: []pb.ClientStatsPayload{
+	want := &pb.StatsPayload{
+		Stats: []*pb.ClientStatsPayload{
 			{
 				Hostname:         "host",
 				Env:              "prod",
@@ -369,11 +369,11 @@ func TestConversion(t *testing.T) {
 				Service:          "mysql",
 				ContainerID:      "abcdef123456",
 				Tags:             []string{"a:b", "c:d"},
-				Stats: []pb.ClientStatsBucket{
+				Stats: []*pb.ClientStatsBucket{
 					{
 						Start:    10,
 						Duration: 1,
-						Stats: []pb.ClientGroupedStats{
+						Stats: []*pb.ClientGroupedStats{
 							{
 								Service:        "mysql",
 								Name:           "db.query",
@@ -407,7 +407,7 @@ func TestConversion(t *testing.T) {
 					{
 						Start:    20,
 						Duration: 3,
-						Stats: []pb.ClientGroupedStats{
+						Stats: []*pb.ClientGroupedStats{
 							{
 								Service:        "php-go",
 								Name:           "http.post",
@@ -437,11 +437,11 @@ func TestConversion(t *testing.T) {
 				Service:          "sprint",
 				ContainerID:      "kljdsfalk32",
 				Tags:             []string{"x:y", "z:w"},
-				Stats: []pb.ClientStatsBucket{
+				Stats: []*pb.ClientStatsBucket{
 					{
 						Start:    30,
 						Duration: 5,
-						Stats: []pb.ClientGroupedStats{
+						Stats: []*pb.ClientGroupedStats{
 							{
 								Service:        "spring-web",
 								Name:           "http.get",
@@ -490,7 +490,7 @@ func TestConversion(t *testing.T) {
 	})
 }
 
-func equalStats(want, got pb.ClientStatsPayload) bool {
+func equalStats(want, got *pb.ClientStatsPayload) bool {
 	cpwant, cpgot := want, got
 	cpwant.Stats = nil
 	cpgot.Stats = nil
