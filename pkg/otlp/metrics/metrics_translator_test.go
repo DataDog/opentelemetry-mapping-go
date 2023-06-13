@@ -830,7 +830,7 @@ func TestMapAPMStats(t *testing.T) {
 	require.NoError(t, err)
 	tr := newTranslator(t, logger)
 	md := tr.StatsPayloadToMetrics(&pb.StatsPayload{
-		Stats: []*pb.ClientStatsPayload{&statsPayloads[0], &statsPayloads[1]},
+		Stats: []*pb.ClientStatsPayload{statsPayloads[0], statsPayloads[1]},
 	})
 
 	ctx := context.Background()
@@ -1107,7 +1107,7 @@ func newSketchWithHostname(name string, summary summary.Summary, tags []string) 
 	return s
 }
 
-var statsPayloads = []pb.ClientStatsPayload{
+var statsPayloads = []*pb.ClientStatsPayload{
 	{
 		Hostname:         "host",
 		Env:              "prod",
