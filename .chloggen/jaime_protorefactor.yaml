@@ -1,5 +1,5 @@
 # One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
-change_type: enhancement
+change_type: breaking
 
 # The name of the component (e.g. pkg/quantile)
 component: pkg/otlp
@@ -13,4 +13,4 @@ issues: [103]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
-subtext:
+subtext: new definitions include mutext to avoid copies, and so implementations should rely on passing arguments by reference and not value.
