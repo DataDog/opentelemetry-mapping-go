@@ -33,6 +33,11 @@ type translatorConfig struct {
 	InstrumentationLibraryMetadataAsTags bool
 	InstrumentationScopeMetadataAsTags   bool
 
+	// withRemapping reports whether certain metrics that are only available when using
+	// the Datadog Agent should be obtained by remapping from OTEL counterparts (e.g.
+	// container.* and system.* metrics).
+	withRemapping bool
+
 	// cache configuration
 	sweepInterval int64
 	deltaTTL      int64
@@ -42,6 +47,16 @@ type translatorConfig struct {
 
 // TranslatorOption is a translator creation option.
 type TranslatorOption func(*translatorConfig) error
+
+// WithRemapping specifies that certain OTEL metrics (such as container.* and system.*) need to be
+// remapped to their Datadog counterparts because they will not be available otherwise. This happens
+// in situations when the translator is running as part of a Collector without the Datadog Agent.
+func WithRemapping() TranslatorOption {
+	return func(t *translatorConfig) error {
+		t.withRemapping = true
+		return nil
+	}
+}
 
 // WithDeltaTTL sets the delta TTL for cumulative metrics datapoints.
 // By default, 3600 seconds are used.
