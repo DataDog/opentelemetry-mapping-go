@@ -52,7 +52,7 @@ pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal/data/protogen/r
 pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal/data/protogen/trace/v1,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/pcommon,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/collector/semconv/v1.6.1,Apache-2.0,Copyright The OpenTelemetry Authors
-pkg/otlp/attributes,go.uber.org/multierr,MIT,"Copyright (c) 2017-2021 Uber Technologies, Inc | Copyright (c) 2017-2021 Uber Technologies, Inc"
+pkg/otlp/attributes,go.uber.org/multierr,MIT,"Copyright (c) 2017-2021 Uber Technologies, Inc"
 pkg/otlp/attributes,golang.org/x/net/http/httpguts,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
 pkg/otlp/attributes,golang.org/x/net/http2,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
 pkg/otlp/attributes,golang.org/x/net/http2/hpack,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
