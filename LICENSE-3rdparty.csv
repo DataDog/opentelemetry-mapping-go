@@ -145,7 +145,7 @@ pkg/otlp/attributes,google.golang.org/protobuf/types/descriptorpb,BSD-3-Clause,C
 pkg/otlp/attributes,google.golang.org/protobuf/types/known/anypb,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/otlp/attributes,google.golang.org/protobuf/types/known/durationpb,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/otlp/attributes,google.golang.org/protobuf/types/known/timestamppb,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
-pkg/otlp/metrics,github.com/DataDog/datadog-agent/pkg/trace/pb,Apache-2.0,"Copyright 2016-present Datadog, Inc"
+pkg/otlp/metrics,github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace,Apache-2.0,"Copyright 2016-present Datadog, Inc"
 pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
 pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/azure,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
 pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/ec2,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
