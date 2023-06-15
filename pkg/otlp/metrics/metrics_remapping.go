@@ -48,15 +48,11 @@ func remapSystemMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	case "system.cpu.load_average.15m":
 		copyMetric(all, m, "system.load.15", 1)
 	case "system.cpu.utilization":
-		for name, state := range map[string]string{
-			"system.cpu.idle":   "idle",
-			"system.cpu.user":   "user",
-			"system.cpu.system": "system",
-			"system.cpu.iowait": "wait",
-			"system.cpu.stolen": "steal",
-		} {
-			copyMetric(all, m, name, divPercentage, kv{"state", state})
-		}
+		copyMetric(all, m, "system.cpu.idle", divPercentage, kv{"state", "idle"})
+		copyMetric(all, m, "system.cpu.user", divPercentage, kv{"state", "user"})
+		copyMetric(all, m, "system.cpu.system", divPercentage, kv{"state", "system"})
+		copyMetric(all, m, "system.cpu.iowait", divPercentage, kv{"state", "wait"})
+		copyMetric(all, m, "system.cpu.stolen", divPercentage, kv{"state", "steal"})
 	case "system.memory.usage":
 		copyMetric(all, m, "system.mem.total", divMebibytes)
 		copyMetric(all, m, "system.mem.usable", divMebibytes,
@@ -158,9 +154,14 @@ func copyMetric(dest pmetric.MetricSlice, m pmetric.Metric, newname string, div 
 		}
 		switch dp.ValueType() {
 		case pmetric.NumberDataPointValueTypeInt:
-			dp.SetIntValue(dp.IntValue() / int64(div))
+			if div >= 1 {
+				// avoid division by zero
+				dp.SetIntValue(dp.IntValue() / int64(div))
+			}
 		case pmetric.NumberDataPointValueTypeDouble:
-			dp.SetDoubleValue(dp.DoubleValue() / div)
+			if div != 0 {
+				dp.SetDoubleValue(dp.DoubleValue() / div)
+			}
 		}
 		return false
 	})
