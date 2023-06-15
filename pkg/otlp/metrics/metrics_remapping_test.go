@@ -243,6 +243,14 @@ func TestRemapMetrics(t *testing.T) {
 			},
 		},
 		{
+			in: metric("container.blockio.io_serviced_recursive",
+				point{f: 1, attrs: map[string]any{"xoperation": "write"}},
+				point{f: 2, attrs: map[string]any{"xoperation": "read"}},
+				point{f: 3, attrs: map[string]any{"state": "buffered"}},
+			),
+			out: nil, // no datapoints match filter
+		},
+		{
 			in:  metric("container.network.io.usage.tx_bytes", point{f: 15}),
 			out: []pmetric.Metric{metric("container.net.sent", point{f: 15})},
 		},
