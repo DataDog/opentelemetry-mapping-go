@@ -51,6 +51,9 @@ type TranslatorOption func(*translatorConfig) error
 // WithRemapping specifies that certain OTEL metrics (such as container.* and system.*) need to be
 // remapped to their Datadog counterparts because they will not be available otherwise. This happens
 // in situations when the translator is running as part of a Collector without the Datadog Agent.
+//
+// Do note that in some scenarios this process renames certain metrics (such as for example prefixing
+// system.* and process.* metrics with the otel.* namespace).
 func WithRemapping() TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.withRemapping = true
