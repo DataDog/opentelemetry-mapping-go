@@ -133,6 +133,8 @@ type kv struct{ K, V string }
 // be divided by div. If filter is provided, only the data points that have *either* of the specified string
 // attributes will be copied over. If the filtering results in no datapoints, no new metric is added to dest.
 //
+// copyMetric returns the new metric and reports whether it was added to dest.
+//
 // Please note that copyMetric is restricted to the metric types Sum and Gauge.
 func copyMetric(dest pmetric.MetricSlice, m pmetric.Metric, newname string, div float64, filter ...kv) (pmetric.Metric, bool) {
 	newm := pmetric.NewMetric()

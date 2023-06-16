@@ -33,7 +33,7 @@ func TestRemapMetrics(t *testing.T) {
 		// attrs specifies the raw attributes of the datapoint
 		attrs map[string]any
 	}
-	// m is a convenience function to create a new metric with the given name
+	// metric is a convenience function to create a new metric with the given name
 	// and set of datapoints
 	metric := func(name string, dps ...point) pmetric.Metric {
 		out := pmetric.NewMetric()
@@ -95,6 +95,10 @@ func TestRemapMetrics(t *testing.T) {
 			},
 		},
 		{
+			in:  metric("system.cpu.utilization", point{i: 5, attrs: map[string]any{"state": "idle"}}),
+			out: []pmetric.Metric{metric("system.cpu.idle", point{i: 5, attrs: map[string]any{"state": "idle"}})},
+		},
+		{
 			in: metric("system.memory.usage",
 				point{f: divMebibytes * 1, attrs: map[string]any{"state": "free"}},
 				point{f: divMebibytes * 2, attrs: map[string]any{"state": "cached"}},
@@ -118,6 +122,10 @@ func TestRemapMetrics(t *testing.T) {
 					point{f: 3, attrs: map[string]any{"state": "buffered"}},
 				),
 			},
+		},
+		{
+			in:  metric("system.memory.usage", point{i: divMebibytes * 5}),
+			out: []pmetric.Metric{metric("system.mem.total", point{i: 5})},
 		},
 		{
 			in: metric("system.network.io",
