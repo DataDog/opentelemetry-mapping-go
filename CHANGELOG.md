@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.5.0
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics`: A new Translator configuration option (WithRemapping) can be used to extract Datadog system and container metrics. (#102)
+
 ## v0.4.0
 
 **VERSION HAS BEEN RETRACTED**
