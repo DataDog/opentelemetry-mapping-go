@@ -590,7 +590,7 @@ func mapHistogramRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pme
 	}
 }
 
-// MapMetrics maps OTLP metrics into the DataDog format
+// MapMetrics maps OTLP metrics into the Datadog format
 func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consumer Consumer) (Metadata, error) {
 	metadata := Metadata{
 		Languages: []string{},
@@ -660,6 +660,9 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 							mapHistogramRuntimeMetricWithAttributes(md, metricsArray, mp)
 						}
 					}
+				}
+				if t.cfg.withRemapping {
+					remapMetrics(metricsArray, md)
 				}
 				baseDims := &Dimensions{
 					name:     md.Name(),
