@@ -6,14 +6,7 @@
 
 ## v0.4.0
 
-### 🛑 Breaking changes 🛑
-
-- `pkg/otlp`: use new location for updated protobuf definitions in the datadog-agent repo, trace protobuf definitions specifically. (#103)
-  new definitions include mutext to avoid copies, and so implementations should rely on passing arguments by reference and not value.
-
-### 💡 Enhancements 💡
-
-- `pkg/otlp/metrics`: A new Translator configuration option (WithRemapping) can be used to extract Datadog system and container metrics. (#102)
+**VERSION HAS BEEN RETRACTED**
 
 ## v0.3.0
 
