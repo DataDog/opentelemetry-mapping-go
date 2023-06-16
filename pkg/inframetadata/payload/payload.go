@@ -18,7 +18,9 @@ type HostMetadata struct {
 	// Meta includes metadata about the host.
 	Meta *Meta `json:"meta"`
 
-	// InternalHostname is the canonical hostname
+	// InternalHostname is the canonical hostname.
+	// We always set its value to be the same as Meta.Hostname.
+	// See Meta.Hostname docstring for more details.
 	InternalHostname string `json:"internalHostname"`
 
 	// Version is the OpenTelemetry Collector version.
@@ -61,7 +63,9 @@ type Meta struct {
 	// EC2Hostname is the hostname from the EC2 metadata API
 	EC2Hostname string `json:"ec2-hostname,omitempty"`
 
-	// Hostname is the canonical hostname
+	// Hostname is (typically) the canonical hostname.
+	// See https://github.com/DataDog/dogweb/blob/a8f5d94/prozess/sobotka/transform.py#L991-L1105
+	// for more details on how the canonical hostname resolution logic works.
 	Hostname string `json:"hostname"`
 
 	// SocketHostname is the OS hostname

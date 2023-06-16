@@ -10,6 +10,9 @@
 //
 // Most of the details on the payload definition are actually in DataDog/gohai, while here fields are just an empty interface.
 // To make matters worse, this needs custom double marshaling because of legacy reasons.
+//
+// This payload definition is undergoing a refactor; the DataDog/gohai library is being deprecated in favor of a new module
+// in DataDog/datadog-agent (see https://github.com/DataDog/gohai/pull/180).
 
 package gohai
 
