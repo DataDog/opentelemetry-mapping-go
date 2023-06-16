@@ -23,6 +23,7 @@ var (
 		"pkg/otlp/attributes",
 		"pkg/otlp/metrics",
 		"pkg/internal/sketchtest",
+		"pkg/inframetadata",
 	}
 )
 

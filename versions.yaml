@@ -12,6 +12,7 @@ module-sets:
       - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/logs
       - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics
       - github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest
+      - github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata
 excluded-modules:
   - github.com/DataDog/opentelemetry-mapping-go/internal/tools
   - github.com/DataDog/opentelemetry-mapping-go/internal/tools/generate-license-file
