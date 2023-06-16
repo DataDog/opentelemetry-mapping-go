@@ -14,7 +14,7 @@ import (
 	"strings"
 	"testing"
 
-	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
+	"github.com/DataDog/datadog-agent/pkg/trace/pb"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
 	"github.com/stretchr/testify/assert"
@@ -118,7 +118,7 @@ type testConsumer struct {
 	testMetrics TestMetrics
 }
 
-func (t *testConsumer) ConsumeAPMStats(_ *pb.ClientStatsPayload) {
+func (t *testConsumer) ConsumeAPMStats(_ pb.ClientStatsPayload) {
 	// not used for this consumer, but do warn the user if they
 	// try to use it
 	panic("(*testConsumer).ConsumeAPMStats not implemented")
