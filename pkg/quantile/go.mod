@@ -17,3 +17,5 @@ require (
 )
 
 replace github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest => ../internal/sketchtest
+
+retract v0.4.0 // see #107

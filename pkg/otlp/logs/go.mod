@@ -35,3 +35,5 @@ require (
 )
 
 replace github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes => ../attributes
+
+retract v0.4.0 // see #107

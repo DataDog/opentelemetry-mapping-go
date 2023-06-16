@@ -44,3 +44,5 @@ replace (
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes => ../attributes
 	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile => ../../quantile
 )
+
+retract v0.4.0 // see #107
