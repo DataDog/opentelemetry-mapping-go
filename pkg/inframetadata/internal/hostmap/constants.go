@@ -11,26 +11,26 @@ const (
 	attributeKernelVersion = "os.kernel.version"
 )
 
-// gohai platform subsection fields.
+// gohai fieldPlatform subsection fields.
 const (
-	platformHostname         = "hostname"
-	platformOS               = "os"
-	platformProcessor        = "processor"
-	platformMachine          = "machine"
-	platformHardwarePlatform = "hardware_platform"
-	platformKernelName       = "kernel_name"
-	platformKernelRelease    = "kernel_release"
-	platformKernelVersion    = "kernel_version"
+	fieldPlatformHostname         = "hostname"
+	fieldPlatformOS               = "os"
+	fieldPlatformProcessor        = "processor"
+	fieldPlatformMachine          = "machine"
+	fieldPlatformHardwarePlatform = "hardware_fieldPlatform"
+	fieldPlatformKernelName       = "kernel_name"
+	fieldPlatformKernelRelease    = "kernel_release"
+	fieldPlatformKernelVersion    = "kernel_version"
 )
 
-// platformAttributesMap defines the mapping between Gohai platform fields
+// platformAttributesMap defines the mapping between Gohai fieldPlatform fields
 // and resource attribute names (semantic conventions or not).
 var platformAttributesMap map[string]string = map[string]string{
-	platformOS:               conventions.AttributeOSDescription,
-	platformProcessor:        conventions.AttributeHostArch,
-	platformMachine:          conventions.AttributeHostArch,
-	platformHardwarePlatform: conventions.AttributeHostArch,
-	platformKernelName:       attributeKernelName,
-	platformKernelRelease:    attributeKernelRelease,
-	platformKernelVersion:    attributeKernelVersion,
+	fieldPlatformOS:               conventions.AttributeOSDescription,
+	fieldPlatformProcessor:        conventions.AttributeHostArch,
+	fieldPlatformMachine:          conventions.AttributeHostArch,
+	fieldPlatformHardwarePlatform: conventions.AttributeHostArch,
+	fieldPlatformKernelName:       attributeKernelName,
+	fieldPlatformKernelRelease:    attributeKernelRelease,
+	fieldPlatformKernelVersion:    attributeKernelVersion,
 }
