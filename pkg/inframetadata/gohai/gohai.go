@@ -59,13 +59,13 @@ func (m gohaiMarshaler) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON implements the json.Unmarshaler interface.
 // Unmarshals the passed bytes twice (first to a string, then to gohai.Gohai)
 func (m *gohaiMarshaler) UnmarshalJSON(bytes []byte) error {
-	firstUnmarshall := ""
-	err := json.Unmarshal(bytes, &firstUnmarshall)
+	var out string
+	err := json.Unmarshal(bytes, &out)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal([]byte(firstUnmarshall), &(m.Gohai))
+	err = json.Unmarshal([]byte(out), &(m.Gohai))
 	return err
 }
 
