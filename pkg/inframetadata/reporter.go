@@ -93,9 +93,9 @@ func hasHostMetadata(res pcommon.Resource) (bool, error) {
 	return shouldUse, nil
 }
 
-// Consume a resource for host metadata reporting purposes.
-// The resource will be used only if it is usable (see 'checkResource') and it has a host attribute.
-func (r *Reporter) Consume(res pcommon.Resource) error {
+// ConsumeResource for host metadata reporting purposes.
+// The resource will be used only if it is usable (see 'hasHostMetadata') and it has a host attribute.
+func (r *Reporter) ConsumeResource(res pcommon.Resource) error {
 	if ok, err := hasHostMetadata(res); err != nil {
 		return fmt.Errorf("failed to check resource: %w", err)
 	} else if !ok {

@@ -9,7 +9,7 @@
 //
 // The `Reporter` has three public methods:
 // - The `Run() error` and `Stop()` methods manage its lifecycle
-// - The `Consume(pcommon.Resource) (bool, error)` method ingests resources, updates host metadata payloads, and reports whether any changes or errors occurred during processing.
+// - The `ConsumeResource(pcommon.Resource) (bool, error)` method ingests resources, updates host metadata payloads, and reports whether any changes or errors occurred during processing.
 //
 // Internally, the `Reporter` manages a `HostMap`, which has two public methods:
 // - The `Update(host string, resource pcommon.Resource) (changed bool, err error)` method updates a hosts information and reports whether any changes or errors occurred during processing.

@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
+	conventions "go.opentelemetry.io/collector/semconv/v1.6.1"
 	"go.uber.org/multierr"
 
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/gohai"
@@ -17,8 +18,6 @@ type HostMap struct {
 	mu sync.Mutex
 	// hosts map
 	hosts map[string]payload.HostMetadata
-	// u is the updater
-	u *updater
 }
 
 // New creates a new HostMap.
@@ -26,8 +25,46 @@ func New() (*HostMap, error) {
 	return &HostMap{
 		mu:    sync.Mutex{},
 		hosts: make(map[string]payload.HostMetadata),
-		u:     &updater{},
 	}, nil
+}
+
+func getStrField(m pcommon.Map, key string) (string, bool, error) {
+	val, ok := m.Get(key)
+	if !ok {
+		// Field not available, don't update but don't fail either
+		return "", false, nil
+	}
+
+	if val.Type() != pcommon.ValueTypeStr {
+		return "", false, fmt.Errorf("%q has type %q, expected type \"Str\" instead", key, val.Type())
+	}
+
+	return val.Str(), true, nil
+}
+
+func isAWS(m pcommon.Map) (bool, error) {
+	cloudProvider, ok, err := getStrField(m, conventions.AttributeCloudProvider)
+	if err != nil {
+		return false, err
+	} else if !ok {
+		// no cloud provider field
+		return false, nil
+	}
+	return cloudProvider == conventions.AttributeCloudProviderAWS, nil
+}
+
+func getInstanceID(m pcommon.Map) (string, bool, error) {
+	if onAWS, err := isAWS(m); err != nil || !onAWS {
+		return "", onAWS, err
+	}
+	return getStrField(m, conventions.AttributeHostID)
+}
+
+func getEC2Hostname(m pcommon.Map) (string, bool, error) {
+	if onAWS, err := isAWS(m); err != nil || !onAWS {
+		return "", onAWS, err
+	}
+	return getStrField(m, conventions.AttributeHostName)
 }
 
 // Update the information about a given host by providing a resource.
@@ -45,7 +82,6 @@ func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, err e
 	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	m.u.Reset(res)
 
 	var found bool
 	if old, ok := m.hosts[host]; ok {
@@ -53,30 +89,42 @@ func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, err e
 		md = old
 	}
 
-	m.u.FromValue(&md.InternalHostname, host)
+	md.InternalHostname = host
+	md.Meta.Hostname = host
 
-	// Meta section
-	m.u.FromFunc(&md.Meta.InstanceID,
-		func(m pcommon.Map) (string, bool, error) {
-			return "", false, fmt.Errorf("not implemented: InstanceID")
-		},
-	)
-	m.u.FromFunc(&md.Meta.EC2Hostname,
-		func(m pcommon.Map) (string, bool, error) {
-			return "", false, fmt.Errorf("not implemented: EC2Hostname")
-		},
-	)
-	m.u.FromValue(&md.Meta.Hostname, host)
+	// InstanceID field
+	if instanceId, ok, fieldErr := getInstanceID(res.Attributes()); fieldErr != nil {
+		err = multierr.Append(err, fieldErr)
+	} else if ok {
+		old := md.Meta.InstanceID
+		changed = changed || old != instanceId
+		md.Meta.InstanceID = instanceId
+	}
+
+	// EC2Hostname field
+	if EC2Hostname, ok, fieldErr := getEC2Hostname(res.Attributes()); fieldErr != nil {
+		err = multierr.Append(err, fieldErr)
+	} else if ok {
+		old := md.Meta.EC2Hostname
+		changed = changed || old != EC2Hostname
+		md.Meta.EC2Hostname = EC2Hostname
+	}
 
 	// Gohai - Platform
-	m.u.FromValue(md.Gohai.Gohai.Platform.(map[string]*string)["hostname"], host)
+	md.Gohai.Gohai.Platform.(map[string]string)["hostname"] = host
 	for field, attribute := range platformAttributesMap {
-		m.u.FromAttributeToMap(md.Gohai.Gohai.Platform.(map[string]string), field, attribute)
+		strVal, ok, fieldErr := getStrField(res.Attributes(), attribute)
+		if fieldErr != nil {
+			err = multierr.Append(err, fieldErr)
+		} else if ok {
+			old := md.Gohai.Gohai.Platform.(map[string]string)[field]
+			changed = changed || old != strVal
+			md.Gohai.Gohai.Platform.(map[string]string)[field] = strVal
+		}
 	}
 
 	m.hosts[host] = md
-	changed = found && m.u.HasChanged()
-	err = multierr.Append(err, m.u.Error())
+	changed = changed && found
 	return
 }
 
