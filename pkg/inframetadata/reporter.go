@@ -124,7 +124,7 @@ func (r *Reporter) Run(ctx context.Context) error {
 		select {
 		case <-r.ticker.C:
 			// extract payloads from hostMap and report them.
-			for host, payload := range r.hostMap.Extract() {
+			for host, payload := range r.hostMap.Flush() {
 				r.logger.Info("Sending host metadata",
 					zap.String("host", host))
 				if err := r.pusher.Push(ctx, payload); err != nil {

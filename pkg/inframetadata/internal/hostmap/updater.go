@@ -18,11 +18,10 @@ type updater struct {
 	err error
 }
 
-// newUpdater creates a new Updater.
-func newUpdater(res pcommon.Resource) *updater {
-	return &updater{
-		attrs: res.Attributes(),
-	}
+func (m *updater) Reset(res pcommon.Resource) {
+	m.changed = false
+	m.err = nil
+	m.attrs = res.Attributes()
 }
 
 // FromValue sets field from value and records changes.

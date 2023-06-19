@@ -11,21 +11,22 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/payload"
 )
 
-// HostMap stores a map from hostnames to host metadata payloads.
-// Host metadata payloads can be updated with the information from a given resource.
-// At any time, the internal map can be extracted and the map will be cleared out.
+// HostMap maps from hostnames to host metadata payloads.
 type HostMap struct {
-	// mutex for the host map.
-	mutex sync.Mutex
+	// mu is the mutex for the host map and updater.
+	mu sync.Mutex
 	// hosts map
 	hosts map[string]payload.HostMetadata
+	// u is the updater
+	u *updater
 }
 
-// New creates a new HostMap
+// New creates a new HostMap.
 func New() (*HostMap, error) {
 	return &HostMap{
-		mutex: sync.Mutex{},
+		mu:    sync.Mutex{},
 		hosts: make(map[string]payload.HostMetadata),
+		u:     &updater{},
 	}, nil
 }
 
@@ -36,53 +37,53 @@ func New() (*HostMap, error) {
 //
 // Partial modifications will still be applied even with non-fatal errors.
 func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, err error) {
-	hm := payload.HostMetadata{
+	md := payload.HostMetadata{
 		Flavor:  "otelcol-contrib",
 		Meta:    &payload.Meta{},
 		Tags:    &payload.HostTags{},
 		Payload: gohai.NewEmpty(),
 	}
-	updater := newUpdater(res)
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.u.Reset(res)
 
-	var existingHost bool
-	if oldHM, ok := m.hosts[host]; ok {
-		existingHost = true
-		hm = oldHM
+	var found bool
+	if old, ok := m.hosts[host]; ok {
+		found = true
+		md = old
 	}
 
-	updater.FromValue(&hm.InternalHostname, host)
+	m.u.FromValue(&md.InternalHostname, host)
 
 	// Meta section
-	updater.FromFunc(&hm.Meta.InstanceID,
+	m.u.FromFunc(&md.Meta.InstanceID,
 		func(m pcommon.Map) (string, bool, error) {
 			return "", false, fmt.Errorf("not implemented: InstanceID")
 		},
 	)
-	updater.FromFunc(&hm.Meta.EC2Hostname,
+	m.u.FromFunc(&md.Meta.EC2Hostname,
 		func(m pcommon.Map) (string, bool, error) {
 			return "", false, fmt.Errorf("not implemented: EC2Hostname")
 		},
 	)
-	updater.FromValue(&hm.Meta.Hostname, host)
+	m.u.FromValue(&md.Meta.Hostname, host)
 
 	// Gohai - Platform
-	updater.FromValue(hm.Gohai.Gohai.Platform.(map[string]*string)["hostname"], host)
+	m.u.FromValue(md.Gohai.Gohai.Platform.(map[string]*string)["hostname"], host)
 	for field, attribute := range platformAttributesMap {
-		updater.FromAttributeToMap(hm.Gohai.Gohai.Platform.(map[string]string), field, attribute)
+		m.u.FromAttributeToMap(md.Gohai.Gohai.Platform.(map[string]string), field, attribute)
 	}
 
-	m.hosts[host] = hm
-	changed = existingHost && updater.HasChanged()
-	err = multierr.Append(err, updater.Error())
+	m.hosts[host] = md
+	changed = found && m.u.HasChanged()
+	err = multierr.Append(err, m.u.Error())
 	return
 }
 
-// Extract all the host metadata payloads and clear them from the HostMap.
-func (m *HostMap) Extract() map[string]payload.HostMetadata {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
+// Flush all the host metadata payloads and clear them from the HostMap.
+func (m *HostMap) Flush() map[string]payload.HostMetadata {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	hosts := m.hosts
 	m.hosts = make(map[string]payload.HostMetadata)
 	return hosts
