@@ -64,7 +64,7 @@ func createSampledLogger(logger *zap.Logger) *zap.Logger {
 
 // NewReporter creates a new host metadata reporter.
 // The reporter consumes pcommon.Resources through its 'Consume' method and merges them into payload.HostMetadata payloads.
-// It then periodically exporters these functions through the pusher with a specified period.
+// It then exports the payloads through the pusher with a specified period.
 func NewReporter(logger *zap.Logger, pusher Pusher, period time.Duration) (*Reporter, error) {
 	hostMap, err := hostmap.New()
 	if err != nil {
@@ -80,9 +80,9 @@ func NewReporter(logger *zap.Logger, pusher Pusher, period time.Duration) (*Repo
 	}, nil
 }
 
-// checkResource to see if it should be used by default.
+// hasHostMetadata to see if it should be used by default.
 // A resource is usable if 'AttributeDatadogHostUseAsMetadata' is true or shouldUseByDefault is true.
-func checkResource(res pcommon.Resource) (bool, error) {
+func hasHostMetadata(res pcommon.Resource) (bool, error) {
 	shouldUse := shouldUseByDefault
 	if val, ok := res.Attributes().Get(AttributeDatadogHostUseAsMetadata); ok {
 		if val.Type() != pcommon.ValueTypeBool {
@@ -96,9 +96,9 @@ func checkResource(res pcommon.Resource) (bool, error) {
 // Consume a resource for host metadata reporting purposes.
 // The resource will be used only if it is usable (see 'checkResource') and it has a host attribute.
 func (r *Reporter) Consume(res pcommon.Resource) error {
-	if shouldUse, err := checkResource(res); err != nil {
+	if ok, err := hasHostMetadata(res); err != nil {
 		return fmt.Errorf("failed to check resource: %w", err)
-	} else if !shouldUse {
+	} else if !ok {
 		// The resource should not be used for host metadata.
 		return nil
 	}
