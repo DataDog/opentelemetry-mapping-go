@@ -6,12 +6,17 @@
 package testutils
 
 import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+
 	"go.opentelemetry.io/collector/pdata/pcommon"
 )
 
 // ResourceFromMap builds a resource with resource attributes set to the provided map.
-func NewResourceFromMap(m map[string]any) pcommon.Resource {
+func NewResourceFromMap(t *testing.T, m map[string]any) pcommon.Resource {
 	res := pcommon.NewResource()
-	res.Attributes().FromRaw(m)
+	err := res.Attributes().FromRaw(m)
+	require.NoError(t, err)
 	return res
 }

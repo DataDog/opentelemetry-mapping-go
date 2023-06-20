@@ -59,7 +59,7 @@ func TestHasHostMetadata(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ok, err := hasHostMetadata(testutils.NewResourceFromMap(tt.attrs))
+			ok, err := hasHostMetadata(testutils.NewResourceFromMap(t, tt.attrs))
 			if tt.err != "" {
 				assert.EqualError(t, err, tt.err)
 			} else {
@@ -96,7 +96,7 @@ func TestRun(t *testing.T) {
 		close(ch)
 	}()
 
-	err = r.ConsumeResource(testutils.NewResourceFromMap(map[string]any{
+	err = r.ConsumeResource(testutils.NewResourceFromMap(t, map[string]any{
 		AttributeDatadogHostUseAsMetadata:  true,
 		conventions.AttributeCloudProvider: conventions.AttributeCloudProviderAWS,
 		conventions.AttributeHostID:        "host-1-hostid",
@@ -106,7 +106,7 @@ func TestRun(t *testing.T) {
 	}))
 	assert.EqualError(t, err, "\"os.description\" has type \"Bool\", expected type \"Str\" instead")
 
-	err = r.ConsumeResource(testutils.NewResourceFromMap(map[string]any{}))
+	err = r.ConsumeResource(testutils.NewResourceFromMap(t, map[string]any{}))
 	assert.NoError(t, err)
 
 	// wait until Push has been called once before stopping

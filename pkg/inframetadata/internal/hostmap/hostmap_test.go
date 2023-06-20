@@ -80,7 +80,7 @@ func TestUpdate(t *testing.T) {
 	require.NoError(t, err)
 
 	for _, info := range hostInfo {
-		changed, err := hostMap.Update(info.hostname, testutils.NewResourceFromMap(info.attributes))
+		changed, err := hostMap.Update(info.hostname, testutils.NewResourceFromMap(t, info.attributes))
 		assert.Equal(t, info.expectedChanged, changed)
 		if info.expectedErr != "" {
 			assert.EqualError(t, err, info.expectedErr)
