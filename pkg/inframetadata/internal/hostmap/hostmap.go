@@ -32,7 +32,12 @@ func New() *HostMap {
 	}
 }
 
-func getStrField(m pcommon.Map, key string) (string, bool, error) {
+// strField gets a string-typed field from a resource attribute map.
+// It returns:
+// - The field's value, if available
+// - Whether the field was present in the map
+// - Any errors found in the process
+func strField(m pcommon.Map, key string) (string, bool, error) {
 	val, ok := m.Get(key)
 	if !ok {
 		// Field not available, don't update but don't fail either
@@ -44,8 +49,10 @@ func getStrField(m pcommon.Map, key string) (string, bool, error) {
 	return val.Str(), true, nil
 }
 
+// isAWS checks if a resource attribute map
+// is coming from an AWS VM.
 func isAWS(m pcommon.Map) (bool, error) {
-	cloudProvider, ok, err := getStrField(m, conventions.AttributeCloudProvider)
+	cloudProvider, ok, err := strField(m, conventions.AttributeCloudProvider)
 	if err != nil {
 		return false, err
 	} else if !ok {
@@ -55,21 +62,28 @@ func isAWS(m pcommon.Map) (bool, error) {
 	return cloudProvider == conventions.AttributeCloudProviderAWS, nil
 }
 
-// instanceID gets the AWS EC2 instance ID from a map.
+// instanceID gets the AWS EC2 instance ID from a resource attribute map.
 // It returns:
-// - The EC2 instance id
+// - The EC2 instance id if available
+// - Whether the instance id was found
+// - Any errors found retrieving the ID
 func instanceID(m pcommon.Map) (string, bool, error) {
 	if onAWS, err := isAWS(m); err != nil || !onAWS {
 		return "", onAWS, err
 	}
-	return getStrField(m, conventions.AttributeHostID)
+	return strField(m, conventions.AttributeHostID)
 }
 
+// ec2Hostname gets the AWS EC2 OS hostname from a resource attribute map.
+// It returns:
+// - The EC2 OS hostname if available
+// - Whether the EC2 OS hostname was found
+// - Any errors found retrieving the ID
 func ec2Hostname(m pcommon.Map) (string, bool, error) {
 	if onAWS, err := isAWS(m); err != nil || !onAWS {
 		return "", onAWS, err
 	}
-	return getStrField(m, conventions.AttributeHostName)
+	return strField(m, conventions.AttributeHostName)
 }
 
 // Update the information about a given host by providing a resource.
@@ -118,7 +132,7 @@ func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, err e
 	// Gohai - Platform
 	md.Gohai.Gohai.Platform.(map[string]string)["hostname"] = host
 	for field, attribute := range platformAttributesMap {
-		strVal, ok, fieldErr := getStrField(res.Attributes(), attribute)
+		strVal, ok, fieldErr := strField(res.Attributes(), attribute)
 		if fieldErr != nil {
 			err = multierr.Append(err, fieldErr)
 		} else if ok {
