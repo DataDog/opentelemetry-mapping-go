@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	conventions "go.opentelemetry.io/collector/semconv/v1.18.0"
 
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/internal/testutils"
@@ -76,9 +75,7 @@ func TestUpdate(t *testing.T) {
 		},
 	}
 
-	hostMap, err := New()
-	require.NoError(t, err)
-
+	hostMap := New()
 	for _, info := range hostInfo {
 		changed, err := hostMap.Update(info.hostname, testutils.NewResourceFromMap(t, info.attributes))
 		assert.Equal(t, info.expectedChanged, changed)

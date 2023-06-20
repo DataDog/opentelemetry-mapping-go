@@ -111,7 +111,7 @@ func TestRun(t *testing.T) {
 
 	// wait until Push has been called once before stopping
 	<-p.ch
-	r.Stop(context.Background())
+	r.Stop()
 	// wait until Reporter has stopped
 	<-ch
 	assert.Equal(t, p.md.Meta.Hostname, "host-1-hostid")

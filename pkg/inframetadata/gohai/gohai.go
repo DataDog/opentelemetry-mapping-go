@@ -36,6 +36,11 @@ type Payload struct {
 	Gohai gohaiMarshaler `json:"gohai"`
 }
 
+// Platform returns a reference to the Gohai payload 'platform' map.
+func (p *Payload) Platform() map[string]string {
+	return p.Gohai.Gohai.Platform.(map[string]string)
+}
+
 // gohaiSerializer implements json.Marshaler and json.Unmarshaler on top of a gohai payload
 type gohaiMarshaler struct {
 	Gohai *Gohai

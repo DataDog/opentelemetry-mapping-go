@@ -26,11 +26,10 @@ type HostMap struct {
 }
 
 // New creates a new HostMap.
-func New() (*HostMap, error) {
+func New() *HostMap {
 	return &HostMap{
-		mu:    sync.Mutex{},
 		hosts: make(map[string]payload.HostMetadata),
-	}, nil
+	}
 }
 
 func getStrField(m pcommon.Map, key string) (string, bool, error) {
@@ -39,11 +38,9 @@ func getStrField(m pcommon.Map, key string) (string, bool, error) {
 		// Field not available, don't update but don't fail either
 		return "", false, nil
 	}
-
 	if val.Type() != pcommon.ValueTypeStr {
 		return "", false, fmt.Errorf("%q has type %q, expected type \"Str\" instead", key, val.Type())
 	}
-
 	return val.Str(), true, nil
 }
 
@@ -58,14 +55,17 @@ func isAWS(m pcommon.Map) (bool, error) {
 	return cloudProvider == conventions.AttributeCloudProviderAWS, nil
 }
 
-func getInstanceID(m pcommon.Map) (string, bool, error) {
+// instanceID gets the AWS EC2 instance ID from a map.
+// It returns:
+// - The EC2 instance id
+func instanceID(m pcommon.Map) (string, bool, error) {
 	if onAWS, err := isAWS(m); err != nil || !onAWS {
 		return "", onAWS, err
 	}
 	return getStrField(m, conventions.AttributeHostID)
 }
 
-func getEC2Hostname(m pcommon.Map) (string, bool, error) {
+func ec2Hostname(m pcommon.Map) (string, bool, error) {
 	if onAWS, err := isAWS(m); err != nil || !onAWS {
 		return "", onAWS, err
 	}
@@ -98,7 +98,7 @@ func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, err e
 	md.Meta.Hostname = host
 
 	// InstanceID field
-	if instanceId, ok, fieldErr := getInstanceID(res.Attributes()); fieldErr != nil {
+	if instanceId, ok, fieldErr := instanceID(res.Attributes()); fieldErr != nil {
 		err = multierr.Append(err, fieldErr)
 	} else if ok {
 		old := md.Meta.InstanceID
@@ -107,7 +107,7 @@ func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, err e
 	}
 
 	// EC2Hostname field
-	if EC2Hostname, ok, fieldErr := getEC2Hostname(res.Attributes()); fieldErr != nil {
+	if EC2Hostname, ok, fieldErr := ec2Hostname(res.Attributes()); fieldErr != nil {
 		err = multierr.Append(err, fieldErr)
 	} else if ok {
 		old := md.Meta.EC2Hostname
@@ -122,9 +122,9 @@ func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, err e
 		if fieldErr != nil {
 			err = multierr.Append(err, fieldErr)
 		} else if ok {
-			old := md.Gohai.Gohai.Platform.(map[string]string)[field]
+			old := md.Platform()[field]
 			changed = changed || old != strVal
-			md.Gohai.Gohai.Platform.(map[string]string)[field] = strVal
+			md.Platform()[field] = strVal
 		}
 	}
 

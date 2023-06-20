@@ -71,11 +71,7 @@ func createSampledLogger(logger *zap.Logger) *zap.Logger {
 // The reporter consumes pcommon.Resources through its 'Consume' method and merges them into payload.HostMetadata payloads.
 // It then exports the payloads through the pusher with a specified period.
 func NewReporter(logger *zap.Logger, pusher Pusher, period time.Duration) (*Reporter, error) {
-	hostMap, err := hostmap.New()
-	if err != nil {
-		return nil, fmt.Errorf("failed to build host map: %w", err)
-	}
-
+	hostMap := hostmap.New()
 	return &Reporter{
 		logger:  createSampledLogger(logger),
 		hostMap: hostMap,
@@ -157,6 +153,6 @@ func (r *Reporter) Run(ctx context.Context) error {
 }
 
 // Stop the reporter.
-func (r *Reporter) Stop(_ context.Context) {
+func (r *Reporter) Stop() {
 	close(r.closeCh)
 }
