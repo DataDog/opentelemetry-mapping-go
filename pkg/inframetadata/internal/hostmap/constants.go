@@ -1,3 +1,8 @@
+// Unless explicitly stated otherwise all files in this repository are licensed
+// under the Apache License Version 2.0.
+// This product includes software developed at Datadog (https://www.datadoghq.com/).
+// Copyright 2023-present Datadog, Inc.
+
 package hostmap
 
 import (
@@ -17,7 +22,7 @@ const (
 	fieldPlatformOS               = "os"
 	fieldPlatformProcessor        = "processor"
 	fieldPlatformMachine          = "machine"
-	fieldPlatformHardwarePlatform = "hardware_fieldPlatform"
+	fieldPlatformHardwarePlatform = "hardware_platform"
 	fieldPlatformKernelName       = "kernel_name"
 	fieldPlatformKernelRelease    = "kernel_release"
 	fieldPlatformKernelVersion    = "kernel_version"

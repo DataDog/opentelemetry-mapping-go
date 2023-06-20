@@ -1,3 +1,8 @@
+// Unless explicitly stated otherwise all files in this repository are licensed
+// under the Apache License Version 2.0.
+// This product includes software developed at Datadog (https://www.datadoghq.com/).
+// Copyright 2023-present Datadog, Inc.
+
 package inframetadata
 
 import (
@@ -113,7 +118,15 @@ func (r *Reporter) ConsumeResource(res pcommon.Resource) error {
 		return nil
 	}
 
-	r.hostMap.Update(src.Identifier, res)
+	changed, err := r.hostMap.Update(src.Identifier, res)
+	if changed {
+		r.logger.Debug("Host metadata changed for host after payload",
+			zap.String("host", src.Identifier), zap.Any("attributes", res.Attributes()),
+		)
+	}
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

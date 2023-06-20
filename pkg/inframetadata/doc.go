@@ -14,6 +14,4 @@
 // Internally, the `Reporter` manages a `HostMap`, which has two public methods:
 // - The `Update(host string, resource pcommon.Resource) (changed bool, err error)` method updates a hosts information and reports whether any changes or errors occurred during processing.
 // - The `Extract() map[string]payloads.HostMetadata` method clears out the `HostMap` and returns a copy of its internal information.
-//
-// To do the updates, the `HostMap` uses an `updater`. This struct manages the changes and error tracking per update.
 package inframetadata
