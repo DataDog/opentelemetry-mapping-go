@@ -16,7 +16,7 @@ const (
 	attributeKernelVersion = "os.kernel.version"
 )
 
-// gohai fieldPlatform subsection fields.
+// This set of constants represent fields in the Gohai payload's Platform field.
 const (
 	fieldPlatformHostname         = "hostname"
 	fieldPlatformOS               = "os"

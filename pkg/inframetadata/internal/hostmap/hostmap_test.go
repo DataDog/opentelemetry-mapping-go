@@ -123,7 +123,7 @@ func TestUpdate(t *testing.T) {
 			Hostname: "host-2-hostid",
 		})
 		assert.Equal(t, md.Tags, &payload.HostTags{})
-		assert.Equal(t, md.Payload.Gohai.Gohai.Platform, map[string]string{
+		assert.Equal(t, md.Platform(), map[string]string{
 			"hostname":                    "host-2-hostid",
 			fieldPlatformProcessor:        "arm64",
 			fieldPlatformMachine:          "arm64",

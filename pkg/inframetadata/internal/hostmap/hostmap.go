@@ -130,7 +130,7 @@ func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, err e
 	}
 
 	// Gohai - Platform
-	md.Gohai.Gohai.Platform.(map[string]string)["hostname"] = host
+	md.Platform()["hostname"] = host
 	for field, attribute := range platformAttributesMap {
 		strVal, ok, fieldErr := strField(res.Attributes(), attribute)
 		if fieldErr != nil {
