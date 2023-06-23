@@ -112,21 +112,21 @@ func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, err e
 	md.Meta.Hostname = host
 
 	// InstanceID field
-	if instanceId, ok, fieldErr := instanceID(res.Attributes()); fieldErr != nil {
-		err = multierr.Append(err, fieldErr)
+	if iid, ok, err2 := instanceID(res.Attributes()); err2 != nil {
+		err = multierr.Append(err, err2)
 	} else if ok {
 		old := md.Meta.InstanceID
-		changed = changed || old != instanceId
-		md.Meta.InstanceID = instanceId
+		changed = changed || old != iid
+		md.Meta.InstanceID = iid
 	}
 
 	// EC2Hostname field
-	if EC2Hostname, ok, fieldErr := ec2Hostname(res.Attributes()); fieldErr != nil {
-		err = multierr.Append(err, fieldErr)
+	if host, ok, err2 := ec2Hostname(res.Attributes()); err2 != nil {
+		err = multierr.Append(err, err2)
 	} else if ok {
 		old := md.Meta.EC2Hostname
-		changed = changed || old != EC2Hostname
-		md.Meta.EC2Hostname = EC2Hostname
+		changed = changed || old != host
+		md.Meta.EC2Hostname = host
 	}
 
 	// Gohai - Platform
