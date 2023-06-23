@@ -67,7 +67,7 @@ func NewTranslator(logger *zap.Logger, options ...TranslatorOption) (*Translator
 		HistMode:                             HistogramModeDistributions,
 		SendHistogramAggregations:            false,
 		Quantiles:                            false,
-		SendMonotonic:                        true,
+		NumberMode:                           NumberModeCumulativeToDelta,
 		ResourceAttributesAsTags:             false,
 		InstrumentationLibraryMetadataAsTags: false,
 		sweepInterval:                        1800,
@@ -676,9 +676,14 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 				case pmetric.MetricTypeSum:
 					switch md.Sum().AggregationTemporality() {
 					case pmetric.AggregationTemporalityCumulative:
-						if t.cfg.SendMonotonic && isCumulativeMonotonic(md) {
-							t.mapNumberMonotonicMetrics(ctx, consumer, baseDims, md.Sum().DataPoints())
-						} else {
+						if isCumulativeMonotonic(md) {
+							switch t.cfg.NumberMode {
+							case NumberModeCumulativeToDelta:
+								t.mapNumberMonotonicMetrics(ctx, consumer, baseDims, md.Sum().DataPoints())
+							case NumberModeRawValue:
+								t.mapNumberMetrics(ctx, consumer, baseDims, Gauge, md.Sum().DataPoints())
+							}
+						} else { // delta and cumulative non-monotonic sums
 							t.mapNumberMetrics(ctx, consumer, baseDims, Gauge, md.Sum().DataPoints())
 						}
 					case pmetric.AggregationTemporalityDelta:

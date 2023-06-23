@@ -25,7 +25,7 @@ type translatorConfig struct {
 	HistMode                  HistogramMode
 	SendHistogramAggregations bool
 	Quantiles                 bool
-	SendMonotonic             bool
+	NumberMode                NumberMode
 	ResourceAttributesAsTags  bool
 	// Deprecated: use InstrumentationScopeMetadataAsTags instead in favor of
 	// https://github.com/open-telemetry/opentelemetry-proto/releases/tag/v0.15.0
@@ -177,14 +177,7 @@ const (
 // The default mode is NumberModeCumulativeToDelta.
 func WithNumberMode(mode NumberMode) TranslatorOption {
 	return func(t *translatorConfig) error {
-		switch mode {
-		case NumberModeCumulativeToDelta:
-			t.SendMonotonic = true
-		case NumberModeRawValue:
-			t.SendMonotonic = false
-		default:
-			return fmt.Errorf("unknown number mode: %q", mode)
-		}
+		t.NumberMode = mode
 		return nil
 	}
 }
