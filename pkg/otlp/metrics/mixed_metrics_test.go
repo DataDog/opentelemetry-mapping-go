@@ -118,6 +118,26 @@ func TestMapMetrics(t *testing.T) {
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 2,
 		},
+		{
+			name:     "with-initial-value-keep",
+			otlpfile: "testdata/otlpdata/mixed/simple.json",
+			ddogfile: "testdata/datadogdata/mixed/simple_keep.json",
+			options: []TranslatorOption{
+				WithInitialValueMode(InitialValueModeKeep),
+			},
+			expectedUnknownMetricType:                 1,
+			expectedUnsupportedAggregationTemporality: 2,
+		},
+		{
+			name:     "with-initial-value-drop",
+			otlpfile: "testdata/otlpdata/mixed/simple.json",
+			ddogfile: "testdata/datadogdata/mixed/simple_drop.json",
+			options: []TranslatorOption{
+				WithInitialValueMode(InitialValueModeDrop),
+			},
+			expectedUnknownMetricType:                 1,
+			expectedUnsupportedAggregationTemporality: 2,
+		},
 	}
 
 	for _, testinstance := range tests {
