@@ -126,7 +126,7 @@ func (r *Reporter) ConsumeResource(res pcommon.Resource) error {
 	return nil
 }
 
-// Run the reporter to periodically exporte
+// Run the reporter to periodically export
 func (r *Reporter) Run(ctx context.Context) error {
 	ctx, cancel := context.WithCancel(ctx)
 	for {
