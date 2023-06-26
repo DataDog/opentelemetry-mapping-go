@@ -25,7 +25,8 @@ type translatorConfig struct {
 	HistMode                  HistogramMode
 	SendHistogramAggregations bool
 	Quantiles                 bool
-	SendMonotonic             bool
+	NumberMode                NumberMode
+	InitialCumulMonoValueMode InitialCumulMonoValueMode
 	ResourceAttributesAsTags  bool
 	// Deprecated: use InstrumentationScopeMetadataAsTags instead in favor of
 	// https://github.com/open-telemetry/opentelemetry-proto/releases/tag/v0.15.0
@@ -177,14 +178,33 @@ const (
 // The default mode is NumberModeCumulativeToDelta.
 func WithNumberMode(mode NumberMode) TranslatorOption {
 	return func(t *translatorConfig) error {
-		switch mode {
-		case NumberModeCumulativeToDelta:
-			t.SendMonotonic = true
-		case NumberModeRawValue:
-			t.SendMonotonic = false
-		default:
-			return fmt.Errorf("unknown number mode: %q", mode)
-		}
+		t.NumberMode = mode
+		return nil
+	}
+}
+
+// InitialCumulMonoValueMode defines what the exporter should do with the initial value
+// of a cumulative monotonic sum when under the 'cumulative_to_delta' mode.
+// It is not used when the mode is 'raw_value'.
+type InitialCumulMonoValueMode string
+
+const (
+	// InitialCumulMonoValueModeAuto reports the initial value if its start timestamp
+	// is set and it happens after the process was started.
+	InitialCumulMonoValueModeAuto InitialCumulMonoValueMode = "auto"
+
+	// InitialCumulMonoValueModeDrop always drops the initial value.
+	InitialCumulMonoValueModeDrop InitialCumulMonoValueMode = "drop"
+
+	// InitialCumulMonoValueModeKeep always reports the initial value.
+	InitialCumulMonoValueModeKeep InitialCumulMonoValueMode = "keep"
+)
+
+// WithInitialCumulMonoValueMode sets the initial value mode.
+// The default mode is InitialCumulMonoValueModeAuto.
+func WithInitialCumulMonoValueMode(mode InitialCumulMonoValueMode) TranslatorOption {
+	return func(t *translatorConfig) error {
+		t.InitialCumulMonoValueMode = mode
 		return nil
 	}
 }
