@@ -91,7 +91,13 @@ func ec2Hostname(m pcommon.Map) (string, bool, error) {
 //   - Whether the information about the `host` has changed
 //   - Any non-fatal errors that may have occurred during the update
 //
-// Partial modifications will still be applied even with non-fatal errors.
+// Non-fatal errors are local to the specific field where they happened
+// and do not change the other fields. If when filling a field a non-fatal
+// error is raised, the error will be reported, the field will be left
+// empty and further fields will still be filled.
+//
+// The order in which resource attributes are read does not affect the final
+// host metadata payload, even if non-fatal errors are raised during execution.
 func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, err error) {
 	md := payload.HostMetadata{
 		Flavor:  "otelcol-contrib",
