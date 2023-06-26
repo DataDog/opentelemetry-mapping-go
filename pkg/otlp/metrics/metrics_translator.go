@@ -152,6 +152,23 @@ func getProcessStartTime() uint64 {
 	return startTime
 }
 
+// shouldConsumeInitialValue checks if the initial value of a cumulative monotonic metric
+// should be consumed or dropped.
+func (t *Translator) shouldConsumeInitialValue(startTs, ts uint64) bool {
+	switch t.cfg.InitialCumulMonoValueMode {
+	case InitialCumulMonoValueModeAuto:
+		if getProcessStartTime() < startTs && startTs != ts {
+			// Report the first value if the timeseries started after the Datadog Agent process started.
+			return true
+		}
+	case InitialCumulMonoValueModeKeep:
+		return true
+	case InitialCumulMonoValueModeDrop:
+		// do nothing, drop the point
+	}
+	return false
+}
+
 // mapNumberMonotonicMetrics maps monotonic datapoints into Datadog metrics
 func (t *Translator) mapNumberMonotonicMetrics(
 	ctx context.Context,
@@ -179,18 +196,8 @@ func (t *Translator) mapNumberMonotonicMetrics(
 
 		if dx, ok := t.prevPts.MonotonicDiff(pointDims, startTs, ts, val); ok {
 			consumer.ConsumeTimeSeries(ctx, pointDims, Count, ts, dx)
-		} else if i == 0 {
-			switch t.cfg.InitialCumulMonoValueMode {
-			case InitialCumulMonoValueModeAuto:
-				if getProcessStartTime() < startTs && startTs != ts {
-					// Report the first value if the timeseries started after the Datadog Agent process started.
-					consumer.ConsumeTimeSeries(ctx, pointDims, Count, ts, val)
-				}
-			case InitialCumulMonoValueModeKeep:
-				consumer.ConsumeTimeSeries(ctx, pointDims, Count, ts, val)
-			case InitialCumulMonoValueModeDrop:
-				// do nothing, drop the point
-			}
+		} else if i == 0 && t.shouldConsumeInitialValue(startTs, ts) {
+			consumer.ConsumeTimeSeries(ctx, pointDims, Count, ts, val)
 		}
 	}
 }
