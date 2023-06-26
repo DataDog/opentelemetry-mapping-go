@@ -179,10 +179,10 @@ func (t *Translator) mapNumberMonotonicMetrics(
 
 		if dx, ok := t.prevPts.MonotonicDiff(pointDims, startTs, ts, val); ok {
 			consumer.ConsumeTimeSeries(ctx, pointDims, Count, ts, dx)
-		} else {
+		} else if i == 0 {
 			switch t.cfg.InitialCumulMonoValueMode {
 			case InitialCumulMonoValueModeAuto:
-				if i == 0 && getProcessStartTime() < startTs && startTs != ts {
+				if getProcessStartTime() < startTs && startTs != ts {
 					// Report the first value if the timeseries started after the Datadog Agent process started.
 					consumer.ConsumeTimeSeries(ctx, pointDims, Count, ts, val)
 				}
