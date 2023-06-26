@@ -193,7 +193,7 @@ const (
 	// is set and it happens after the process was started.
 	InitialCumulMonoValueModeAuto InitialCumulMonoValueMode = "auto"
 
-	// InitialCumulMonoModeDrop always drops the initial value.
+	// InitialCumulMonoValueModeDrop always drops the initial value.
 	InitialCumulMonoValueModeDrop InitialCumulMonoValueMode = "drop"
 
 	// InitialCumulMonoValueModeKeep always reports the initial value.
