@@ -5,7 +5,7 @@ change_type: enhancement
 component: pkg/otlp/metrics
 
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: Add WithInitialValueMode option to metrics translator to configure behavior when exporting cumulative monotonic sums under the 'cumulative_to_delta' mode
+note: Add WithInitialCumulMonoValueMode option to metrics translator to configure behavior when exporting cumulative monotonic sums under the 'cumulative_to_delta' mode
 
 # The PR related to this change
 issues: [109]

@@ -68,7 +68,7 @@ func NewTranslator(logger *zap.Logger, options ...TranslatorOption) (*Translator
 		SendHistogramAggregations:            false,
 		Quantiles:                            false,
 		NumberMode:                           NumberModeCumulativeToDelta,
-		InitialValueMode:                     InitialValueModeAuto,
+		InitialCumulMonoValueMode:            InitialCumulMonoValueModeAuto,
 		ResourceAttributesAsTags:             false,
 		InstrumentationLibraryMetadataAsTags: false,
 		sweepInterval:                        1800,
@@ -180,15 +180,15 @@ func (t *Translator) mapNumberMonotonicMetrics(
 		if dx, ok := t.prevPts.MonotonicDiff(pointDims, startTs, ts, val); ok {
 			consumer.ConsumeTimeSeries(ctx, pointDims, Count, ts, dx)
 		} else {
-			switch t.cfg.InitialValueMode {
-			case InitialValueModeAuto:
+			switch t.cfg.InitialCumulMonoValueMode {
+			case InitialCumulMonoValueModeAuto:
 				if i == 0 && getProcessStartTime() < startTs && startTs != ts {
 					// Report the first value if the timeseries started after the Datadog Agent process started.
 					consumer.ConsumeTimeSeries(ctx, pointDims, Count, ts, val)
 				}
-			case InitialValueModeKeep:
+			case InitialCumulMonoValueModeKeep:
 				consumer.ConsumeTimeSeries(ctx, pointDims, Count, ts, val)
-			case InitialValueModeDrop:
+			case InitialCumulMonoValueModeDrop:
 				// do nothing, drop the point
 			}
 		}

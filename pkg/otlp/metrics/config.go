@@ -26,7 +26,7 @@ type translatorConfig struct {
 	SendHistogramAggregations bool
 	Quantiles                 bool
 	NumberMode                NumberMode
-	InitialValueMode          InitialValueMode
+	InitialCumulMonoValueMode InitialCumulMonoValueMode
 	ResourceAttributesAsTags  bool
 	// Deprecated: use InstrumentationScopeMetadataAsTags instead in favor of
 	// https://github.com/open-telemetry/opentelemetry-proto/releases/tag/v0.15.0
@@ -183,28 +183,28 @@ func WithNumberMode(mode NumberMode) TranslatorOption {
 	}
 }
 
-// InitialValueMode defines what the exporter should do with the initial value
+// InitialCumulMonoValueMode defines what the exporter should do with the initial value
 // of a cumulative monotonic sum when under the 'cumulative_to_delta' mode.
 // It is not used when the mode is 'raw_value'.
-type InitialValueMode string
+type InitialCumulMonoValueMode string
 
 const (
-	// InitialValueModeAuto reports the initial value if its start timestamp
+	// InitialCumulMonoValueModeAuto reports the initial value if its start timestamp
 	// is set and it happens after the process was started.
-	InitialValueModeAuto InitialValueMode = "auto"
+	InitialCumulMonoValueModeAuto InitialCumulMonoValueMode = "auto"
 
-	// InitialValueModeDrop always drops the initial value.
-	InitialValueModeDrop InitialValueMode = "drop"
+	// InitialCumulMonoModeDrop always drops the initial value.
+	InitialCumulMonoValueModeDrop InitialCumulMonoValueMode = "drop"
 
-	// InitialValueModeKeep always reports the initial value.
-	InitialValueModeKeep InitialValueMode = "keep"
+	// InitialCumulMonoValueModeKeep always reports the initial value.
+	InitialCumulMonoValueModeKeep InitialCumulMonoValueMode = "keep"
 )
 
-// WithInitialValueMode sets the initial value mode.
-// The default mode is InitialValueModeAuto.
-func WithInitialValueMode(mode InitialValueMode) TranslatorOption {
+// WithInitialCumulMonoValueMode sets the initial value mode.
+// The default mode is InitialCumulMonoValueModeAuto.
+func WithInitialCumulMonoValueMode(mode InitialCumulMonoValueMode) TranslatorOption {
 	return func(t *translatorConfig) error {
-		t.InitialValueMode = mode
+		t.InitialCumulMonoValueMode = mode
 		return nil
 	}
 }

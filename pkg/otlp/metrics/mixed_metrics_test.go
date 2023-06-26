@@ -123,7 +123,7 @@ func TestMapMetrics(t *testing.T) {
 			otlpfile: "testdata/otlpdata/mixed/simple.json",
 			ddogfile: "testdata/datadogdata/mixed/simple_keep.json",
 			options: []TranslatorOption{
-				WithInitialValueMode(InitialValueModeKeep),
+				WithInitialCumulMonoValueMode(InitialCumulMonoValueModeKeep),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 2,
@@ -133,7 +133,7 @@ func TestMapMetrics(t *testing.T) {
 			otlpfile: "testdata/otlpdata/mixed/simple.json",
 			ddogfile: "testdata/datadogdata/mixed/simple_drop.json",
 			options: []TranslatorOption{
-				WithInitialValueMode(InitialValueModeDrop),
+				WithInitialCumulMonoValueMode(InitialCumulMonoValueModeDrop),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 2,
