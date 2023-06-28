@@ -4,6 +4,16 @@
 
 <!-- next version -->
 
+## v0.5.1
+
+### 🚀 New components 🚀
+
+- `pkg/inframetadata`: The pkg/inframetadata module contains logic and payload definitions related to infrastructure monitoring (#105)
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics`: Add WithInitialCumulMonoValueMode option to metrics translator to configure behavior when exporting cumulative monotonic sums under the 'cumulative_to_delta' mode (#109)
+
 ## v0.5.0
 
 ### 💡 Enhancements 💡
