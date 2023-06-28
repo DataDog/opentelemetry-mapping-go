@@ -2,10 +2,11 @@ package metrics
 
 // runtimeMetricPrefixLanguageMap defines the runtime metric prefixes and which languages they map to
 var runtimeMetricPrefixLanguageMap = map[string]string{
-	"process.runtime.go":     "go",
-	"process.runtime.dotnet": "dotnet",
-	"process.runtime.jvm":    "jvm",
-	"process.runtime.python": "python",
+	"process.runtime.go":      "go",
+	"process.runtime.dotnet":  "dotnet",
+	"process.runtime.jvm":     "jvm",
+	"process.runtime.cpython": "python",
+	"runtime.cpython":         "python",
 }
 
 // runtimeMetricMapping defines the fields needed to map OTel runtime metrics to their equivalent
