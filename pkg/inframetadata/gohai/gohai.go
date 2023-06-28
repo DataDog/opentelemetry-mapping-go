@@ -36,6 +36,11 @@ type Payload struct {
 	Gohai gohaiMarshaler `json:"gohai"`
 }
 
+// Platform returns a reference to the Gohai payload 'platform' map.
+func (p *Payload) Platform() map[string]string {
+	return p.Gohai.Gohai.Platform.(map[string]string)
+}
+
 // gohaiSerializer implements json.Marshaler and json.Unmarshaler on top of a gohai payload
 type gohaiMarshaler struct {
 	Gohai *Gohai
@@ -59,14 +64,15 @@ func (m gohaiMarshaler) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON implements the json.Unmarshaler interface.
 // Unmarshals the passed bytes twice (first to a string, then to gohai.Gohai)
 func (m *gohaiMarshaler) UnmarshalJSON(bytes []byte) error {
-	firstUnmarshall := ""
-	err := json.Unmarshal(bytes, &firstUnmarshall)
+	// First, unmarshal to a string
+	var out string
+	err := json.Unmarshal(bytes, &out)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal([]byte(firstUnmarshall), &(m.Gohai))
-	return err
+	// Then, unmarshal the JSON-formatted string into a gohai.Gohai struct.
+	return json.Unmarshal([]byte(out), &(m.Gohai))
 }
 
 // NewEmpty creates a new empty Gohai payload.
