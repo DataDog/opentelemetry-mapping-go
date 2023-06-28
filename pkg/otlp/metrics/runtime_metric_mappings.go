@@ -6,7 +6,6 @@ var runtimeMetricPrefixLanguageMap = map[string]string{
 	"process.runtime.dotnet":  "dotnet",
 	"process.runtime.jvm":     "jvm",
 	"process.runtime.cpython": "python",
-	"runtime.cpython":         "python",
 }
 
 // runtimeMetricMapping defines the fields needed to map OTel runtime metrics to their equivalent
@@ -227,45 +226,6 @@ var javaRuntimeMetricsMappings = runtimeMetricMappingList{
 }
 
 var pythonRuntimeMetricsMappings = runtimeMetricMappingList{
-	"runtime.cpython.cpu_time": {{
-		mappedName: "runtime.python.cpu.time.sys",
-		attributes: []runtimeMetricAttribute{{
-			key:    "type",
-			values: []string{"system"},
-		}},
-	}, {
-		mappedName: "runtime.python.cpu.time.user",
-		attributes: []runtimeMetricAttribute{{
-			key:    "type",
-			values: []string{"user"},
-		}},
-	}},
-	"runtime.cpython.gc_count": {{
-		mappedName: "runtime.python.gc.count.gen0",
-		attributes: []runtimeMetricAttribute{{
-			key:    "count",
-			values: []string{"0"},
-		}},
-	}, {
-		mappedName: "runtime.python.gc.count.gen1",
-		attributes: []runtimeMetricAttribute{{
-			key:    "count",
-			values: []string{"1"},
-		}},
-	}, {
-		mappedName: "runtime.python.gc.count.gen2",
-		attributes: []runtimeMetricAttribute{{
-			key:    "count",
-			values: []string{"2"},
-		}},
-	}},
-	"runtime.cpython.memory": {{
-		mappedName: "runtime.python.mem.rss",
-		attributes: []runtimeMetricAttribute{{
-			key:    "type",
-			values: []string{"rss"},
-		}},
-	}},
 	"process.runtime.cpython.cpu_time": {{
 		mappedName: "runtime.python.cpu.time.sys",
 		attributes: []runtimeMetricAttribute{{
