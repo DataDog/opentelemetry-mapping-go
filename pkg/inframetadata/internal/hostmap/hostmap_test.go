@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	conventions "go.opentelemetry.io/collector/semconv/v1.18.0"
+	"go.uber.org/multierr"
 
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/internal/testutils"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/payload"
@@ -20,7 +21,7 @@ func TestUpdate(t *testing.T) {
 		hostname        string
 		attributes      map[string]any
 		expectedChanged bool
-		expectedErr     string
+		expectedErrs    []string
 	}{
 		{
 			hostname: "host-1-hostid",
@@ -61,7 +62,25 @@ func TestUpdate(t *testing.T) {
 				attributeKernelVersion:             "#82~18.04.1-Ubuntu SMP Fri Apr 16 15:10:02 UTC 2021", // changed
 			},
 			expectedChanged: true,
-			expectedErr:     "\"os.description\" has type \"Bool\", expected type \"Str\" instead",
+			expectedErrs:    []string{"\"os.description\" has type \"Bool\", expected type \"Str\" instead"},
+		},
+		{
+			// Same as #1 but wrong type in two places and no update
+			hostname: "host-1-hostid",
+			attributes: map[string]any{
+				conventions.AttributeCloudProvider: conventions.AttributeCloudProviderAWS,
+				conventions.AttributeHostID:        "host-1-hostid",
+				conventions.AttributeHostName:      "host-1-hostname",
+				conventions.AttributeOSDescription: true, // wrong type
+				conventions.AttributeHostArch:      conventions.AttributeHostArchAMD64,
+				attributeKernelName:                1, // wrong type
+				attributeKernelRelease:             "5.19.0-43-generic",
+			},
+			expectedChanged: false,
+			expectedErrs: []string{
+				"\"os.description\" has type \"Bool\", expected type \"Str\" instead",
+				"\"os.kernel.name\" has type \"Int\", expected type \"Str\" instead",
+			},
 		},
 		{
 			// Different host, partial information, on Azure
@@ -79,8 +98,12 @@ func TestUpdate(t *testing.T) {
 	for _, info := range hostInfo {
 		changed, err := hostMap.Update(info.hostname, testutils.NewResourceFromMap(t, info.attributes))
 		assert.Equal(t, info.expectedChanged, changed)
-		if info.expectedErr != "" {
-			assert.EqualError(t, err, info.expectedErr)
+		if len(info.expectedErrs) > 0 {
+			var errStrings []string
+			for _, err := range multierr.Errors(err) {
+				errStrings = append(errStrings, err.Error())
+			}
+			assert.ElementsMatch(t, info.expectedErrs, errStrings)
 		} else {
 			assert.NoError(t, err)
 		}
