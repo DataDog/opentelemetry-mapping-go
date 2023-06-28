@@ -5,6 +5,7 @@ var runtimeMetricPrefixLanguageMap = map[string]string{
 	"process.runtime.go":     "go",
 	"process.runtime.dotnet": "dotnet",
 	"process.runtime.jvm":    "jvm",
+	"process.runtime.python": "python",
 }
 
 // runtimeMetricMapping defines the fields needed to map OTel runtime metrics to their equivalent
@@ -224,6 +225,87 @@ var javaRuntimeMetricsMappings = runtimeMetricMappingList{
 	}},
 }
 
+var pythonRuntimeMetricsMappings = runtimeMetricMappingList{
+	"runtime.cpython.cpu_time": {{
+		mappedName: "runtime.python.cpu.time.sys",
+		attributes: []runtimeMetricAttribute{{
+			key:    "type",
+			values: []string{"system"},
+		}},
+	}, {
+		mappedName: "runtime.python.cpu.time.user",
+		attributes: []runtimeMetricAttribute{{
+			key:    "type",
+			values: []string{"user"},
+		}},
+	}},
+	"runtime.cpython.gc_count": {{
+		mappedName: "runtime.python.gc.count.gen0",
+		attributes: []runtimeMetricAttribute{{
+			key:    "count",
+			values: []string{"0"},
+		}},
+	}, {
+		mappedName: "runtime.python.gc.count.gen1",
+		attributes: []runtimeMetricAttribute{{
+			key:    "count",
+			values: []string{"1"},
+		}},
+	}, {
+		mappedName: "runtime.python.gc.count.gen2",
+		attributes: []runtimeMetricAttribute{{
+			key:    "count",
+			values: []string{"2"},
+		}},
+	}},
+	"runtime.cpython.memory": {{
+		mappedName: "runtime.python.mem.rss",
+		attributes: []runtimeMetricAttribute{{
+			key:    "type",
+			values: []string{"rss"},
+		}},
+	}},
+	"process.runtime.cpython.cpu_time": {{
+		mappedName: "runtime.python.cpu.time.sys",
+		attributes: []runtimeMetricAttribute{{
+			key:    "type",
+			values: []string{"system"},
+		}},
+	}, {
+		mappedName: "runtime.python.cpu.time.user",
+		attributes: []runtimeMetricAttribute{{
+			key:    "type",
+			values: []string{"user"},
+		}},
+	}},
+	"process.runtime.cpython.gc_count": {{
+		mappedName: "runtime.python.gc.count.gen0",
+		attributes: []runtimeMetricAttribute{{
+			key:    "count",
+			values: []string{"0"},
+		}},
+	}, {
+		mappedName: "runtime.python.gc.count.gen1",
+		attributes: []runtimeMetricAttribute{{
+			key:    "count",
+			values: []string{"1"},
+		}},
+	}, {
+		mappedName: "runtime.python.gc.count.gen2",
+		attributes: []runtimeMetricAttribute{{
+			key:    "count",
+			values: []string{"2"},
+		}},
+	}},
+	"process.runtime.cpython.memory": {{
+		mappedName: "runtime.python.mem.rss",
+		attributes: []runtimeMetricAttribute{{
+			key:    "type",
+			values: []string{"rss"},
+		}},
+	}},
+}
+
 func getRuntimeMetricsMappings() runtimeMetricMappingList {
 	res := runtimeMetricMappingList{}
 	for k, v := range goRuntimeMetricsMappings {
@@ -233,6 +315,9 @@ func getRuntimeMetricsMappings() runtimeMetricMappingList {
 		res[k] = v
 	}
 	for k, v := range javaRuntimeMetricsMappings {
+		res[k] = v
+	}
+	for k, v := range pythonRuntimeMetricsMappings {
 		res[k] = v
 	}
 	return res
