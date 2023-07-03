@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/frapposelli/wwhrd v0.4.0
 	github.com/golangci/golangci-lint v1.52.2
-	go.opentelemetry.io/build-tools/chloggen v0.7.0
+	go.opentelemetry.io/build-tools/chloggen v0.8.0
 	go.opentelemetry.io/build-tools/multimod v0.8.0
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // No tagged version available
 )
