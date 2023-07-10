@@ -1,5 +1,5 @@
-github.com/DataDog/datadog-agent/pkg/trace v0.45.0 h1:RZCZDyNw7JzbYQxebK1ZXuQvum4usOPHRanD5mZ8um8=
-github.com/DataDog/datadog-agent/pkg/trace v0.45.0/go.mod h1:sMx7fHUAtLbSrUqFjTdKjwfhtUj284HbsttNAzHfsgo=
+github.com/DataDog/datadog-agent/pkg/trace v0.46.0 h1:qqkeAbdsVzw0N0YYSWMvJIeuccTvNucOWTBFvoa09QI=
+github.com/DataDog/datadog-agent/pkg/trace v0.46.0/go.mod h1:zwd31jKVdLteo2YLYAmI6Bkc6c20mGyVCdkEWrtcTrQ=
 github.com/DataDog/sketches-go v1.4.2 h1:gppNudE9d19cQ98RYABOetxIhpTCl4m7CnbRZjvVA/o=
 github.com/DataDog/sketches-go v1.4.2/go.mod h1:xJIXldczJyyjnbDop7ZZcLxJdV3+7Kra7H1KMgpgkLk=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
