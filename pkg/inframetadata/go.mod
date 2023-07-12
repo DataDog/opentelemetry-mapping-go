@@ -27,3 +27,13 @@ require (
 )
 
 replace github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes => ../otlp/attributes
+
+replace github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source => ../otlp/attributes/source
+
+replace github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/gohai => ./gohai
+
+replace github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/payload => ./payload
+
+replace github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/internal/hostmap => ./internal/hostmap
+
+replace github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/internal/testutils => ./internal/testutils

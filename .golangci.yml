@@ -36,6 +36,20 @@ linters-settings:
     include-go-root: true
     packages-with-error-message:
       - sync/atomic: "Use go.uber.org/atomic instead"
+    rules:
+      main:
+        files:
+          - $all
+        allow:
+          - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes
+          - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source
+          - github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/gohai
+          - github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/payload
+          - github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/internal/hostmap
+          - github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/internal/testutils
+          - github.com/stretchr/testify/assert
+          - github.com/stretchr/testify/require
+          
   staticcheck:
     go: "1.19"
     checks: ["all",
