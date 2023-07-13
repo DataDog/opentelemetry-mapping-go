@@ -41,14 +41,19 @@ linters-settings:
         files:
           - $all
         allow:
-          - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes
-          - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source
-          - github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/gohai
-          - github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/payload
-          - github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/internal/hostmap
-          - github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/internal/testutils
-          - github.com/stretchr/testify/assert
-          - github.com/stretchr/testify/require
+          - $gostd
+          - github.com/DataDog/datadog-agent
+          - github.com/DataDog/datadog-api-client-go
+          - github.com/DataDog/opentelemetry-mapping-go
+          - github.com/DataDog/sketches-go
+          - github.com/dustin/go-humanize
+          - github.com/golang
+          - github.com/lightstep/go-expohisto
+          - github.com/patrickmn/go-cache
+          - github.com/stretchr/testify
+          - golang.org/x/exp
+          - gopkg.in/yaml.v3
+          - go.uber.org
           
   staticcheck:
     go: "1.19"
