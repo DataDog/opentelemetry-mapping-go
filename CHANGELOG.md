@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.5.2
+
+### 💡 Enhancements 💡
+
+- `pkg/inframetadata`: Add `Reporter` implementation (#88)
+
 ## v0.5.1
 
 ### 🚀 New components 🚀
