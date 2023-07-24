@@ -4,6 +4,13 @@
 
 <!-- next version -->
 
+## v0.5.3
+
+### 🛑 Breaking changes 🛑
+
+- `pkg/otlp`: use new location for updated protobuf definitions in the datadog-agent repo, trace protobuf definitions specifically. (#103)
+  new definitions include mutext to avoid copies, and so implementations should rely on passing arguments by reference and not value.
+
 ## v0.5.2
 
 ### 💡 Enhancements 💡
