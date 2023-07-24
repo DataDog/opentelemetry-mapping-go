@@ -95,7 +95,7 @@ jobs:
       - name: Check licenses file
         run: make gen-licenses && git diff -s --exit-code || (echo "make gen-licenses needed"; exit 1)
       - name: Check golangci-lint
-        run: make lint
+        run: make lint OPTS="--timeout 2m"
 
   breaking-changes:
     runs-on: ubuntu-latest
