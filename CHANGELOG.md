@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.5.4
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/otlp/logs`: Remove `otel_source` tag from log translator output (#130)
+
 ## v0.5.3
 
 ### 🛑 Breaking changes 🛑
