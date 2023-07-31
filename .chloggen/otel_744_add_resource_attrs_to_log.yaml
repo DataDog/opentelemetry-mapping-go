@@ -5,7 +5,7 @@ change_type: bug_fix
 component: pkg/otlp
 
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: Add resource attributes to AdditionalProperties field of log
+note: Populate OTLP resource attributes in Datadog logs
 
 # The PR related to this change
 issues: [138]
