@@ -383,7 +383,7 @@ func TestTransform(t *testing.T) {
 			},
 		},
 		{
-			name: "resource attributes in additional properties",
+			name: "DD hostname and service are not overridden by resource attributes",
 			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
