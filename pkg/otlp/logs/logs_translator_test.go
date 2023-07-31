@@ -90,6 +90,7 @@ func TestTransform(t *testing.T) {
 					"app":              "test",
 					"status":           "debug",
 					otelSeverityNumber: "5",
+					"service.name":     "otlp_col",
 				},
 			},
 		},
@@ -118,6 +119,7 @@ func TestTransform(t *testing.T) {
 					"app":              "test",
 					"status":           "debug",
 					otelSeverityNumber: "5",
+					"service.name":     "otlp_col",
 				},
 			},
 		},
@@ -348,6 +350,63 @@ func TestTransform(t *testing.T) {
 					ddSpanID:       fmt.Sprintf("%d", ddSp),
 					ddTraceID:      fmt.Sprintf("%d", ddTr),
 					"service.name": "otlp_col",
+				},
+			},
+		},
+		{
+			name: "resource attributes in additional properties",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					l.Attributes().PutStr("app", "test")
+					l.SetSeverityNumber(5)
+					return l
+				}(),
+				res: func() pcommon.Resource {
+					r := pcommon.NewResource()
+					r.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
+					r.Attributes().PutStr("key", "val")
+					return r
+				}(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString("service:otlp_col"),
+				Message: *datadog.PtrString(""),
+				Service: datadog.PtrString("otlp_col"),
+				AdditionalProperties: map[string]string{
+					"app":              "test",
+					"status":           "debug",
+					otelSeverityNumber: "5",
+					"key":              "val",
+					"service.name":     "otlp_col",
+				},
+			},
+		},
+		{
+			name: "resource attributes in additional properties",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					l.Attributes().PutStr("app", "test")
+					l.SetSeverityNumber(5)
+					return l
+				}(),
+				res: func() pcommon.Resource {
+					r := pcommon.NewResource()
+					r.Attributes().PutStr("hostname", "example_host")
+					r.Attributes().PutStr("service", "otlp_col")
+					return r
+				}(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString(""),
+				Message: *datadog.PtrString(""),
+				AdditionalProperties: map[string]string{
+					"app":              "test",
+					"status":           "debug",
+					otelSeverityNumber: "5",
+					"otel.service":     "otlp_col",
+					"otel.hostname":    "example_host",
 				},
 			},
 		},

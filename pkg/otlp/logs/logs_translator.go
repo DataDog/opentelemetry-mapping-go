@@ -118,6 +118,14 @@ func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) data
 		}
 		return true
 	})
+	res.Attributes().Range(func(k string, v pcommon.Value) bool {
+		if k == "hostname" || k == "service" {
+			l.AdditionalProperties["otel."+k] = v.AsString()
+		} else {
+			l.AdditionalProperties[k] = v.AsString()
+		}
+		return true
+	})
 	if traceID := lr.TraceID(); !traceID.IsEmpty() {
 		l.AdditionalProperties[ddTraceID] = strconv.FormatUint(traceIDToUint64(traceID), 10)
 		l.AdditionalProperties[otelTraceID] = hex.EncodeToString(traceID[:])
