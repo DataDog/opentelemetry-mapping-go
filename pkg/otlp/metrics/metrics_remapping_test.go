@@ -275,15 +275,20 @@ func TestRemapMetrics(t *testing.T) {
 			out: []pmetric.Metric{metric("container.net.rcvd.packets", point{f: 15})},
 		},
 	} {
-		lena := dest.Len()
-		checkprefix := strings.HasPrefix(tt.in.Name(), "system.") || strings.HasPrefix(tt.in.Name(), "process.")
+		lenin := dest.Len()
 		remapMetrics(dest, tt.in)
-		if checkprefix {
-			require.True(t, strings.HasPrefix(tt.in.Name(), "otel."), "system.* and process.* metrics need to be prepended with the otel.* namespace")
+		out := tt.out
+		if strings.HasPrefix(tt.in.Name(), "system.") || strings.HasPrefix(tt.in.Name(), "process.") {
+			// on system.* and process.* metrics, we should expect an additional metric
+			// which is a copy of the input with the otel.* prefix added
+			cp := pmetric.NewMetric()
+			tt.in.CopyTo(cp)
+			cp.SetName("otel." + cp.Name())
+			out = append(out, cp)
 		}
-		require.Equal(t, dest.Len()-lena, len(tt.out), "unexpected number of metrics added")
-		for i, out := range tt.out {
-			require.Equal(t, out, dest.At(dest.Len()-len(tt.out)+i))
+		require.Equal(t, dest.Len()-lenin, len(out), "unexpected number of metrics added")
+		for i, o := range out {
+			require.Equal(t, o, dest.At(dest.Len()-len(out)+i))
 		}
 	}
 

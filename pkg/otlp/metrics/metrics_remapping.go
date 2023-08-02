@@ -70,7 +70,9 @@ func remapSystemMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 		copyMetric(all, m, "system.disk.in_use", 1)
 	}
 	// process.* and system.* metrics need to be prepended with the otel.* namespace
-	m.SetName("otel." + m.Name())
+	newm := all.AppendEmpty()
+	m.CopyTo(newm)
+	newm.SetName("otel." + m.Name())
 }
 
 // remapContainerMetrics extracts system metrics from m and appends them to all.
