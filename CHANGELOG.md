@@ -4,6 +4,13 @@
 
 <!-- next version -->
 
+## v0.5.5
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/otlp`: Populate OTLP resource attributes in Datadog logs (#138)
+- `pkg/otlp/metrics`: Changes mapping for jvm.loaded_classes from process.runtime.jvm.classes.loaded to process.runtime.jvm.classes.current_loaded (#143)
+
 ## v0.5.4
 
 ### 🧰 Bug fixes 🧰
