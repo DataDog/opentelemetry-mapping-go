@@ -620,7 +620,7 @@ func TestMapRuntimeMetricsMultipleLanguageTags(t *testing.T) {
 	}
 	assert.ElementsMatch(t, []string{"go", "dotnet"}, rmt.Languages)
 
-	exampleDims = newDims("process.runtime.jvm.classes.loaded")
+	exampleDims = newDims("process.runtime.jvm.classes.current_loaded")
 	md4 := createTestIntCumulativeMonotonicMetrics(false)
 	md3.ResourceMetrics().MoveAndAppendTo(md4.ResourceMetrics())
 	rmt, err = tr.MapMetrics(ctx, md4, consumer)
