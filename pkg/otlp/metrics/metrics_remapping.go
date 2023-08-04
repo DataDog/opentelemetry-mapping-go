@@ -69,10 +69,13 @@ func remapSystemMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	case "system.filesystem.utilization":
 		copyMetric(all, m, "system.disk.in_use", 1)
 	}
-	// process.* and system.* metrics need to be prepended with the otel.* namespace
-	newm := all.AppendEmpty()
-	m.CopyTo(newm)
-	newm.SetName("otel." + m.Name())
+	if strings.HasPrefix(name, "system.") {
+		// we keep the original metric for system.* metrics
+		newm := all.AppendEmpty()
+		m.CopyTo(newm)
+	}
+	// and we prepend all of them with the otel.* namespace namespace
+	m.SetName("otel." + m.Name())
 }
 
 // remapContainerMetrics extracts system metrics from m and appends them to all.

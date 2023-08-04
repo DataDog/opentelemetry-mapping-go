@@ -275,21 +275,27 @@ func TestRemapMetrics(t *testing.T) {
 			out: []pmetric.Metric{metric("container.net.rcvd.packets", point{f: 15})},
 		},
 	} {
-		lenin := dest.Len()
-		remapMetrics(dest, tt.in)
-		out := tt.out
-		if strings.HasPrefix(tt.in.Name(), "system.") || strings.HasPrefix(tt.in.Name(), "process.") {
-			// on system.* and process.* metrics, we should expect an additional metric
-			// which is a copy of the input with the otel.* prefix added
-			cp := pmetric.NewMetric()
-			tt.in.CopyTo(cp)
-			cp.SetName("otel." + cp.Name())
-			out = append(out, cp)
-		}
-		require.Equal(t, dest.Len()-lenin, len(out), "unexpected number of metrics added")
-		for i, o := range out {
-			require.Equal(t, o, dest.At(dest.Len()-len(out)+i))
-		}
+		t.Run("", func(t *testing.T) {
+			lenin := dest.Len()
+			issystem := strings.HasPrefix(tt.in.Name(), "system.")
+			out := tt.out
+			if issystem {
+				// the original system.* metrics need to be preserved
+				newm := pmetric.NewMetric()
+				tt.in.CopyTo(newm)
+				out = append(out, newm)
+			}
+			isprocess := strings.HasPrefix(tt.in.Name(), "process.")
+			remapMetrics(dest, tt.in)
+			if issystem || isprocess {
+				// system.* and process.* metrics have been prepended with the otel.* namespace
+				require.True(t, strings.HasPrefix(tt.in.Name(), "otel."), "system.* and process.* metrics need to be prepended with the otel.* namespace")
+			}
+			require.Equal(t, dest.Len()-lenin, len(out), "unexpected number of metrics added")
+			for i, o := range out {
+				require.Equal(t, o, dest.At(dest.Len()-len(out)+i))
+			}
+		})
 	}
 
 }
