@@ -1,5 +1,5 @@
-github.com/DataDog/datadog-agent/pkg/proto v0.47.0-rc.3.0.20230720220350-143f7b52181b h1:xIcy5dLozuUVBW9+fcikKrIfnADVYRYD8US5ndQFXyE=
-github.com/DataDog/datadog-agent/pkg/proto v0.47.0-rc.3.0.20230720220350-143f7b52181b/go.mod h1:O3WwGRPZxs4BpB2ccUvIIPprhscWBRpudJT6mC+7sr8=
+github.com/DataDog/datadog-agent/pkg/proto v0.48.0-beta.1 h1:Htxj/RE55AeDZ+OE6+x+kJQz3toGWzR40Baq0Dknv8U=
+github.com/DataDog/datadog-agent/pkg/proto v0.48.0-beta.1/go.mod h1:O3WwGRPZxs4BpB2ccUvIIPprhscWBRpudJT6mC+7sr8=
 github.com/DataDog/sketches-go v1.4.2 h1:gppNudE9d19cQ98RYABOetxIhpTCl4m7CnbRZjvVA/o=
 github.com/DataDog/sketches-go v1.4.2/go.mod h1:xJIXldczJyyjnbDop7ZZcLxJdV3+7Kra7H1KMgpgkLk=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
