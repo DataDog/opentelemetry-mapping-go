@@ -55,22 +55,30 @@ func TestRemapMetrics(t *testing.T) {
 		return m
 	}
 
-	dest := pmetric.NewMetricSlice()
 	for _, tt := range []struct {
 		in  pmetric.Metric
 		out []pmetric.Metric
 	}{
 		{
-			in:  metric("system.cpu.load_average.1m", point{f: 1}),
-			out: []pmetric.Metric{metric("system.load.1", point{f: 1})},
+			in: metric("system.cpu.load_average.1m", point{f: 1}),
+			out: []pmetric.Metric{
+				metric("system.load.1", point{f: 1}),
+				metric("system.cpu.load_average.1m", point{f: 1}),
+			},
 		},
 		{
-			in:  metric("system.cpu.load_average.5m", point{f: 5}),
-			out: []pmetric.Metric{metric("system.load.5", point{f: 5})},
+			in: metric("system.cpu.load_average.5m", point{f: 5}),
+			out: []pmetric.Metric{
+				metric("system.load.5", point{f: 5}),
+				metric("system.cpu.load_average.5m", point{f: 5}),
+			},
 		},
 		{
-			in:  metric("system.cpu.load_average.15m", point{f: 15}),
-			out: []pmetric.Metric{metric("system.load.15", point{f: 15})},
+			in: metric("system.cpu.load_average.15m", point{f: 15}),
+			out: []pmetric.Metric{
+				metric("system.load.15", point{f: 15}),
+				metric("system.cpu.load_average.15m", point{f: 15}),
+			},
 		},
 		{
 			in: metric("system.cpu.utilization",
@@ -92,11 +100,22 @@ func TestRemapMetrics(t *testing.T) {
 					point{f: 500, attrs: map[string]any{"state": "wait"}}),
 				metric("system.cpu.stolen",
 					point{f: 800, attrs: map[string]any{"state": "steal"}}),
+				metric("system.cpu.utilization",
+					point{f: 1, attrs: map[string]any{"state": "idle"}},
+					point{f: 2, attrs: map[string]any{"state": "user"}},
+					point{f: 3, attrs: map[string]any{"state": "system"}},
+					point{f: 5, attrs: map[string]any{"state": "wait"}},
+					point{f: 8, attrs: map[string]any{"state": "steal"}},
+					point{f: 13, attrs: map[string]any{"state": "other"}},
+				),
 			},
 		},
 		{
-			in:  metric("system.cpu.utilization", point{i: 5, attrs: map[string]any{"state": "idle"}}),
-			out: []pmetric.Metric{metric("system.cpu.idle", point{i: 5, attrs: map[string]any{"state": "idle"}})},
+			in: metric("system.cpu.utilization", point{i: 5, attrs: map[string]any{"state": "idle"}}),
+			out: []pmetric.Metric{
+				metric("system.cpu.idle", point{i: 5, attrs: map[string]any{"state": "idle"}}),
+				metric("system.cpu.utilization", point{i: 5, attrs: map[string]any{"state": "idle"}}),
+			},
 		},
 		{
 			in: metric("system.memory.usage",
@@ -121,11 +140,22 @@ func TestRemapMetrics(t *testing.T) {
 					point{f: 2, attrs: map[string]any{"state": "cached"}},
 					point{f: 3, attrs: map[string]any{"state": "buffered"}},
 				),
+				metric("system.memory.usage",
+					point{f: divMebibytes * 1, attrs: map[string]any{"state": "free"}},
+					point{f: divMebibytes * 2, attrs: map[string]any{"state": "cached"}},
+					point{f: divMebibytes * 3, attrs: map[string]any{"state": "buffered"}},
+					point{f: divMebibytes * 5, attrs: map[string]any{"state": "steal"}},
+					point{f: divMebibytes * 8, attrs: map[string]any{"state": "system"}},
+					point{f: divMebibytes * 13, attrs: map[string]any{"state": "user"}},
+				),
 			},
 		},
 		{
-			in:  metric("system.memory.usage", point{i: divMebibytes * 5}),
-			out: []pmetric.Metric{metric("system.mem.total", point{i: 5})},
+			in: metric("system.memory.usage", point{i: divMebibytes * 5}),
+			out: []pmetric.Metric{
+				metric("system.mem.total", point{i: 5}),
+				metric("system.memory.usage", point{i: divMebibytes * 5}),
+			},
 		},
 		{
 			in: metric("system.network.io",
@@ -139,6 +169,11 @@ func TestRemapMetrics(t *testing.T) {
 				),
 				metric("system.net.bytes_sent",
 					point{f: 2, attrs: map[string]any{"direction": "transmit"}},
+				),
+				metric("system.network.io",
+					point{f: 1, attrs: map[string]any{"direction": "receive"}},
+					point{f: 2, attrs: map[string]any{"direction": "transmit"}},
+					point{f: 3, attrs: map[string]any{"state": "buffered"}},
 				),
 			},
 		},
@@ -155,11 +190,23 @@ func TestRemapMetrics(t *testing.T) {
 				metric("system.swap.used",
 					point{f: 2, attrs: map[string]any{"state": "used"}},
 				),
+				metric("system.paging.usage",
+					point{f: divMebibytes * 1, attrs: map[string]any{"state": "free"}},
+					point{f: divMebibytes * 2, attrs: map[string]any{"state": "used"}},
+					point{f: 3, attrs: map[string]any{"state": "buffered"}},
+				),
 			},
 		},
 		{
-			in:  metric("system.filesystem.utilization", point{f: 15}),
-			out: []pmetric.Metric{metric("system.disk.in_use", point{f: 15})},
+			in: metric("system.filesystem.utilization", point{f: 15}),
+			out: []pmetric.Metric{
+				metric("system.disk.in_use", point{f: 15}),
+				metric("system.filesystem.utilization", point{f: 15}),
+			},
+		},
+		{
+			in:  metric("process.metrics", point{f: 15}),
+			out: []pmetric.Metric{},
 		},
 		{
 			in:  metric("other.metric", point{f: 15}),
@@ -276,24 +323,17 @@ func TestRemapMetrics(t *testing.T) {
 		},
 	} {
 		t.Run("", func(t *testing.T) {
-			lenin := dest.Len()
-			issystem := strings.HasPrefix(tt.in.Name(), "system.")
-			out := tt.out
-			if issystem {
-				// the original system.* metrics need to be preserved
-				newm := pmetric.NewMetric()
-				tt.in.CopyTo(newm)
-				out = append(out, newm)
-			}
-			isprocess := strings.HasPrefix(tt.in.Name(), "process.")
+			dest := pmetric.NewMetricSlice()
+			name := tt.in.Name()
+			shouldprepend := strings.HasPrefix(tt.in.Name(), "system.") || strings.HasPrefix(tt.in.Name(), "process.")
 			remapMetrics(dest, tt.in)
-			if issystem || isprocess {
-				// system.* and process.* metrics have been prepended with the otel.* namespace
-				require.True(t, strings.HasPrefix(tt.in.Name(), "otel."), "system.* and process.* metrics need to be prepended with the otel.* namespace")
+			if shouldprepend {
+				// these metrics need to be prepended with otel.*
+				require.Equal(t, tt.in.Name(), "otel."+name)
 			}
-			require.Equal(t, dest.Len()-lenin, len(out), "unexpected number of metrics added")
-			for i, o := range out {
-				require.Equal(t, o, dest.At(dest.Len()-len(out)+i))
+			require.Equal(t, len(tt.out), dest.Len())
+			for i, o := range tt.out {
+				require.Equal(t, o, dest.At(i))
 			}
 		})
 	}
