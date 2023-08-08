@@ -674,6 +674,7 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 		// Fetch tags from attributes.
 		attributeTags := attributes.TagsFromAttributes(rm.Resource().Attributes())
 		ilms := rm.ScopeMetrics()
+		rattrs := rm.Resource().Attributes()
 		for j := 0; j < ilms.Len(); j++ {
 			ilm := ilms.At(j)
 			metricsArray := ilm.Metrics()
@@ -687,6 +688,7 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 				additionalTags = attributeTags
 			}
 
+			newMetrics := pmetric.NewMetricSlice()
 			for k := 0; k < metricsArray.Len(); k++ {
 				md := metricsArray.At(k)
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
@@ -694,86 +696,91 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 					for _, mp := range v {
 						if mp.attributes == nil {
 							// duplicate runtime metrics as Datadog runtime metrics
-							cp := metricsArray.AppendEmpty()
+							cp := newMetrics.AppendEmpty()
 							md.CopyTo(cp)
 							cp.SetName(mp.mappedName)
 							break
 						}
 						if md.Type() == pmetric.MetricTypeSum {
-							mapSumRuntimeMetricWithAttributes(md, metricsArray, mp)
+							mapSumRuntimeMetricWithAttributes(md, newMetrics, mp)
 						} else if md.Type() == pmetric.MetricTypeGauge {
-							mapGaugeRuntimeMetricWithAttributes(md, metricsArray, mp)
+							mapGaugeRuntimeMetricWithAttributes(md, newMetrics, mp)
 						} else if md.Type() == pmetric.MetricTypeHistogram {
-							mapHistogramRuntimeMetricWithAttributes(md, metricsArray, mp)
+							mapHistogramRuntimeMetricWithAttributes(md, newMetrics, mp)
 						}
 					}
 				}
 				if t.cfg.withRemapping {
-					remapMetrics(metricsArray, md)
+					remapMetrics(newMetrics, md)
 				}
-				baseDims := &Dimensions{
-					name:     md.Name(),
-					tags:     additionalTags,
-					host:     host,
-					originID: attributes.OriginIDFromAttributes(rm.Resource().Attributes()),
-				}
-				switch md.Type() {
-				case pmetric.MetricTypeGauge:
-					t.mapNumberMetrics(ctx, consumer, baseDims, Gauge, md.Gauge().DataPoints())
-				case pmetric.MetricTypeSum:
-					switch md.Sum().AggregationTemporality() {
-					case pmetric.AggregationTemporalityCumulative:
-						if isCumulativeMonotonic(md) {
-							switch t.cfg.NumberMode {
-							case NumberModeCumulativeToDelta:
-								t.mapNumberMonotonicMetrics(ctx, consumer, baseDims, md.Sum().DataPoints())
-							case NumberModeRawValue:
-								t.mapNumberMetrics(ctx, consumer, baseDims, Gauge, md.Sum().DataPoints())
-							}
-						} else { // delta and cumulative non-monotonic sums
-							t.mapNumberMetrics(ctx, consumer, baseDims, Gauge, md.Sum().DataPoints())
-						}
-					case pmetric.AggregationTemporalityDelta:
-						t.mapNumberMetrics(ctx, consumer, baseDims, Count, md.Sum().DataPoints())
-					default: // pmetric.AggregationTemporalityUnspecified or any other not supported type
-						t.logger.Debug("Unknown or unsupported aggregation temporality",
-							zap.String(metricName, md.Name()),
-							zap.Any("aggregation temporality", md.Sum().AggregationTemporality()),
-						)
-						continue
-					}
-				case pmetric.MetricTypeHistogram:
-					switch md.Histogram().AggregationTemporality() {
-					case pmetric.AggregationTemporalityCumulative, pmetric.AggregationTemporalityDelta:
-						delta := md.Histogram().AggregationTemporality() == pmetric.AggregationTemporalityDelta
-						t.mapHistogramMetrics(ctx, consumer, baseDims, md.Histogram().DataPoints(), delta)
-					default: // pmetric.AggregationTemporalityUnspecified or any other not supported type
-						t.logger.Debug("Unknown or unsupported aggregation temporality",
-							zap.String("metric name", md.Name()),
-							zap.Any("aggregation temporality", md.Histogram().AggregationTemporality()),
-						)
-						continue
-					}
-				case pmetric.MetricTypeExponentialHistogram:
-					switch md.ExponentialHistogram().AggregationTemporality() {
-					case pmetric.AggregationTemporalityDelta:
-						delta := md.ExponentialHistogram().AggregationTemporality() == pmetric.AggregationTemporalityDelta
-						t.mapExponentialHistogramMetrics(ctx, consumer, baseDims, md.ExponentialHistogram().DataPoints(), delta)
-					default: // pmetric.AggregationTemporalityCumulative, pmetric.AggregationTemporalityUnspecified or any other not supported type
-						t.logger.Debug("Unknown or unsupported aggregation temporality",
-							zap.String("metric name", md.Name()),
-							zap.Any("aggregation temporality", md.ExponentialHistogram().AggregationTemporality()),
-						)
-						continue
-					}
-				case pmetric.MetricTypeSummary:
-					t.mapSummaryMetrics(ctx, consumer, baseDims, md.Summary().DataPoints())
-				default: // pmetric.MetricDataTypeNone or any other not supported type
-					t.logger.Debug("Unknown or unsupported metric type", zap.String(metricName, md.Name()), zap.Any("data type", md.Type()))
-					continue
-				}
+				t.mapToDDFormat(ctx, md, consumer, additionalTags, host, rattrs)
+			}
+
+			for k := 0; k < newMetrics.Len(); k++ {
+				md := newMetrics.At(k)
+				t.mapToDDFormat(ctx, md, consumer, additionalTags, host, rattrs)
 			}
 		}
 	}
 	return metadata, nil
+}
+
+func (t *Translator) mapToDDFormat(ctx context.Context, md pmetric.Metric, consumer Consumer, additionalTags []string, host string, rattrs pcommon.Map) {
+	baseDims := &Dimensions{
+		name:     md.Name(),
+		tags:     additionalTags,
+		host:     host,
+		originID: attributes.OriginIDFromAttributes(rattrs),
+	}
+	switch md.Type() {
+	case pmetric.MetricTypeGauge:
+		t.mapNumberMetrics(ctx, consumer, baseDims, Gauge, md.Gauge().DataPoints())
+	case pmetric.MetricTypeSum:
+		switch md.Sum().AggregationTemporality() {
+		case pmetric.AggregationTemporalityCumulative:
+			if isCumulativeMonotonic(md) {
+				switch t.cfg.NumberMode {
+				case NumberModeCumulativeToDelta:
+					t.mapNumberMonotonicMetrics(ctx, consumer, baseDims, md.Sum().DataPoints())
+				case NumberModeRawValue:
+					t.mapNumberMetrics(ctx, consumer, baseDims, Gauge, md.Sum().DataPoints())
+				}
+			} else { // delta and cumulative non-monotonic sums
+				t.mapNumberMetrics(ctx, consumer, baseDims, Gauge, md.Sum().DataPoints())
+			}
+		case pmetric.AggregationTemporalityDelta:
+			t.mapNumberMetrics(ctx, consumer, baseDims, Count, md.Sum().DataPoints())
+		default: // pmetric.AggregationTemporalityUnspecified or any other not supported type
+			t.logger.Debug("Unknown or unsupported aggregation temporality",
+				zap.String(metricName, md.Name()),
+				zap.Any("aggregation temporality", md.Sum().AggregationTemporality()),
+			)
+		}
+	case pmetric.MetricTypeHistogram:
+		switch md.Histogram().AggregationTemporality() {
+		case pmetric.AggregationTemporalityCumulative, pmetric.AggregationTemporalityDelta:
+			delta := md.Histogram().AggregationTemporality() == pmetric.AggregationTemporalityDelta
+			t.mapHistogramMetrics(ctx, consumer, baseDims, md.Histogram().DataPoints(), delta)
+		default: // pmetric.AggregationTemporalityUnspecified or any other not supported type
+			t.logger.Debug("Unknown or unsupported aggregation temporality",
+				zap.String("metric name", md.Name()),
+				zap.Any("aggregation temporality", md.Histogram().AggregationTemporality()),
+			)
+		}
+	case pmetric.MetricTypeExponentialHistogram:
+		switch md.ExponentialHistogram().AggregationTemporality() {
+		case pmetric.AggregationTemporalityDelta:
+			delta := md.ExponentialHistogram().AggregationTemporality() == pmetric.AggregationTemporalityDelta
+			t.mapExponentialHistogramMetrics(ctx, consumer, baseDims, md.ExponentialHistogram().DataPoints(), delta)
+		default: // pmetric.AggregationTemporalityCumulative, pmetric.AggregationTemporalityUnspecified or any other not supported type
+			t.logger.Debug("Unknown or unsupported aggregation temporality",
+				zap.String("metric name", md.Name()),
+				zap.Any("aggregation temporality", md.ExponentialHistogram().AggregationTemporality()),
+			)
+		}
+	case pmetric.MetricTypeSummary:
+		t.mapSummaryMetrics(ctx, consumer, baseDims, md.Summary().DataPoints())
+	default: // pmetric.MetricDataTypeNone or any other not supported type
+		t.logger.Debug("Unknown or unsupported metric type", zap.String(metricName, md.Name()), zap.Any("data type", md.Type()))
+	}
 }
