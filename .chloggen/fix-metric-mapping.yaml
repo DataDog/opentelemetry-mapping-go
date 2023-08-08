@@ -5,7 +5,7 @@ change_type: 'bug_fix'
 component: pkg/otlp/metrics
 
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: Fix the incorrect for-loop which mutates the same slice while iterating over it, leading to unexpected metric names. 
+note: Fix the incorrect for-loop which mutates the same slice while iterating over it, leading to unexpected metric names. Also avoid mutating the input pmetric.Metrics. 
 
 # The PR related to this change
 issues: [141]
