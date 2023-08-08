@@ -429,6 +429,36 @@ func TestMapRuntimeMetricsHasMapping(t *testing.T) {
 	assert.Equal(t, []string{"go"}, rmt.Languages)
 }
 
+func TestMapRuntimeMetricsHasMappingCollector(t *testing.T) {
+	ctx := context.Background()
+	tr, err := NewTranslator(
+		zap.NewNop(),
+		WithRemapping(),
+	)
+	require.NoError(t, err)
+	consumer := &mockFullConsumer{}
+	exampleDims = newDims("process.runtime.go.goroutines")
+	exampleOtelDims := newDims("otel.process.runtime.go.goroutines")
+	mappedDims := newDims("runtime.go.num_goroutine")
+	rmt, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	startTs := int(getProcessStartTime()) + 1
+	assert.ElementsMatch(t,
+		consumer.metrics,
+		[]metric{
+			newCount(exampleOtelDims, uint64(seconds(startTs+1)), 10),
+			newCount(exampleOtelDims, uint64(seconds(startTs+2)), 5),
+			newCount(exampleOtelDims, uint64(seconds(startTs+3)), 5),
+			newCount(mappedDims, uint64(seconds(startTs+1)), 10),
+			newCount(mappedDims, uint64(seconds(startTs+2)), 5),
+			newCount(mappedDims, uint64(seconds(startTs+3)), 5),
+		},
+	)
+	assert.Equal(t, []string{"go"}, rmt.Languages)
+}
+
 func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
@@ -447,6 +477,33 @@ func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 		[]metric{
 			newCountWithHost(newDims("process.runtime.dotnet.gc.collections.count").AddTags("generation:gen0"), uint64(seconds(startTs+1)), 10, fallbackHostname),
 			newCountWithHost(newDims("runtime.dotnet.gc.count.gen0"), uint64(seconds(startTs+1)), 10, fallbackHostname),
+		},
+	)
+	assert.Equal(t, []string{"dotnet"}, rmt.Languages)
+}
+
+func TestMapSumRuntimeMetricWithAttributesHasMappingCollector(t *testing.T) {
+	ctx := context.Background()
+	tr, err := NewTranslator(
+		zap.NewNop(),
+		WithRemapping(),
+	)
+	require.NoError(t, err)
+	consumer := &mockFullConsumer{}
+	attributes := []runtimeMetricAttribute{{
+		key:    "generation",
+		values: []string{"gen0"},
+	}}
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes, 1), consumer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	startTs := int(getProcessStartTime()) + 1
+	assert.ElementsMatch(t,
+		consumer.metrics,
+		[]metric{
+			newCount(newDims("otel.process.runtime.dotnet.gc.collections.count").AddTags("generation:gen0"), uint64(seconds(startTs+1)), 10),
+			newCount(newDims("runtime.dotnet.gc.count.gen0"), uint64(seconds(startTs+1)), 10),
 		},
 	)
 	assert.Equal(t, []string{"dotnet"}, rmt.Languages)
