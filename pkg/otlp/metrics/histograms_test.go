@@ -32,6 +32,14 @@ func TestDeltaHistogramTranslatorOptions(t *testing.T) {
 			},
 		},
 		{
+			name:     "distributions-test-min-max",
+			otlpfile: "testdata/otlpdata/histogram/simple-delta-min-max.json",
+			ddogfile: "testdata/datadogdata/histogram/simple-delta-min-max_dist-nocs.json",
+			options: []TranslatorOption{
+				WithHistogramMode(HistogramModeDistributions),
+			},
+		},
+		{
 			name:     "distributions-count-sum",
 			otlpfile: "testdata/otlpdata/histogram/simple-delta.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-delta_dist-cs.json",

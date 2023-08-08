@@ -244,8 +244,17 @@ func (t *Translator) getSketchBuckets(
 	startTs := uint64(p.StartTimestamp())
 	ts := uint64(p.Timestamp())
 	as := &quantile.Agent{}
+
+	// After the loop,
+	// - minBound contains the lower bound of the lowest nonzero bucket,
+	// - maxBound contains the upper bound of the highest nonzero bucket
+	// - minBoundSet indicates if the minBound is set, effectively because
+	//   there was at least a nonzero bucket.
+	var minBound, maxBound float64
+	var minBoundSet bool
 	for j := 0; j < p.BucketCounts().Len(); j++ {
 		lowerBound, upperBound := getBounds(p, j)
+		originalLowerBound, originalUpperBound := lowerBound, upperBound
 
 		// Compute temporary bucketTags to have unique keys in the t.prevPts cache for each bucket
 		// The bucketTags are computed from the bounds before the InsertInterpolate fix is done,
@@ -265,12 +274,22 @@ func (t *Translator) getSketchBuckets(
 		}
 
 		count := p.BucketCounts().At(j)
+		var nonZeroBucket bool
 		if delta {
+			nonZeroBucket = count > 0
 			as.InsertInterpolate(lowerBound, upperBound, uint(count))
 		} else if dx, ok := t.prevPts.Diff(bucketDims, startTs, ts, float64(count)); ok {
+			nonZeroBucket = dx > 0
 			as.InsertInterpolate(lowerBound, upperBound, uint(dx))
 		}
 
+		if nonZeroBucket {
+			if !minBoundSet {
+				minBound = originalLowerBound
+				minBoundSet = true
+			}
+			maxBound = originalUpperBound
+		}
 	}
 
 	sketch := as.Finish()
@@ -280,6 +299,17 @@ func (t *Translator) getSketchBuckets(
 			sketch.Basic.Cnt = int64(histInfo.count)
 			sketch.Basic.Sum = histInfo.sum
 			sketch.Basic.Avg = sketch.Basic.Sum / float64(sketch.Basic.Cnt)
+		}
+
+		// If there is at least one bucket with nonzero count,
+		// override min/max with bounds if they are not infinite.
+		if minBoundSet {
+			if !math.IsInf(minBound, 0) {
+				sketch.Basic.Min = minBound
+			}
+			if !math.IsInf(maxBound, 0) {
+				sketch.Basic.Max = maxBound
+			}
 		}
 
 		if histInfo.hasMinFromLastTimeWindow {
