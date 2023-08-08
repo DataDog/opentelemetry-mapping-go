@@ -4,6 +4,15 @@
 
 <!-- next version -->
 
+## v0.7.0
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/otlp/metrics`: Fix the incorrect for-loop which mutates the same slice while iterating over it, leading to unexpected metric names. Also avoid mutating the input pmetric.Metrics. (#141)
+- `pkg/otlp/metrics`: The minimum and maximum estimation for OTLP Histogram to Datadog distribution mapping now ensures the average is within [min, max]. (#149)
+  This estimation is only used when the minimum and maximum are not available in the OTLP payload or this is a cumulative payload.
+  
+
 ## v0.5.5
 
 ### 🧰 Bug fixes 🧰
