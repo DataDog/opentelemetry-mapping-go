@@ -673,6 +673,29 @@ func TestMapRuntimeMetricsNoMapping(t *testing.T) {
 	assert.Empty(t, rmt.Languages)
 }
 
+func TestMapSystemMetrics(t *testing.T) {
+	ctx := context.Background()
+	tr, err := NewTranslator(
+		zap.NewNop(),
+		WithRemapping(),
+	)
+	require.NoError(t, err)
+	consumer := &mockFullConsumer{}
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("system.filesystem.utilization", pmetric.MetricTypeGauge, nil, 1), consumer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	startTs := int(getProcessStartTime()) + 1
+	assert.ElementsMatch(t,
+		consumer.metrics,
+		[]metric{
+			newGaugeWithHost(newDims("otel.system.filesystem.utilization"), uint64(seconds(startTs+1)), 10, ""),
+			newGaugeWithHost(newDims("system.disk.in_use"), uint64(seconds(startTs+1)), 10, ""),
+		},
+	)
+	assert.Empty(t, rmt.Languages)
+}
+
 func TestMapIntMonotonicOutOfOrder(t *testing.T) {
 	stamps := []int{1, 0, 2, 3}
 	values := []int64{0, 1, 2, 3}

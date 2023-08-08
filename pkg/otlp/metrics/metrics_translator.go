@@ -657,6 +657,7 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 				additionalTags = attributeTags
 			}
 
+			newMetrics := pmetric.NewMetricSlice()
 			for k := 0; k < metricsArray.Len(); k++ {
 				md := metricsArray.At(k)
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
@@ -664,23 +665,29 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 					for _, mp := range v {
 						if mp.attributes == nil {
 							// duplicate runtime metrics as Datadog runtime metrics
-							cp := metricsArray.AppendEmpty()
+							cp := newMetrics.AppendEmpty()
 							md.CopyTo(cp)
 							cp.SetName(mp.mappedName)
 							break
 						}
 						if md.Type() == pmetric.MetricTypeSum {
-							mapSumRuntimeMetricWithAttributes(md, metricsArray, mp)
+							mapSumRuntimeMetricWithAttributes(md, newMetrics, mp)
 						} else if md.Type() == pmetric.MetricTypeGauge {
-							mapGaugeRuntimeMetricWithAttributes(md, metricsArray, mp)
+							mapGaugeRuntimeMetricWithAttributes(md, newMetrics, mp)
 						} else if md.Type() == pmetric.MetricTypeHistogram {
-							mapHistogramRuntimeMetricWithAttributes(md, metricsArray, mp)
+							mapHistogramRuntimeMetricWithAttributes(md, newMetrics, mp)
 						}
 					}
 				}
 				if t.cfg.withRemapping {
-					remapMetrics(metricsArray, md)
+					remapMetrics(newMetrics, md)
 				}
+			}
+
+			newMetrics.MoveAndAppendTo(metricsArray)
+
+			for k := 0; k < metricsArray.Len(); k++ {
+				md := metricsArray.At(k)
 				baseDims := &Dimensions{
 					name:     md.Name(),
 					tags:     additionalTags,
