@@ -193,7 +193,6 @@ pkg/otlp/metrics,go.opentelemetry.io/collector/pdata/internal/otlp,Apache-2.0,Co
 pkg/otlp/metrics,go.opentelemetry.io/collector/pdata/pcommon,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/collector/pdata/pmetric,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/collector/semconv/v1.6.1,Apache-2.0,Copyright The OpenTelemetry Authors
-pkg/otlp/metrics,go.uber.org/atomic,MIT,"Copyright (c) 2016 Uber Technologies, Inc"
 pkg/otlp/metrics,go.uber.org/multierr,MIT,"Copyright (c) 2017-2021 Uber Technologies, Inc"
 pkg/otlp/metrics,go.uber.org/zap,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/otlp/metrics,go.uber.org/zap/buffer,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
@@ -201,6 +200,7 @@ pkg/otlp/metrics,go.uber.org/zap/internal,MIT,"Copyright (c) 2016-2017 Uber Tech
 pkg/otlp/metrics,go.uber.org/zap/internal/bufferpool,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/otlp/metrics,go.uber.org/zap/internal/color,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/otlp/metrics,go.uber.org/zap/internal/exit,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
+pkg/otlp/metrics,go.uber.org/zap/internal/pool,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/otlp/metrics,go.uber.org/zap/zapcore,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/otlp/metrics,golang.org/x/exp/constraints,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
 pkg/otlp/metrics,golang.org/x/exp/slices,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
