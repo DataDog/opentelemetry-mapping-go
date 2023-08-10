@@ -17,36 +17,51 @@ package attributes
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"text/template"
 
 	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
+	"gopkg.in/yaml.v3"
 )
 
-type spanChangeAttrs struct {
+type SpanChangeAttrs struct {
 	AttributeMap map[string]string `yaml:"attribute_map"`
 	ApplyToSpans []string          `yaml:"apply_to_spans"`
 }
 
-type spanChanges struct {
-	RenameAttributes      *spanChangeAttrs `yaml:"rename_attributes"`
-	ChangeAttributeValues *spanChangeAttrs `yaml:"change_attribute_values"`
+type SpanChanges struct {
+	RenameAttributes      *SpanChangeAttrs `yaml:"rename_attributes"`
+	ChangeAttributeValues *SpanChangeAttrs `yaml:"change_attribute_values"`
 }
 
-type spanMigration struct {
-	Changes []*spanChanges `yaml:"changes"`
+type SpanMigration struct {
+	Changes []*SpanChanges `yaml:"changes"`
 }
 
-type migration struct {
-	Spans *spanMigration `yaml:"spans"`
+type Migration struct {
+	Spans *SpanMigration `yaml:"spans"`
 }
 
-type spanMigrationConfig struct {
-	Migrations []*migration `yaml:"migrations"`
+type SpanMigrationConfig struct {
+	Migrations []*Migration `yaml:"migrations"`
 }
 
-func (cfg *spanMigrationConfig) migrateSpans(tp *pb.TracerPayload) {
+func GetConfig(file_path string) (*SpanMigrationConfig, error) {
+	cfg := SpanMigrationConfig{}
+	yamlFile, err := os.ReadFile(file_path)
+	if err != nil {
+		return nil, err
+	}
+	err = yaml.Unmarshal(yamlFile, &cfg)
+	if err != nil {
+		return nil, err
+	}
+	return &cfg, nil
+}
+
+func (cfg *SpanMigrationConfig) migrateSpans(tp *pb.TracerPayload) {
 	for _, m := range cfg.Migrations {
 		for _, cg := range m.Spans.Changes {
 			switch {
@@ -59,7 +74,7 @@ func (cfg *spanMigrationConfig) migrateSpans(tp *pb.TracerPayload) {
 	}
 }
 
-func applyRenaming(tp *pb.TracerPayload, attrs *spanChangeAttrs) {
+func applyRenaming(tp *pb.TracerPayload, attrs *SpanChangeAttrs) {
 	for _, ch := range tp.GetChunks() {
 		for _, s := range ch.GetSpans() {
 			if !appliesToSpan(s, attrs.ApplyToSpans) {
@@ -91,7 +106,7 @@ func remapSpanMetrics(s *pb.Span, from, to string) {
 	delete(s.Metrics, from)
 }
 
-func applyValueChanges(tp *pb.TracerPayload, attrs *spanChangeAttrs) {
+func applyValueChanges(tp *pb.TracerPayload, attrs *SpanChangeAttrs) {
 	for _, ch := range tp.GetChunks() {
 		for _, s := range ch.GetSpans() {
 			if !appliesToSpan(s, attrs.ApplyToSpans) {
