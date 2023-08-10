@@ -61,7 +61,7 @@ func GetConfig(file_path string) (*SpanMigrationConfig, error) {
 	return &cfg, nil
 }
 
-func (cfg *SpanMigrationConfig) migrateSpans(tp *pb.TracerPayload) {
+func (cfg *SpanMigrationConfig) MigrateSpans(tp *pb.TracerPayload) {
 	for _, m := range cfg.Migrations {
 		for _, cg := range m.Spans.Changes {
 			switch {
