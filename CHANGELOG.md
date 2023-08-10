@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.7.1
+
+### 💡 Enhancements 💡
+
+- `pkg/inframetadata`: Host metadata is now reported the first time new information becomes available for a host. (#150)
+
 ## v0.7.0
 
 ### 🧰 Bug fixes 🧰
