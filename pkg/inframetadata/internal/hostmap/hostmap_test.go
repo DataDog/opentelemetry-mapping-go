@@ -96,7 +96,7 @@ func TestUpdate(t *testing.T) {
 
 	hostMap := New()
 	for _, info := range hostInfo {
-		changed, err := hostMap.Update(info.hostname, testutils.NewResourceFromMap(t, info.attributes))
+		changed, _, err := hostMap.Update(info.hostname, testutils.NewResourceFromMap(t, info.attributes))
 		assert.Equal(t, info.expectedChanged, changed)
 		if len(info.expectedErrs) > 0 {
 			var errStrings []string
