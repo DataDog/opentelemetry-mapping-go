@@ -1,6 +1,6 @@
 module github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata
 
-go 1.19
+go 1.20
 
 require (
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.7.1
