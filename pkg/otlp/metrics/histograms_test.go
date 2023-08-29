@@ -174,6 +174,19 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			expectedUnsupportedAggregationTemporality: 1,
 		},
 		{
+			// https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/26103
+			name:     "empty-delta-issue-26103",
+			otlpfile: "testdata/otlpdata/histogram/empty-delta-exponential.json",
+			ddogfile: "testdata/datadogdata/histogram/empty-delta-exponential.json",
+		},
+		{
+			// https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/26103
+			name:     "empty-cumulative-issue-26103",
+			otlpfile: "testdata/otlpdata/histogram/empty-cumulative-exponential.json",
+			ddogfile: "testdata/datadogdata/histogram/empty-cumulative-exponential.json",
+			expectedUnsupportedAggregationTemporality: 1,
+		},
+		{
 			name:     "resource-attributes-as-tags",
 			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_res-tags.json",
