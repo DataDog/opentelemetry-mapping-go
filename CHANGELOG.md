@@ -4,6 +4,16 @@
 
 <!-- next version -->
 
+## v0.8.0
+
+### 🛑 Breaking changes 🛑
+
+- `all`: Remove go 1.19 support, bump minimum to go 1.20 and add testing for 1.21 (#159)
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/otlp/metrics`: Empty OTLP Exponential Histograms are now dropped instead of causing a crash (#158)
+
 ## v0.7.1
 
 ### 💡 Enhancements 💡
