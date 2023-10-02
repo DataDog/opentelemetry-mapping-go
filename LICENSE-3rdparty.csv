@@ -94,6 +94,7 @@ pkg/otlp/attributes,google.golang.org/grpc/internal/grpclog,Apache-2.0,Google In
 pkg/otlp/attributes,google.golang.org/grpc/internal/grpcrand,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/grpcsync,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/grpcutil,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/idle,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/metadata,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/pretty,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/resolver,Apache-2.0,Google Inc.
@@ -245,6 +246,7 @@ pkg/otlp/metrics,google.golang.org/grpc/internal/grpclog,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/grpcrand,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/grpcsync,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/grpcutil,Apache-2.0,Google Inc.
+pkg/otlp/metrics,google.golang.org/grpc/internal/idle,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/metadata,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/pretty,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/resolver,Apache-2.0,Google Inc.
@@ -377,6 +379,7 @@ pkg/inframetadata,google.golang.org/grpc/internal/grpclog,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/grpcrand,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/grpcsync,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/grpcutil,Apache-2.0,Google Inc.
+pkg/inframetadata,google.golang.org/grpc/internal/idle,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/metadata,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/pretty,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/resolver,Apache-2.0,Google Inc.
