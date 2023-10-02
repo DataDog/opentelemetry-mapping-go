@@ -17,7 +17,7 @@ package instrumentationscope
 import (
 	"go.opentelemetry.io/collector/pdata/pcommon"
 
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics/internal/utils"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metricscommon"
 )
 
 const (
@@ -29,7 +29,7 @@ const (
 // the instrumentation scope and converts them to Datadog tags.
 func TagsFromInstrumentationScopeMetadata(il pcommon.InstrumentationScope) []string {
 	return []string{
-		utils.FormatKeyValueTag(instrumentationScopeTag, il.Name()),
-		utils.FormatKeyValueTag(instrumentationScopeVersionTag, il.Version()),
+		metricscommon.FormatKeyValueTag(instrumentationScopeTag, il.Name()),
+		metricscommon.FormatKeyValueTag(instrumentationScopeVersionTag, il.Version()),
 	}
 }

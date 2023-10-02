@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package metrics
+package metricscommon
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
 )
 
-type translatorConfig struct {
+type TranslatorConfig struct {
 	// metrics export behavior
 	HistMode                  HistogramMode
 	SendHistogramAggregations bool
@@ -34,20 +34,20 @@ type translatorConfig struct {
 	InstrumentationLibraryMetadataAsTags bool
 	InstrumentationScopeMetadataAsTags   bool
 
-	// withRemapping reports whether certain metrics that are only available when using
+	// WithRemapping reports whether certain metrics that are only available when using
 	// the Datadog Agent should be obtained by remapping from OTEL counterparts (e.g.
 	// container.* and system.* metrics).
-	withRemapping bool
+	WithRemapping bool
 
 	// cache configuration
-	sweepInterval int64
-	deltaTTL      int64
+	SweepInterval int64
+	DeltaTTL      int64
 
-	fallbackSourceProvider source.Provider
+	FallbackSourceProvider source.Provider
 }
 
 // TranslatorOption is a translator creation option.
-type TranslatorOption func(*translatorConfig) error
+type TranslatorOption func(*TranslatorConfig) error
 
 // WithRemapping specifies that certain OTEL metrics (such as container.* and system.*) need to be
 // remapped to their Datadog counterparts because they will not be available otherwise. This happens
@@ -56,23 +56,23 @@ type TranslatorOption func(*translatorConfig) error
 // Do note that in some scenarios this process renames certain metrics (such as for example prefixing
 // system.* and process.* metrics with the otel.* namespace).
 func WithRemapping() TranslatorOption {
-	return func(t *translatorConfig) error {
-		t.withRemapping = true
+	return func(t *TranslatorConfig) error {
+		t.WithRemapping = true
 		return nil
 	}
 }
 
 // WithDeltaTTL sets the delta TTL for cumulative metrics datapoints.
 // By default, 3600 seconds are used.
-func WithDeltaTTL(deltaTTL int64) TranslatorOption {
-	return func(t *translatorConfig) error {
-		if deltaTTL <= 0 {
-			return fmt.Errorf("time to live must be positive: %d", deltaTTL)
+func WithDeltaTTL(DeltaTTL int64) TranslatorOption {
+	return func(t *TranslatorConfig) error {
+		if DeltaTTL <= 0 {
+			return fmt.Errorf("time to live must be positive: %d", DeltaTTL)
 		}
-		t.deltaTTL = deltaTTL
-		t.sweepInterval = 1
-		if t.deltaTTL > 1 {
-			t.sweepInterval = t.deltaTTL / 2
+		t.DeltaTTL = DeltaTTL
+		t.SweepInterval = 1
+		if t.DeltaTTL > 1 {
+			t.SweepInterval = t.DeltaTTL / 2
 		}
 		return nil
 	}
@@ -81,15 +81,15 @@ func WithDeltaTTL(deltaTTL int64) TranslatorOption {
 // WithFallbackSourceProvider sets the fallback source provider.
 // By default, an empty hostname is used as a fallback.
 func WithFallbackSourceProvider(provider source.Provider) TranslatorOption {
-	return func(t *translatorConfig) error {
-		t.fallbackSourceProvider = provider
+	return func(t *TranslatorConfig) error {
+		t.FallbackSourceProvider = provider
 		return nil
 	}
 }
 
 // WithQuantiles enables quantiles exporting for summary metrics.
 func WithQuantiles() TranslatorOption {
-	return func(t *translatorConfig) error {
+	return func(t *TranslatorConfig) error {
 		t.Quantiles = true
 		return nil
 	}
@@ -97,7 +97,7 @@ func WithQuantiles() TranslatorOption {
 
 // WithResourceAttributesAsTags sets resource attributes as tags.
 func WithResourceAttributesAsTags() TranslatorOption {
-	return func(t *translatorConfig) error {
+	return func(t *TranslatorConfig) error {
 		t.ResourceAttributesAsTags = true
 		return nil
 	}
@@ -105,7 +105,7 @@ func WithResourceAttributesAsTags() TranslatorOption {
 
 // WithInstrumentationLibraryMetadataAsTags sets instrumentation library metadata as tags.
 func WithInstrumentationLibraryMetadataAsTags() TranslatorOption {
-	return func(t *translatorConfig) error {
+	return func(t *TranslatorConfig) error {
 		t.InstrumentationLibraryMetadataAsTags = true
 		return nil
 	}
@@ -113,7 +113,7 @@ func WithInstrumentationLibraryMetadataAsTags() TranslatorOption {
 
 // WithInstrumentationScopeMetadataAsTags sets instrumentation scope metadata as tags.
 func WithInstrumentationScopeMetadataAsTags() TranslatorOption {
-	return func(t *translatorConfig) error {
+	return func(t *TranslatorConfig) error {
 		t.InstrumentationScopeMetadataAsTags = true
 		return nil
 	}
@@ -134,7 +134,7 @@ const (
 // WithHistogramMode sets the histograms mode.
 // The default mode is HistogramModeOff.
 func WithHistogramMode(mode HistogramMode) TranslatorOption {
-	return func(t *translatorConfig) error {
+	return func(t *TranslatorConfig) error {
 
 		switch mode {
 		case HistogramModeNoBuckets, HistogramModeCounters, HistogramModeDistributions:
@@ -154,7 +154,7 @@ func WithCountSumMetrics() TranslatorOption {
 
 // WithHistogramAggregations exports .count, .sum, .min and .max histogram metrics when available.
 func WithHistogramAggregations() TranslatorOption {
-	return func(t *translatorConfig) error {
+	return func(t *TranslatorConfig) error {
 		t.SendHistogramAggregations = true
 		return nil
 	}
@@ -177,7 +177,7 @@ const (
 // WithNumberMode sets the number mode.
 // The default mode is NumberModeCumulativeToDelta.
 func WithNumberMode(mode NumberMode) TranslatorOption {
-	return func(t *translatorConfig) error {
+	return func(t *TranslatorConfig) error {
 		t.NumberMode = mode
 		return nil
 	}
@@ -203,7 +203,7 @@ const (
 // WithInitialCumulMonoValueMode sets the initial value mode.
 // The default mode is InitialCumulMonoValueModeAuto.
 func WithInitialCumulMonoValueMode(mode InitialCumulMonoValueMode) TranslatorOption {
-	return func(t *translatorConfig) error {
+	return func(t *TranslatorConfig) error {
 		t.InitialCumulMonoValueMode = mode
 		return nil
 	}

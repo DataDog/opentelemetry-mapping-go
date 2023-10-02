@@ -8,6 +8,7 @@ package metrics
 import (
 	"testing"
 
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metricscommon"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -20,7 +21,7 @@ func TestMapMetrics(t *testing.T) {
 		name                                      string
 		otlpfile                                  string
 		ddogfile                                  string
-		options                                   []TranslatorOption
+		options                                   []metricscommon.TranslatorOption
 		expectedUnknownMetricType                 int
 		expectedUnsupportedAggregationTemporality int
 	}{
@@ -35,8 +36,8 @@ func TestMapMetrics(t *testing.T) {
 			name:     "resource-attributes-as-tags",
 			otlpfile: "testdata/otlpdata/mixed/simple.json",
 			ddogfile: "testdata/datadogdata/mixed/simple_res-tags.json",
-			options: []TranslatorOption{
-				WithResourceAttributesAsTags(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithResourceAttributesAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 2,
@@ -45,8 +46,8 @@ func TestMapMetrics(t *testing.T) {
 			name:     "count-sum",
 			otlpfile: "testdata/otlpdata/mixed/simple.json",
 			ddogfile: "testdata/datadogdata/mixed/simple_cs.json",
-			options: []TranslatorOption{
-				WithHistogramAggregations(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramAggregations(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 2,
@@ -55,8 +56,8 @@ func TestMapMetrics(t *testing.T) {
 			name:     "instrumentation-library-metadata-as-tags",
 			otlpfile: "testdata/otlpdata/mixed/simple.json",
 			ddogfile: "testdata/datadogdata/mixed/simple_ilmd-tags.json",
-			options: []TranslatorOption{
-				WithInstrumentationLibraryMetadataAsTags(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 2,
@@ -65,8 +66,8 @@ func TestMapMetrics(t *testing.T) {
 			name:     "instrumentation-scope-metadata-as-tags",
 			otlpfile: "testdata/otlpdata/mixed/simple.json",
 			ddogfile: "testdata/datadogdata/mixed/simple_ismd-tags.json",
-			options: []TranslatorOption{
-				WithInstrumentationScopeMetadataAsTags(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithInstrumentationScopeMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 2,
@@ -75,9 +76,9 @@ func TestMapMetrics(t *testing.T) {
 			name:     "count-sum-instrumentation-library-metadata-as-tags",
 			otlpfile: "testdata/otlpdata/mixed/simple.json",
 			ddogfile: "testdata/datadogdata/mixed/simple_cs-ilmd-tags.json",
-			options: []TranslatorOption{
-				WithHistogramAggregations(),
-				WithInstrumentationLibraryMetadataAsTags(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramAggregations(),
+				metricscommon.WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 2,
@@ -86,9 +87,9 @@ func TestMapMetrics(t *testing.T) {
 			name:     "resource-tags-instrumentation-library-metadata-as-tags",
 			otlpfile: "testdata/otlpdata/mixed/simple.json",
 			ddogfile: "testdata/datadogdata/mixed/simple_res-ilmd-tags.json",
-			options: []TranslatorOption{
-				WithResourceAttributesAsTags(),
-				WithInstrumentationLibraryMetadataAsTags(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithResourceAttributesAsTags(),
+				metricscommon.WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 2,
@@ -97,10 +98,10 @@ func TestMapMetrics(t *testing.T) {
 			name:     "count-sum-resource-tags-instrumentation-library-metadata-as-tags",
 			otlpfile: "testdata/otlpdata/mixed/simple.json",
 			ddogfile: "testdata/datadogdata/mixed/simple_cs-both-tags.json",
-			options: []TranslatorOption{
-				WithHistogramAggregations(),
-				WithResourceAttributesAsTags(),
-				WithInstrumentationLibraryMetadataAsTags(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramAggregations(),
+				metricscommon.WithResourceAttributesAsTags(),
+				metricscommon.WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 2,
@@ -109,11 +110,11 @@ func TestMapMetrics(t *testing.T) {
 			name:     "with-all",
 			otlpfile: "testdata/otlpdata/mixed/simple.json",
 			ddogfile: "testdata/datadogdata/mixed/simple_all.json",
-			options: []TranslatorOption{
-				WithHistogramAggregations(),
-				WithResourceAttributesAsTags(),
-				WithInstrumentationLibraryMetadataAsTags(),
-				WithInstrumentationScopeMetadataAsTags(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramAggregations(),
+				metricscommon.WithResourceAttributesAsTags(),
+				metricscommon.WithInstrumentationLibraryMetadataAsTags(),
+				metricscommon.WithInstrumentationScopeMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 2,
@@ -122,8 +123,8 @@ func TestMapMetrics(t *testing.T) {
 			name:     "with-initial-value-keep",
 			otlpfile: "testdata/otlpdata/mixed/simple.json",
 			ddogfile: "testdata/datadogdata/mixed/simple_keep.json",
-			options: []TranslatorOption{
-				WithInitialCumulMonoValueMode(InitialCumulMonoValueModeKeep),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithInitialCumulMonoValueMode(metricscommon.InitialCumulMonoValueModeKeep),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 2,
@@ -132,8 +133,8 @@ func TestMapMetrics(t *testing.T) {
 			name:     "with-initial-value-drop",
 			otlpfile: "testdata/otlpdata/mixed/simple.json",
 			ddogfile: "testdata/datadogdata/mixed/simple_drop.json",
-			options: []TranslatorOption{
-				WithInitialCumulMonoValueMode(InitialCumulMonoValueModeDrop),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithInitialCumulMonoValueMode(metricscommon.InitialCumulMonoValueModeDrop),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 2,

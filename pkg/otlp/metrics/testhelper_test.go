@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metricscommon"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
 	"github.com/stretchr/testify/assert"
@@ -50,7 +51,7 @@ type TestSketch struct {
 
 type TestTimeSeries struct {
 	TestDimensions
-	Type      DataType
+	Type      metricscommon.DataType
 	Timestamp uint64
 	Value     float64
 }
@@ -112,7 +113,7 @@ func AssertTranslatorMap(t TestingT, translator *Translator, otlpfilename string
 	return true
 }
 
-var _ Consumer = (*testConsumer)(nil)
+var _ metricscommon.Consumer = (*testConsumer)(nil)
 
 type testConsumer struct {
 	testMetrics TestMetrics
@@ -126,8 +127,8 @@ func (t *testConsumer) ConsumeAPMStats(_ *pb.ClientStatsPayload) {
 
 func (t *testConsumer) ConsumeTimeSeries(
 	_ context.Context,
-	dimensions *Dimensions,
-	typ DataType,
+	dimensions *metricscommon.Dimensions,
+	typ metricscommon.DataType,
 	timestamp uint64,
 	value float64,
 ) {
@@ -147,7 +148,7 @@ func (t *testConsumer) ConsumeTimeSeries(
 
 func (t *testConsumer) ConsumeSketch(
 	_ context.Context,
-	dimensions *Dimensions,
+	dimensions *metricscommon.Dimensions,
 	timestamp uint64,
 	sketch *quantile.Sketch,
 ) {
@@ -178,7 +179,7 @@ func TestTestDimensions(t *testing.T) {
 		)
 	}
 
-	trueType := reflect.TypeOf(Dimensions{})
+	trueType := reflect.TypeOf(metricscommon.Dimensions{})
 	var trueFields []string
 	for i := 0; i < trueType.NumField(); i++ {
 		trueFields = append(trueFields,
@@ -216,7 +217,7 @@ func TestAssertTranslatorMapFailure(t *testing.T) {
 	// Compare OTLP file with incorrect output
 	ddogfile := "testdata/datadogdata/histogram/simple-delta_nobuckets-cs.json"
 
-	translator, err := NewTranslator(zap.NewNop(), WithHistogramMode(HistogramModeDistributions))
+	translator, err := NewTranslator(zap.NewNop(), metricscommon.WithHistogramMode(metricscommon.HistogramModeDistributions))
 	require.NoError(t, err)
 	mockTesting := &testingTMock{t}
 	assert.False(t, AssertTranslatorMap(mockTesting, translator, otlpfile, ddogfile), "AssertTranslatorMap should have failed but did not")

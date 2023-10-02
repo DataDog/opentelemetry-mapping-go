@@ -8,6 +8,8 @@ package metrics
 import (
 	"testing"
 
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metricscommon"
+
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )
@@ -17,38 +19,38 @@ func TestSummaryMetrics(t *testing.T) {
 		name     string
 		otlpfile string
 		ddogfile string
-		options  []TranslatorOption
+		options  []metricscommon.TranslatorOption
 		tags     []string
 	}{
 		{
 			name:     "summary",
 			otlpfile: "testdata/otlpdata/summary/simple.json",
 			ddogfile: "testdata/datadogdata/summary/simple_summary.json",
-			options:  []TranslatorOption{WithFallbackSourceProvider(testProvider("fallbackHostname"))},
+			options:  []metricscommon.TranslatorOption{metricscommon.WithFallbackSourceProvider(testProvider("fallbackHostname"))},
 		},
 		{
 			name:     "summary-with-quantiles",
 			otlpfile: "testdata/otlpdata/summary/simple.json",
 			ddogfile: "testdata/datadogdata/summary/simple_summary-with-quantile.json",
-			options: []TranslatorOption{
-				WithFallbackSourceProvider(testProvider("fallbackHostname")),
-				WithQuantiles(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithFallbackSourceProvider(testProvider("fallbackHostname")),
+				metricscommon.WithQuantiles(),
 			},
 		},
 		{
 			name:     "summary-with-attributes",
 			otlpfile: "testdata/otlpdata/summary/with-attributes.json",
 			ddogfile: "testdata/datadogdata/summary/with-attributes_summary.json",
-			options:  []TranslatorOption{WithFallbackSourceProvider(testProvider("fallbackHostname"))},
+			options:  []metricscommon.TranslatorOption{metricscommon.WithFallbackSourceProvider(testProvider("fallbackHostname"))},
 			tags:     []string{"attribute_tag:attribute_value"},
 		},
 		{
 			name:     "summary-with-attributes-quantiles",
 			otlpfile: "testdata/otlpdata/summary/with-attributes.json",
 			ddogfile: "testdata/datadogdata/summary/with-attributes-quantile_summary.json",
-			options: []TranslatorOption{
-				WithFallbackSourceProvider(testProvider("fallbackHostname")),
-				WithQuantiles(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithFallbackSourceProvider(testProvider("fallbackHostname")),
+				metricscommon.WithQuantiles(),
 			},
 			tags: []string{"attribute_tag:attribute_value"},
 		},

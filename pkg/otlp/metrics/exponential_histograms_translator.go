@@ -25,6 +25,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metricscommon"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 )
 
@@ -84,8 +85,8 @@ func (t *Translator) exponentialHistogramToDDSketch(
 // - A count of zero values in the population
 func (t *Translator) mapExponentialHistogramMetrics(
 	ctx context.Context,
-	consumer Consumer,
-	dims *Dimensions,
+	consumer metricscommon.Consumer,
+	dims *metricscommon.Dimensions,
 	slice pmetric.ExponentialHistogramDataPointSlice,
 	delta bool,
 ) {
@@ -93,7 +94,7 @@ func (t *Translator) mapExponentialHistogramMetrics(
 		p := slice.At(i)
 		startTs := uint64(p.StartTimestamp())
 		ts := uint64(p.Timestamp())
-		pointDims := dims.WithAttributeMap(p.Attributes())
+		pointDims := WithAttributeMap(dims, p.Attributes())
 
 		histInfo := histogramInfo{ok: true}
 
@@ -107,7 +108,7 @@ func (t *Translator) mapExponentialHistogramMetrics(
 		}
 
 		sumDims := pointDims.WithSuffix("sum")
-		if !t.isSkippable(sumDims.name, p.Sum()) {
+		if !t.isSkippable(sumDims.Name(), p.Sum()) {
 			if delta {
 				histInfo.sum = p.Sum()
 			} else if dx, ok := t.prevPts.Diff(sumDims, startTs, ts, p.Sum()); ok {
@@ -121,17 +122,17 @@ func (t *Translator) mapExponentialHistogramMetrics(
 
 		if t.cfg.SendHistogramAggregations && histInfo.ok {
 			// We only send the sum and count if both values were ok.
-			consumer.ConsumeTimeSeries(ctx, countDims, Count, ts, float64(histInfo.count))
-			consumer.ConsumeTimeSeries(ctx, sumDims, Count, ts, histInfo.sum)
+			consumer.ConsumeTimeSeries(ctx, countDims, metricscommon.Count, ts, float64(histInfo.count))
+			consumer.ConsumeTimeSeries(ctx, sumDims, metricscommon.Count, ts, histInfo.sum)
 
 			if delta {
 				if p.HasMin() {
 					minDims := pointDims.WithSuffix("min")
-					consumer.ConsumeTimeSeries(ctx, minDims, Gauge, ts, p.Min())
+					consumer.ConsumeTimeSeries(ctx, minDims, metricscommon.Gauge, ts, p.Min())
 				}
 				if p.HasMax() {
 					maxDims := pointDims.WithSuffix("max")
-					consumer.ConsumeTimeSeries(ctx, maxDims, Gauge, ts, p.Max())
+					consumer.ConsumeTimeSeries(ctx, maxDims, metricscommon.Gauge, ts, p.Max())
 				}
 			}
 		}
@@ -139,7 +140,7 @@ func (t *Translator) mapExponentialHistogramMetrics(
 		expHistDDSketch, err := t.exponentialHistogramToDDSketch(p, delta)
 		if err != nil {
 			t.logger.Debug("Failed to convert ExponentialHistogram into DDSketch",
-				zap.String("metric name", dims.name),
+				zap.String("metric name", dims.Name()),
 				zap.Error(err),
 			)
 			continue
@@ -148,7 +149,7 @@ func (t *Translator) mapExponentialHistogramMetrics(
 		agentSketch, err := quantile.ConvertDDSketchIntoSketch(expHistDDSketch)
 		if err != nil {
 			t.logger.Debug("Failed to convert DDSketch into Sketch",
-				zap.String("metric name", dims.name),
+				zap.String("metric name", dims.Name()),
 				zap.Error(err),
 			)
 			continue

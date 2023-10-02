@@ -26,6 +26,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metricscommon"
 )
 
 const (
@@ -45,11 +46,11 @@ var inputTable = []struct {
 	{input: 10000000},
 }
 
-func newBenchmarkTranslator(b *testing.B, logger *zap.Logger, opts ...TranslatorOption) *Translator {
-	options := append([]TranslatorOption{
-		WithFallbackSourceProvider(testProvider("fallbackHostname")),
-		WithHistogramMode(HistogramModeDistributions),
-		WithNumberMode(NumberModeCumulativeToDelta),
+func newBenchmarkTranslator(b *testing.B, logger *zap.Logger, opts ...metricscommon.TranslatorOption) *Translator {
+	options := append([]metricscommon.TranslatorOption{
+		metricscommon.WithFallbackSourceProvider(testProvider("fallbackHostname")),
+		metricscommon.WithHistogramMode(metricscommon.HistogramModeDistributions),
+		metricscommon.WithNumberMode(metricscommon.NumberModeCumulativeToDelta),
 	}, opts...)
 
 	tr, err := NewTranslator(
@@ -171,7 +172,7 @@ func createBenchmarkDeltaSumMetrics(n int, additionalAttributes map[string]strin
 	return md
 }
 
-func createBenchmarkRuntimeMetric(metricName string, metricType pmetric.MetricType, attributes []runtimeMetricAttribute, dataPoints int) pmetric.Metrics {
+func createBenchmarkRuntimeMetric(metricName string, metricType pmetric.MetricType, attributes []metricscommon.RuntimeMetricAttribute, dataPoints int) pmetric.Metrics {
 	md := pmetric.NewMetrics()
 	met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 	met.SetName(metricName)
@@ -197,7 +198,7 @@ func createBenchmarkRuntimeMetric(metricName string, metricType pmetric.MetricTy
 			startTs := int(getProcessStartTime()) + 1
 			dpInt := dpsInt.AppendEmpty()
 			for _, attr := range attributes {
-				dpInt.Attributes().PutStr(attr.key, attr.values[0])
+				dpInt.Attributes().PutStr(attr.Key, attr.Values[0])
 			}
 			dpInt.SetStartTimestamp(seconds(startTs))
 			dpInt.SetTimestamp(seconds(startTs + 1 + i))
@@ -211,7 +212,7 @@ func createBenchmarkRuntimeMetric(metricName string, metricType pmetric.MetricTy
 		startTs := int(getProcessStartTime()) + 1
 		hpCount := hpsCount.AppendEmpty()
 		for _, attr := range attributes {
-			hpCount.Attributes().PutStr(attr.key, attr.values[0])
+			hpCount.Attributes().PutStr(attr.Key, attr.Values[0])
 		}
 		hpCount.SetStartTimestamp(seconds(startTs))
 		hpCount.SetTimestamp(seconds(startTs + 1 + i))
@@ -516,9 +517,9 @@ func BenchmarkMapSumRuntimeMetric(b *testing.B) {
 }
 
 func BenchmarkMapGaugeRuntimeMetricWithAttributesHasMapping(b *testing.B) {
-	attr := []runtimeMetricAttribute{{
-		key:    "generation",
-		values: []string{"gen1"},
+	attr := []metricscommon.RuntimeMetricAttribute{{
+		Key:    "generation",
+		Values: []string{"gen1"},
 	}}
 
 	for _, v := range inputTable {
@@ -532,11 +533,11 @@ func BenchmarkMapGaugeRuntimeMetricWithAttributesHasMapping(b *testing.B) {
 }
 
 func BenchmarkMapGaugeRuntimeMetricWith10AttributesHasMapping(b *testing.B) {
-	var attr []runtimeMetricAttribute
+	var attr []metricscommon.RuntimeMetricAttribute
 	for i := 1; i <= 10; i++ {
-		attr = append(attr, runtimeMetricAttribute{
-			key:    "generation",
-			values: []string{fmt.Sprintf("gen%d", i)},
+		attr = append(attr, metricscommon.RuntimeMetricAttribute{
+			Key:    "generation",
+			Values: []string{fmt.Sprintf("gen%d", i)},
 		})
 	}
 
@@ -551,11 +552,11 @@ func BenchmarkMapGaugeRuntimeMetricWith10AttributesHasMapping(b *testing.B) {
 }
 
 func BenchmarkMapGaugeRuntimeMetricWith100AttributesHasMapping(b *testing.B) {
-	var attr []runtimeMetricAttribute
+	var attr []metricscommon.RuntimeMetricAttribute
 	for i := 1; i <= 100; i++ {
-		attr = append(attr, runtimeMetricAttribute{
-			key:    "generation",
-			values: []string{fmt.Sprintf("gen%d", i)},
+		attr = append(attr, metricscommon.RuntimeMetricAttribute{
+			Key:    "generation",
+			Values: []string{fmt.Sprintf("gen%d", i)},
 		})
 	}
 

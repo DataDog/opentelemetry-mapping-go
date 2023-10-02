@@ -8,6 +8,7 @@ package metrics
 import (
 	"testing"
 
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metricscommon"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -20,64 +21,64 @@ func TestDeltaHistogramTranslatorOptions(t *testing.T) {
 		name     string
 		otlpfile string
 		ddogfile string
-		options  []TranslatorOption
+		options  []metricscommon.TranslatorOption
 		err      string
 	}{
 		{
 			name:     "distributions",
 			otlpfile: "testdata/otlpdata/histogram/simple-delta.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-delta_dist-nocs.json",
-			options: []TranslatorOption{
-				WithHistogramMode(HistogramModeDistributions),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramMode(metricscommon.HistogramModeDistributions),
 			},
 		},
 		{
 			name:     "distributions-test-min-max",
 			otlpfile: "testdata/otlpdata/histogram/simple-delta-min-max.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-delta-min-max_dist-nocs.json",
-			options: []TranslatorOption{
-				WithHistogramMode(HistogramModeDistributions),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramMode(metricscommon.HistogramModeDistributions),
 			},
 		},
 		{
 			name:     "distributions-count-sum",
 			otlpfile: "testdata/otlpdata/histogram/simple-delta.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-delta_dist-cs.json",
-			options: []TranslatorOption{
-				WithHistogramMode(HistogramModeDistributions),
-				WithHistogramAggregations(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramMode(metricscommon.HistogramModeDistributions),
+				metricscommon.WithHistogramAggregations(),
 			},
 		},
 		{
 			name:     "buckets",
 			otlpfile: "testdata/otlpdata/histogram/simple-delta.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-delta_counters-nocs.json",
-			options: []TranslatorOption{
-				WithHistogramMode(HistogramModeCounters),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramMode(metricscommon.HistogramModeCounters),
 			},
 		},
 		{
 			name:     "buckets-count-sum",
 			otlpfile: "testdata/otlpdata/histogram/simple-delta.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-delta_counters-cs.json",
-			options: []TranslatorOption{
-				WithHistogramMode(HistogramModeCounters),
-				WithHistogramAggregations(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramMode(metricscommon.HistogramModeCounters),
+				metricscommon.WithHistogramAggregations(),
 			},
 		},
 		{
 			name:     "count-sum",
 			otlpfile: "testdata/otlpdata/histogram/simple-delta.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-delta_nobuckets-cs.json",
-			options: []TranslatorOption{
-				WithHistogramMode(HistogramModeNoBuckets),
-				WithHistogramAggregations(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramMode(metricscommon.HistogramModeNoBuckets),
+				metricscommon.WithHistogramAggregations(),
 			},
 		},
 		{
 			name: "no-count-sum-no-buckets",
-			options: []TranslatorOption{
-				WithHistogramMode(HistogramModeNoBuckets),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramMode(metricscommon.HistogramModeNoBuckets),
 			},
 			err: errNoBucketsNoSumCount,
 		},
@@ -101,49 +102,49 @@ func TestCumulativeHistogramTranslatorOptions(t *testing.T) {
 		name     string
 		otlpfile string
 		ddogfile string
-		options  []TranslatorOption
+		options  []metricscommon.TranslatorOption
 	}{
 		{
 			name:     "distributions",
 			otlpfile: "testdata/otlpdata/histogram/simple-cumulative.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-cumulative_dist-nocs.json",
-			options: []TranslatorOption{
-				WithHistogramMode(HistogramModeDistributions),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramMode(metricscommon.HistogramModeDistributions),
 			},
 		},
 		{
 			name:     "distributions-count-sum",
 			otlpfile: "testdata/otlpdata/histogram/simple-cumulative.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-cumulative_dist-cs.json",
-			options: []TranslatorOption{
-				WithHistogramMode(HistogramModeDistributions),
-				WithHistogramAggregations(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramMode(metricscommon.HistogramModeDistributions),
+				metricscommon.WithHistogramAggregations(),
 			},
 		},
 		{
 			name:     "buckets",
 			otlpfile: "testdata/otlpdata/histogram/simple-cumulative.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-cumulative_counters-nocs.json",
-			options: []TranslatorOption{
-				WithHistogramMode(HistogramModeCounters),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramMode(metricscommon.HistogramModeCounters),
 			},
 		},
 		{
 			name:     "buckets-count-sum",
 			otlpfile: "testdata/otlpdata/histogram/simple-cumulative.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-cumulative_counters-cs.json",
-			options: []TranslatorOption{
-				WithHistogramMode(HistogramModeCounters),
-				WithHistogramAggregations(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramMode(metricscommon.HistogramModeCounters),
+				metricscommon.WithHistogramAggregations(),
 			},
 		},
 		{
 			name:     "count-sum",
 			otlpfile: "testdata/otlpdata/histogram/simple-cumulative.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-cumulative_nobuckets-cs.json",
-			options: []TranslatorOption{
-				WithHistogramMode(HistogramModeNoBuckets),
-				WithHistogramAggregations(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramMode(metricscommon.HistogramModeNoBuckets),
+				metricscommon.WithHistogramAggregations(),
 			},
 		},
 	}
@@ -162,7 +163,7 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 		name                                      string
 		otlpfile                                  string
 		ddogfile                                  string
-		options                                   []TranslatorOption
+		options                                   []metricscommon.TranslatorOption
 		expectedUnknownMetricType                 int
 		expectedUnsupportedAggregationTemporality int
 	}{
@@ -190,8 +191,8 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			name:     "resource-attributes-as-tags",
 			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_res-tags.json",
-			options: []TranslatorOption{
-				WithResourceAttributesAsTags(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithResourceAttributesAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 1,
@@ -200,8 +201,8 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			name:     "count-sum",
 			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_cs.json",
-			options: []TranslatorOption{
-				WithHistogramAggregations(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramAggregations(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 1,
@@ -210,8 +211,8 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			name:     "instrumentation-library-metadata-as-tags",
 			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_ilmd-tags.json",
-			options: []TranslatorOption{
-				WithInstrumentationLibraryMetadataAsTags(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 1,
@@ -220,8 +221,8 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			name:     "instrumentation-scope-metadata-as-tags",
 			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_ismd-tags.json",
-			options: []TranslatorOption{
-				WithInstrumentationScopeMetadataAsTags(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithInstrumentationScopeMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 1,
@@ -230,9 +231,9 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			name:     "count-sum-instrumentation-library-metadata-as-tags",
 			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_cs-ilmd-tags.json",
-			options: []TranslatorOption{
-				WithHistogramAggregations(),
-				WithInstrumentationLibraryMetadataAsTags(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramAggregations(),
+				metricscommon.WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 1,
@@ -241,9 +242,9 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			name:     "resource-tags-instrumentation-library-metadata-as-tags",
 			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_res-ilmd-tags.json",
-			options: []TranslatorOption{
-				WithResourceAttributesAsTags(),
-				WithInstrumentationLibraryMetadataAsTags(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithResourceAttributesAsTags(),
+				metricscommon.WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 1,
@@ -252,10 +253,10 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			name:     "count-sum-resource-tags-instrumentation-library-metadata-as-tags",
 			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_cs-both-tags.json",
-			options: []TranslatorOption{
-				WithHistogramAggregations(),
-				WithResourceAttributesAsTags(),
-				WithInstrumentationLibraryMetadataAsTags(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramAggregations(),
+				metricscommon.WithResourceAttributesAsTags(),
+				metricscommon.WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 1,
@@ -264,11 +265,11 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			name:     "with-all",
 			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_all.json",
-			options: []TranslatorOption{
-				WithHistogramAggregations(),
-				WithResourceAttributesAsTags(),
-				WithInstrumentationLibraryMetadataAsTags(),
-				WithInstrumentationScopeMetadataAsTags(),
+			options: []metricscommon.TranslatorOption{
+				metricscommon.WithHistogramAggregations(),
+				metricscommon.WithResourceAttributesAsTags(),
+				metricscommon.WithInstrumentationLibraryMetadataAsTags(),
+				metricscommon.WithInstrumentationScopeMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 1,

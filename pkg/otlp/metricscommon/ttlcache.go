@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package metrics
+package metricscommon
 
 import (
 	"time"
@@ -20,7 +20,7 @@ import (
 	gocache "github.com/patrickmn/go-cache"
 )
 
-type ttlCache struct {
+type TTLCache struct {
 	cache *gocache.Cache
 }
 
@@ -32,20 +32,21 @@ type numberCounter struct {
 	value   float64
 }
 
-func newTTLCache(sweepInterval int64, deltaTTL int64) *ttlCache {
+// NewTTLCache creates a new TTLCache
+func NewTTLCache(sweepInterval int64, deltaTTL int64) *TTLCache {
 	cache := gocache.New(time.Duration(deltaTTL)*time.Second, time.Duration(sweepInterval)*time.Second)
-	return &ttlCache{cache}
+	return &TTLCache{cache}
 }
 
 // Diff submits a new value for a given non-monotonic metric and returns the difference with the
 // last submitted value (ordered by timestamp). The diff value is only valid if `ok` is true.
-func (t *ttlCache) Diff(dimensions *Dimensions, startTs, ts uint64, val float64) (float64, bool) {
+func (t *TTLCache) Diff(dimensions *Dimensions, startTs, ts uint64, val float64) (float64, bool) {
 	return t.putAndGetDiff(dimensions, false, startTs, ts, val)
 }
 
 // MonotonicDiff submits a new value for a given monotonic metric and returns the difference with the
 // last submitted value (ordered by timestamp). The diff value is only valid if `ok` is true.
-func (t *ttlCache) MonotonicDiff(dimensions *Dimensions, startTs, ts uint64, val float64) (float64, bool) {
+func (t *TTLCache) MonotonicDiff(dimensions *Dimensions, startTs, ts uint64, val float64) (float64, bool) {
 	return t.putAndGetDiff(dimensions, true, startTs, ts, val)
 }
 
@@ -67,7 +68,7 @@ func isNotFirstPoint(startTs, ts, oldStartTs uint64) (isNotFirst bool) {
 
 // putAndGetDiff submits a new value for a given metric and returns the difference with the
 // last submitted value (ordered by timestamp). The diff value is only valid if `ok` is true.
-func (t *ttlCache) putAndGetDiff(
+func (t *TTLCache) putAndGetDiff(
 	dimensions *Dimensions,
 	monotonic bool,
 	startTs, ts uint64,
@@ -107,7 +108,7 @@ type extrema struct {
 
 // putAndCheckExtrema stores a new extrema for a cumulative timeseries and checks if the
 // extrema is the one from the last time window. The min flag indicates whether it is a minimum extrema (true) or a maximum extrema (false).
-func (t *ttlCache) putAndCheckExtrema(
+func (t *TTLCache) putAndCheckExtrema(
 	dimensions *Dimensions,
 	startTs, ts uint64,
 	curExtrema float64,
@@ -149,11 +150,11 @@ func (t *ttlCache) putAndCheckExtrema(
 }
 
 // PutAndCheckMin stores a minimum and checks whether the minimum is from the last time window.
-func (t *ttlCache) PutAndCheckMin(dimensions *Dimensions, startTs, ts uint64, curMin float64) (isMinFromLastTimeWindow bool) {
+func (t *TTLCache) PutAndCheckMin(dimensions *Dimensions, startTs, ts uint64, curMin float64) (isMinFromLastTimeWindow bool) {
 	return t.putAndCheckExtrema(dimensions, startTs, ts, curMin, true)
 }
 
 // PutAndCheckMax stores a maximum and checks whether the maximum is from the last time window.
-func (t *ttlCache) PutAndCheckMax(dimensions *Dimensions, startTs, ts uint64, curMax float64) (isMaxFromLastTimeWindow bool) {
+func (t *TTLCache) PutAndCheckMax(dimensions *Dimensions, startTs, ts uint64, curMax float64) (isMaxFromLastTimeWindow bool) {
 	return t.putAndCheckExtrema(dimensions, startTs, ts, curMax, false)
 }

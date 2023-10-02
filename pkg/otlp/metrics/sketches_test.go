@@ -30,10 +30,11 @@ import (
 
 	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metricscommon"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 )
 
-var _ SketchConsumer = (*sketchConsumer)(nil)
+var _ metricscommon.SketchConsumer = (*sketchConsumer)(nil)
 
 type sketchConsumer struct {
 	mockTimeSeriesConsumer
@@ -49,7 +50,7 @@ func (c *sketchConsumer) ConsumeAPMStats(_ *pb.ClientStatsPayload) {
 // ConsumeSketch implements the translator.Consumer interface.
 func (c *sketchConsumer) ConsumeSketch(
 	_ context.Context,
-	_ *Dimensions,
+	_ *metricscommon.Dimensions,
 	_ uint64,
 	sketch *quantile.Sketch,
 ) {

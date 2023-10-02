@@ -28,6 +28,7 @@ import (
 
 	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metricscommon"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
 )
@@ -98,11 +99,11 @@ func (t testProvider) Source(context.Context) (source.Source, error) {
 }
 
 func newTranslator(t *testing.T, logger *zap.Logger) *Translator {
-	options := []TranslatorOption{
-		WithFallbackSourceProvider(testProvider(fallbackHostname)),
-		WithHistogramMode(HistogramModeDistributions),
-		WithNumberMode(NumberModeCumulativeToDelta),
-		WithHistogramAggregations(),
+	options := []metricscommon.TranslatorOption{
+		metricscommon.WithFallbackSourceProvider(testProvider(fallbackHostname)),
+		metricscommon.WithHistogramMode(metricscommon.HistogramModeDistributions),
+		metricscommon.WithNumberMode(metricscommon.NumberModeCumulativeToDelta),
+		metricscommon.WithHistogramAggregations(),
 	}
 
 	tr, err := NewTranslator(
@@ -116,7 +117,7 @@ func newTranslator(t *testing.T, logger *zap.Logger) *Translator {
 
 type metric struct {
 	name      string
-	typ       DataType
+	typ       metricscommon.DataType
 	timestamp uint64
 	value     float64
 	tags      []string
@@ -131,7 +132,7 @@ type sketch struct {
 	host      string
 }
 
-var _ TimeSeriesConsumer = (*mockTimeSeriesConsumer)(nil)
+var _ metricscommon.TimeSeriesConsumer = (*mockTimeSeriesConsumer)(nil)
 
 type mockTimeSeriesConsumer struct {
 	metrics []metric
@@ -139,8 +140,8 @@ type mockTimeSeriesConsumer struct {
 
 func (m *mockTimeSeriesConsumer) ConsumeTimeSeries(
 	_ context.Context,
-	dimensions *Dimensions,
-	typ DataType,
+	dimensions *metricscommon.Dimensions,
+	typ metricscommon.DataType,
 	ts uint64,
 	val float64,
 ) {
@@ -156,28 +157,28 @@ func (m *mockTimeSeriesConsumer) ConsumeTimeSeries(
 	)
 }
 
-func newDims(name string) *Dimensions {
-	return &Dimensions{name: name, tags: []string{}}
+func newDims(name string) *metricscommon.Dimensions {
+	return metricscommon.NewDimensions(name, []string{}, "", "")
 }
 
-func newGauge(dims *Dimensions, ts uint64, val float64) metric {
+func newGauge(dims *metricscommon.Dimensions, ts uint64, val float64) metric {
 	return newGaugeWithHost(dims, ts, val, "")
 }
 
-func newGaugeWithHost(dims *Dimensions, ts uint64, val float64, host string) metric {
-	return metric{name: dims.name, typ: Gauge, timestamp: ts, value: val, tags: dims.tags, host: host}
+func newGaugeWithHost(dims *metricscommon.Dimensions, ts uint64, val float64, host string) metric {
+	return metric{name: dims.Name(), typ: metricscommon.Gauge, timestamp: ts, value: val, tags: dims.Tags(), host: host}
 }
 
-func newCount(dims *Dimensions, ts uint64, val float64) metric {
+func newCount(dims *metricscommon.Dimensions, ts uint64, val float64) metric {
 	return newCountWithHost(dims, ts, val, "")
 }
 
-func newCountWithHost(dims *Dimensions, ts uint64, val float64, host string) metric {
-	return metric{name: dims.name, typ: Count, timestamp: ts, value: val, tags: dims.tags, host: host}
+func newCountWithHost(dims *metricscommon.Dimensions, ts uint64, val float64, host string) metric {
+	return metric{name: dims.Name(), typ: metricscommon.Count, timestamp: ts, value: val, tags: dims.Tags(), host: host}
 }
 
-func newSketch(dims *Dimensions, ts uint64, s summary.Summary) sketch {
-	return sketch{name: dims.name, basic: s, timestamp: ts, tags: dims.tags}
+func newSketch(dims *metricscommon.Dimensions, ts uint64, s summary.Summary) sketch {
+	return sketch{name: dims.Name(), basic: s, timestamp: ts, tags: dims.Tags()}
 }
 
 func TestMapIntMetrics(t *testing.T) {
@@ -191,7 +192,7 @@ func TestMapIntMetrics(t *testing.T) {
 
 	consumer := &mockTimeSeriesConsumer{}
 	dims := newDims("int64.test")
-	tr.mapNumberMetrics(ctx, consumer, dims, Gauge, slice)
+	tr.mapNumberMetrics(ctx, consumer, dims, metricscommon.Gauge, slice)
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{newGauge(dims, uint64(ts), 17)},
@@ -199,7 +200,7 @@ func TestMapIntMetrics(t *testing.T) {
 
 	consumer = &mockTimeSeriesConsumer{}
 	dims = newDims("int64.delta.test")
-	tr.mapNumberMetrics(ctx, consumer, dims, Count, slice)
+	tr.mapNumberMetrics(ctx, consumer, dims, metricscommon.Count, slice)
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{newCount(dims, uint64(ts), 17)},
@@ -207,8 +208,8 @@ func TestMapIntMetrics(t *testing.T) {
 
 	// With attribute tags
 	consumer = &mockTimeSeriesConsumer{}
-	dims = &Dimensions{name: "int64.test", tags: []string{"attribute_tag:attribute_value"}}
-	tr.mapNumberMetrics(ctx, consumer, dims, Gauge, slice)
+	dims = metricscommon.NewDimensions("int64.test", []string{"attribute_tag:attribute_value"}, "", "")
+	tr.mapNumberMetrics(ctx, consumer, dims, metricscommon.Gauge, slice)
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{newGauge(dims, uint64(ts), 17)},
@@ -226,7 +227,7 @@ func TestMapDoubleMetrics(t *testing.T) {
 
 	consumer := &mockTimeSeriesConsumer{}
 	dims := newDims("float64.test")
-	tr.mapNumberMetrics(ctx, consumer, dims, Gauge, slice)
+	tr.mapNumberMetrics(ctx, consumer, dims, metricscommon.Gauge, slice)
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{newGauge(dims, uint64(ts), math.Pi)},
@@ -234,7 +235,7 @@ func TestMapDoubleMetrics(t *testing.T) {
 
 	consumer = &mockTimeSeriesConsumer{}
 	dims = newDims("float64.delta.test")
-	tr.mapNumberMetrics(ctx, consumer, dims, Count, slice)
+	tr.mapNumberMetrics(ctx, consumer, dims, metricscommon.Count, slice)
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{newCount(dims, uint64(ts), math.Pi)},
@@ -242,8 +243,8 @@ func TestMapDoubleMetrics(t *testing.T) {
 
 	// With attribute tags
 	consumer = &mockTimeSeriesConsumer{}
-	dims = &Dimensions{name: "float64.test", tags: []string{"attribute_tag:attribute_value"}}
-	tr.mapNumberMetrics(ctx, consumer, dims, Gauge, slice)
+	dims = metricscommon.NewDimensions("float64.test", []string{"attribute_tag:attribute_value"}, "", "")
+	tr.mapNumberMetrics(ctx, consumer, dims, metricscommon.Gauge, slice)
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{newGauge(dims, uint64(ts), math.Pi)},
@@ -388,7 +389,7 @@ func TestMapIntMonotonicReportDiffForFirstValue(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
+	dims := metricscommon.NewDimensions(exampleDims.Name(), []string{}, fallbackHostname, "")
 	startTs := int(getProcessStartTime()) + 1
 	// Add an entry to the cache about the timeseries, in this case we send the diff (9) rather than the first value (10).
 	tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+1)), 1)
@@ -433,7 +434,7 @@ func TestMapRuntimeMetricsHasMappingCollector(t *testing.T) {
 	ctx := context.Background()
 	tr, err := NewTranslator(
 		zap.NewNop(),
-		WithRemapping(),
+		metricscommon.WithRemapping(),
 	)
 	require.NoError(t, err)
 	consumer := &mockFullConsumer{}
@@ -463,9 +464,9 @@ func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	attributes := []runtimeMetricAttribute{{
-		key:    "generation",
-		values: []string{"gen0"},
+	attributes := []metricscommon.RuntimeMetricAttribute{{
+		Key:    "generation",
+		Values: []string{"gen0"},
 	}}
 	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes, 1), consumer)
 	if err != nil {
@@ -486,13 +487,13 @@ func TestMapSumRuntimeMetricWithAttributesHasMappingCollector(t *testing.T) {
 	ctx := context.Background()
 	tr, err := NewTranslator(
 		zap.NewNop(),
-		WithRemapping(),
+		metricscommon.WithRemapping(),
 	)
 	require.NoError(t, err)
 	consumer := &mockFullConsumer{}
-	attributes := []runtimeMetricAttribute{{
-		key:    "generation",
-		values: []string{"gen0"},
+	attributes := []metricscommon.RuntimeMetricAttribute{{
+		Key:    "generation",
+		Values: []string{"gen0"},
 	}}
 	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes, 1), consumer)
 	if err != nil {
@@ -513,9 +514,9 @@ func TestMapGaugeRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	attributes := []runtimeMetricAttribute{{
-		key:    "generation",
-		values: []string{"gen1"},
+	attributes := []metricscommon.RuntimeMetricAttribute{{
+		Key:    "generation",
+		Values: []string{"gen1"},
 	}}
 	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeGauge, attributes, 1), consumer)
 	if err != nil {
@@ -562,9 +563,9 @@ func TestMapHistogramRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	attributes := []runtimeMetricAttribute{{
-		key:    "generation",
-		values: []string{"gen1"},
+	attributes := []metricscommon.RuntimeMetricAttribute{{
+		Key:    "generation",
+		Values: []string{"gen1"},
 	}}
 	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeHistogram, attributes, 1), consumer)
 	if err != nil {
@@ -591,12 +592,12 @@ func TestMapRuntimeMetricWithTwoAttributesHasMapping(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	attributes := []runtimeMetricAttribute{{
-		key:    "pool",
-		values: []string{"G1 Old Gen"},
+	attributes := []metricscommon.RuntimeMetricAttribute{{
+		Key:    "pool",
+		Values: []string{"G1 Old Gen"},
 	}, {
-		key:    "type",
-		values: []string{"heap"},
+		Key:    "type",
+		Values: []string{"heap"},
 	}}
 	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 1), consumer)
 	if err != nil {
@@ -618,12 +619,12 @@ func TestMapRuntimeMetricWithTwoAttributesMultipleDataPointsHasMapping(t *testin
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	attributes := []runtimeMetricAttribute{{
-		key:    "pool",
-		values: []string{"G1 Old Gen", "G1 Survivor Space", "G1 Eden Space"},
+	attributes := []metricscommon.RuntimeMetricAttribute{{
+		Key:    "pool",
+		Values: []string{"G1 Old Gen", "G1 Survivor Space", "G1 Eden Space"},
 	}, {
-		key:    "type",
-		values: []string{"heap", "heap", "heap"},
+		Key:    "type",
+		Values: []string{"heap", "heap", "heap"},
 	}}
 	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 3), consumer)
 	if err != nil {
@@ -691,9 +692,9 @@ func TestMapGaugeRuntimeMetricWithInvalidAttributes(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	attributes := []runtimeMetricAttribute{{
-		key:    "type",
-		values: []string{"heap2"},
+	attributes := []metricscommon.RuntimeMetricAttribute{{
+		Key:    "type",
+		Values: []string{"heap2"},
 	}}
 	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 1), consumer)
 	if err != nil {
@@ -734,7 +735,7 @@ func TestMapSystemMetrics(t *testing.T) {
 	ctx := context.Background()
 	tr, err := NewTranslator(
 		zap.NewNop(),
-		WithRemapping(),
+		metricscommon.WithRemapping(),
 	)
 	require.NoError(t, err)
 	consumer := &mockFullConsumer{}
@@ -922,7 +923,7 @@ func TestMapDoubleMonotonicReportDiffForFirstValue(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
+	dims := metricscommon.NewDimensions(exampleDims.Name(), []string{}, fallbackHostname, "")
 	startTs := int(getProcessStartTime()) + 1
 	// Add an entry to the cache about the timeseries, in this case we send the diff (9) rather than the first value (10).
 	tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+1)), 1)
@@ -963,7 +964,7 @@ func TestMapDoubleMonotonicOutOfOrder(t *testing.T) {
 	)
 }
 
-var _ SketchConsumer = (*mockFullConsumer)(nil)
+var _ metricscommon.SketchConsumer = (*mockFullConsumer)(nil)
 
 type mockFullConsumer struct {
 	mockTimeSeriesConsumer
@@ -975,7 +976,7 @@ func (c *mockFullConsumer) ConsumeAPMStats(p *pb.ClientStatsPayload) {
 	c.apmstats = append(c.apmstats, p)
 }
 
-func (c *mockFullConsumer) ConsumeSketch(_ context.Context, dimensions *Dimensions, ts uint64, sk *quantile.Sketch) {
+func (c *mockFullConsumer) ConsumeSketch(_ context.Context, dimensions *metricscommon.Dimensions, ts uint64, sk *quantile.Sketch) {
 	c.sketches = append(c.sketches,
 		sketch{
 			name:      dimensions.Name(),
@@ -999,7 +1000,7 @@ func TestLegacyBucketsTags(t *testing.T) {
 	pointOne.ExplicitBounds().FromRaw([]float64{0})
 	pointOne.SetTimestamp(seconds(0))
 	consumer := &mockTimeSeriesConsumer{}
-	dims := &Dimensions{name: "test.histogram.one", tags: tags}
+	dims := metricscommon.NewDimensions("test.histogram.one", tags, "", "")
 	tr.getLegacyBuckets(ctx, consumer, dims, pointOne, true)
 	seriesOne := consumer.metrics
 
@@ -1008,7 +1009,7 @@ func TestLegacyBucketsTags(t *testing.T) {
 	pointTwo.ExplicitBounds().FromRaw([]float64{1})
 	pointTwo.SetTimestamp(seconds(0))
 	consumer = &mockTimeSeriesConsumer{}
-	dims = &Dimensions{name: "test.histogram.two", tags: tags}
+	dims = metricscommon.NewDimensions("test.histogram.two", tags, "", "")
 	tr.getLegacyBuckets(ctx, consumer, dims, pointTwo, true)
 	seriesTwo := consumer.metrics
 
@@ -1048,7 +1049,7 @@ const (
 func createTestIntCumulativeMonotonicMetrics(tsmatch bool) pmetric.Metrics {
 	md := pmetric.NewMetrics()
 	met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
-	met.SetName(exampleDims.name)
+	met.SetName(exampleDims.Name())
 	met.SetEmptySum()
 	met.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
 	met.Sum().SetIsMonotonic(true)
@@ -1074,7 +1075,7 @@ func createTestIntCumulativeMonotonicMetrics(tsmatch bool) pmetric.Metrics {
 func createTestDoubleCumulativeMonotonicMetrics(tsmatch bool) pmetric.Metrics {
 	md := pmetric.NewMetrics()
 	met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
-	met.SetName(exampleDims.name)
+	met.SetName(exampleDims.Name())
 	met.SetEmptySum()
 	met.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
 	met.Sum().SetIsMonotonic(true)
@@ -1119,7 +1120,7 @@ func createTestHistogramMetric(metricName string) pmetric.Metrics {
 	return md
 }
 
-func createTestMetricWithAttributes(metricName string, metricType pmetric.MetricType, attributes []runtimeMetricAttribute, dataPoints int) pmetric.Metrics {
+func createTestMetricWithAttributes(metricName string, metricType pmetric.MetricType, attributes []metricscommon.RuntimeMetricAttribute, dataPoints int) pmetric.Metrics {
 	md := pmetric.NewMetrics()
 	met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 	met.SetName(metricName)
@@ -1145,7 +1146,7 @@ func createTestMetricWithAttributes(metricName string, metricType pmetric.Metric
 			startTs := int(getProcessStartTime()) + 1
 			dpInt := dpsInt.AppendEmpty()
 			for _, attr := range attributes {
-				dpInt.Attributes().PutStr(attr.key, attr.values[i])
+				dpInt.Attributes().PutStr(attr.Key, attr.Values[i])
 			}
 			dpInt.SetStartTimestamp(seconds(startTs))
 			dpInt.SetTimestamp(seconds(startTs + 1 + i))
@@ -1159,7 +1160,7 @@ func createTestMetricWithAttributes(metricName string, metricType pmetric.Metric
 		startTs := int(getProcessStartTime()) + 1
 		hpCount := hpsCount.AppendEmpty()
 		for _, attr := range attributes {
-			hpCount.Attributes().PutStr(attr.key, attr.values[i])
+			hpCount.Attributes().PutStr(attr.Key, attr.Values[i])
 		}
 		hpCount.SetStartTimestamp(seconds(startTs))
 		hpCount.SetTimestamp(seconds(startTs + 1 + i))
