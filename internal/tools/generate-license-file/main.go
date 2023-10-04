@@ -22,6 +22,7 @@ var (
 		"pkg/quantile",
 		"pkg/otlp/attributes",
 		"pkg/otlp/metrics",
+		"pkg/otlp/metricsproto",
 		"pkg/internal/sketchtest",
 		"pkg/inframetadata",
 	}
