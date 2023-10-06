@@ -9,6 +9,7 @@ module-sets:
     modules:
       - github.com/DataDog/opentelemetry-mapping-go/pkg/quantile
       - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes
+      - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributesproto
       - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/logs
       - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics
       - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metricsproto
