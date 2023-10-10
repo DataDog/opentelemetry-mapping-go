@@ -43,10 +43,18 @@ func strField(m pcommon.Map, key string) (string, bool, error) {
 		// Field not available, don't update but don't fail either
 		return "", false, nil
 	}
-	if val.Type() != pcommon.ValueTypeStr {
+
+	var value string
+	switch val.Type() {
+	case pcommon.ValueTypeStr:
+		value = val.Str()
+	case pcommon.ValueTypeInt:
+		value = val.AsString()
+	default:
 		return "", false, fmt.Errorf("%q has type %q, expected type \"Str\" instead", key, val.Type())
 	}
-	return val.Str(), true, nil
+
+	return value, true, nil
 }
 
 // isAWS checks if a resource attribute map
@@ -154,6 +162,18 @@ func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, md pa
 			old := md.Platform()[field]
 			changed = changed || old != strVal
 			md.Platform()[field] = strVal
+		}
+	}
+
+	// Gohai - CPU
+	for field, attribute := range cpuAttributesMap {
+		strVal, ok, fieldErr := strField(res.Attributes(), attribute)
+		if fieldErr != nil {
+			err = multierr.Append(err, fieldErr)
+		} else if ok {
+			old := md.CPU()[field]
+			changed = changed || old != strVal
+			md.CPU()[field] = strVal
 		}
 	}
 
