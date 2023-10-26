@@ -41,6 +41,11 @@ func (p *Payload) Platform() map[string]string {
 	return p.Gohai.Gohai.Platform.(map[string]string)
 }
 
+// CPU returns a reference to the Gohai payload 'cpu' map.
+func (p *Payload) CPU() map[string]string {
+	return p.Gohai.Gohai.CPU.(map[string]string)
+}
+
 // gohaiSerializer implements json.Marshaler and json.Unmarshaler on top of a gohai payload
 type gohaiMarshaler struct {
 	Gohai *Gohai
@@ -81,6 +86,7 @@ func NewEmpty() Payload {
 		Gohai: gohaiMarshaler{
 			Gohai: &Gohai{
 				Platform: map[string]string{},
+				CPU:      map[string]string{},
 			},
 		},
 	}
