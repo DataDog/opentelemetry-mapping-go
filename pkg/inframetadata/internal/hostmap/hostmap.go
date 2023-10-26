@@ -32,7 +32,8 @@ func New() *HostMap {
 	}
 }
 
-// strField gets a string-typed field from a resource attribute map.
+// strField gets a field as string from a resource attribute map.
+// It can handle fields of type "Str" and "Int".
 // It returns:
 // - The field's value, if available
 // - Whether the field was present in the map
