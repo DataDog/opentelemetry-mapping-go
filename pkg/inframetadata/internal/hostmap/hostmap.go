@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	conventions "go.opentelemetry.io/collector/semconv/v1.18.0"
 	"go.uber.org/multierr"
 
@@ -103,6 +104,21 @@ func (m *HostMap) Set(md payload.HostMetadata) error {
 	return nil
 }
 
+// newOrFetchHostMetadata returns the host metadata payload for a given host or creates a new one.
+// This method is NOT thread-safe and should be called from within a mutex.
+func (m *HostMap) newOrFetchHostMetadata(host string) (payload.HostMetadata, bool) {
+	md, ok := m.hosts[host]
+	if !ok {
+		md = payload.HostMetadata{
+			Flavor:  "otelcol-contrib",
+			Meta:    &payload.Meta{},
+			Tags:    &payload.HostTags{},
+			Payload: gohai.NewEmpty(),
+		}
+	}
+	return md, ok
+}
+
 // Update the information about a given host by providing a resource.
 // The function reports:
 //   - Whether the information about the `host` has changed
@@ -117,21 +133,9 @@ func (m *HostMap) Set(md payload.HostMetadata) error {
 // The order in which resource attributes are read does not affect the final
 // host metadata payload, even if non-fatal errors are raised during execution.
 func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, md payload.HostMetadata, err error) {
-	md = payload.HostMetadata{
-		Flavor:  "otelcol-contrib",
-		Meta:    &payload.Meta{},
-		Tags:    &payload.HostTags{},
-		Payload: gohai.NewEmpty(),
-	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
-
-	var found bool
-	if old, ok := m.hosts[host]; ok {
-		found = true
-		md = old
-	}
-
+	md, found := m.newOrFetchHostMetadata(host)
 	md.InternalHostname = host
 	md.Meta.Hostname = host
 
@@ -181,6 +185,42 @@ func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, md pa
 	m.hosts[host] = md
 	changed = changed && found
 	return
+}
+
+func (m *HostMap) UpdateFromMetric(host string, metric pmetric.Metric) {
+	var point pmetric.NumberDataPoint
+	switch metric.MetricType() {
+	case pmetric.MetricTypeGauge:
+		lastIndex := metric.Gauge().DataPoints().Len() - 1
+		point = metric.Gauge().DataPoints().At(lastIndex)
+	case pmetric.MetricTypeSum:
+		lastIndex := metric.Sum().DataPoints().Len() - 1
+		point = metric.Sum().DataPoints().At(lastIndex)
+	default:
+		// unsupported type
+		return
+	}
+
+	var value float64
+	switch point.ValueType() {
+	case pmetric.NumberDataPointValueTypeInt:
+		value = float64(point.IntValue())
+	case pmetric.NumberDataPointValueTypeDouble:
+		value = point.DoubleValue()
+	default:
+		// unsupported type
+		return
+	}
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	md, _ := m.newOrFetchHostMetadata(host)
+
+	// Gohai - CPU
+	field, ok := cpuMetricsMap[metric.Name()]
+	if ok {
+		md.CPU()[field] = value
+	}
 }
 
 // Flush all the host metadata payloads and clear them from the HostMap.

@@ -56,14 +56,26 @@ const (
 	attributeHostCPUCacheL2Size = "host.cpu.cache.l2.size"
 )
 
+// CPU related OpenTelemetry Semantic Conventions for metrics.
+// TODO: Replace by conventions constants once available.
+const (
+	metricSystemCPUPhysicalCount = "system.cpu.physical.count"
+	metricSystemCPULogicalCount  = "system.cpu.logical.count"
+	metricSystemCPUFrequency     = "system.cpu.frequency"
+	metricSystemMemoryLimit      = "system.memory.limit"
+)
+
 // This set of constants represent fields in the Gohai payload's CPU field.
 const (
-	fieldCPUVendorID  = "vendor_id"
-	fieldCPUModelName = "model_name"
-	fieldCPUCacheSize = "cache_size"
-	fieldCPUFamily    = "family"
-	fieldCPUModel     = "model"
-	fieldCPUStepping  = "stepping"
+	fieldCPUVendorID          = "vendor_id"
+	fieldCPUModelName         = "model_name"
+	fieldCPUCacheSize         = "cache_size"
+	fieldCPUFamily            = "family"
+	fieldCPUModel             = "model"
+	fieldCPUStepping          = "stepping"
+	fieldCPUCores             = "cpu_cores"
+	fieldCPULogicalProcessors = "cpu_logical_processors"
+	fieldCPUMHz               = "mhz"
 )
 
 // cpuAttributesMap defines the mapping between Gohai fieldCPU fields
@@ -75,4 +87,18 @@ var cpuAttributesMap map[string]string = map[string]string{
 	fieldCPUFamily:    attributeHostCPUFamily,
 	fieldCPUModel:     attributeHostCPUModelID,
 	fieldCPUStepping:  attributeHostCPUStepping,
+}
+
+var cpuMetricsMap map[string]string = map[string]string{
+	metricSystemCPUPhysicalCount: fieldCPUCores,
+	metricSystemCPULogicalCount:  fieldCPULogicalProcessors,
+	metricSystemCPUFrequency:     fieldCPUMHz,
+}
+
+// TrackedMetrics is the set of metrics that are tracked by the hostmap.
+var TrackedMetrics map[string]struct{} = map[string]struct{}{
+	metricSystemCPUPhysicalCount: {},
+	metricSystemCPULogicalCount:  {},
+	metricSystemCPUFrequency:     {},
+	metricSystemMemoryLimit:      {},
 }

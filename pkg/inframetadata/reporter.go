@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/pmetric"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
@@ -104,6 +106,19 @@ func (r *Reporter) pushAndLog(ctx context.Context, hm payload.HostMetadata) {
 	}
 }
 
+func (r *Reporter) hostname(res pcommon.Resource) (string, bool) {
+	src, ok := attributes.SourceFromAttrs(res.Attributes())
+	if !ok {
+		r.logger.Warn("resource does not have host-identifying attributes", zap.Any("attributes", res.Attributes()))
+		return "", false
+	}
+	if src.Kind != source.HostnameKind {
+		// The resource does not identify a host (e.g. serverless resource)
+		return "", false
+	}
+	return src.Identifier, true
+}
+
 // ConsumeResource for host metadata reporting purposes.
 // The resource will be used only if it is usable (see 'hasHostMetadata') and it has a host attribute.
 func (r *Reporter) ConsumeResource(res pcommon.Resource) error {
@@ -114,25 +129,50 @@ func (r *Reporter) ConsumeResource(res pcommon.Resource) error {
 		return nil
 	}
 
-	src, ok := attributes.SourceFromAttrs(res.Attributes())
+	hostname, ok := r.hostname(res)
 	if !ok {
-		r.logger.Warn("resource does not have host-identifying attributes", zap.Any("attributes", res.Attributes()))
-		return nil
-	}
-	if src.Kind != source.HostnameKind {
-		// The resource does not identify a host (e.g. serverless resource)
 		return nil
 	}
 
-	changed, payload, err := r.hostMap.Update(src.Identifier, res)
+	changed, payload, err := r.hostMap.Update(hostname, res)
 	if changed {
 		r.logger.Debug("Host metadata changed for host after payload",
-			zap.String("host", src.Identifier), zap.Any("attributes", res.Attributes()),
+			zap.String("host", hostname), zap.Any("attributes", res.Attributes()),
 		)
 		r.pushAndLog(context.Background(), payload)
 	}
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (r *Reporter) ConsumeMetrics(md pmetric.Metrics) error {
+	rms := md.ResourceMetrics()
+	for i := 0; i < rms.Len(); i++ {
+		rm := rms.At(i)
+		res := rm.Resource()
+		if ok, err := hasHostMetadata(res); err != nil {
+			return fmt.Errorf("failed to check resource: %w", err)
+		} else if !ok {
+			// The resource should not be used for host metadata.
+			return nil
+		}
+
+		host, ok := r.hostname(res)
+		if !ok {
+			continue
+		}
+		ilms := rm.ScopeMetrics()
+		for j := 0; j < ilms.Len(); j++ {
+			metricsArray := ilms.At(j).Metrics()
+			for k := 0; k < metricsArray.Len(); k++ {
+				metric := metricsArray.At(k)
+				if _, ok := hostmap.KnownMetrics[metric.Name()]; ok {
+					r.hostMap.UpdateFromMetric(host, metric)
+				}
+			}
+		}
 	}
 	return nil
 }
