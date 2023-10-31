@@ -11,12 +11,12 @@ import (
 )
 
 const (
-	maxBinWidth = math.MaxUint16
+	maxBinWidth = math.MaxUint32
 )
 
 type bin struct {
 	k Key
-	n uint16
+	n uint32
 }
 
 // incrSafe performs `b.n += by` safely handling overflows. When an overflow
@@ -29,7 +29,7 @@ func (b *bin) incrSafe(by int) int {
 		return next - maxBinWidth
 	}
 
-	b.n = uint16(next)
+	b.n = uint32(next)
 	return 0
 }
 
@@ -40,14 +40,14 @@ func (b *bin) incrSafe(by int) int {
 //	(2) n > maxBinWidth  : >1 bin
 func appendSafe(bins []bin, k Key, n int) []bin {
 	if n <= maxBinWidth {
-		return append(bins, bin{k: k, n: uint16(n)})
+		return append(bins, bin{k: k, n: uint32(n)})
 	}
 
 	// on overflow, insert multiple bins with the same key.
 	// put full bins at end
 
 	// TODO|PROD: Add validation func that sorts by key and then n (smaller bin first).
-	r := uint16(n % maxBinWidth)
+	r := uint32(n % maxBinWidth)
 	if r != 0 {
 		bins = append(bins, bin{k: k, n: r})
 	}
@@ -61,10 +61,11 @@ func appendSafe(bins []bin, k Key, n int) []bin {
 
 type binList []bin
 
-func (bins binList) nSum() int {
-	s := 0
+func (bins binList) nSum() uint64 {
+	var s uint64
+	s = 0
 	for _, b := range bins {
-		s += int(b.n)
+		s += uint64(b.n)
 	}
 	return s
 }
