@@ -6,7 +6,7 @@
 package quantile
 
 const (
-	agentBufCap = 512
+	agentBufCap = 5 * 1024
 )
 
 var agentConfig = Default()
