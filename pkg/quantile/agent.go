@@ -6,7 +6,8 @@
 package quantile
 
 const (
-	agentBufCap = 512
+	// Byte size threshold for flushing buffered values into the sketch.
+	agentBufCap = 1024
 )
 
 var agentConfig = Default()
@@ -65,10 +66,6 @@ func (a *Agent) Insert(v float64, sampleRate float64) {
 	if sampleRate == 1 {
 		a.Sketch.Basic.Insert(v)
 		a.Buf = append(a.Buf, k)
-
-		if len(a.Buf) < agentBufCap {
-			return
-		}
 	} else {
 		// use truncated 1 / sampleRate as count to match histograms
 		n := 1 / sampleRate
@@ -78,9 +75,10 @@ func (a *Agent) Insert(v float64, sampleRate float64) {
 			n: uint(n),
 		}
 		a.CountBuf = append(a.CountBuf, kc)
-		if len(a.CountBuf) < agentBufCap {
-			return
-		}
+	}
+	approxSize := len(a.Buf)*2 + len(a.CountBuf)*8
+	if approxSize < agentBufCap {
+		return
 	}
 	a.flush()
 }
