@@ -78,6 +78,9 @@ func (a *Agent) Insert(v float64, sampleRate float64) {
 			n: uint(n),
 		}
 		a.CountBuf = append(a.CountBuf, kc)
+		if len(a.CountBuf) < agentBufCap {
+			return
+		}
 	}
 	a.flush()
 }
