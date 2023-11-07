@@ -156,15 +156,15 @@ func (t *Translator) mapExponentialHistogramMetrics(
 
 		if histInfo.ok {
 			// override approximate sum, count and average in sketch with exact values if available.
-			agentSketch.Basic.Cnt = int64(histInfo.count)
-			agentSketch.Basic.Sum = histInfo.sum
-			agentSketch.Basic.Avg = agentSketch.Basic.Sum / float64(agentSketch.Basic.Cnt)
+			agentSketch.Basic().Cnt = int64(histInfo.count)
+			agentSketch.Basic().Sum = histInfo.sum
+			agentSketch.Basic().Avg = agentSketch.Basic().Sum / float64(agentSketch.Basic().Cnt)
 		}
 		if delta && p.HasMin() {
-			agentSketch.Basic.Min = p.Min()
+			agentSketch.Basic().Min = p.Min()
 		}
 		if delta && p.HasMax() {
-			agentSketch.Basic.Max = p.Max()
+			agentSketch.Basic().Max = p.Max()
 		}
 
 		consumer.ConsumeSketch(ctx, pointDims, ts, agentSketch)

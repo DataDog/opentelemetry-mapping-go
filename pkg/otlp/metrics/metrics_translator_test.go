@@ -975,7 +975,7 @@ func (c *mockFullConsumer) ConsumeAPMStats(p *pb.ClientStatsPayload) {
 	c.apmstats = append(c.apmstats, p)
 }
 
-func (c *mockFullConsumer) ConsumeSketch(_ context.Context, dimensions *Dimensions, ts uint64, sk *quantile.Sketch) {
+func (c *mockFullConsumer) ConsumeSketch(_ context.Context, dimensions *Dimensions, ts uint64, sk quantile.Sketch) {
 	c.sketches = append(c.sketches,
 		sketch{
 			name:      dimensions.Name(),

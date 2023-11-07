@@ -80,7 +80,7 @@ type SketchConsumer interface {
 		ctx context.Context,
 		dimensions *Dimensions,
 		timestamp uint64,
-		sketch *quantile.Sketch,
+		sketch quantile.Sketch,
 	)
 }
 

@@ -23,7 +23,7 @@ func (s *Summary) Reset() {
 	*s = Summary{}
 }
 
-func (s *Summary) String() string {
+func (s Summary) String() string {
 	return fmt.Sprintf("min=%.4f max=%.4f avg=%.4f sum=%.4f cnt=%d",
 		s.Min, s.Max, s.Avg, s.Sum, s.Cnt)
 }

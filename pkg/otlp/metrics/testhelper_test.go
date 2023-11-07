@@ -149,7 +149,7 @@ func (t *testConsumer) ConsumeSketch(
 	_ context.Context,
 	dimensions *Dimensions,
 	timestamp uint64,
-	sketch *quantile.Sketch,
+	sketch quantile.Sketch,
 ) {
 	k, n := sketch.Cols()
 	t.testMetrics.Sketches = append(t.testMetrics.Sketches,

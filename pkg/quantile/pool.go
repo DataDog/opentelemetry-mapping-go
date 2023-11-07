@@ -24,6 +24,13 @@ var (
 		},
 	}
 
+	binListPool32 = sync.Pool{
+		New: func() interface{} {
+			a := make([]bin32, 0, defaultBinListSize)
+			return &a
+		},
+	}
+
 	keyListPool = sync.Pool{
 		New: func() interface{} {
 			a := make([]Key, 0, defaultKeyListSize)
@@ -46,6 +53,15 @@ func getBinList() []bin {
 
 func putBinList(a []bin) {
 	binListPool.Put(&a)
+}
+
+func getBinList32() []bin32 {
+	a := *(binListPool32.Get().(*[]bin32))
+	return a[:0]
+}
+
+func putBinList32(a []bin32) {
+	binListPool32.Put(&a)
 }
 
 func getKeyList() []Key {

@@ -296,36 +296,36 @@ func (t *Translator) getSketchBuckets(
 	if sketch != nil {
 		if histInfo.ok {
 			// override approximate sum, count and average in sketch with exact values if available.
-			sketch.Basic.Cnt = int64(histInfo.count)
-			sketch.Basic.Sum = histInfo.sum
-			sketch.Basic.Avg = sketch.Basic.Sum / float64(sketch.Basic.Cnt)
+			sketch.Basic().Cnt = int64(histInfo.count)
+			sketch.Basic().Sum = histInfo.sum
+			sketch.Basic().Avg = sketch.Basic().Sum / float64(sketch.Basic().Cnt)
 		}
 
 		// If there is at least one bucket with nonzero count,
 		// override min/max with bounds if they are not infinite.
 		if minBoundSet {
 			if !math.IsInf(minBound, 0) {
-				sketch.Basic.Min = minBound
+				sketch.Basic().Min = minBound
 			}
 			if !math.IsInf(maxBound, 0) {
-				sketch.Basic.Max = maxBound
+				sketch.Basic().Max = maxBound
 			}
 		}
 
 		if histInfo.hasMinFromLastTimeWindow {
 			// We know exact minimum for the last time window.
-			sketch.Basic.Min = p.Min()
+			sketch.Basic().Min = p.Min()
 		} else if p.HasMin() {
 			// Clamp minimum with the global minimum (p.Min()) to account for sketch mapping error.
-			sketch.Basic.Min = math.Max(p.Min(), sketch.Basic.Min)
+			sketch.Basic().Min = math.Max(p.Min(), sketch.Basic().Min)
 		}
 
 		if histInfo.hasMaxFromLastTimeWindow {
 			// We know exact maximum for the last time window.
-			sketch.Basic.Max = p.Max()
+			sketch.Basic().Max = p.Max()
 		} else if p.HasMax() {
 			// Clamp maximum with global maximum (p.Max()) to account for sketch mapping error.
-			sketch.Basic.Max = math.Min(p.Max(), sketch.Basic.Max)
+			sketch.Basic().Max = math.Min(p.Max(), sketch.Basic().Max)
 		}
 
 		consumer.ConsumeSketch(ctx, pointDims, ts, sketch)

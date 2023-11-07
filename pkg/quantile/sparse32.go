@@ -13,37 +13,37 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
 )
 
-var _ memSized = (*Sketch16)(nil)
+var _ memSized = (*Sketch32)(nil)
 
 // A Sketch for tracking quantiles
 // The serialized JSON of Sketch contains the summary only
 // Bins are not included.
-type Sketch16 struct {
-	sparseStore
+type Sketch32 struct {
+	sparseStore32
 
 	BasicSummary summary.Summary `json:"summary"`
 }
 
-func (s Sketch16) String() string {
+func (s Sketch32) String() string {
 	var b strings.Builder
 	// todo
 	// printSketch(&b, s, Default())
 	return b.String()
 }
 
-func (s Sketch16) BinsLen() int {
+func (s Sketch32) BinsLen() int {
 	return len(s.bins)
 }
 
-func (s Sketch16) BinsCap() int {
+func (s Sketch32) BinsCap() int {
 	return cap(s.bins)
 }
 
-func (s Sketch16) Basic() *summary.Summary {
+func (s Sketch32) Basic() *summary.Summary {
 	return &s.BasicSummary
 }
 
-func (s Sketch16) BinsString() string {
+func (s Sketch32) BinsString() string {
 	var b strings.Builder
 	// todo
 	// printBins(&b, s.bins, defaultBinPerLine)
@@ -54,23 +54,23 @@ func (s Sketch16) BinsString() string {
 //
 //	used: uses len(bins)
 //	allocated: uses cap(bins)
-func (s Sketch16) MemSize() (used, allocated int) {
+func (s Sketch32) MemSize() (used, allocated int) {
 	const (
 		basicSize = int(unsafe.Sizeof(summary.Summary{}))
 	)
 
-	used, allocated = s.sparseStore.MemSize()
+	used, allocated = s.sparseStore32.MemSize()
 	used += basicSize
 	allocated += basicSize
 	return
 }
 
-func (s Sketch16) Insert(c *Config, keys []Key) {
+func (s Sketch32) Insert(c *Config, keys []Key) {
 	// todo
 }
 
 // InsertMany values into the sketch.
-func (s Sketch16) InsertMany(c *Config, values []float64) {
+func (s Sketch32) InsertMany(c *Config, values []float64) {
 	keys := getKeyList()
 
 	for _, v := range values {
@@ -83,28 +83,28 @@ func (s Sketch16) InsertMany(c *Config, values []float64) {
 }
 
 // Reset sketch to its empty state.
-func (s Sketch16) Reset() {
+func (s Sketch32) Reset() {
 	s.BasicSummary.Reset()
 	s.count = 0
 	s.bins = s.bins[:0] // TODO: just release to a size tiered pool.
 }
 
 // GetRawBins return raw bins information as string
-func (s *Sketch16) GetRawBins() (int, string) {
-	return s.count, strings.Replace(s.bins.String(), "\n", "", -1)
+func (s *Sketch32) GetRawBins() (int, string) {
+	return s.count, strings.Replace(s.BinsString(), "\n", "", -1)
 }
 
 // Insert a single value into the sketch.
 // NOTE: InsertMany is much more efficient.
-func (s *Sketch16) InsertVals(c *Config, vals ...float64) {
+func (s *Sketch32) InsertVals(c *Config, vals ...float64) {
 	// TODO: remove this
 	s.InsertMany(c, vals)
 }
 
 // Merge o into s, without mutating o.
-func (s *Sketch16) merge(c *Config, o *Sketch16) {
+func (s *Sketch32) merge(c *Config, o *Sketch32) {
 	s.BasicSummary.Merge(o.BasicSummary)
-	s.sparseStore.merge(c, &o.sparseStore)
+	s.sparseStore32.merge(c, &o.sparseStore32)
 }
 
 // Quantile returns v such that s.count*q items are <= v.
@@ -113,7 +113,7 @@ func (s *Sketch16) merge(c *Config, o *Sketch16) {
 //
 //		Quantile(c, q <= 0)  = min
 //	 Quantile(c, q >= 1)  = max
-func (s Sketch16) Quantile(c *Config, q float64) float64 {
+func (s Sketch32) Quantile(c *Config, q float64) float64 {
 	switch {
 	case s.count == 0:
 		return 0
@@ -158,12 +158,8 @@ func (s Sketch16) Quantile(c *Config, q float64) float64 {
 	return s.BasicSummary.Max
 }
 
-func rank(count int, q float64) float64 {
-	return math.RoundToEven(q * float64(count-1))
-}
-
 // CopyTo makes a deep copy of this sketch into dst.
-func (s *Sketch16) CopyTo(dst *Sketch16) {
+func (s *Sketch32) CopyTo(dst *Sketch32) {
 	// TODO: pool slices here?
 	dst.bins = dst.bins.ensureLen(s.bins.Len())
 	copy(dst.bins, s.bins)
@@ -172,18 +168,18 @@ func (s *Sketch16) CopyTo(dst *Sketch16) {
 }
 
 // Copy returns a deep copy
-func (s *Sketch16) Copy() *Sketch16 {
-	dst := &Sketch16{}
+func (s *Sketch32) Copy() *Sketch32 {
+	dst := &Sketch32{}
 	s.CopyTo(dst)
 	return dst
 }
 
-func (s Sketch16) CopyAsSketch() Sketch {
+func (s Sketch32) CopyAsSketch() Sketch {
 	return s.Copy()
 }
 
 // Equals returns true if s and o are equivalent.
-func (s *Sketch16) Equals(o *Sketch16) bool {
+func (s *Sketch32) Equals(o *Sketch32) bool {
 	if s.BasicSummary != o.BasicSummary {
 		return false
 	}
@@ -206,7 +202,7 @@ func (s *Sketch16) Equals(o *Sketch16) bool {
 }
 
 // ApproxEquals checks if s and o are equivalent, with e error allowed for Sum and Average
-func (s *Sketch16) ApproxEquals(o *Sketch16, e float64) bool {
+func (s *Sketch32) ApproxEquals(o *Sketch32, e float64) bool {
 	if math.Abs(s.BasicSummary.Sum-o.BasicSummary.Sum) > e {
 		return false
 	}

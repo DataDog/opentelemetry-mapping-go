@@ -45,7 +45,7 @@ func printBins(w io.Writer, bins []bin, maxPerLine int) {
 	}
 }
 
-func printSketch(w io.Writer, s *Sketch, c *Config) {
+func printSketch(w io.Writer, s Sketch, c *Config) {
 	fmt.Fprintln(w, "sketch:")
 	head := func(s string) {
 		fmt.Fprintln(w, indent(s, 1))
@@ -57,7 +57,7 @@ func printSketch(w io.Writer, s *Sketch, c *Config) {
 
 	// bins
 	head("bins:")
-	fmt.Fprintln(w, indent(s.bins.String(), 2))
+	fmt.Fprintln(w, indent(s.BinsString(), 2))
 
 	// size
 	head("size:")
@@ -69,7 +69,7 @@ func printSketch(w io.Writer, s *Sketch, c *Config) {
 	)
 	fmt.Fprint(w, "\n")
 	iprintf("len=%d cap=%d",
-		s.bins.Len(), s.bins.Cap())
+		s.BinsLen(), s.BinsCap())
 	fmt.Fprint(w, "\n")
 
 	// stats
@@ -82,7 +82,7 @@ func printSketch(w io.Writer, s *Sketch, c *Config) {
 		fmt.Fprintf(w, "%02g=%.2f", p, s.Quantile(c, p/100))
 	}
 	fmt.Fprint(w, "\n")
-	fmt.Fprintln(w, indent(s.Basic.String(), 2))
+	fmt.Fprintln(w, indent(s.Basic().String(), 2))
 }
 
 func indent(s string, level int) string {
