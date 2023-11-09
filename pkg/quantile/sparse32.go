@@ -39,15 +39,12 @@ func (s Sketch32) BinsCap() int {
 	return cap(s.bins)
 }
 
-func (s Sketch32) Basic() *summary.Summary {
-	return &s.BasicSummary
+func (s Sketch32) Count() uint64 {
+	return s.sparseStore32.count
 }
 
-func (s Sketch32) BinsString() string {
-	var b strings.Builder
-	// todo
-	// printBins(&b, s.bins, defaultBinPerLine)
-	return b.String()
+func (s Sketch32) Basic() *summary.Summary {
+	return &s.BasicSummary
 }
 
 // MemSize returns memory use in bytes:
@@ -66,7 +63,7 @@ func (s Sketch32) MemSize() (used, allocated int) {
 }
 
 func (s Sketch32) Insert(c *Config, keys []Key) {
-	// todo
+	s.sparseStore32.insert(c, keys)
 }
 
 // InsertMany values into the sketch.
@@ -87,11 +84,6 @@ func (s Sketch32) Reset() {
 	s.BasicSummary.Reset()
 	s.count = 0
 	s.bins = s.bins[:0] // TODO: just release to a size tiered pool.
-}
-
-// GetRawBins return raw bins information as string
-func (s *Sketch32) GetRawBins() (int, string) {
-	return s.count, strings.Replace(s.BinsString(), "\n", "", -1)
 }
 
 // Insert a single value into the sketch.

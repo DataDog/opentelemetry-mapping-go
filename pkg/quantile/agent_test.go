@@ -19,8 +19,8 @@ func TestAgent(t *testing.T) {
 	type testcase struct {
 		// expected
 		// s.Basic.Cnt should equal binsum + buf
-		binsum int // expected sum(b.n) for bin in a.
-		buf    int // expected len(a.buf)
+		binsum uint64 // expected sum(b.n) for bin in a.
+		buf    uint64 // expected len(a.buf)
 
 		// action
 		ninsert int  // ninsert values are inserted before checking
@@ -47,24 +47,25 @@ func TestAgent(t *testing.T) {
 	check := func(t *testing.T, exp testcase) {
 		t.Helper()
 
-		if l := len(a.Buf); l != exp.buf {
+		if l := uint64(len(a.Buf)); l != exp.buf {
 			t.Fatalf("len(a.buf) wrong. got:%d, want:%d", l, exp.buf)
 		}
 
-		binsum := 0
-		for _, b := range a.Sketch.bins {
-			binsum += int(b.n)
+		binsum := uint64(0)
+		_, ns := a.Sketch.Cols()
+		for n := range ns {
+			binsum += uint64(n)
 		}
 
 		if got, want := binsum, exp.binsum; got != want {
 			t.Fatalf("sum(b.n) wrong. got:%d, want:%d", got, want)
 		}
 
-		if got, want := a.Sketch.count, binsum; got != want {
+		if got, want := a.Sketch.Count(), binsum; got != want {
 			t.Fatalf("s.count should match binsum. got:%d, want:%d", got, want)
 		}
 
-		if got, want := int(a.Sketch.Basic.Cnt), exp.binsum+exp.buf; got != want {
+		if got, want := uint64(a.Sketch.Basic().Cnt), exp.binsum+exp.buf; got != want {
 			t.Fatalf("Summary.Cnt should equal len(buf)+s.count. got:%d, want: %d", got, want)
 		}
 	}
@@ -139,13 +140,13 @@ func TestAgentInterpolation(t *testing.T) {
 
 		exp := ParseSketch(t, tt.exp)
 
-		if tt.count != uint(exp.Basic.Cnt) {
-			t.Errorf("Expected sketch has wrong count %v (expected %v)", exp.Basic.Cnt, tt.count)
+		if tt.count != uint(exp.Basic().Cnt) {
+			t.Errorf("Expected sketch has wrong count %v (expected %v)", exp.Basic().Cnt, tt.count)
 			t.Fail()
 		}
 
-		if tt.count != uint(a.Sketch.Basic.Cnt) {
-			t.Errorf("Actual sketch has wrong count %v (expected %v)", a.Sketch.Basic.Cnt, tt.count)
+		if tt.count != uint(a.Sketch.Basic().Cnt) {
+			t.Errorf("Actual sketch has wrong count %v (expected %v)", a.Sketch.Basic().Cnt, tt.count)
 			t.Fail()
 		}
 

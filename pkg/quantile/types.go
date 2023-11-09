@@ -13,11 +13,13 @@ type Sketch interface {
 	InsertCounts(c *Config, kcs []KeyCount)
 	Reset()
 
+	Count() uint64
+	String() string
+
 	CopyAsSketch() Sketch
 	Cols() (k []int32, n []uint32)
 	Basic() *summary.Summary
 
-	BinsString() string
 	MemSize() (used, allocated int)
 	BinsLen() int
 	BinsCap() int

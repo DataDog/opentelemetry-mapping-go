@@ -39,15 +39,12 @@ func (s Sketch16) BinsCap() int {
 	return cap(s.bins)
 }
 
-func (s Sketch16) Basic() *summary.Summary {
-	return &s.BasicSummary
+func (s Sketch16) Count() uint64 {
+	return uint64(s.sparseStore.count)
 }
 
-func (s Sketch16) BinsString() string {
-	var b strings.Builder
-	// todo
-	// printBins(&b, s.bins, defaultBinPerLine)
-	return b.String()
+func (s Sketch16) Basic() *summary.Summary {
+	return &s.BasicSummary
 }
 
 // MemSize returns memory use in bytes:
@@ -66,7 +63,7 @@ func (s Sketch16) MemSize() (used, allocated int) {
 }
 
 func (s Sketch16) Insert(c *Config, keys []Key) {
-	// todo
+	s.sparseStore.insert(c, keys)
 }
 
 // InsertMany values into the sketch.
@@ -85,13 +82,8 @@ func (s Sketch16) InsertMany(c *Config, values []float64) {
 // Reset sketch to its empty state.
 func (s Sketch16) Reset() {
 	s.BasicSummary.Reset()
-	s.count = 0
+	s.sparseStore.count = 0
 	s.bins = s.bins[:0] // TODO: just release to a size tiered pool.
-}
-
-// GetRawBins return raw bins information as string
-func (s *Sketch16) GetRawBins() (int, string) {
-	return s.count, strings.Replace(s.bins.String(), "\n", "", -1)
 }
 
 // Insert a single value into the sketch.
@@ -107,7 +99,7 @@ func (s *Sketch16) merge(c *Config, o *Sketch16) {
 	s.sparseStore.merge(c, &o.sparseStore)
 }
 
-// Quantile returns v such that s.count*q items are <= v.
+// Quantile returns v such that s.sparseStore.count*q items are <= v.
 //
 // Special cases are:
 //
@@ -115,7 +107,7 @@ func (s *Sketch16) merge(c *Config, o *Sketch16) {
 //	 Quantile(c, q >= 1)  = max
 func (s Sketch16) Quantile(c *Config, q float64) float64 {
 	switch {
-	case s.count == 0:
+	case s.sparseStore.count == 0:
 		return 0
 	case q <= 0:
 		return s.BasicSummary.Min
@@ -125,7 +117,7 @@ func (s Sketch16) Quantile(c *Config, q float64) float64 {
 
 	var (
 		n     float64
-		rWant = rank(s.count, q)
+		rWant = rank(uint64(s.sparseStore.count), q)
 	)
 
 	for i, b := range s.bins {
@@ -158,7 +150,7 @@ func (s Sketch16) Quantile(c *Config, q float64) float64 {
 	return s.BasicSummary.Max
 }
 
-func rank(count int, q float64) float64 {
+func rank(count uint64, q float64) float64 {
 	return math.RoundToEven(q * float64(count-1))
 }
 
@@ -167,7 +159,7 @@ func (s *Sketch16) CopyTo(dst *Sketch16) {
 	// TODO: pool slices here?
 	dst.bins = dst.bins.ensureLen(s.bins.Len())
 	copy(dst.bins, s.bins)
-	dst.count = s.count
+	dst.count = s.sparseStore.count
 	dst.BasicSummary = s.BasicSummary
 }
 
@@ -188,7 +180,7 @@ func (s *Sketch16) Equals(o *Sketch16) bool {
 		return false
 	}
 
-	if s.count != o.count {
+	if s.sparseStore.count != o.count {
 		return false
 	}
 
@@ -227,7 +219,7 @@ func (s *Sketch16) ApproxEquals(o *Sketch16, e float64) bool {
 		return false
 	}
 
-	if s.count != o.count {
+	if s.sparseStore.count != o.count {
 		return false
 	}
 

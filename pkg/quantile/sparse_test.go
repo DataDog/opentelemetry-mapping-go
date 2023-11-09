@@ -20,10 +20,10 @@ func TestMerge(t *testing.T) {
 		c      = Default()
 		values []float64
 
-		s1          = &Sketch{}
-		s2          = &Sketch{}
-		sInsert     = &Sketch{}
-		sInsertMany = &Sketch{}
+		s1          = &Sketch16{}
+		s2          = &Sketch16{}
+		sInsert     = &Sketch16{}
+		sInsertMany = &Sketch16{}
 	)
 
 	for i := -50; i <= 50; i++ {

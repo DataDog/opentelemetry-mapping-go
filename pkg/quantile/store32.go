@@ -14,7 +14,7 @@ var _ memSized = (*sparseStore32)(nil)
 
 type sparseStore32 struct {
 	bins  binList32
-	count int
+	count uint64
 }
 
 // Cols returns an array of k and n.
@@ -168,11 +168,11 @@ func (s sparseStore32) InsertCounts(c *Config, kcs []KeyCount) {
 		case b.k > vk:
 			// When vk[i] == vk[i+1] we need to make sure they go in the same bucket.
 			tmp = appendSafe32(tmp, vk, kn)
-			s.count += kn
+			s.count += uint64(kn)
 			keyIdx++
 		default:
 			tmp = appendSafe32(tmp, b.k, int(b.n)+kn)
-			s.count += kn
+			s.count += uint64(kn)
 			sIdx++
 			keyIdx++
 		}
@@ -183,7 +183,7 @@ func (s sparseStore32) InsertCounts(c *Config, kcs []KeyCount) {
 	for keyIdx < len(kcs) {
 		kn := int(kcs[keyIdx].n)
 		tmp = appendSafe32(tmp, kcs[keyIdx].k, kn)
-		s.count += kn
+		s.count += uint64(kn)
 		keyIdx++
 	}
 
@@ -196,7 +196,7 @@ func (s sparseStore32) InsertCounts(c *Config, kcs []KeyCount) {
 }
 
 func (s *sparseStore32) insert(c *Config, keys []Key) {
-	s.count += len(keys)
+	s.count += uint64(len(keys))
 
 	// TODO|PERF: A custom uint16 sort should easily beat sort.Sort.
 	// TODO|PERF: Would it be cheaper to sort float64s and then convert to keys?

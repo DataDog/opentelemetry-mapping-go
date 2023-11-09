@@ -291,7 +291,7 @@ func TestConvertDDSketchIntoSketch(t *testing.T) {
 			assert.InDelta(
 				t,
 				convertedSketch.GetCount(),
-				outputSketch.Basic.Cnt,
+				outputSketch.Basic().Cnt,
 				acceptableFloatError,
 			)
 
@@ -301,7 +301,7 @@ func TestConvertDDSketchIntoSketch(t *testing.T) {
 			assert.InDelta(
 				t,
 				expectedMinValue,
-				outputSketch.Basic.Min,
+				outputSketch.Basic().Min,
 				acceptableFloatError,
 			)
 
@@ -311,7 +311,7 @@ func TestConvertDDSketchIntoSketch(t *testing.T) {
 			assert.InDelta(
 				t,
 				expectedMaxValue,
-				outputSketch.Basic.Max,
+				outputSketch.Basic().Max,
 				acceptableFloatError,
 			)
 

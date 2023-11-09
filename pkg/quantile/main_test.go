@@ -39,9 +39,9 @@ func ParseBuf(t *testing.T, dsl string) []float64 {
 //
 // NOTE: there is no guarantee that the sketch is correct (because we'd like to
 // test bad sketch handling)
-func ParseSketch(t *testing.T, dsl string) *Sketch {
+func ParseSketch(t *testing.T, dsl string) Sketch {
 	t.Helper()
-	s := &Sketch{}
+	s := &Sketch16{}
 	c := Default()
 
 	eachParsedToken(t, dsl, 16, func(k Key, n uint64) {
@@ -51,7 +51,7 @@ func ParseSketch(t *testing.T, dsl string) *Sketch {
 
 		s.count += int(n)
 		s.bins = append(s.bins, bin{k: k, n: uint16(n)})
-		s.Basic.InsertN(c.f64(k), float64(n))
+		s.Basic().InsertN(c.f64(k), float64(n))
 	})
 
 	return s
