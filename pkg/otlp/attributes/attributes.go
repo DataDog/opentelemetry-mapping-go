@@ -187,7 +187,7 @@ func ContainerTagFromResourceAttributes(attrs pcommon.Map) map[string]string {
 // Deprecated: Deprecated in favor of ContainerTagFromResourceAttributes.
 func ContainerTagFromAttributes(attr map[string]string) map[string]string {
 	ddtags := make(map[string]string)
-	for key, val := range attr{
+	for key, val := range attr {
 		datadogKey, found := containerMappings[key]
 		if !found {
 			continue
