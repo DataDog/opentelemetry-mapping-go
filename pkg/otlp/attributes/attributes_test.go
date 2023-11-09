@@ -101,12 +101,12 @@ func TestContainerTagFromResourceAttributes(t *testing.T) {
 		"ecs_cluster_name":    "sample_ecs_cluster_name",
 		"ecs_container_name":  "sample_ecs_container_name",
 		"custom.team":         "otel",
-	}, ContainerTagFromResourceAttributes(attributes))
-	fmt.Println(ContainerTagFromResourceAttributes(attributes))
+	}, ContainerTagsFromResourceAttributes(attributes))
+	fmt.Println(ContainerTagsFromResourceAttributes(attributes))
 }
 
 func TestContainerTagFromResourceAttributesEmpty(t *testing.T) {
-	assert.Empty(t, ContainerTagFromResourceAttributes(pcommon.NewMap()))
+	assert.Empty(t, ContainerTagsFromResourceAttributes(pcommon.NewMap()))
 }
 
 func TestContainerTagFromAttributes(t *testing.T) {

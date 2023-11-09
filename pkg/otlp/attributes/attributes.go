@@ -136,7 +136,7 @@ func TagsFromAttributes(attrs pcommon.Map) []string {
 	})
 
 	// Container Tag mappings
-	ctags := ContainerTagFromResourceAttributes(attrs)
+	ctags := ContainerTagsFromResourceAttributes(attrs)
 	for key, val := range ctags {
 		tags = append(tags, fmt.Sprintf("%s:%s", key, val))
 	}
@@ -162,7 +162,7 @@ func OriginIDFromAttributes(attrs pcommon.Map) (originID string) {
 
 // ContainerTagFromResourceAttributes extracts container tags from the given
 // set of resource attributes.
-func ContainerTagFromResourceAttributes(attrs pcommon.Map) map[string]string {
+func ContainerTagsFromResourceAttributes(attrs pcommon.Map) map[string]string {
 	ddtags := make(map[string]string)
 
 	attrs.Range(func(key string, value pcommon.Value) bool {
