@@ -6,30 +6,33 @@
 package quantile
 
 import (
-	"math"
 	"strings"
 )
 
-const (
-	maxBinWidth = math.MaxUint16
-)
+func MaxOf[T uint16 | uint32]() T {
+	return ^T(0)
+}
 
-type bin struct {
+func maxBinWidth[T uint16 | uint32]() T {
+	return MaxOf[T]()
+}
+
+type bin[T uint16 | uint32] struct {
 	k Key
-	n uint16
+	n T
 }
 
 // incrSafe performs `b.n += by` safely handling overflows. When an overflow
 // occurs, we set b.n to it's max, and return the leftover amount to increment.
-func (b *bin) incrSafe(by int) int {
+func (b *bin[T]) incrSafe(by int) int {
 	next := by + int(b.n)
 
-	if next > maxBinWidth {
-		b.n = maxBinWidth
-		return next - maxBinWidth
+	if next > int(maxBinWidth[T]()) {
+		b.n = maxBinWidth[T]()
+		return next - int(maxBinWidth[T]())
 	}
 
-	b.n = uint16(next)
+	b.n = T(next)
 	return 0
 }
 
@@ -38,54 +41,54 @@ func (b *bin) incrSafe(by int) int {
 //
 //	(1) n <= maxBinWidth :  1 bin
 //	(2) n > maxBinWidth  : >1 bin
-func appendSafe(bins []bin, k Key, n int) []bin {
-	if n <= maxBinWidth {
-		return append(bins, bin{k: k, n: uint16(n)})
+func appendSafe[T uint16 | uint32](bins []bin[T], k Key, n int) []bin[T] {
+	if n <= int(maxBinWidth[T]()) {
+		return append(bins, bin[T]{k: k, n: T(n)})
 	}
 
 	// on overflow, insert multiple bins with the same key.
 	// put full bins at end
 
 	// TODO|PROD: Add validation func that sorts by key and then n (smaller bin first).
-	r := uint16(n % maxBinWidth)
+	r := T(n % int(maxBinWidth[T]()))
 	if r != 0 {
-		bins = append(bins, bin{k: k, n: r})
+		bins = append(bins, bin[T]{k: k, n: r})
 	}
 
-	for i := 0; i < n/maxBinWidth; i++ {
-		bins = append(bins, bin{k: k, n: maxBinWidth})
+	for i := 0; i < n/int(maxBinWidth[T]()); i++ {
+		bins = append(bins, bin[T]{k: k, n: maxBinWidth[T]()})
 	}
 
 	return bins
 }
 
-type binList []bin
+type binList[T uint16 | uint32] []bin[T]
 
-func (bins binList) nSum() int {
-	s := 0
+func (bins binList[T]) nSum() uint64 {
+	s := uint64(0)
 	for _, b := range bins {
-		s += int(b.n)
+		s += uint64(b.n)
 	}
 	return s
 }
 
-func (bins binList) Cap() int {
+func (bins binList[T]) Cap() int {
 	return cap(bins)
 }
 
-func (bins binList) Len() int {
+func (bins binList[T]) Len() int {
 	return len(bins)
 }
 
-func (bins binList) ensureLen(newLen int) binList {
+func (bins binList[T]) ensureLen(newLen int) binList[T] {
 	for cap(bins) < newLen {
-		bins = append(bins[:cap(bins)], bin{})
+		bins = append(bins[:cap(bins)], bin[T]{})
 	}
 
 	return bins[:newLen]
 }
 
-func (bins binList) String() string {
+func (bins binList[T]) String() string {
 	var w strings.Builder
 	printBins(&w, bins, defaultBinPerLine)
 	return w.String()

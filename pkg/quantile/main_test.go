@@ -6,24 +6,28 @@
 package quantile
 
 import (
-	"math"
 	"strconv"
 	"strings"
 	"testing"
+	"unsafe"
 )
+
+func bitSize[T uint16 | uint32]() uint {
+	return uint(unsafe.Sizeof(T(0))) * 8
+}
 
 // ParseBuf creates a slice of float64s from the given dsl
 // TODO|DOC: add more examples
-func ParseBuf(t *testing.T, dsl string) []float64 {
+func ParseBuf[T uint16 | uint32](t *testing.T, dsl string) []float64 {
 	t.Helper()
 	var (
 		c   = Default()
 		out []float64
 	)
 
-	eachParsedToken(t, dsl, 16, func(k Key, n uint64) {
-		if n > maxBinWidth {
-			t.Fatal("n > max", n, maxBinWidth)
+	eachParsedToken[T](t, dsl, bitSize[T](), func(k Key, n uint64) {
+		if n > uint64(maxBinWidth[T]()) {
+			t.Fatal("n > max", n, maxBinWidth[T]())
 		}
 
 		for i := uint64(0); i < n; i++ {
@@ -39,18 +43,18 @@ func ParseBuf(t *testing.T, dsl string) []float64 {
 //
 // NOTE: there is no guarantee that the sketch is correct (because we'd like to
 // test bad sketch handling)
-func ParseSketch(t *testing.T, dsl string) *Sketch {
+func ParseSketch[T uint16 | uint32](t *testing.T, dsl string) *Sketch[T] {
 	t.Helper()
-	s := &Sketch{}
+	s := &Sketch[T]{}
 	c := Default()
 
-	eachParsedToken(t, dsl, 16, func(k Key, n uint64) {
-		if n > maxBinWidth {
-			t.Fatal("n > max", n, maxBinWidth)
+	eachParsedToken[T](t, dsl, bitSize[T](), func(k Key, n uint64) {
+		if n > uint64(maxBinWidth[T]()) {
+			t.Fatal("n > max", n, maxBinWidth[T]())
 		}
 
 		s.count += int(n)
-		s.bins = append(s.bins, bin{k: k, n: uint16(n)})
+		s.bins = append(s.bins, bin[T]{k: k, n: T(n)})
 		s.Basic.InsertN(c.f64(k), float64(n))
 	})
 
@@ -67,7 +71,7 @@ func parseKey(t *testing.T, s string) Key {
 	return Key(k)
 }
 
-func parseN(t *testing.T, s string) uint64 {
+func parseN[T uint16 | uint32](t *testing.T, s string) uint64 {
 	t.Helper()
 	if !strings.HasPrefix(s, "max") {
 		n, err := strconv.ParseUint(s, 10, 64)
@@ -79,7 +83,7 @@ func parseN(t *testing.T, s string) uint64 {
 	}
 
 	// <k>:max case
-	n := uint64(math.MaxUint16)
+	n := uint64(maxBinWidth[T]())
 	switch {
 	case s == "max":
 		return n
@@ -110,7 +114,7 @@ func parseN(t *testing.T, s string) uint64 {
 // - "0:max"   = Bin{k:0, n:maxBinWidth}
 // - "1:2"     = Bin{k:1, n:2}
 // - "3:max-2" = Bin{k:3, n:maxBinWidth-2}
-func eachParsedToken(t *testing.T, dsl string, bitSize uint, f func(Key, uint64)) {
+func eachParsedToken[T uint16 | uint32](t *testing.T, dsl string, bitSize uint, f func(Key, uint64)) {
 	t.Helper()
 	if dsl == "" {
 		return
@@ -122,7 +126,7 @@ func eachParsedToken(t *testing.T, dsl string, bitSize uint, f func(Key, uint64)
 			t.Fatal("bad incr tpl:", tok)
 		}
 		k := parseKey(t, tok[:i])
-		n := parseN(t, tok[i+1:])
+		n := parseN[T](t, tok[i+1:])
 
 		// make sure this value can be cast to our bitSize
 		if maxn := uint64(1)<<bitSize - 1; n > maxn {
@@ -136,7 +140,7 @@ func eachParsedToken(t *testing.T, dsl string, bitSize uint, f func(Key, uint64)
 
 // arange is like np.arange, except it creates a sketch
 // inserting ([start,] stop[, step,]) values.
-func arange(t *testing.T, c *Config, args ...int) *Sketch {
+func arange[T uint16 | uint32](t *testing.T, c *Config, args ...int) *Sketch[T] {
 	t.Helper()
 	var (
 		start, stop int
@@ -154,7 +158,7 @@ func arange(t *testing.T, c *Config, args ...int) *Sketch {
 		t.Fatalf("too many args: %v", args)
 	}
 
-	s := &Sketch{}
+	s := &Sketch[T]{}
 	for i := start; i < stop; i += step {
 		s.Insert(c, float64(i))
 	}

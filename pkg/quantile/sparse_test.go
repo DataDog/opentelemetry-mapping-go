@@ -16,14 +16,23 @@ import (
 )
 
 func TestMerge(t *testing.T) {
+	t.Run("uint16", func(t *testing.T) {
+		testMerge[uint16](t)
+	})
+	t.Run("uint32", func(t *testing.T) {
+		testMerge[uint32](t)
+	})
+}
+
+func testMerge[T uint16 | uint32](t *testing.T) {
 	var (
 		c      = Default()
 		values []float64
 
-		s1          = &Sketch{}
-		s2          = &Sketch{}
-		sInsert     = &Sketch{}
-		sInsertMany = &Sketch{}
+		s1          = &Sketch[T]{}
+		s2          = &Sketch[T]{}
+		sInsert     = &Sketch[T]{}
+		sInsertMany = &Sketch[T]{}
 	)
 
 	for i := -50; i <= 50; i++ {
@@ -41,7 +50,7 @@ func TestMerge(t *testing.T) {
 	sInsertMany.InsertMany(c, values)
 	s1.Merge(c, s2)
 	require.Len(t, sInsert.bins, len(values))
-	for _, s := range []*Sketch{s1, sInsertMany, sInsert} {
+	for _, s := range []*Sketch[T]{s1, sInsertMany, sInsert} {
 		require.EqualValues(t, 0, s.Quantile(c, .50))
 		require.EqualValues(t, sInsert.Quantile(c, .99), -sInsert.Quantile(c, .01))
 		for p := 0; p < 50; p++ {
@@ -59,8 +68,17 @@ func TestMerge(t *testing.T) {
 }
 
 func TestString(t *testing.T) {
+	t.Run("uint16", func(t *testing.T) {
+		testString[uint16](t)
+	})
+	t.Run("uint32", func(t *testing.T) {
+		testString[uint32](t)
+	})
+}
+
+func testString[T uint16 | uint32](t *testing.T) {
 	var (
-		s, c    = &Sketch{}, Default()
+		s, c    = &Sketch[T]{}, Default()
 		nvalues = 5
 	)
 
@@ -73,8 +91,17 @@ func TestString(t *testing.T) {
 }
 
 func TestReset(t *testing.T) {
+	t.Run("uint16", func(t *testing.T) {
+		testReset[uint16](t)
+	})
+	t.Run("uint32", func(t *testing.T) {
+		testReset[uint32](t)
+	})
+}
+
+func testReset[T uint16 | uint32](t *testing.T) {
 	var (
-		s, c      = &Sketch{}, Default()
+		s, c      = &Sketch[T]{}, Default()
 		checkBins = func(nbins int) {
 			t.Helper()
 			switch {
@@ -104,17 +131,26 @@ func TestReset(t *testing.T) {
 	if s.Basic != empty {
 		t.Fatalf("%s should be empty", s.Basic.String())
 	}
-
 }
+
 func TestQuantile(t *testing.T) {
+	t.Run("uint16", func(t *testing.T) {
+		testQuantile[uint16](t)
+	})
+	t.Run("uint32", func(t *testing.T) {
+		testQuantile[uint32](t)
+	})
+}
+
+func testQuantile[T uint16 | uint32](t *testing.T) {
 	var (
 		c = Default()
 
 		// create a sketch with nbins bins.
-		create = func(nbins int) *Sketch {
+		create = func(nbins int) *Sketch[T] {
 			t.Helper()
 
-			s := &Sketch{}
+			s := &Sketch[T]{}
 			k := c.key(1)
 			for i := 0; i < nbins; i++ {
 				v := c.f64(k)
@@ -143,12 +179,12 @@ func TestQuantile(t *testing.T) {
 	)
 
 	type qtest struct {
-		s   *Sketch
+		s   *Sketch[T]
 		q   float64
 		exp float64
 	}
 
-	sIncr101 := arange(t, c, 101)
+	sIncr101 := arange[T](t, c, 101)
 	sBin101 := create(101)
 
 	for i, tt := range []qtest{
@@ -186,11 +222,20 @@ func IsClose(t *testing.T, expected, actual float64) {
 }
 
 func TestQuantileDDGo(t *testing.T) {
+	t.Run("uint16", func(t *testing.T) {
+		testQuantileDDGo[uint16](t)
+	})
+	t.Run("uint32", func(t *testing.T) {
+		testQuantileDDGo[uint32](t)
+	})
+}
+
+func testQuantileDDGo[T uint16 | uint32](t *testing.T) {
 	c := Default()
 	t.Run("Test count greater than sum of bins", func(t *testing.T) {
 		ta := require.New(t)
 
-		s := arange(t, c, 1, 101)
+		s := arange[T](t, c, 1, 101)
 		q := s.Quantile(c, .99)
 		ta.NotEqual(s.Basic.Max, q, "should not be max from sketch")
 

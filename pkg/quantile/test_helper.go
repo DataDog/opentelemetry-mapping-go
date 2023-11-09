@@ -17,42 +17,91 @@ func almostEqual(a, b, e float64) bool {
 }
 
 // SketchesApproxEqual checks whether two SketchSeries are equal
-func SketchesApproxEqual(exp, act *Sketch, e float64) bool {
+func SketchesApproxEqual(exp, act SketchReader, e float64) bool {
 
-	if !almostEqual(exp.Basic.Sum, act.Basic.Sum, e) {
+	if !almostEqual(exp.Summary().Sum, act.Summary().Sum, e) {
 		return false
 	}
 
-	if !almostEqual(exp.Basic.Avg, act.Basic.Avg, e) {
+	if !almostEqual(exp.Summary().Avg, act.Summary().Avg, e) {
 		return false
 	}
 
-	if !almostEqual(exp.Basic.Max, act.Basic.Max, e) {
+	if !almostEqual(exp.Summary().Max, act.Summary().Max, e) {
 		return false
 	}
 
-	if !almostEqual(exp.Basic.Min, act.Basic.Min, e) {
+	if !almostEqual(exp.Summary().Min, act.Summary().Min, e) {
 		return false
 	}
 
-	if exp.Basic.Cnt != exp.Basic.Cnt {
+	if exp.Summary().Cnt != exp.Summary().Cnt {
 		return false
 	}
 
-	if exp.count != act.count {
+	if exp.Count() != act.Count() {
 		return false
 	}
 
-	if len(exp.bins) != len(act.bins) {
+	exp_keys, exp_vals := exp.Cols()
+	act_keys, act_vals := act.Cols()
+
+	if len(exp_keys) != len(act_keys) {
 		return false
 	}
 
-	for i := range exp.bins {
-		if math.Abs(float64(act.bins[i].k-exp.bins[i].k)) > 1 {
+	for i := range exp_keys {
+		if math.Abs(float64(act_keys[i]-exp_keys[i])) > 1 {
 			return false
 		}
 
-		if act.bins[i].n != exp.bins[i].n {
+		if act_vals[i] != exp_vals[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+// SketchesEqual checks whether two SketchSeries are equal
+func SketchesEqual(exp, act SketchReader) bool {
+	if exp.Summary().Sum != act.Summary().Sum {
+		return false
+	}
+
+	if exp.Summary().Avg != act.Summary().Avg {
+		return false
+	}
+
+	if exp.Summary().Max != act.Summary().Max {
+		return false
+	}
+
+	if exp.Summary().Min != act.Summary().Min {
+		return false
+	}
+
+	if exp.Summary().Cnt != exp.Summary().Cnt {
+		return false
+	}
+
+	if exp.Count() != act.Count() {
+		return false
+	}
+
+	exp_keys, exp_vals := exp.Cols()
+	act_keys, act_vals := act.Cols()
+
+	if len(exp_keys) != len(act_keys) {
+		return false
+	}
+
+	for i := range exp_keys {
+		if act_keys[i] != exp_keys[i] {
+			return false
+		}
+
+		if act_vals[i] != exp_vals[i] {
 			return false
 		}
 	}

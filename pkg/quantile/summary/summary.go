@@ -18,6 +18,11 @@ type Summary struct {
 	Cnt int64
 }
 
+// Compare two summaries
+func (s *Summary) Equals(other *Summary) bool {
+	return s.Min == other.Min && s.Max == other.Max && s.Sum == other.Sum && s.Avg == other.Avg && s.Cnt == other.Cnt
+}
+
 // Reset the summary
 func (s *Summary) Reset() {
 	*s = Summary{}

@@ -89,9 +89,9 @@ func convertFloatCountsToIntCounts(floatKeyCounts []floatKeyCount) []KeyCount {
 // convertDDSketchIntoSketch takes a DDSketch and moves its data to a Sketch.
 // The conversion assumes that the DDSketch has a mapping that is compatible
 // with the Sketch parameters (eg. a DDSketch returned by convertDDSketchMapping).
-func convertDDSketchIntoSketch(c *Config, inputSketch *ddsketch.DDSketch) (*Sketch, error) {
-	sparseStore := sparseStore{
-		bins:  make([]bin, 0, defaultBinListSize),
+func convertDDSketchIntoSketch[T uint16 | uint32](c *Config, inputSketch *ddsketch.DDSketch) (*Sketch[T], error) {
+	sparseStore := sparseStore[T]{
+		bins:  make([]bin[T], 0, defaultBinListSize),
 		count: 0,
 	}
 
@@ -160,7 +160,7 @@ func convertDDSketchIntoSketch(c *Config, inputSketch *ddsketch.DDSketch) (*Sket
 	// Populate sparseStore object with the collected keyCounts
 	// insertCounts will take care of creating multiple uint16 bins for a
 	// single key if the count overflows uint16
-	sparseStore.insertCounts(c, keyCounts)
+	sparseStore.InsertCounts(c, keyCounts)
 
 	// Create summary object
 	// Calculate the total count that was inserted in the Sketch
@@ -189,7 +189,7 @@ func convertDDSketchIntoSketch(c *Config, inputSketch *ddsketch.DDSketch) (*Sket
 	}
 
 	// Build the final Sketch object
-	outputSketch := &Sketch{
+	outputSketch := &Sketch[T]{
 		sparseStore: sparseStore,
 		Basic:       summary,
 	}
@@ -201,7 +201,7 @@ func convertDDSketchIntoSketch(c *Config, inputSketch *ddsketch.DDSketch) (*Sket
 // converting the DDSketch into a new DDSketch with a mapping that's compatible
 // with Sketch parameters, then creating the Sketch by copying the DDSketch
 // bins to the Sketch store.
-func ConvertDDSketchIntoSketch(inputSketch *ddsketch.DDSketch) (*Sketch, error) {
+func ConvertDDSketchIntoSketch[T uint16 | uint32](inputSketch *ddsketch.DDSketch) (*Sketch[T], error) {
 	sketchConfig := Default()
 
 	compatibleDDSketch, err := createDDSketchWithSketchMapping(sketchConfig, inputSketch)
@@ -209,7 +209,7 @@ func ConvertDDSketchIntoSketch(inputSketch *ddsketch.DDSketch) (*Sketch, error) 
 		return nil, fmt.Errorf("couldn't convert input ddsketch into ddsketch with compatible parameters: %w", err)
 	}
 
-	outputSketch, err := convertDDSketchIntoSketch(sketchConfig, compatibleDDSketch)
+	outputSketch, err := convertDDSketchIntoSketch[T](sketchConfig, compatibleDDSketch)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't convert ddsketch into Sketch: %w", err)
 	}

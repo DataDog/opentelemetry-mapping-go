@@ -243,7 +243,7 @@ func (t *Translator) getSketchBuckets(
 ) {
 	startTs := uint64(p.StartTimestamp())
 	ts := uint64(p.Timestamp())
-	as := &quantile.Agent{}
+	as := quantile.NewAgent[uint16]()
 
 	// After the loop,
 	// - minBound contains the lower bound of the lowest nonzero bucket,
@@ -296,36 +296,36 @@ func (t *Translator) getSketchBuckets(
 	if sketch != nil {
 		if histInfo.ok {
 			// override approximate sum, count and average in sketch with exact values if available.
-			sketch.Basic.Cnt = int64(histInfo.count)
-			sketch.Basic.Sum = histInfo.sum
-			sketch.Basic.Avg = sketch.Basic.Sum / float64(sketch.Basic.Cnt)
+			sketch.Summary().Cnt = int64(histInfo.count)
+			sketch.Summary().Sum = histInfo.sum
+			sketch.Summary().Avg = sketch.Summary().Sum / float64(sketch.Summary().Cnt)
 		}
 
 		// If there is at least one bucket with nonzero count,
 		// override min/max with bounds if they are not infinite.
 		if minBoundSet {
 			if !math.IsInf(minBound, 0) {
-				sketch.Basic.Min = minBound
+				sketch.Summary().Min = minBound
 			}
 			if !math.IsInf(maxBound, 0) {
-				sketch.Basic.Max = maxBound
+				sketch.Summary().Max = maxBound
 			}
 		}
 
 		if histInfo.hasMinFromLastTimeWindow {
 			// We know exact minimum for the last time window.
-			sketch.Basic.Min = p.Min()
+			sketch.Summary().Min = p.Min()
 		} else if p.HasMin() {
 			// Clamp minimum with the global minimum (p.Min()) to account for sketch mapping error.
-			sketch.Basic.Min = math.Max(p.Min(), sketch.Basic.Min)
+			sketch.Summary().Min = math.Max(p.Min(), sketch.Summary().Min)
 		}
 
 		if histInfo.hasMaxFromLastTimeWindow {
 			// We know exact maximum for the last time window.
-			sketch.Basic.Max = p.Max()
+			sketch.Summary().Max = p.Max()
 		} else if p.HasMax() {
 			// Clamp maximum with global maximum (p.Max()) to account for sketch mapping error.
-			sketch.Basic.Max = math.Min(p.Max(), sketch.Basic.Max)
+			sketch.Summary().Max = math.Min(p.Max(), sketch.Summary().Max)
 		}
 
 		consumer.ConsumeSketch(ctx, pointDims, ts, sketch)

@@ -15,53 +15,58 @@ const (
 	defaultOverflowListSize = 16
 )
 
-var (
-	// TODO: multiple pools, one for each size class (like github.com/oxtoacart/bpool)
-	binListPool = sync.Pool{
-		New: func() interface{} {
-			a := make([]bin, 0, defaultBinListSize)
-			return &a
+type BinPool[T uint16 | uint32] struct {
+	binListPool      sync.Pool
+	keyListPool      sync.Pool
+	overflowListPool sync.Pool
+}
+
+func NewBinPool[T uint16 | uint32]() *BinPool[T] {
+	return &BinPool[T]{
+		binListPool: sync.Pool{
+			New: func() interface{} {
+				a := make([]bin[T], 0, defaultBinListSize)
+				return &a
+			},
+		},
+		keyListPool: sync.Pool{
+			New: func() interface{} {
+				a := make([]Key, 0, defaultKeyListSize)
+				return &a
+			},
+		},
+		overflowListPool: sync.Pool{
+			New: func() interface{} {
+				a := make([]bin[T], 0, defaultOverflowListSize)
+				return &a
+			},
 		},
 	}
+}
 
-	keyListPool = sync.Pool{
-		New: func() interface{} {
-			a := make([]Key, 0, defaultKeyListSize)
-			return &a
-		},
-	}
-
-	overflowListPool = sync.Pool{
-		New: func() interface{} {
-			a := make([]bin, 0, defaultOverflowListSize)
-			return &a
-		},
-	}
-)
-
-func getBinList() []bin {
-	a := *(binListPool.Get().(*[]bin))
+func (b *BinPool[T]) getBinList() []bin[T] {
+	a := *(b.binListPool.Get().(*[]bin[T]))
 	return a[:0]
 }
 
-func putBinList(a []bin) {
-	binListPool.Put(&a)
+func (b *BinPool[T]) putBinList(a []bin[T]) {
+	b.binListPool.Put(&a)
 }
 
-func getKeyList() []Key {
-	a := *(keyListPool.Get().(*[]Key))
+func (b *BinPool[T]) getKeyList() []Key {
+	a := *(b.keyListPool.Get().(*[]Key))
 	return a[:0]
 }
 
-func putKeyList(a []Key) {
-	keyListPool.Put(&a)
+func (b *BinPool[T]) putKeyList(a []Key) {
+	b.keyListPool.Put(&a)
 }
 
-func getOverflowList() []bin {
-	a := *(overflowListPool.Get().(*[]bin))
+func (b *BinPool[T]) getOverflowList() []bin[T] {
+	a := *(b.overflowListPool.Get().(*[]bin[T]))
 	return a[:0]
 }
 
-func putOverflowList(a []bin) {
-	overflowListPool.Put(&a)
+func (b *BinPool[T]) putOverflowList(a []bin[T]) {
+	b.overflowListPool.Put(&a)
 }

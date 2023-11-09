@@ -12,33 +12,42 @@ import (
 )
 
 func TestBin_incrSafe(t *testing.T) {
-	const maxn = maxBinWidth
+	t.Run("uint16", func(t *testing.T) {
+		testBin_incrSafe[uint16](t)
+	})
+	t.Run("uint32", func(t *testing.T) {
+		testBin_incrSafe[uint32](t)
+	})
+}
+
+func testBin_incrSafe[T uint16 | uint32](t *testing.T) {
+	maxn := maxBinWidth[T]()
 	tests := []struct {
-		n            uint16
-		by           int
-		wantN        uint16
-		wantOverflow int
+		n            T
+		by           uint64
+		wantN        T
+		wantOverflow uint64
 		name         string
 	}{
 		{by: 1, wantN: 1},
 		{n: 1, by: 1, wantN: 2},
 		{n: maxn, by: 1, wantN: maxn, wantOverflow: 1},
-		{by: maxn, wantN: maxn},
-		{n: 1, by: maxn, wantN: maxn, wantOverflow: 1},
-		{n: 100, by: 3 * maxn, wantN: maxn, wantOverflow: 2*maxn + 100},
+		{by: uint64(maxn), wantN: maxn},
+		{n: 1, by: uint64(maxn), wantN: maxn, wantOverflow: 1},
+		{n: 100, by: uint64(3 * maxn), wantN: maxn, wantOverflow: uint64(2*maxn + 100)},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
 			var (
-				b           = bin{n: tt.n}
-				gotOverflow = b.incrSafe(tt.by)
+				b           = bin[T]{n: tt.n}
+				gotOverflow = b.incrSafe(int(tt.by)) // this will fail for T uint32
 				errs        []string
 				ok          = true
 			)
 
-			if tt.wantOverflow != gotOverflow {
+			if tt.wantOverflow != uint64(gotOverflow) {
 				ok = false
 				errs = append(errs, fmt.Sprintf("\toverflow: got %d, want %d",
 					gotOverflow, tt.wantOverflow))

@@ -14,11 +14,22 @@ import (
 )
 
 func TestAgent(t *testing.T) {
-	a := &Agent{}
+	t.Run("uint16", func(t *testing.T) {
+		testAgent(t, &Agent{
+			Sketch: &Sketch[uint16]{},
+		})
+	})
+	t.Run("uint32", func(t *testing.T) {
+		testAgent(t, &Agent{
+			Sketch: &Sketch[uint32]{}
+		})
+	})
+}
 
+func testAgent(t *testing.T, a *Agent) {
 	type testcase struct {
 		// expected
-		// s.Basic.Cnt should equal binsum + buf
+		// s.Summary().Cnt should equal binsum + buf
 		binsum int // expected sum(b.n) for bin in a.
 		buf    int // expected len(a.buf)
 
@@ -64,7 +75,7 @@ func TestAgent(t *testing.T) {
 			t.Fatalf("s.count should match binsum. got:%d, want:%d", got, want)
 		}
 
-		if got, want := int(a.Sketch.Basic.Cnt), exp.binsum+exp.buf; got != want {
+		if got, want := int(a.Sketch.Summary().Cnt), exp.binsum+exp.buf; got != want {
 			t.Fatalf("Summary.Cnt should equal len(buf)+s.count. got:%d, want: %d", got, want)
 		}
 	}
@@ -88,14 +99,23 @@ func TestAgent(t *testing.T) {
 }
 
 func TestAgentFinish(t *testing.T) {
+	t.Run("uint16", func(t *testing.T) {
+		testAgentFinish[uint16](t)
+	})
+	t.Run("uint32", func(t *testing.T) {
+		testAgentFinish[uint32](t)
+	})
+}
+
+func testAgentFinish[T uint16 | uint32](t *testing.T) {
 	t.Run("DeepCopy", func(t *testing.T) {
 		var (
-			binsptr = func(s *Sketch) uintptr {
+			binsptr = func(s *Sketch[T]) uintptr {
 				hdr := (*reflect.SliceHeader)(unsafe.Pointer(&s.bins))
 				return hdr.Data
 			}
 
-			checkDeepCopy = func(a *Agent, s *Sketch) {
+			checkDeepCopy = func(a *Agent, s *Sketch[T]) {
 				if binsptr(&a.Sketch) == binsptr(s) {
 					t.Fatal("finished sketch should not share the same bin array")
 				}
@@ -103,14 +123,13 @@ func TestAgentFinish(t *testing.T) {
 				if !a.Sketch.Equals(s) {
 					t.Fatal("sketches should be equal")
 				}
-				require.Equal(t, a.Sketch, *s)
 			}
 
 			aSketch = &Agent{}
 		)
 
 		aSketch.Insert(1, 1)
-		finished := aSketch.Finish()
+		finished := aSketch.FinishDistinct()
 		checkDeepCopy(aSketch, finished)
 	})
 
@@ -121,11 +140,18 @@ func TestAgentFinish(t *testing.T) {
 }
 
 func TestAgentInterpolation(t *testing.T) {
+	t.Run("uint16", func(t *testing.T) {
+		testAgentInterpolation[uint16](t)
+	})
+	// Not run for uint32. These tests are specialized for uint16.
+}
+
+func testAgentInterpolation[T uint16 | uint32](t *testing.T) {
 	a := &Agent{}
 
 	type testcase struct {
 		// expected
-		// s.Basic.Cnt should equal binsum + buf
+		// s.Summary().Cnt should equal binsum + buf
 		lower float64 // lower bound for interpolation
 		upper float64 // upper bound for interpolation
 		count uint    //  values are inserted before checking
@@ -137,15 +163,15 @@ func TestAgentInterpolation(t *testing.T) {
 	check := func(t *testing.T, tt testcase) {
 		t.Helper()
 
-		exp := ParseSketch(t, tt.exp)
+		exp := ParseSketch[T](t, tt.exp)
 
-		if tt.count != uint(exp.Basic.Cnt) {
-			t.Errorf("Expected sketch has wrong count %v (expected %v)", exp.Basic.Cnt, tt.count)
+		if tt.count != uint(exp.Summary().Cnt) {
+			t.Errorf("Expected sketch has wrong count %v (expected %v)", exp.Summary().Cnt, tt.count)
 			t.Fail()
 		}
 
-		if tt.count != uint(a.Sketch.Basic.Cnt) {
-			t.Errorf("Actual sketch has wrong count %v (expected %v)", a.Sketch.Basic.Cnt, tt.count)
+		if tt.count != uint(a.Sketch.Summary().Cnt) {
+			t.Errorf("Actual sketch has wrong count %v (expected %v)", a.Sketch.Summary().Cnt, tt.count)
 			t.Fail()
 		}
 
