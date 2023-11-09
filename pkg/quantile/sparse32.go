@@ -24,26 +24,26 @@ type Sketch32 struct {
 	BasicSummary summary.Summary `json:"summary"`
 }
 
-func (s Sketch32) String() string {
+func (s *Sketch32) String() string {
 	var b strings.Builder
 	// todo
 	// printSketch(&b, s, Default())
 	return b.String()
 }
 
-func (s Sketch32) BinsLen() int {
+func (s *Sketch32) BinsLen() int {
 	return len(s.bins)
 }
 
-func (s Sketch32) BinsCap() int {
+func (s *Sketch32) BinsCap() int {
 	return cap(s.bins)
 }
 
-func (s Sketch32) Count() uint64 {
+func (s *Sketch32) Count() uint64 {
 	return s.sparseStore32.count
 }
 
-func (s Sketch32) Basic() *summary.Summary {
+func (s *Sketch32) Basic() *summary.Summary {
 	return &s.BasicSummary
 }
 
@@ -51,7 +51,7 @@ func (s Sketch32) Basic() *summary.Summary {
 //
 //	used: uses len(bins)
 //	allocated: uses cap(bins)
-func (s Sketch32) MemSize() (used, allocated int) {
+func (s *Sketch32) MemSize() (used, allocated int) {
 	const (
 		basicSize = int(unsafe.Sizeof(summary.Summary{}))
 	)
@@ -62,12 +62,12 @@ func (s Sketch32) MemSize() (used, allocated int) {
 	return
 }
 
-func (s Sketch32) InsertKeys(c *Config, keys []Key) {
+func (s *Sketch32) InsertKeys(c *Config, keys []Key) {
 	s.sparseStore32.insert(c, keys)
 }
 
 // InsertMany values into the sketch.
-func (s Sketch32) InsertMany(c *Config, values []float64) {
+func (s *Sketch32) InsertMany(c *Config, values []float64) {
 	keys := getKeyList()
 
 	for _, v := range values {
@@ -80,7 +80,7 @@ func (s Sketch32) InsertMany(c *Config, values []float64) {
 }
 
 // Reset sketch to its empty state.
-func (s Sketch32) Reset() {
+func (s *Sketch32) Reset() {
 	s.BasicSummary.Reset()
 	s.count = 0
 	s.bins = s.bins[:0] // TODO: just release to a size tiered pool.
@@ -88,7 +88,7 @@ func (s Sketch32) Reset() {
 
 // Insert a single value into the sketch.
 // NOTE: InsertMany is much more efficient.
-func (s Sketch32) InsertVals(c *Config, vals ...float64) {
+func (s *Sketch32) InsertVals(c *Config, vals ...float64) {
 	// TODO: remove this
 	s.InsertMany(c, vals)
 }
@@ -105,7 +105,7 @@ func (s *Sketch32) merge(c *Config, o *Sketch32) {
 //
 //		Quantile(c, q <= 0)  = min
 //	 Quantile(c, q >= 1)  = max
-func (s Sketch32) Quantile(c *Config, q float64) float64 {
+func (s *Sketch32) Quantile(c *Config, q float64) float64 {
 	switch {
 	case s.count == 0:
 		return 0
@@ -166,7 +166,7 @@ func (s *Sketch32) Copy() *Sketch32 {
 	return dst
 }
 
-func (s Sketch32) CopyAsSketch() Sketch {
+func (s *Sketch32) CopyAsSketch() Sketch {
 	return s.Copy()
 }
 

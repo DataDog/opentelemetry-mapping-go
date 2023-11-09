@@ -39,9 +39,9 @@ func TestMerge(t *testing.T) {
 	}
 
 	sInsertMany.InsertMany(c, values)
-	s1.Merge(c, s2)
+	s1.merge(c, s2)
 	require.Len(t, sInsert.bins, len(values))
-	for _, s := range []*Sketch{s1, sInsertMany, sInsert} {
+	for _, s := range []*Sketch16{s1, sInsertMany, sInsert} {
 		require.EqualValues(t, 0, s.Quantile(c, .50))
 		require.EqualValues(t, sInsert.Quantile(c, .99), -sInsert.Quantile(c, .01))
 		for p := 0; p < 50; p++ {
@@ -60,12 +60,12 @@ func TestMerge(t *testing.T) {
 
 func TestString(t *testing.T) {
 	var (
-		s, c    = &Sketch{}, Default()
+		s, c    = &Sketch16{}, Default()
 		nvalues = 5
 	)
 
 	for i := 0; i < nvalues; i++ {
-		s.Insert(c, float64(i))
+		s.InsertVals(c, float64(i))
 	}
 
 	// TODO: more in depth tests, we just make sure this doesn't panic.
@@ -74,7 +74,7 @@ func TestString(t *testing.T) {
 
 func TestReset(t *testing.T) {
 	var (
-		s, c      = &Sketch{}, Default()
+		s, c      = &Sketch16{}, Default()
 		checkBins = func(nbins int) {
 			t.Helper()
 			switch {
@@ -82,8 +82,8 @@ func TestReset(t *testing.T) {
 				t.Fatalf("s.bins.Len() != nbins. got:%d, want:%d", s.bins.Len(), nbins)
 			case s.count != nbins:
 				t.Fatalf("s.count != nbins. got:%d, want:%d", s.count, nbins)
-			case int(s.Basic.Cnt) != nbins:
-				t.Fatalf("s.Basic.Cnt != nbins. got:%d, want:%d", s.Basic.Cnt, nbins)
+			case int(s.Basic().Cnt) != nbins:
+				t.Fatalf("s.Basic.Cnt != nbins. got:%d, want:%d", s.Basic().Cnt, nbins)
 			}
 		}
 	)
@@ -92,7 +92,7 @@ func TestReset(t *testing.T) {
 	nbins := 10
 	for i := 0; i < nbins; i++ {
 		v := math.Pow(c.gamma.v, float64(i))
-		s.Insert(c, v)
+		s.InsertVals(c, v)
 	}
 	checkBins(nbins)
 
@@ -101,8 +101,8 @@ func TestReset(t *testing.T) {
 	checkBins(0)
 
 	empty := summary.Summary{}
-	if s.Basic != empty {
-		t.Fatalf("%s should be empty", s.Basic.String())
+	if *s.Basic() != empty {
+		t.Fatalf("%s should be empty", s.Basic().String())
 	}
 
 }
@@ -111,10 +111,10 @@ func TestQuantile(t *testing.T) {
 		c = Default()
 
 		// create a sketch with nbins bins.
-		create = func(nbins int) *Sketch {
+		create = func(nbins int) *Sketch16 {
 			t.Helper()
 
-			s := &Sketch{}
+			s := &Sketch16{}
 			k := c.key(1)
 			for i := 0; i < nbins; i++ {
 				v := c.f64(k)
@@ -122,7 +122,7 @@ func TestQuantile(t *testing.T) {
 					t.Errorf("key(f64(%d)) != k. got: %d, want: %d", k, c.key(v), k)
 				}
 
-				s.Insert(c, v)
+				s.InsertVals(c, v)
 				k++
 			}
 
@@ -143,7 +143,7 @@ func TestQuantile(t *testing.T) {
 	)
 
 	type qtest struct {
-		s   *Sketch
+		s   *Sketch16
 		q   float64
 		exp float64
 	}
@@ -192,12 +192,12 @@ func TestQuantileDDGo(t *testing.T) {
 
 		s := arange(t, c, 1, 101)
 		q := s.Quantile(c, .99)
-		ta.NotEqual(s.Basic.Max, q, "should not be max from sketch")
+		ta.NotEqual(s.Basic().Max, q, "should not be max from sketch")
 
 		// Count bigger than sum of bin counts
 		s.count = 200
 		q = s.Quantile(c, .99)
-		ta.Equal(s.Basic.Max, q, "should be max from sketch")
+		ta.Equal(s.Basic().Max, q, "should be max from sketch")
 	})
 }
 
@@ -213,7 +213,7 @@ func TestRank(t *testing.T) {
 		for p := float64(0); p <= 100; p++ {
 			q := p / 100.0
 
-			if r := rank(cnt, q); r != p {
+			if r := rank(uint64(cnt), q); r != p {
 				t.Errorf("rank(%d, %g) wrong. got:%g want:%g", cnt, q, r, p)
 			}
 		}

@@ -8,21 +8,20 @@ package quantile
 import "github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
 
 type Sketch interface {
-	InsertKeys(c *Config, values []Key)
-	InsertVals(c *Config, vals ...float64)
-	InsertMany(c *Config, values []float64)
 	InsertCounts(c *Config, kcs []KeyCount)
+	InsertKeys(c *Config, values []Key)
+	InsertMany(c *Config, values []float64)
+	InsertVals(c *Config, vals ...float64)
 	Reset()
 
-	Count() uint64
-	String() string
-
-	CopyAsSketch() Sketch
-	Cols() (k []int32, n []uint32)
 	Basic() *summary.Summary
+	Cols() (k []int32, n []uint32)
 
-	MemSize() (used, allocated int)
-	BinsLen() int
 	BinsCap() int
+	BinsLen() int
+	CopyAsSketch() Sketch
+	Count() uint64
+	MemSize() (used, allocated int)
 	Quantile(c *Config, q float64) float64
+	String() string
 }

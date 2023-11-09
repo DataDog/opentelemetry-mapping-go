@@ -39,9 +39,9 @@ func ParseBuf(t *testing.T, dsl string) []float64 {
 //
 // NOTE: there is no guarantee that the sketch is correct (because we'd like to
 // test bad sketch handling)
-func ParseSketch(t *testing.T, dsl string) Sketch {
+func ParseSketch(t *testing.T, dsl string) Sketch16 {
 	t.Helper()
-	s := &Sketch16{}
+	s := Sketch16{}
 	c := Default()
 
 	eachParsedToken(t, dsl, 16, func(k Key, n uint64) {
@@ -136,7 +136,7 @@ func eachParsedToken(t *testing.T, dsl string, bitSize uint, f func(Key, uint64)
 
 // arange is like np.arange, except it creates a sketch
 // inserting ([start,] stop[, step,]) values.
-func arange(t *testing.T, c *Config, args ...int) *Sketch {
+func arange(t *testing.T, c *Config, args ...int) *Sketch16 {
 	t.Helper()
 	var (
 		start, stop int
@@ -156,7 +156,7 @@ func arange(t *testing.T, c *Config, args ...int) *Sketch {
 
 	s := &Sketch16{}
 	for i := start; i < stop; i += step {
-		s.Insert(c, float64(i))
+		s.InsertVals(c, float64(i))
 	}
 
 	return s

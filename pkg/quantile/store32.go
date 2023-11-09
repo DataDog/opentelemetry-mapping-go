@@ -18,7 +18,7 @@ type sparseStore32 struct {
 }
 
 // Cols returns an array of k and n.
-func (s sparseStore32) Cols() (k []int32, n []uint32) {
+func (s *sparseStore32) Cols() (k []int32, n []uint32) {
 	if len(s.bins) == 0 {
 		return
 	}
