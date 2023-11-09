@@ -63,46 +63,69 @@ func TestTagsFromAttributesEmpty(t *testing.T) {
 }
 
 func TestContainerTagFromResourceAttributes(t *testing.T) {
-	attributes := pcommon.NewMap()
-	err := attributes.FromRaw(map[string]interface{}{
-		conventions.AttributeContainerName:         "sample_app",
-		conventions.AttributeContainerImageTag:     "sample_app_image_tag",
-		conventions.AttributeContainerRuntime:      "cro",
-		conventions.AttributeK8SContainerName:      "kube_sample_app",
-		conventions.AttributeK8SReplicaSetName:     "sample_replica_set",
-		conventions.AttributeK8SDaemonSetName:      "sample_daemonset_name",
-		conventions.AttributeK8SPodName:            "sample_pod_name",
-		conventions.AttributeCloudProvider:         "sample_cloud_provider",
-		conventions.AttributeCloudRegion:           "sample_region",
-		conventions.AttributeCloudAvailabilityZone: "sample_zone",
-		conventions.AttributeAWSECSTaskFamily:      "sample_task_family",
-		conventions.AttributeAWSECSClusterARN:      "sample_ecs_cluster_name",
-		conventions.AttributeAWSECSContainerARN:    "sample_ecs_container_name",
-		"custom_tag":                               "example_custom_tag",
-		"":                                         "empty_string_key",
-		"empty_string_val":                         "",
-		"datadog.container.tag.custom.team":        "otel",
-		"datadog.container.tag.":                   "otel",
-		"datadog.container.tag.custom":             "",
+	t.Run("valid", func(t *testing.T) {
+		attributes := pcommon.NewMap()
+		err := attributes.FromRaw(map[string]interface{}{
+			conventions.AttributeContainerName:         "sample_app",
+			conventions.AttributeContainerImageTag:     "sample_app_image_tag",
+			conventions.AttributeContainerRuntime:      "cro",
+			conventions.AttributeK8SContainerName:      "kube_sample_app",
+			conventions.AttributeK8SReplicaSetName:     "sample_replica_set",
+			conventions.AttributeK8SDaemonSetName:      "sample_daemonset_name",
+			conventions.AttributeK8SPodName:            "sample_pod_name",
+			conventions.AttributeCloudProvider:         "sample_cloud_provider",
+			conventions.AttributeCloudRegion:           "sample_region",
+			conventions.AttributeCloudAvailabilityZone: "sample_zone",
+			conventions.AttributeAWSECSTaskFamily:      "sample_task_family",
+			conventions.AttributeAWSECSClusterARN:      "sample_ecs_cluster_name",
+			conventions.AttributeAWSECSContainerARN:    "sample_ecs_container_name",
+			"datadog.container.tag.custom.team": "otel",
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, map[string]string{
+			"container_name":                    "sample_app",
+			"image_tag":                         "sample_app_image_tag",
+			"runtime":                           "cro",
+			"kube_container_name":               "kube_sample_app",
+			"kube_replica_set":                  "sample_replica_set",
+			"kube_daemon_set":                   "sample_daemonset_name",
+			"pod_name":                          "sample_pod_name",
+			"cloud_provider":                    "sample_cloud_provider",
+			"region":                            "sample_region",
+			"zone":                              "sample_zone",
+			"task_family":                       "sample_task_family",
+			"ecs_cluster_name":                  "sample_ecs_cluster_name",
+			"ecs_container_name":                "sample_ecs_container_name",
+			"custom.team":                       "otel",
+		}, ContainerTagsFromResourceAttributes(attributes))
+		fmt.Println(ContainerTagsFromResourceAttributes(attributes))
 	})
-	assert.NoError(t, err)
-	assert.Equal(t, map[string]string{
-		"container_name":      "sample_app",
-		"image_tag":           "sample_app_image_tag",
-		"runtime":             "cro",
-		"kube_container_name": "kube_sample_app",
-		"kube_replica_set":    "sample_replica_set",
-		"kube_daemon_set":     "sample_daemonset_name",
-		"pod_name":            "sample_pod_name",
-		"cloud_provider":      "sample_cloud_provider",
-		"region":              "sample_region",
-		"zone":                "sample_zone",
-		"task_family":         "sample_task_family",
-		"ecs_cluster_name":    "sample_ecs_cluster_name",
-		"ecs_container_name":  "sample_ecs_container_name",
-		"custom.team":         "otel",
-	}, ContainerTagsFromResourceAttributes(attributes))
-	fmt.Println(ContainerTagsFromResourceAttributes(attributes))
+
+	t.Run("conventions vs custom", func(t *testing.T) {
+		attributes := pcommon.NewMap()
+		err := attributes.FromRaw(map[string]interface{}{
+			conventions.AttributeContainerName:     "ok",
+			"datadog.container.tag.container_name": "nok",
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, map[string]string{
+			"container_name": "ok",
+		}, ContainerTagsFromResourceAttributes(attributes))
+	})
+
+	t.Run("invalid", func(t *testing.T) {
+		attributes := pcommon.NewMap()
+		err := attributes.FromRaw(map[string]interface{}{
+			"empty_string_val":                     "",
+			"":                                     "empty_string_key",
+			"custom_tag":                           "example_custom_tag",
+		})
+		assert.NoError(t, err)
+		slice := attributes.PutEmptySlice("datadog.container.tag.slice")
+		slice.AppendEmpty().SetStr("value1")
+		slice.AppendEmpty().SetStr("value2")
+		assert.Equal(t, map[string]string{}, ContainerTagsFromResourceAttributes(attributes))
+	})
 }
 
 func TestContainerTagFromResourceAttributesEmpty(t *testing.T) {
