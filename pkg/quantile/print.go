@@ -57,7 +57,7 @@ func printSketch(w io.Writer, s Sketch, c *Config) {
 
 	// bins
 	head("bins:")
-	fmt.Fprintln(w, indent(s.BinsString(), 2))
+	fmt.Fprintln(w, indent(s.String(), 2))
 
 	// size
 	head("size:")
