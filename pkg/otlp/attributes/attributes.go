@@ -173,7 +173,7 @@ func ContainerTagsFromResourceAttributes(attrs pcommon.Map) map[string]string {
 	attrs.Range(func(key string, value pcommon.Value) bool {
 		// Semantic Conventions
 		if datadogKey, found := containerMappings[key]; found && value.Str() != "" {
-			ddtags[datadogKey] = value.AsString()
+			ddtags[datadogKey] = value.Str()
 		}
 		// Custom (datadog.container.tag namespace)
 		if strings.HasPrefix(key, customContainerTagPrefix) {
@@ -181,7 +181,7 @@ func ContainerTagsFromResourceAttributes(attrs pcommon.Map) map[string]string {
 			if customKey != "" && value.Str() != "" {
 				// Do not replace if set via semantic conventions mappings.
 				if _, found := ddtags[customKey]; !found {
-					ddtags[customKey] = value.AsString()
+					ddtags[customKey] = value.Str()
 				}
 			}
 		}
