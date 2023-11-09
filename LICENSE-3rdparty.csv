@@ -94,6 +94,7 @@ pkg/otlp/attributes,google.golang.org/grpc/internal/grpclog,Apache-2.0,Google In
 pkg/otlp/attributes,google.golang.org/grpc/internal/grpcrand,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/grpcsync,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/grpcutil,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/idle,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/metadata,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/pretty,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/resolver,Apache-2.0,Google Inc.
@@ -201,6 +202,7 @@ pkg/otlp/metrics,go.uber.org/zap/internal/bufferpool,MIT,"Copyright (c) 2016-201
 pkg/otlp/metrics,go.uber.org/zap/internal/color,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/otlp/metrics,go.uber.org/zap/internal/exit,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/otlp/metrics,go.uber.org/zap/internal/pool,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
+pkg/otlp/metrics,go.uber.org/zap/internal/stacktrace,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/otlp/metrics,go.uber.org/zap/zapcore,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/otlp/metrics,golang.org/x/exp/constraints,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
 pkg/otlp/metrics,golang.org/x/exp/slices,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
@@ -245,6 +247,7 @@ pkg/otlp/metrics,google.golang.org/grpc/internal/grpclog,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/grpcrand,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/grpcsync,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/grpcutil,Apache-2.0,Google Inc.
+pkg/otlp/metrics,google.golang.org/grpc/internal/idle,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/metadata,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/pretty,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/resolver,Apache-2.0,Google Inc.
@@ -377,6 +380,7 @@ pkg/inframetadata,google.golang.org/grpc/internal/grpclog,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/grpcrand,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/grpcsync,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/grpcutil,Apache-2.0,Google Inc.
+pkg/inframetadata,google.golang.org/grpc/internal/idle,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/metadata,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/pretty,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/resolver,Apache-2.0,Google Inc.

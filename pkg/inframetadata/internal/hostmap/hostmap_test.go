@@ -34,6 +34,12 @@ func TestUpdate(t *testing.T) {
 				attributeKernelName:                "GNU/Linux",
 				attributeKernelRelease:             "5.19.0-43-generic",
 				attributeKernelVersion:             "#44~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Mon May 22 13:39:36 UTC 2",
+				attributeHostCPUVendorID:           "GenuineIntel",
+				attributeHostCPUFamily:             6,
+				attributeHostCPUModelID:            10,
+				attributeHostCPUModelName:          "11th Gen Intel(R) Core(TM) i7-1185G7 @ 3.00GHz",
+				attributeHostCPUStepping:           1,
+				attributeHostCPUCacheL2Size:        12288000,
 			},
 			expectedChanged: false,
 		},
@@ -73,13 +79,13 @@ func TestUpdate(t *testing.T) {
 				conventions.AttributeHostName:      "host-1-hostname",
 				conventions.AttributeOSDescription: true, // wrong type
 				conventions.AttributeHostArch:      conventions.AttributeHostArchAMD64,
-				attributeKernelName:                1, // wrong type
+				attributeKernelName:                false, // wrong type
 				attributeKernelRelease:             "5.19.0-43-generic",
 			},
 			expectedChanged: false,
 			expectedErrs: []string{
 				"\"os.description\" has type \"Bool\", expected type \"Str\" instead",
-				"\"os.kernel.name\" has type \"Int\", expected type \"Str\" instead",
+				"\"os.kernel.name\" has type \"Bool\", expected type \"Str\" instead",
 			},
 		},
 		{
@@ -132,7 +138,14 @@ func TestUpdate(t *testing.T) {
 			fieldPlatformKernelRelease:    "5.19.0-43-generic",
 			fieldPlatformKernelVersion:    "#82~18.04.1-Ubuntu SMP Fri Apr 16 15:10:02 UTC 2021",
 		})
-		assert.Nil(t, md.Payload.Gohai.Gohai.CPU)
+		assert.Equal(t, md.Payload.Gohai.Gohai.CPU, map[string]string{
+			fieldCPUCacheSize: "12288000",
+			fieldCPUFamily:    "6",
+			fieldCPUModel:     "10",
+			fieldCPUModelName: "11th Gen Intel(R) Core(TM) i7-1185G7 @ 3.00GHz",
+			fieldCPUStepping:  "1",
+			fieldCPUVendorID:  "GenuineIntel",
+		})
 		assert.Nil(t, md.Payload.Gohai.Gohai.FileSystem)
 		assert.Nil(t, md.Payload.Gohai.Gohai.Memory)
 		assert.Nil(t, md.Payload.Gohai.Gohai.Network)
@@ -152,7 +165,7 @@ func TestUpdate(t *testing.T) {
 			fieldPlatformMachine:          "arm64",
 			fieldPlatformHardwarePlatform: "arm64",
 		})
-		assert.Nil(t, md.Payload.Gohai.Gohai.CPU)
+		assert.Empty(t, md.Payload.Gohai.Gohai.CPU)
 		assert.Nil(t, md.Payload.Gohai.Gohai.FileSystem)
 		assert.Nil(t, md.Payload.Gohai.Gohai.Memory)
 		assert.Nil(t, md.Payload.Gohai.Gohai.Network)

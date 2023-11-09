@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
@@ -44,7 +44,7 @@ jobs:
     needs: [setup-environment]
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
@@ -70,7 +70,7 @@ jobs:
     needs: [setup-environment]
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
@@ -93,7 +93,7 @@ jobs:
       - name: Check gofmt
         run: make fmt  && git diff -s --exit-code || (echo  "make fmt needed"; exit 1)
       - name: Check licenses file
-        run: make gen-licenses && git diff -s --exit-code || (echo "make gen-licenses needed"; exit 1)
+        run: make gen-licenses && git diff --exit-code || (echo "make gen-licenses needed"; exit 1)
       - name: Check golangci-lint
         run: make lint OPTS="--timeout 2m"
 
@@ -103,13 +103,13 @@ jobs:
     needs: [setup-environment]
     steps:
       - name: Checkout base branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with: 
           ref: ${{ github.base_ref }}
           path: ${{ github.base_ref }}
 
       - name: Checkout HEAD
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with: 
           ref: ${{ github.head_ref }}
           path: ${{ github.head_ref }}
