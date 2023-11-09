@@ -126,10 +126,9 @@ func TestContainerTagFromResourceAttributes(t *testing.T) {
 		slice.AppendEmpty().SetStr("value2")
 		assert.Equal(t, map[string]string{}, ContainerTagsFromResourceAttributes(attributes))
 	})
-}
 
-func TestContainerTagFromResourceAttributesEmpty(t *testing.T) {
-	assert.Empty(t, ContainerTagsFromResourceAttributes(pcommon.NewMap()))
+	t.Run("empty", func(t *testing.T) {
+		assert.Empty(t, ContainerTagsFromResourceAttributes(pcommon.NewMap()))	})
 }
 
 func TestContainerTagFromAttributes(t *testing.T) {
