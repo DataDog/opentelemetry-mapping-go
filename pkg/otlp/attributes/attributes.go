@@ -22,6 +22,9 @@ import (
 	conventions "go.opentelemetry.io/collector/semconv/v1.6.1"
 )
 
+// customContainerTagPrefix defines the prefix for custom container tags.
+const customContainerTagPrefix = "datadog.container.tag."
+
 var (
 	// coreMapping defines the mapping between OpenTelemetry semantic conventions
 	// and Datadog Agent conventions for env, service and version.
@@ -70,9 +73,6 @@ var (
 		conventions.AttributeK8SNamespaceName:   "kube_namespace",
 		conventions.AttributeK8SPodName:         "pod_name",
 	}
-
-	// customContainerTagPrefix defines the prefix for custom container tags.
-	customContainerTagPrefix = "datadog.container.tag."
 
 	// Kubernetes mappings defines the mapping between Kubernetes conventions (both general and Datadog specific)
 	// and Datadog Agent conventions. The Datadog Agent conventions can be found at
