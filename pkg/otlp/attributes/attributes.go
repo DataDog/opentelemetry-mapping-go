@@ -163,7 +163,7 @@ func OriginIDFromAttributes(attrs pcommon.Map) (originID string) {
 // ContainerTagFromResourceAttributes extracts container tags from the given
 // set of resource attributes. Container tags are extracted via semantic
 // conventions. Customer container tags are extracted via resource attributes
-// prefixed by datadog.container.tag. Custom container tag values of a different type 
+// prefixed by datadog.container.tag. Custom container tag values of a different type
 // than ValueTypeStr will be ignored.
 // In the case of duplicates between semantic conventions and custom resource attributes
 // (e.g. container.id, datadog.container.tag.container_id) the semantic convention takes
@@ -179,7 +179,7 @@ func ContainerTagsFromResourceAttributes(attrs pcommon.Map) map[string]string {
 		if strings.HasPrefix(key, customContainerTagPrefix) {
 			customKey := strings.TrimPrefix(key, customContainerTagPrefix)
 			if customKey != "" && value.Str() != "" {
-				// Do not replace if set via semantic conventions mappings.		
+				// Do not replace if set via semantic conventions mappings.
 				if _, found := ddtags[customKey]; !found {
 					ddtags[customKey] = value.AsString()
 				}
