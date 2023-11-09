@@ -39,7 +39,7 @@ func (a *Agent) Finish() Sketch {
 // flush buffered values into the sketch.
 func (a *Agent) flush() {
 	if len(a.Buf) != 0 {
-		a.Sketch.Insert(agentConfig, a.Buf)
+		a.Sketch.InsertKeys(agentConfig, a.Buf)
 		a.Buf = nil
 	}
 

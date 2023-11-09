@@ -154,7 +154,7 @@ func arange(t *testing.T, c *Config, args ...int) *Sketch {
 		t.Fatalf("too many args: %v", args)
 	}
 
-	s := &Sketch{}
+	s := &Sketch16{}
 	for i := start; i < stop; i += step {
 		s.Insert(c, float64(i))
 	}

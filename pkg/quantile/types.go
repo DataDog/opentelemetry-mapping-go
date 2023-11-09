@@ -8,7 +8,8 @@ package quantile
 import "github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
 
 type Sketch interface {
-	Insert(c *Config, values []Key)
+	InsertKeys(c *Config, values []Key)
+	InsertVals(c *Config, vals ...float64)
 	InsertMany(c *Config, values []float64)
 	InsertCounts(c *Config, kcs []KeyCount)
 	Reset()

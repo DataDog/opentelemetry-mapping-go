@@ -62,7 +62,7 @@ func (s Sketch16) MemSize() (used, allocated int) {
 	return
 }
 
-func (s Sketch16) Insert(c *Config, keys []Key) {
+func (s Sketch16) InsertKeys(c *Config, keys []Key) {
 	s.sparseStore.insert(c, keys)
 }
 
@@ -75,7 +75,7 @@ func (s Sketch16) InsertMany(c *Config, values []float64) {
 		keys = append(keys, c.key(v))
 	}
 
-	s.insert(c, keys)
+	s.sparseStore.insert(c, keys)
 	putKeyList(keys)
 }
 
@@ -88,7 +88,7 @@ func (s Sketch16) Reset() {
 
 // Insert a single value into the sketch.
 // NOTE: InsertMany is much more efficient.
-func (s *Sketch16) InsertVals(c *Config, vals ...float64) {
+func (s Sketch16) InsertVals(c *Config, vals ...float64) {
 	// TODO: remove this
 	s.InsertMany(c, vals)
 }

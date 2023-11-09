@@ -28,13 +28,13 @@ func TestMerge(t *testing.T) {
 
 	for i := -50; i <= 50; i++ {
 		v := float64(i)
-		sInsert.Insert(c, v)
+		sInsert.InsertVals(c, v)
 
 		values = append(values, v)
 		if i&1 == 0 {
-			s1.Insert(c, v)
+			s1.InsertVals(c, v)
 		} else {
-			s2.Insert(c, v)
+			s2.InsertVals(c, v)
 		}
 	}
 

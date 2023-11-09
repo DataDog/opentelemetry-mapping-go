@@ -62,7 +62,7 @@ func (s Sketch32) MemSize() (used, allocated int) {
 	return
 }
 
-func (s Sketch32) Insert(c *Config, keys []Key) {
+func (s Sketch32) InsertKeys(c *Config, keys []Key) {
 	s.sparseStore32.insert(c, keys)
 }
 
@@ -88,7 +88,7 @@ func (s Sketch32) Reset() {
 
 // Insert a single value into the sketch.
 // NOTE: InsertMany is much more efficient.
-func (s *Sketch32) InsertVals(c *Config, vals ...float64) {
+func (s Sketch32) InsertVals(c *Config, vals ...float64) {
 	// TODO: remove this
 	s.InsertMany(c, vals)
 }
