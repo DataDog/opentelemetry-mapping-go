@@ -546,62 +546,114 @@ func extractLanguageTag(name string, languageTags []string) []string {
 	return languageTags
 }
 
-// mapGaugeRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Gauge metric
-func mapGaugeRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
-	for i := 0; i < md.Gauge().DataPoints().Len(); i++ {
-		matchesAttributes := true
+// matchesAttributes checks if the given attributes map contains all the attributes in the given runtime metric mapping
+func matchesAttributes(attrs pcommon.Map, mp runtimeMetricMapping) bool {
+	for _, attribute := range mp.attributes {
+		attributeValue, res := attrs.Get(attribute.key)
+		if !res || !slices.Contains(attribute.values, attributeValue.AsString()) {
+			return false
+		}
+	}
+	return true
+}
+
+// mapDataPoint copies the source data point to the destination data point with the given int/double value, and removes mapped attributes
+func mapDataPoint(source pmetric.NumberDataPoint, dest pmetric.NumberDataPoint, intValue int64, doubleValue float64, mp runtimeMetricMapping) {
+	source.CopyTo(dest)
+	switch dest.ValueType() {
+	case pmetric.NumberDataPointValueTypeInt:
+		dest.SetIntValue(intValue)
+	case pmetric.NumberDataPointValueTypeDouble:
+		dest.SetDoubleValue(doubleValue)
+	}
+	dest.Attributes().RemoveIf(func(s string, value pcommon.Value) bool {
 		for _, attribute := range mp.attributes {
-			attributeValue, res := md.Gauge().DataPoints().At(i).Attributes().Get(attribute.key)
-			if !res || !slices.Contains(attribute.values, attributeValue.AsString()) {
-				matchesAttributes = false
-				break
+			if s == attribute.key {
+				return true
 			}
 		}
-		if matchesAttributes {
+		return mp.sumAttributeKey != "" && s == mp.sumAttributeKey
+	})
+}
+
+// mapGaugeRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Gauge metric
+func mapGaugeRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
+	if mp.sumAttributeKey != "" {
+		var intValue int64 = 0
+		var doubleValue = 0.0
+		canMap := false
+		for i := 0; i < md.Gauge().DataPoints().Len(); i++ {
+			dp := md.Gauge().DataPoints().At(i)
+			_, hasSumAttribute := dp.Attributes().Get(mp.sumAttributeKey)
+			if matchesAttributes(dp.Attributes(), mp) && hasSumAttribute {
+				canMap = true
+				switch dp.ValueType() {
+				case pmetric.NumberDataPointValueTypeInt:
+					intValue += dp.IntValue()
+				case pmetric.NumberDataPointValueTypeDouble:
+					doubleValue += dp.DoubleValue()
+				}
+			}
+		}
+
+		if canMap {
 			cp := metricsArray.AppendEmpty()
 			cp.SetEmptyGauge()
-			dataPoint := cp.Gauge().DataPoints().AppendEmpty()
-			md.Gauge().DataPoints().At(i).CopyTo(dataPoint)
-			dataPoint.Attributes().RemoveIf(func(s string, value pcommon.Value) bool {
-				for _, attribute := range mp.attributes {
-					if s == attribute.key {
-						return true
-					}
-				}
-				return false
-			})
+			mapDataPoint(md.Gauge().DataPoints().At(0), cp.Gauge().DataPoints().AppendEmpty(), intValue, doubleValue, mp)
 			cp.SetName(mp.mappedName)
+		}
+	} else {
+		for i := 0; i < md.Gauge().DataPoints().Len(); i++ {
+			dp := md.Gauge().DataPoints().At(i)
+			if matchesAttributes(dp.Attributes(), mp) {
+				cp := metricsArray.AppendEmpty()
+				cp.SetEmptyGauge()
+				mapDataPoint(dp, cp.Gauge().DataPoints().AppendEmpty(), dp.IntValue(), dp.DoubleValue(), mp)
+				cp.SetName(mp.mappedName)
+			}
 		}
 	}
 }
 
 // mapSumRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Sum metric
 func mapSumRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
-	for i := 0; i < md.Sum().DataPoints().Len(); i++ {
-		matchesAttributes := true
-		for _, attribute := range mp.attributes {
-			attributeValue, res := md.Sum().DataPoints().At(i).Attributes().Get(attribute.key)
-			if !res || !slices.Contains(attribute.values, attributeValue.AsString()) {
-				matchesAttributes = false
-				break
+	if mp.sumAttributeKey != "" {
+		var intValue int64 = 0
+		var doubleValue = 0.0
+		canMap := false
+		for i := 0; i < md.Sum().DataPoints().Len(); i++ {
+			dp := md.Sum().DataPoints().At(i)
+			_, hasSumAttribute := md.Sum().DataPoints().At(i).Attributes().Get(mp.sumAttributeKey)
+			if matchesAttributes(dp.Attributes(), mp) && hasSumAttribute {
+				canMap = true
+				switch md.Sum().DataPoints().At(i).ValueType() {
+				case pmetric.NumberDataPointValueTypeInt:
+					intValue += md.Sum().DataPoints().At(i).IntValue()
+				case pmetric.NumberDataPointValueTypeDouble:
+					doubleValue += md.Sum().DataPoints().At(i).DoubleValue()
+				}
 			}
 		}
-		if matchesAttributes {
+
+		if canMap {
 			cp := metricsArray.AppendEmpty()
 			cp.SetEmptySum()
 			cp.Sum().SetAggregationTemporality(md.Sum().AggregationTemporality())
 			cp.Sum().SetIsMonotonic(md.Sum().IsMonotonic())
-			dataPoint := cp.Sum().DataPoints().AppendEmpty()
-			md.Sum().DataPoints().At(i).CopyTo(dataPoint)
-			dataPoint.Attributes().RemoveIf(func(s string, value pcommon.Value) bool {
-				for _, attribute := range mp.attributes {
-					if s == attribute.key {
-						return true
-					}
-				}
-				return false
-			})
+			mapDataPoint(md.Sum().DataPoints().At(0), cp.Sum().DataPoints().AppendEmpty(), intValue, doubleValue, mp)
 			cp.SetName(mp.mappedName)
+		}
+	} else {
+		for i := 0; i < md.Sum().DataPoints().Len(); i++ {
+			dp := md.Sum().DataPoints().At(i)
+			if matchesAttributes(dp.Attributes(), mp) {
+				cp := metricsArray.AppendEmpty()
+				cp.SetEmptySum()
+				cp.Sum().SetAggregationTemporality(md.Sum().AggregationTemporality())
+				cp.Sum().SetIsMonotonic(md.Sum().IsMonotonic())
+				mapDataPoint(dp, cp.Sum().DataPoints().AppendEmpty(), dp.IntValue(), dp.DoubleValue(), mp)
+				cp.SetName(mp.mappedName)
+			}
 		}
 	}
 }
@@ -609,20 +661,13 @@ func mapSumRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.M
 // mapHistogramRuntimeMetricWithAttributes maps the specified runtime metric from metric attributes into a new Histogram metric
 func mapHistogramRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pmetric.MetricSlice, mp runtimeMetricMapping) {
 	for i := 0; i < md.Histogram().DataPoints().Len(); i++ {
-		matchesAttributes := true
-		for _, attribute := range mp.attributes {
-			attributeValue, res := md.Histogram().DataPoints().At(i).Attributes().Get(attribute.key)
-			if !res || !slices.Contains(attribute.values, attributeValue.AsString()) {
-				matchesAttributes = false
-				break
-			}
-		}
-		if matchesAttributes {
+		dp := md.Histogram().DataPoints().At(i)
+		if matchesAttributes(dp.Attributes(), mp) {
 			cp := metricsArray.AppendEmpty()
 			cp.SetEmptyHistogram()
 			cp.Histogram().SetAggregationTemporality(md.Histogram().AggregationTemporality())
 			dataPoint := cp.Histogram().DataPoints().AppendEmpty()
-			md.Histogram().DataPoints().At(i).CopyTo(dataPoint)
+			dp.CopyTo(dataPoint)
 			dataPoint.Attributes().RemoveIf(func(s string, value pcommon.Value) bool {
 				for _, attribute := range mp.attributes {
 					if s == attribute.key {

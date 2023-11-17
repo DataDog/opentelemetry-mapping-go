@@ -607,7 +607,7 @@ func TestMapRuntimeMetricWithTwoAttributesHasMapping(t *testing.T) {
 		consumer.metrics,
 		[]metric{
 			newGaugeWithHost(newDims("process.runtime.jvm.memory.usage").AddTags("pool:G1 Old Gen", "type:heap"), uint64(seconds(startTs+1)), 10, fallbackHostname),
-			newGaugeWithHost(newDims("jvm.heap_memory").AddTags("pool:G1 Old Gen"), uint64(seconds(startTs+1)), 10, fallbackHostname),
+			newGaugeWithHost(newDims("jvm.heap_memory"), uint64(seconds(startTs+1)), 10, fallbackHostname),
 			newGaugeWithHost(newDims("jvm.gc.old_gen_size"), uint64(seconds(startTs+1)), 10, fallbackHostname),
 		},
 	)
@@ -636,9 +636,7 @@ func TestMapRuntimeMetricWithTwoAttributesMultipleDataPointsHasMapping(t *testin
 			newGaugeWithHost(newDims("process.runtime.jvm.memory.usage").AddTags("pool:G1 Old Gen", "type:heap"), uint64(seconds(startTs+1)), 10, fallbackHostname),
 			newGaugeWithHost(newDims("process.runtime.jvm.memory.usage").AddTags("pool:G1 Survivor Space", "type:heap"), uint64(seconds(startTs+2)), 20, fallbackHostname),
 			newGaugeWithHost(newDims("process.runtime.jvm.memory.usage").AddTags("pool:G1 Eden Space", "type:heap"), uint64(seconds(startTs+3)), 30, fallbackHostname),
-			newGaugeWithHost(newDims("jvm.heap_memory").AddTags("pool:G1 Old Gen"), uint64(seconds(startTs+1)), 10, fallbackHostname),
-			newGaugeWithHost(newDims("jvm.heap_memory").AddTags("pool:G1 Survivor Space"), uint64(seconds(startTs+2)), 20, fallbackHostname),
-			newGaugeWithHost(newDims("jvm.heap_memory").AddTags("pool:G1 Eden Space"), uint64(seconds(startTs+3)), 30, fallbackHostname),
+			newGaugeWithHost(newDims("jvm.heap_memory"), uint64(seconds(startTs+1)), 60, fallbackHostname),
 			newGaugeWithHost(newDims("jvm.gc.old_gen_size"), uint64(seconds(startTs+1)), 10, fallbackHostname),
 			newGaugeWithHost(newDims("jvm.gc.survivor_size"), uint64(seconds(startTs+2)), 20, fallbackHostname),
 			newGaugeWithHost(newDims("jvm.gc.eden_size"), uint64(seconds(startTs+3)), 30, fallbackHostname),
