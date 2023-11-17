@@ -3,6 +3,9 @@
 // This product includes software developed at Datadog (https://www.datadoghq.com/).
 // Copyright 2016-present Datadog, Inc.
 
+//go:build test
+// +build test
+
 package quantile
 
 import (
@@ -15,14 +18,10 @@ import (
 
 func TestAgent(t *testing.T) {
 	t.Run("uint16", func(t *testing.T) {
-		testAgent(t, &Agent{
-			Sketch: &Sketch[uint16]{},
-		})
+		testAgent(t, NewAgent[uint16]())
 	})
 	t.Run("uint32", func(t *testing.T) {
-		testAgent(t, &Agent{
-			Sketch: &Sketch[uint32]{}
-		})
+		testAgent(t, NewAgent[uint32]())
 	})
 }
 
@@ -63,15 +62,16 @@ func testAgent(t *testing.T, a *Agent) {
 		}
 
 		binsum := 0
-		for _, b := range a.Sketch.bins {
-			binsum += int(b.n)
+		_, ns := a.Sketch.Cols()
+		for _, n := range ns {
+			binsum += int(n)
 		}
 
 		if got, want := binsum, exp.binsum; got != want {
 			t.Fatalf("sum(b.n) wrong. got:%d, want:%d", got, want)
 		}
 
-		if got, want := a.Sketch.count, binsum; got != want {
+		if got, want := a.Sketch.Count(), binsum; got != want {
 			t.Fatalf("s.count should match binsum. got:%d, want:%d", got, want)
 		}
 
@@ -115,26 +115,26 @@ func testAgentFinish[T uint16 | uint32](t *testing.T) {
 				return hdr.Data
 			}
 
-			checkDeepCopy = func(a *Agent, s *Sketch[T]) {
+			checkDeepCopy = func(a *Agent, s SketchReader) {
 				if binsptr(&a.Sketch) == binsptr(s) {
 					t.Fatal("finished sketch should not share the same bin array")
 				}
 
-				if !a.Sketch.Equals(s) {
+				if !SketchesEqual(a.Sketch, s) {
 					t.Fatal("sketches should be equal")
 				}
 			}
 
-			aSketch = &Agent{}
+			aSketch = NewAgent[T]()
 		)
 
 		aSketch.Insert(1, 1)
-		finished := aSketch.FinishDistinct()
+		finished := aSketch.Finish()
 		checkDeepCopy(aSketch, finished)
 	})
 
 	t.Run("Empty", func(t *testing.T) {
-		a := &Agent{}
+		a := NewAgent[T]()
 		require.Nil(t, a.Finish())
 	})
 }
@@ -147,7 +147,7 @@ func TestAgentInterpolation(t *testing.T) {
 }
 
 func testAgentInterpolation[T uint16 | uint32](t *testing.T) {
-	a := &Agent{}
+	a := NewAgent[T]()
 
 	type testcase struct {
 		// expected
@@ -175,14 +175,15 @@ func testAgentInterpolation[T uint16 | uint32](t *testing.T) {
 			t.Fail()
 		}
 
-		if !a.Sketch.ApproxEquals(exp, tt.e) {
+		if !SketchesApproxEqual(exp, a.Sketch, tt.e) {
 			t.Errorf("sketches should be equal\nactual %s\nexp %s", a.Sketch.String(), exp.String())
 			t.Fail()
 		}
 
 		var actCount uint
-		for _, b := range a.Sketch.bins {
-			actCount += uint(b.n)
+		_, ns := a.Sketch.Cols()
+		for _, n := range ns {
+			actCount += uint(n)
 		}
 
 		if tt.count != actCount {

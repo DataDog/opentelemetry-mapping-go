@@ -183,7 +183,7 @@ func testStore[T uint16 | uint32](t *testing.T) {
 			// TODO|TEST: that we never exceed binLimit.
 			t.Run("", func(t *testing.T) {
 				s := tt.s
-				s.insert(Default(), tt.keys)
+				s.InsertKeys(Default(), tt.keys)
 
 				exp := buildStore[T](t, tt.exp)
 				if exp.count != s.count {

@@ -12,6 +12,12 @@ type SketchReader interface {
 	Cols() (k []int32, n []uint32)
 	Count() int
 	CopyInterface() SketchReader
+
+	SketchDebug
+}
+
+type SketchDebug interface {
+	String() string
 }
 
 type SketchWriter interface {
