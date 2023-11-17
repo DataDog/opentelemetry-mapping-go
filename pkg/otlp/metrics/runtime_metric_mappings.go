@@ -10,8 +10,9 @@ var runtimeMetricPrefixLanguageMap = map[string]string{
 // runtimeMetricMapping defines the fields needed to map OTel runtime metrics to their equivalent
 // Datadog runtime metrics
 type runtimeMetricMapping struct {
-	mappedName string                   // the Datadog runtime metric name
-	attributes []runtimeMetricAttribute // the attribute(s) this metric originates from
+	mappedName      string                   // the Datadog runtime metric name
+	attributes      []runtimeMetricAttribute // the attribute(s) this metric originates from
+	sumAttributeKey string                   // the key of the attribute to sum values over
 }
 
 // runtimeMetricAttribute defines the structure for an attribute in regard to mapping runtime metrics.
@@ -101,12 +102,14 @@ var javaRuntimeMetricsMappings = runtimeMetricMappingList{
 			key:    "type",
 			values: []string{"heap"},
 		}},
+		sumAttributeKey: "pool",
 	}, {
 		mappedName: "jvm.non_heap_memory",
 		attributes: []runtimeMetricAttribute{{
 			key:    "type",
 			values: []string{"non_heap"},
 		}},
+		sumAttributeKey: "pool",
 	}, {
 		mappedName: "jvm.gc.old_gen_size",
 		attributes: []runtimeMetricAttribute{{
@@ -150,12 +153,14 @@ var javaRuntimeMetricsMappings = runtimeMetricMappingList{
 			key:    "type",
 			values: []string{"heap"},
 		}},
+		sumAttributeKey: "pool",
 	}, {
 		mappedName: "jvm.non_heap_memory_committed",
 		attributes: []runtimeMetricAttribute{{
 			key:    "type",
 			values: []string{"non_heap"},
 		}},
+		sumAttributeKey: "pool",
 	}},
 	"process.runtime.jvm.memory.init": {{
 		mappedName: "jvm.heap_memory_init",
@@ -163,12 +168,14 @@ var javaRuntimeMetricsMappings = runtimeMetricMappingList{
 			key:    "type",
 			values: []string{"heap"},
 		}},
+		sumAttributeKey: "pool",
 	}, {
 		mappedName: "jvm.non_heap_memory_init",
 		attributes: []runtimeMetricAttribute{{
 			key:    "type",
 			values: []string{"non_heap"},
 		}},
+		sumAttributeKey: "pool",
 	}},
 	"process.runtime.jvm.memory.limit": {{
 		mappedName: "jvm.heap_memory_max",
@@ -176,12 +183,14 @@ var javaRuntimeMetricsMappings = runtimeMetricMappingList{
 			key:    "type",
 			values: []string{"heap"},
 		}},
+		sumAttributeKey: "pool",
 	}, {
 		mappedName: "jvm.non_heap_memory_max",
 		attributes: []runtimeMetricAttribute{{
 			key:    "type",
 			values: []string{"non_heap"},
 		}},
+		sumAttributeKey: "pool",
 	}},
 	"process.runtime.jvm.buffer.usage": {{
 		mappedName: "jvm.buffer_pool.direct.used",
