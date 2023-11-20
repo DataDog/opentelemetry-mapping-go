@@ -19,7 +19,6 @@ import (
 	"encoding/hex"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadog"
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadogV2"
@@ -156,7 +155,7 @@ func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) data
 	if lr.Timestamp() != 0 {
 		// we are retaining the nano second precision in this property
 		l.AdditionalProperties[otelTimestamp] = strconv.FormatInt(lr.Timestamp().AsTime().UnixNano(), 10)
-		l.AdditionalProperties[ddTimestamp] = lr.Timestamp().AsTime().Format(time.RFC3339)
+		l.AdditionalProperties[ddTimestamp] = lr.Timestamp().AsTime().Format("2006-01-02T15:04:05.000Z")
 	}
 	if l.Message == "" {
 		// set the Message to the Body in case it wasn't already parsed as part of the attributes
