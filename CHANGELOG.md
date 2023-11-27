@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.8.2
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics`: Add support for metrics origin in `Dimensions`. (#204)
+
 ## v0.8.1
 
 ### 🚩 Deprecations 🚩
