@@ -34,6 +34,8 @@ type translatorConfig struct {
 	InstrumentationLibraryMetadataAsTags bool
 	InstrumentationScopeMetadataAsTags   bool
 
+	originProduct OriginProduct
+
 	// withRemapping reports whether certain metrics that are only available when using
 	// the Datadog Agent should be obtained by remapping from OTEL counterparts (e.g.
 	// container.* and system.* metrics).
@@ -156,6 +158,14 @@ func WithCountSumMetrics() TranslatorOption {
 func WithHistogramAggregations() TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.SendHistogramAggregations = true
+		return nil
+	}
+}
+
+// WithOriginProduct sets the origin product attribute.
+func WithOriginProduct(originProduct OriginProduct) TranslatorOption {
+	return func(t *translatorConfig) error {
+		t.originProduct = originProduct
 		return nil
 	}
 }

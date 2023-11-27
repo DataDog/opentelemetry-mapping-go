@@ -6,6 +6,9 @@
       "Tags": [],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 2,
+      "OriginCategory": 0,
+      "OriginService": 0,
       "Type": "count",
       "Timestamp": 1667560641226420925,
       "Value": 30
@@ -15,6 +18,9 @@
       "Tags": [],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 2,
+      "OriginCategory": 0,
+      "OriginService": 0,
       "Type": "count",
       "Timestamp": 1667560641226420925,
       "Value": 20
@@ -27,6 +33,9 @@
       ],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 2,
+      "OriginCategory": 0,
+      "OriginService": 0,
       "Type": "count",
       "Timestamp": 1667560641226420925,
       "Value": 11
@@ -39,6 +48,9 @@
       ],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 2,
+      "OriginCategory": 0,
+      "OriginService": 0,
       "Type": "count",
       "Timestamp": 1667560641226420925,
       "Value": 19

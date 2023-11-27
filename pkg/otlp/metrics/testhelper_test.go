@@ -34,10 +34,13 @@ type TestMetrics struct {
 // TestDimensions copies the Dimensions struct with public fields.
 // NOTE: Keep this in sync with the Dimensions struct.
 type TestDimensions struct {
-	Name     string
-	Tags     []string
-	Host     string
-	OriginID string
+	Name           string
+	Tags           []string
+	Host           string
+	OriginID       string
+	OriginProduct  OriginProduct
+	OriginCategory OriginCategory
+	OriginService  OriginService
 }
 
 type TestSketch struct {
@@ -134,10 +137,13 @@ func (t *testConsumer) ConsumeTimeSeries(
 	t.testMetrics.TimeSeries = append(t.testMetrics.TimeSeries,
 		TestTimeSeries{
 			TestDimensions: TestDimensions{
-				Name:     dimensions.Name(),
-				Tags:     dimensions.Tags(),
-				Host:     dimensions.Host(),
-				OriginID: dimensions.OriginID(),
+				Name:           dimensions.Name(),
+				Tags:           dimensions.Tags(),
+				Host:           dimensions.Host(),
+				OriginID:       dimensions.OriginID(),
+				OriginProduct:  dimensions.OriginProduct(),
+				OriginCategory: dimensions.OriginCategory(),
+				OriginService:  dimensions.OriginService(),
 			},
 			Type:      typ,
 			Timestamp: timestamp,
@@ -155,10 +161,13 @@ func (t *testConsumer) ConsumeSketch(
 	t.testMetrics.Sketches = append(t.testMetrics.Sketches,
 		TestSketch{
 			TestDimensions: TestDimensions{
-				Name:     dimensions.Name(),
-				Tags:     dimensions.Tags(),
-				Host:     dimensions.Host(),
-				OriginID: dimensions.OriginID(),
+				Name:           dimensions.Name(),
+				Tags:           dimensions.Tags(),
+				Host:           dimensions.Host(),
+				OriginID:       dimensions.OriginID(),
+				OriginProduct:  dimensions.OriginProduct(),
+				OriginCategory: dimensions.OriginCategory(),
+				OriginService:  dimensions.OriginService(),
 			},
 			Timestamp: timestamp,
 			Summary:   sketch.Basic,
@@ -216,7 +225,7 @@ func TestAssertTranslatorMapFailure(t *testing.T) {
 	// Compare OTLP file with incorrect output
 	ddogfile := "testdata/datadogdata/histogram/simple-delta_nobuckets-cs.json"
 
-	translator, err := NewTranslator(zap.NewNop(), WithHistogramMode(HistogramModeDistributions))
+	translator, err := NewTranslator(zap.NewNop(), WithOriginProduct(OriginProductDatadogExporter), WithHistogramMode(HistogramModeDistributions))
 	require.NoError(t, err)
 	mockTesting := &testingTMock{t}
 	assert.False(t, AssertTranslatorMap(mockTesting, translator, otlpfile, ddogfile), "AssertTranslatorMap should have failed but did not")
