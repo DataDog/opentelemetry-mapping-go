@@ -494,6 +494,9 @@ func TestTransform(t *testing.T) {
 														},
 													},
 												},
+												"nest14":map[string]any{
+													"nest15": "ok2",
+												},
 											},
 										},
 									},
@@ -513,6 +516,7 @@ func TestTransform(t *testing.T) {
 				Message: *datadog.PtrString(""),
 				AdditionalProperties: map[string]string{
 					"nest1.nest2.nest3.nest4.nest5.nest6.nest7.nest8.nest9.nest10": "{\"nest11\":{\"nest12\":\"ok\"}}",
+					"nest1.nest2.nest3.nest4.nest5.nest14.nest15": "ok2",
 					"status": "",
 				},
 			},
