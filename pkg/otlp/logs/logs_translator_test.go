@@ -410,6 +410,117 @@ func TestTransform(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Nestings",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					l.Attributes().FromRaw(
+						map[string]any{
+							"root": map[string]any{
+								"nest1": map[string]any{
+									"nest2": "val",
+								},
+								"nest12": map[string]any{
+									"nest22": map[string]any{
+										"nest3": "val2",
+									},
+								},
+								"nest13": "val3",
+							},
+						},
+					)
+					return l
+				}(),
+				res: func() pcommon.Resource {
+					r := pcommon.NewResource()
+					return r
+				}(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString(""),
+				Message: *datadog.PtrString(""),
+				AdditionalProperties: map[string]string{
+					"root.nest1.nest2":         "val",
+					"root.nest12.nest22.nest3": "val2",
+					"root.nest13":              "val3",
+					"status":                   "",
+				},
+			},
+		},
+		{
+			name: "Nil Map",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					l.Attributes().FromRaw(nil)
+					return l
+				}(),
+				res: func() pcommon.Resource {
+					r := pcommon.NewResource()
+					return r
+				}(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString(""),
+				Message: *datadog.PtrString(""),
+				AdditionalProperties: map[string]string{
+					"status": "",
+				},
+			},
+		},
+		{
+			name: "Too many nestings",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					l.Attributes().FromRaw(
+						map[string]any{
+							"nest1": map[string]any{
+								"nest2": map[string]any{
+									"nest3": map[string]any{
+										"nest4": map[string]any{
+											"nest5": map[string]any{
+												"nest6": map[string]any{
+													"nest7": map[string]any{
+														"nest8": map[string]any{
+															"nest9": map[string]any{
+																"nest10": map[string]any{
+																	"nest11": map[string]any{
+																		"nest12": "ok",
+																	},
+																},
+															},
+														},
+													},
+												},
+												"nest14": map[string]any{
+													"nest15": "ok2",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					)
+					return l
+				}(),
+				res: func() pcommon.Resource {
+					r := pcommon.NewResource()
+					return r
+				}(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString(""),
+				Message: *datadog.PtrString(""),
+				AdditionalProperties: map[string]string{
+					"nest1.nest2.nest3.nest4.nest5.nest6.nest7.nest8.nest9.nest10": "{\"nest11\":{\"nest12\":\"ok\"}}",
+					"nest1.nest2.nest3.nest4.nest5.nest14.nest15":                  "ok2",
+					"status": "",
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

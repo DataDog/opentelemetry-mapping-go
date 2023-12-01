@@ -114,7 +114,10 @@ func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) data
 			tagStr := strings.Join(tags, ",")
 			l.Ddtags = datadog.PtrString(tagStr)
 		default:
-			l.AdditionalProperties[k] = v.AsString()
+			m := flattenAttribute(k, v, 1)
+			for k, v := range m {
+				l.AdditionalProperties[k] = v
+			}
 		}
 		return true
 	})
@@ -170,6 +173,26 @@ func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) data
 	}
 
 	return l
+}
+
+func flattenAttribute(key string, val pcommon.Value, depth int) map[string]string {
+	result := make(map[string]string)
+
+	if val.Type() != pcommon.ValueTypeMap || depth == 10 {
+		result[key] = val.AsString()
+		return result
+	}
+
+	val.Map().Range(func(k string, v pcommon.Value) bool {
+		newKey := key + "." + k
+		nestedResult := flattenAttribute(newKey, v, depth+1)
+		for nk, nv := range nestedResult {
+			result[nk] = nv
+		}
+		return true
+	})
+
+	return result
 }
 
 func extractHostNameAndServiceName(resourceAttrs pcommon.Map, logAttrs pcommon.Map) (host string, service string) {
