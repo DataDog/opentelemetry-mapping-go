@@ -218,6 +218,39 @@ func TestTransform(t *testing.T) {
 			},
 		},
 		{
+			name: "trace from attributes (underscore)",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					l.Attributes().PutStr("app", "test")
+					l.Attributes().PutStr("span_id", "2e26da881214cd7c")
+					l.Attributes().PutStr("trace_id", "740112b325075be8c80a48de336ebc67")
+					l.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
+					l.SetSeverityNumber(5)
+					return l
+				}(),
+				res: func() pcommon.Resource {
+					r := pcommon.NewResource()
+					return r
+				}(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString(""),
+				Message: *datadog.PtrString(""),
+				Service: datadog.PtrString("otlp_col"),
+				AdditionalProperties: map[string]string{
+					"app":              "test",
+					"status":           "debug",
+					otelSeverityNumber: "5",
+					otelSpanID:         "2e26da881214cd7c",
+					otelTraceID:        "740112b325075be8c80a48de336ebc67",
+					ddSpanID:           "3325585652813450620",
+					ddTraceID:          "14414413676535528551",
+					"service.name":     "otlp_col",
+				},
+			},
+		},
+		{
 			name: "trace from attributes decode error",
 			args: args{
 				lr: func() plog.LogRecord {

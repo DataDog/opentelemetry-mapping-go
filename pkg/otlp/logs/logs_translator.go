@@ -85,7 +85,7 @@ func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) data
 			l.Message = v.AsString()
 		case "status", "severity", "level", "syslog.severity":
 			status = v.AsString()
-		case "traceid", "contextmap.traceid", "oteltraceid":
+		case "traceid", "trace_id", "contextmap.traceid", "oteltraceid":
 			traceID, err := decodeTraceID(v.AsString())
 			if err != nil {
 				logger.Warn("failed to decode trace id",
@@ -97,7 +97,7 @@ func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) data
 				l.AdditionalProperties[ddTraceID] = strconv.FormatUint(traceIDToUint64(traceID), 10)
 				l.AdditionalProperties[otelTraceID] = v.AsString()
 			}
-		case "spanid", "contextmap.spanid", "otelspanid":
+		case "spanid", "span_id", "contextmap.spanid", "otelspanid":
 			spanID, err := decodeSpanID(v.AsString())
 			if err != nil {
 				logger.Warn("failed to decode span id",
