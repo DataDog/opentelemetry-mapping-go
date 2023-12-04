@@ -6,7 +6,7 @@ require (
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.8.3
 	github.com/stretchr/testify v1.8.4
 	go.opentelemetry.io/collector/pdata v1.0.0-rcv0017
-	go.opentelemetry.io/collector/semconv v0.88.0
+	go.opentelemetry.io/collector/semconv v0.90.1
 	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.24.0
 )
