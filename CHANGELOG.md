@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.8.3
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/logs`: Add support for nested log attributes. (#207)
+
 ## v0.8.2
 
 ### 💡 Enhancements 💡
