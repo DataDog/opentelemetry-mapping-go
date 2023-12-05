@@ -218,6 +218,39 @@ func TestTransform(t *testing.T) {
 			},
 		},
 		{
+			name: "trace from attributes (underscore)",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					l.Attributes().PutStr("app", "test")
+					l.Attributes().PutStr("span_id", "2e26da881214cd7c")
+					l.Attributes().PutStr("trace_id", "740112b325075be8c80a48de336ebc67")
+					l.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
+					l.SetSeverityNumber(5)
+					return l
+				}(),
+				res: func() pcommon.Resource {
+					r := pcommon.NewResource()
+					return r
+				}(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString(""),
+				Message: *datadog.PtrString(""),
+				Service: datadog.PtrString("otlp_col"),
+				AdditionalProperties: map[string]string{
+					"app":              "test",
+					"status":           "debug",
+					otelSeverityNumber: "5",
+					otelSpanID:         "2e26da881214cd7c",
+					otelTraceID:        "740112b325075be8c80a48de336ebc67",
+					ddSpanID:           "3325585652813450620",
+					ddTraceID:          "14414413676535528551",
+					"service.name":     "otlp_col",
+				},
+			},
+		},
+		{
 			name: "trace from attributes decode error",
 			args: args{
 				lr: func() plog.LogRecord {
@@ -411,12 +444,25 @@ func TestTransform(t *testing.T) {
 			},
 		},
 		{
-			name: "Timestamps are formatted properly",
+			name: "Nestings",
 			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
-					l.SetTimestamp(pcommon.Timestamp(uint64(1700499303397000000)))
-					l.SetSeverityNumber(5)
+					l.Attributes().FromRaw(
+						map[string]any{
+							"root": map[string]any{
+								"nest1": map[string]any{
+									"nest2": "val",
+								},
+								"nest12": map[string]any{
+									"nest22": map[string]any{
+										"nest3": "val2",
+									},
+								},
+								"nest13": "val3",
+							},
+						},
+					)
 					return l
 				}(),
 				res: func() pcommon.Resource {
@@ -428,10 +474,83 @@ func TestTransform(t *testing.T) {
 				Ddtags:  datadog.PtrString(""),
 				Message: *datadog.PtrString(""),
 				AdditionalProperties: map[string]string{
-					"status":           "debug",
-					otelSeverityNumber: "5",
-					ddTimestamp:        "2023-11-20T16:55:03.397Z",
-					otelTimestamp:      "1700499303397000000",
+					"root.nest1.nest2":         "val",
+					"root.nest12.nest22.nest3": "val2",
+					"root.nest13":              "val3",
+					"status":                   "",
+				},
+			},
+		},
+		{
+			name: "Nil Map",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					l.Attributes().FromRaw(nil)
+					return l
+				}(),
+				res: func() pcommon.Resource {
+					r := pcommon.NewResource()
+					return r
+				}(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString(""),
+				Message: *datadog.PtrString(""),
+				AdditionalProperties: map[string]string{
+					"status": "",
+				},
+			},
+		},
+		{
+			name: "Too many nestings",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					l.Attributes().FromRaw(
+						map[string]any{
+							"nest1": map[string]any{
+								"nest2": map[string]any{
+									"nest3": map[string]any{
+										"nest4": map[string]any{
+											"nest5": map[string]any{
+												"nest6": map[string]any{
+													"nest7": map[string]any{
+														"nest8": map[string]any{
+															"nest9": map[string]any{
+																"nest10": map[string]any{
+																	"nest11": map[string]any{
+																		"nest12": "ok",
+																	},
+																},
+															},
+														},
+													},
+												},
+												"nest14": map[string]any{
+													"nest15": "ok2",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					)
+					return l
+				}(),
+				res: func() pcommon.Resource {
+					r := pcommon.NewResource()
+					return r
+				}(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString(""),
+				Message: *datadog.PtrString(""),
+				AdditionalProperties: map[string]string{
+					"nest1.nest2.nest3.nest4.nest5.nest6.nest7.nest8.nest9.nest10": "{\"nest11\":{\"nest12\":\"ok\"}}",
+					"nest1.nest2.nest3.nest4.nest5.nest14.nest15":                  "ok2",
+					"status": "",
 				},
 			},
 		},
