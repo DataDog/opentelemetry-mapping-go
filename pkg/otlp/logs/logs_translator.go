@@ -85,7 +85,7 @@ func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) data
 			l.Message = v.AsString()
 		case "status", "severity", "level", "syslog.severity":
 			status = v.AsString()
-		case "traceid", "contextmap.traceid", "oteltraceid":
+		case "traceid", "trace_id", "contextmap.traceid", "oteltraceid":
 			traceID, err := decodeTraceID(v.AsString())
 			if err != nil {
 				logger.Warn("failed to decode trace id",
@@ -97,7 +97,7 @@ func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) data
 				l.AdditionalProperties[ddTraceID] = strconv.FormatUint(traceIDToUint64(traceID), 10)
 				l.AdditionalProperties[otelTraceID] = v.AsString()
 			}
-		case "spanid", "contextmap.spanid", "otelspanid":
+		case "spanid", "span_id", "contextmap.spanid", "otelspanid":
 			spanID, err := decodeSpanID(v.AsString())
 			if err != nil {
 				logger.Warn("failed to decode span id",
@@ -114,7 +114,10 @@ func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) data
 			tagStr := strings.Join(tags, ",")
 			l.Ddtags = datadog.PtrString(tagStr)
 		default:
-			l.AdditionalProperties[k] = v.AsString()
+			m := flattenAttribute(k, v, 1)
+			for k, v := range m {
+				l.AdditionalProperties[k] = v
+			}
 		}
 		return true
 	})
@@ -170,6 +173,26 @@ func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) data
 	}
 
 	return l
+}
+
+func flattenAttribute(key string, val pcommon.Value, depth int) map[string]string {
+	result := make(map[string]string)
+
+	if val.Type() != pcommon.ValueTypeMap || depth == 10 {
+		result[key] = val.AsString()
+		return result
+	}
+
+	val.Map().Range(func(k string, v pcommon.Value) bool {
+		newKey := key + "." + k
+		nestedResult := flattenAttribute(newKey, v, depth+1)
+		for nk, nv := range nestedResult {
+			result[nk] = nv
+		}
+		return true
+	})
+
+	return result
 }
 
 func extractHostNameAndServiceName(resourceAttrs pcommon.Map, logAttrs pcommon.Map) (host string, service string) {

@@ -4,6 +4,29 @@
 
 <!-- next version -->
 
+## v0.8.3
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/logs`: Add support for nested log attributes. (#207)
+
+## v0.8.2
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics`: Add support for metrics origin in `Dimensions`. (#204)
+
+## v0.8.1
+
+### 🚩 Deprecations 🚩
+
+- `pkg/otlp/attributes`: ContainerTagFromAttributes is deprecated in favor of ContainerTagFromResourceAttributes. (#193)
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/attributes`: Add support for custom container tags via resource attribute prefix `datadog.container.tag`. (#193)
+- `pkg/inframetadata`: Add support for host.cpu resource attributes (#174)
+
 ## v0.8.0
 
 ### 🛑 Breaking changes 🛑
