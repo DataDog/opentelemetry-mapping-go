@@ -30,6 +30,7 @@ func TestUpdate(t *testing.T) {
 				conventions.AttributeHostID:        "host-1-hostid",
 				conventions.AttributeHostName:      "host-1-hostname",
 				conventions.AttributeOSDescription: "Fedora Linux",
+				conventions.AttributeOSType:        conventions.AttributeOSTypeLinux,
 				conventions.AttributeHostArch:      conventions.AttributeHostArchAMD64,
 				attributeKernelName:                "GNU/Linux",
 				attributeKernelRelease:             "5.19.0-43-generic",
@@ -134,6 +135,8 @@ func TestUpdate(t *testing.T) {
 			fieldPlatformProcessor:        "amd64",
 			fieldPlatformMachine:          "amd64",
 			fieldPlatformHardwarePlatform: "amd64",
+			fieldPlatformGOOS:             "linux",
+			fieldPlatformGOOARCH:          "amd64",
 			fieldPlatformKernelName:       "GNU/Linux",
 			fieldPlatformKernelRelease:    "5.19.0-43-generic",
 			fieldPlatformKernelVersion:    "#82~18.04.1-Ubuntu SMP Fri Apr 16 15:10:02 UTC 2021",
@@ -164,6 +167,7 @@ func TestUpdate(t *testing.T) {
 			fieldPlatformProcessor:        "arm64",
 			fieldPlatformMachine:          "arm64",
 			fieldPlatformHardwarePlatform: "arm64",
+			fieldPlatformGOOARCH:          "arm64",
 		})
 		assert.Empty(t, md.Payload.Gohai.Gohai.CPU)
 		assert.Nil(t, md.Payload.Gohai.Gohai.FileSystem)

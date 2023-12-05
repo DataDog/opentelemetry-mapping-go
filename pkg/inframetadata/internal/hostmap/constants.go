@@ -21,6 +21,8 @@ const (
 const (
 	fieldPlatformHostname         = "hostname"
 	fieldPlatformOS               = "os"
+	fieldPlatformGOOS             = "GOOS"
+	fieldPlatformGOOARCH          = "GOOARCH"
 	fieldPlatformProcessor        = "processor"
 	fieldPlatformMachine          = "machine"
 	fieldPlatformHardwarePlatform = "hardware_platform"
@@ -33,6 +35,8 @@ const (
 // and resource attribute names (semantic conventions or not).
 var platformAttributesMap map[string]string = map[string]string{
 	fieldPlatformOS:               conventions.AttributeOSDescription,
+	fieldPlatformGOOS:             conventions.AttributeOSType,
+	fieldPlatformGOOARCH:          conventions.AttributeHostArch,
 	fieldPlatformProcessor:        conventions.AttributeHostArch,
 	fieldPlatformMachine:          conventions.AttributeHostArch,
 	fieldPlatformHardwarePlatform: conventions.AttributeHostArch,
