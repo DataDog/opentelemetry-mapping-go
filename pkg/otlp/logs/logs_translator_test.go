@@ -554,6 +554,31 @@ func TestTransform(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Timestamps are formatted properly",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					l.SetTimestamp(pcommon.Timestamp(uint64(1700499303397000000)))
+					l.SetSeverityNumber(5)
+					return l
+				}(),
+				res: func() pcommon.Resource {
+					r := pcommon.NewResource()
+					return r
+				}(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString(""),
+				Message: *datadog.PtrString(""),
+				AdditionalProperties: map[string]string{
+					"status":           "debug",
+					otelSeverityNumber: "5",
+					ddTimestamp:        "2023-11-20T16:55:03.397Z",
+					otelTimestamp:      "1700499303397000000",
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

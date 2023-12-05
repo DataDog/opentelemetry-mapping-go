@@ -1,0 +1,11 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: enhancement
+
+# The name of the component (e.g. pkg/quantile)
+component: pkg/otlp/logs
+
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: DataDog log timestamp (ie. '@timestamp') now includes milliseconds.
+
+# The PR related to this change
+issues: [152]
