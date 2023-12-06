@@ -537,7 +537,7 @@ func TestMapHistogramRuntimeMetricHasMapping(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
 
-	rmt, err := tr.MapMetrics(ctx, createTestHistogramMetric("process.runtime.jvm.gc.duration"), consumer)
+	rmt, err := tr.MapMetrics(ctx, createTestHistogramMetric("process.runtime.jvm.threads.count"), consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -545,14 +545,14 @@ func TestMapHistogramRuntimeMetricHasMapping(t *testing.T) {
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
-			newCountWithHost(newDims("process.runtime.jvm.gc.duration.count"), uint64(seconds(startTs+1)), 100, fallbackHostname),
-			newCountWithHost(newDims("process.runtime.jvm.gc.duration.sum"), uint64(seconds(startTs+1)), 0, fallbackHostname),
-			newGaugeWithHost(newDims("process.runtime.jvm.gc.duration.min"), uint64(seconds(startTs+1)), -100, fallbackHostname),
-			newGaugeWithHost(newDims("process.runtime.jvm.gc.duration.max"), uint64(seconds(startTs+1)), 100, fallbackHostname),
-			newCountWithHost(newDims("jvm.gc.parnew.time.count"), uint64(seconds(startTs+1)), 100, fallbackHostname),
-			newCountWithHost(newDims("jvm.gc.parnew.time.sum"), uint64(seconds(startTs+1)), 0, fallbackHostname),
-			newGaugeWithHost(newDims("jvm.gc.parnew.time.min"), uint64(seconds(startTs+1)), -100, fallbackHostname),
-			newGaugeWithHost(newDims("jvm.gc.parnew.time.max"), uint64(seconds(startTs+1)), 100, fallbackHostname),
+			newCountWithHost(newDims("process.runtime.jvm.threads.count.count"), uint64(seconds(startTs+1)), 100, fallbackHostname),
+			newCountWithHost(newDims("process.runtime.jvm.threads.count.sum"), uint64(seconds(startTs+1)), 0, fallbackHostname),
+			newGaugeWithHost(newDims("process.runtime.jvm.threads.count.min"), uint64(seconds(startTs+1)), -100, fallbackHostname),
+			newGaugeWithHost(newDims("process.runtime.jvm.threads.count.max"), uint64(seconds(startTs+1)), 100, fallbackHostname),
+			newCountWithHost(newDims("jvm.thread_count.count"), uint64(seconds(startTs+1)), 100, fallbackHostname),
+			newCountWithHost(newDims("jvm.thread_count.sum"), uint64(seconds(startTs+1)), 0, fallbackHostname),
+			newGaugeWithHost(newDims("jvm.thread_count.min"), uint64(seconds(startTs+1)), -100, fallbackHostname),
+			newGaugeWithHost(newDims("jvm.thread_count.max"), uint64(seconds(startTs+1)), 100, fallbackHostname),
 		},
 	)
 	assert.Equal(t, []string{"jvm"}, rmt.Languages)
