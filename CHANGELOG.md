@@ -4,6 +4,17 @@
 
 <!-- next version -->
 
+## v0.8.4
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/logs`: DataDog log timestamp (ie. '@timestamp') now includes milliseconds. (#152)
+- `pkg/inframetadata`: Add support for GOOS and GOARCH values (#185)
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/otlp/metrics`: Removes runtime metric mapping for process.runtime.jvm.gc.duration -> jvm.gc.parnew.time (#213)
+
 ## v0.8.3
 
 ### 💡 Enhancements 💡
