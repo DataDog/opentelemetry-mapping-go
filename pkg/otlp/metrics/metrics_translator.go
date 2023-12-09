@@ -23,16 +23,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
 
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics/internal/instrumentationlibrary"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics/internal/instrumentationscope"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 )
 
 const (
@@ -123,7 +123,6 @@ func (t *Translator) mapNumberMetrics(
 	dt DataType,
 	slice pmetric.NumberDataPointSlice,
 ) {
-
 	for i := 0; i < slice.Len(); i++ {
 		p := slice.At(i)
 		pointDims := dims.WithAttributeMap(p.Attributes())
@@ -483,7 +482,6 @@ func (t *Translator) mapSummaryMetrics(
 	dims *Dimensions,
 	slice pmetric.SummaryDataPointSlice,
 ) {
-
 	for i := 0; i < slice.Len(); i++ {
 		p := slice.At(i)
 		startTs := uint64(p.StartTimestamp())
@@ -645,15 +643,6 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 	rms := md.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
-		if v, ok := rm.Resource().Attributes().Get(keyAPMStats); ok && v.Bool() {
-			// these resource metrics are an APM Stats payload; consume it as such
-			sp, err := t.statsPayloadFromMetrics(rm)
-			if err != nil {
-				return metadata, fmt.Errorf("error extracting APM Stats from Metrics: %w", err)
-			}
-			consumer.ConsumeAPMStats(sp)
-			continue
-		}
 		src, err := t.source(rm.Resource().Attributes())
 		if err != nil {
 			return metadata, err
@@ -691,6 +680,22 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			newMetrics := pmetric.NewMetricSlice()
 			for k := 0; k < metricsArray.Len(); k++ {
 				md := metricsArray.At(k)
+				if md.Name() == KeyStatsPayload {
+					// these metrics are an APM Stats payload; consume it as such
+					stats, err := t.MetricToStats(md)
+					if err != nil {
+						t.logger.Error("failed to convert metrics to stats", zap.Error(err))
+						return metadata, err
+					}
+
+					for _, st := range stats {
+						for _, sc := range st.Stats {
+							consumer.ConsumeAPMStats(sc)
+						}
+					}
+					continue
+				}
+
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
 					metadata.Languages = extractLanguageTag(md.Name(), metadata.Languages)
 					for _, mp := range v {

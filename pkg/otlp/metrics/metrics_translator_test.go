@@ -20,16 +20,15 @@ import (
 	"testing"
 	"time"
 
+	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
-
-	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
 )
 
 func TestIsCumulativeMonotonic(t *testing.T) {
@@ -265,7 +264,7 @@ func TestMapIntMonotonicMetrics(t *testing.T) {
 		cumulative[i] = cumulative[i-1] + deltas[i-1]
 	}
 
-	//Map to OpenTelemetry format
+	// Map to OpenTelemetry format
 	slice := pmetric.NewNumberDataPointSlice()
 	slice.EnsureCapacity(len(cumulative))
 	for i, val := range cumulative {
@@ -787,7 +786,7 @@ func TestMapDoubleMonotonicMetrics(t *testing.T) {
 		cumulative[i] = cumulative[i-1] + deltas[i-1]
 	}
 
-	//Map to OpenTelemetry format
+	// Map to OpenTelemetry format
 	slice := pmetric.NewNumberDataPointSlice()
 	slice.EnsureCapacity(len(cumulative))
 	for i, val := range cumulative {
@@ -909,9 +908,10 @@ func TestMapAPMStats(t *testing.T) {
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 	tr := newTranslator(t, logger)
-	md := tr.StatsPayloadToMetrics(&pb.StatsPayload{
+	md, err := tr.StatsToMetrics(&pb.StatsPayload{
 		Stats: []*pb.ClientStatsPayload{statsPayloads[0], statsPayloads[1]},
 	})
+	assert.NoError(t, err)
 
 	ctx := context.Background()
 	tr.MapMetrics(ctx, md, consumer)
