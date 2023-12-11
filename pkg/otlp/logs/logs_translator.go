@@ -125,9 +125,6 @@ func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) data
 		// Prefix the keys so they aren't overwritten when marshalling
 		if k == "hostname" || k == "service" {
 			l.AdditionalProperties["otel."+k] = v.AsString()
-		} else if k == "source" {
-			src := *l.Ddtags + ",source:" + v.AsString()
-			l.Ddtags = &src
 		} else {
 			l.AdditionalProperties[k] = v.AsString()
 		}
