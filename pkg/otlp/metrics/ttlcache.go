@@ -82,6 +82,13 @@ func (t *ttlCache) putAndGetDiff(
 			return 0, false
 		}
 		dx = val - cnt.value
+
+		// For the purpose of the POC using a map here for simplicity. Will likely 
+		// need to create a new func to use in this case.
+		if ok := rateAsGaugeMetrics[dimensions.name]; ok == "ok" {
+			dx = dx / time.Duration(ts - cnt.ts).Seconds()
+		}
+
 		// If sequence is monotonic and diff is negative, there has been a reset.
 		// This must never happen if we know the startTs; we also override the value in this case.
 		ok = isNotFirstPoint(startTs, ts, cnt.startTs) && !(monotonic && dx < 0)

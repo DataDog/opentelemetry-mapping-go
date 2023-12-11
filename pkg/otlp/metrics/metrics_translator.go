@@ -40,7 +40,21 @@ const (
 	errNoBucketsNoSumCount string = "no buckets mode and no send count sum are incompatible"
 )
 
-var _ source.Provider = (*noSourceProvider)(nil)
+var (
+	_ source.Provider = (*noSourceProvider)(nil)
+
+	rateAsGaugeMetrics = map[string]string{
+		"kafka.net.bytes_out.rate":                "ok",
+		"kafka.net.bytes_in.rate":                 "ok",
+		"kafka.replication.isr_shrinks.rate":      "ok",
+		"kafka.replication.isr_expands.rate":      "ok",
+		"kafka.replication.leader_elections.rate": "ok",
+		"jvm.gc.minor_collection_count":           "ok",
+		"jvm.gc.major_collection_count":           "ok",
+		"jvm.gc.minor_collection_time":            "ok",
+		"jvm.gc.major_collection_time":            "ok",
+	}
+)
 
 type noSourceProvider struct{}
 
@@ -195,7 +209,13 @@ func (t *Translator) mapNumberMonotonicMetrics(
 		}
 
 		if dx, ok := t.prevPts.MonotonicDiff(pointDims, startTs, ts, val); ok {
-			consumer.ConsumeTimeSeries(ctx, pointDims, Count, ts, dx)
+			// For the purpose of the POC using a map here for simplicity. Will likely 
+			// need to create a new func to use in this case.
+			if rateAsGaugeMetrics[dims.name] == "ok" {
+				consumer.ConsumeTimeSeries(ctx, pointDims, Gauge, ts, dx)
+			} else {
+				consumer.ConsumeTimeSeries(ctx, pointDims, Count, ts, dx)
+			}
 		} else if i == 0 && t.shouldConsumeInitialValue(startTs, ts) {
 			consumer.ConsumeTimeSeries(ctx, pointDims, Count, ts, val)
 		}

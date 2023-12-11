@@ -27,10 +27,117 @@ const (
 	divPercentage = 0.01
 )
 
+var (
+	metricAttrs = map[string]string{
+		"kafka.producer.response-rate":               "producer-metrics",
+		"kafka.producer.request-latency-avg":         "producer-metrics",
+		"kafka.producer.outgoing-byte-rate":          "producer-metrics",
+		"kafka.producer.io-wait-time-ns-avg":         "producer-metrics",
+		"kafka.producer.byte-rate":                   "producer-topic-metrics",
+		"kafka.consumer.total.bytes-consumed-rate":   "consumer-fetch-manager-metrics",
+		"kafka.consumer.total.records-consumed-rate": "consumer-fetch-manager-metrics",
+		"kafka.network.io":                           "BrokerTopicMetrics",
+		"kafka.purgatory.size":                       "DelayedOperationPurgatory",
+		"kafka.partition.under_replicated":           "ReplicaManager",
+		"kafka.isr.operation.count":                  "ReplicaManager",
+		"kafka.leader.election.rate":                 "ControllerStats",
+		"kafka.partition.offline":                    "KafkaController",
+		"kafka.request.time.avg":                     "RequestMetrics",
+		"jvm.gc.collections.count":                   "GarbageCollector",
+		"jvm.gc.collections.elapsed":                 "GarbageCollector",
+	}
+)
+
 // remapMetrics extracts any Datadog specific metrics from m and appends them to all.
 func remapMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	remapSystemMetrics(all, m)
 	remapContainerMetrics(all, m)
+	remapKafkaMetrics(all, m)
+	remapJvmMetrics(all, m)
+}
+
+func remapKafkaMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
+	name := m.Name()
+	if !strings.HasPrefix(name, "kafka.") {
+		// not a kafka metric
+		return
+	}
+	switch name {
+	// no change necessary, as - gets converted to _.
+	case "kafka.producer.request-rate":
+	case "kafka.producer.response-rate":
+	case "kafka.producer.request-latency-avg":
+
+	case "kafka.producer.outgoing-byte-rate":
+		copyMetric(all, m, "kafka.producer.bytes_out", 1)
+	case "kafka.producer.io-wait-time-ns-avg":
+		copyMetric(all, m, "kafka.producer.io_wait", 1)
+	case "kafka.producer.byte-rate":
+		// may need to add tags client, topic.
+		copyMetric(all, m, "kafka.producer.bytes_out", 1)
+	case "kafka.consumer.total.bytes-consumed-rate":
+		copyMetric(all, m, "kafka.consumer.bytes_in", 1)
+	case "kafka.consumer.total.records-consumed-rate":
+		copyMetric(all, m, "kafka.consumer.messages_in", 1)
+	case "kafka.network.io":
+		copyMetric(all, m, "kafka.net.bytes_out.rate", 1, kv{"state", "out"})
+		copyMetric(all, m, "kafka.net.bytes_in.rate", 1, kv{"state", "in"})
+	case "kafka.purgatory.size":
+		copyMetric(all, m, "kafka.request.producer_request_purgatory.size", 1, kv{"type", "produce"})
+		copyMetric(all, m, "kafka.request.fetch_request_purgatory.size", 1, kv{"type", "fetch"})
+	case "kafka.partition.under_replicated":
+		copyMetric(all, m, "kafka.replication.under_replicated_partitions", 1)
+	case "kafka.isr.operation.count":
+		copyMetric(all, m, "kafka.replication.isr_shrinks.rate", 1, kv{"operation", "shrink"})
+		copyMetric(all, m, "kafka.replication.isr_expands.rate", 1, kv{"operation", "extract"})
+	case "kafka.leader.election.rate":
+		copyMetric(all, m, "kafka.replication.leader_elections.rate", 1)
+	case "kafka.partition.offline":
+		copyMetric(all, m, "kafka.replication.offline_partitions_count", 1)
+	case "kafka.request.time.avg":
+		copyMetric(all, m, "kafka.request.produce.time.avg", 1, kv{"type", "produce"})
+		copyMetric(all, m, "kafka.request.fetch_consumer.time.avg", 1, kv{"type", "fetchconsumer"})
+		copyMetric(all, m, "kafka.request.fetch_follower.time.avg", 1, kv{"type", "fetchfollower"})
+	}
+}
+
+func remapJvmMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
+	name := m.Name()
+	if !strings.HasPrefix(name, "jvm.") {
+		// not a jvm metric
+		return
+	}
+	switch name {
+	case "jvm.gc.collections.count":
+		// Young Gen Collectors
+		copyMetric(all, m, "jvm.gc.minor_collection_count", 1, kv{"name", "Copy"})
+		copyMetric(all, m, "jvm.gc.minor_collection_count", 1, kv{"name", "PS Scavenge"})
+		copyMetric(all, m, "jvm.gc.minor_collection_count", 1, kv{"name", "ParNew"})
+		copyMetric(all, m, "jvm.gc.minor_collection_count", 1, kv{"name", "G1 Young Generation"})
+		// Old Gen Collectors
+		copyMetric(all, m, "jvm.gc.major_collection_count", 1, kv{"name", "MarkSweepCompact"})
+		copyMetric(all, m, "jvm.gc.major_collection_count", 1, kv{"name", "PS MarkSweep"})
+		copyMetric(all, m, "jvm.gc.major_collection_count", 1, kv{"name", "ConcurrentMarkSweep"})
+		copyMetric(all, m, "jvm.gc.major_collection_count", 1, kv{"name", "G1 Mixed Generation"})
+		copyMetric(all, m, "jvm.gc.major_collection_count", 1, kv{"name", "G1 Old Generation"})
+		copyMetric(all, m, "jvm.gc.major_collection_count", 1, kv{"name", "Shenandoah Cycles"})
+		copyMetric(all, m, "jvm.gc.major_collection_count", 1, kv{"name", "ZGC"})
+
+	case "jvm.gc.collections.elapsed":
+		// Young Gen Collectors
+		copyMetric(all, m, "jvm.gc.minor_collection_time", 1, kv{"name", "Copy"})
+		copyMetric(all, m, "jvm.gc.minor_collection_time", 1, kv{"name", "PS Scavenge"})
+		copyMetric(all, m, "jvm.gc.minor_collection_time", 1, kv{"name", "ParNew"})
+		copyMetric(all, m, "jvm.gc.minor_collection_time", 1, kv{"name", "G1 Young Generation"})
+		// Old Gen Collectors
+		copyMetric(all, m, "jvm.gc.major_collection_time", 1, kv{"name", "MarkSweepCompact"})
+		copyMetric(all, m, "jvm.gc.major_collection_time", 1, kv{"name", "PS MarkSweep"})
+		copyMetric(all, m, "jvm.gc.major_collection_time", 1, kv{"name", "ConcurrentMarkSweep"})
+		copyMetric(all, m, "jvm.gc.major_collection_time", 1, kv{"name", "G1 Mixed Generation"})
+		copyMetric(all, m, "jvm.gc.major_collection_time", 1, kv{"name", "G1 Old Generation"})
+		copyMetric(all, m, "jvm.gc.major_collection_time", 1, kv{"name", "Shenandoah Cycles"})
+		copyMetric(all, m, "jvm.gc.major_collection_time", 1, kv{"name", "ZGC"})
+	}
 }
 
 // remapSystemMetrics extracts system metrics from m and appends them to all.
@@ -164,6 +271,12 @@ func copyMetric(dest pmetric.MetricSlice, m pmetric.Metric, newname string, div 
 			if div != 0 {
 				dp.SetDoubleValue(dp.DoubleValue() / div)
 			}
+		}
+		// Rather than having metricAttrs map we can extend copyMetric to take in an attribute map for attributes
+		// that need to be added to the new metric. To avoid cluttering this PR and chaging func signature, using
+		// map.
+		if t := metricAttrs[m.Name()]; t != "" {
+			dp.Attributes().PutStr("type", t)
 		}
 		return false
 	})
