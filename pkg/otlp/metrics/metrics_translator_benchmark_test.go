@@ -20,12 +20,11 @@ import (
 	"math"
 	"testing"
 
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
-
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 )
 
 const (
@@ -235,7 +234,7 @@ func benchmarkMapMetrics(metrics pmetric.Metrics, b *testing.B) {
 		// Make deep copy of metrics to avoid mutation affecting benchmark tests
 		metricsCopy := pmetric.NewMetrics()
 		metrics.CopyTo(metricsCopy)
-		_, err := tr.MapMetrics(ctx, metricsCopy, consumer)
+		_, err := tr.MapMetrics(ctx, metricsCopy, consumer, nil)
 		assert.NoError(b, err)
 	}
 }

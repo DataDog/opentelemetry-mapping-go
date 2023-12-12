@@ -636,7 +636,7 @@ func mapHistogramRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pme
 }
 
 // MapMetrics maps OTLP metrics into the Datadog format
-func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consumer Consumer) (Metadata, error) {
+func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consumer Consumer, out chan string) (Metadata, error) {
 	metadata := Metadata{
 		Languages: []string{},
 	}
@@ -680,17 +680,11 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			newMetrics := pmetric.NewMetricSlice()
 			for k := 0; k < metricsArray.Len(); k++ {
 				md := metricsArray.At(k)
-				if md.Name() == KeyStatsPayload {
+				if md.Name() == keyStatsPayload {
 					// these metrics are an APM Stats payload; consume it as such
-					stats, err := t.MetricToStats(md)
-					if err != nil {
-						t.logger.Error("failed to convert metrics to stats", zap.Error(err))
-						return metadata, err
-					}
-
-					for _, st := range stats {
-						for _, sc := range st.Stats {
-							consumer.ConsumeAPMStats(sc)
+					for l := 0; l < md.Sum().DataPoints().Len(); l++ {
+						if payload, ok := md.Sum().DataPoints().At(l).Attributes().Get(keyStatsPayload); ok {
+							out <- payload.AsString()
 						}
 					}
 					continue

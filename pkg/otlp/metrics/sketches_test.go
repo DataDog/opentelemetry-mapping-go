@@ -21,16 +21,15 @@ import (
 	"testing"
 	"time"
 
+	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 	"github.com/lightstep/go-expohisto/structure"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
-
-	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 )
 
 var _ SketchConsumer = (*sketchConsumer)(nil)
@@ -150,7 +149,7 @@ func TestHistogramSketches(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			md := fromCDF(test.cdf)
 			consumer := &sketchConsumer{}
-			_, err := tr.MapMetrics(ctx, md, consumer)
+			_, err := tr.MapMetrics(ctx, md, consumer, nil)
 			assert.NoError(t, err)
 			sk := consumer.sk
 
@@ -347,7 +346,7 @@ func TestExactHistogramStats(t *testing.T) {
 		t.Run(testInstance.name, func(t *testing.T) {
 			md := testInstance.getHist()
 			consumer := &sketchConsumer{}
-			_, err := tr.MapMetrics(ctx, md, consumer)
+			_, err := tr.MapMetrics(ctx, md, consumer, nil)
 			assert.NoError(t, err)
 			sk := consumer.sk
 
@@ -366,7 +365,6 @@ func TestExactHistogramStats(t *testing.T) {
 }
 
 func TestInfiniteBounds(t *testing.T) {
-
 	tests := []struct {
 		name    string
 		getHist func() pmetric.Metrics
@@ -431,7 +429,7 @@ func TestInfiniteBounds(t *testing.T) {
 		t.Run(testInstance.name, func(t *testing.T) {
 			md := testInstance.getHist()
 			consumer := &sketchConsumer{}
-			_, err := tr.MapMetrics(ctx, md, consumer)
+			_, err := tr.MapMetrics(ctx, md, consumer, nil)
 			assert.NoError(t, err)
 			sk := consumer.sk
 
@@ -573,7 +571,7 @@ func TestKnownDistributionsQuantile(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			md := fromQuantile(name, startTime, timeNow, tt.quantile, N, M)
 			consumer := &sketchConsumer{}
-			_, err := tr.MapMetrics(ctx, md, consumer)
+			_, err := tr.MapMetrics(ctx, md, consumer, nil)
 			require.NoError(t, err)
 			require.NotNil(t, consumer.sk)
 

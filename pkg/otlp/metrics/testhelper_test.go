@@ -98,7 +98,7 @@ func AssertTranslatorMap(t TestingT, translator *Translator, otlpfilename string
 
 	// Map metrics using translator.
 	var consumer testConsumer
-	_, err = translator.MapMetrics(context.Background(), otlpdata, &consumer)
+	_, err = translator.MapMetrics(context.Background(), otlpdata, &consumer, nil)
 	require.NoError(t, err)
 
 	if !assert.Equal(t, expecteddata, consumer.testMetrics) {

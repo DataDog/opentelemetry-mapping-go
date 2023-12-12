@@ -15,6 +15,7 @@
 package metrics
 
 import (
+	"strings"
 	"testing"
 
 	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
@@ -169,10 +170,16 @@ func TestConversion(t *testing.T) {
 				sm := rm.ScopeMetrics().At(i)
 				for i := 0; i < sm.Metrics().Len(); i++ {
 					md := sm.Metrics().At(i)
-
-					stats, err := trans.MetricToStats(md)
-					assert.NoError(t, err)
-					results = append(results, stats...)
+					// these metrics are an APM Stats payload; consume it as such
+					for l := 0; l < md.Sum().DataPoints().Len(); l++ {
+						if payload, ok := md.Sum().DataPoints().At(l).Attributes().Get(keyStatsPayload); ok {
+							unmarshaler := &jsonpb.Unmarshaler{}
+							stats := &pb.StatsPayload{}
+							err = unmarshaler.Unmarshal(strings.NewReader(payload.Str()), stats)
+							assert.NoError(t, err)
+							results = append(results, stats)
+						}
+					}
 					assert.NoError(t, err)
 				}
 			}

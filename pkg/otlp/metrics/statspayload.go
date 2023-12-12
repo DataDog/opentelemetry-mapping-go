@@ -15,18 +15,15 @@
 package metrics
 
 import (
-	"fmt"
-	"strings"
-
 	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
 	"github.com/gogo/protobuf/jsonpb"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 )
 
-// KeyStatsPayload is the key for the stats payload in the attributes map.
+// keyStatsPayload is the key for the stats payload in the attributes map.
 // This is used as Metric name and Attribute key.
-const KeyStatsPayload = "dd.internal.stats.payload"
+const keyStatsPayload = "dd.internal.stats.payload"
 
 var (
 	marshaler   = &jsonpb.Marshaler{}
@@ -43,6 +40,11 @@ var (
 // that we are in a Lambda environment. Thus, we must use a placeholder.
 const UnsetHostnamePlaceholder = "__unset__"
 
+// keyAPMStats specifies the key name of the resource attribute which identifies resource metrics
+// as being an APM Stats Payload. The presence of the key results in them being treated and consumed
+// differently by the Translator.
+const keyAPMStats = "_dd.apm_stats"
+
 // StatsToMetrics converts a StatsPayload to a pdata.Metrics
 func (t *Translator) StatsToMetrics(sp *pb.StatsPayload) (pmetric.Metrics, error) {
 	payload, err := marshaler.MarshalToString(sp)
@@ -52,33 +54,15 @@ func (t *Translator) StatsToMetrics(sp *pb.StatsPayload) (pmetric.Metrics, error
 	}
 	mmx := pmetric.NewMetrics()
 	rmx := mmx.ResourceMetrics().AppendEmpty()
+	rmx.Resource().Attributes().PutBool(keyAPMStats, true)
 
 	smx := rmx.ScopeMetrics().AppendEmpty()
 	mslice := smx.Metrics()
 	mx := mslice.AppendEmpty()
-	mx.SetName(KeyStatsPayload)
+	mx.SetName(keyStatsPayload)
 	sum := mx.SetEmptySum()
 	sum.SetIsMonotonic(false)
 	dp := sum.DataPoints().AppendEmpty()
-	dp.Attributes().PutStr(KeyStatsPayload, payload)
+	dp.Attributes().PutStr(keyStatsPayload, payload)
 	return mmx, nil
-}
-
-// MetricToStats converts a pdata.Metrics to a StatsPayload
-func (t *Translator) MetricToStats(md pmetric.Metric) ([]*pb.StatsPayload, error) {
-	var statsPayloads []*pb.StatsPayload
-	for i := 0; i < md.Sum().DataPoints().Len(); i++ {
-		if payload, ok := md.Sum().DataPoints().At(i).Attributes().Get(KeyStatsPayload); ok {
-			sp := &pb.StatsPayload{}
-			var err error
-
-			err = unmarshaler.Unmarshal(strings.NewReader(payload.Str()), sp)
-			if err != nil {
-				return nil, fmt.Errorf("error unmarshaling the payload: %w", err)
-			}
-			statsPayloads = append(statsPayloads, sp)
-
-		}
-	}
-	return statsPayloads, nil
 }

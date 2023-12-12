@@ -19,6 +19,8 @@ import (
 	"math"
 	"testing"
 
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -26,9 +28,6 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
-
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
 )
 
 func exampleSummaryDataPointSlice(ts pcommon.Timestamp, sum float64, count uint64) pmetric.SummaryDataPointSlice {
@@ -156,7 +155,7 @@ func TestNaNMetrics(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, testLogger)
 	consumer := &mockFullConsumer{}
-	_, err := tr.MapMetrics(ctx, md, consumer)
+	_, err := tr.MapMetrics(ctx, md, consumer, nil)
 	require.NoError(t, err)
 
 	assert.ElementsMatch(t, consumer.metrics, []metric{
