@@ -15,6 +15,7 @@
 package metrics
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -327,7 +328,7 @@ func (t *Translator) statsPayloadFromMetrics(rmx pmetric.ResourceMetrics) (*pb.C
 	hostname := getStr(attr, statsKeyHostname)
 	tags := strings.Split(getStr(attr, statsKeyTags), ",")
 	if hostname == UnsetHostnamePlaceholder {
-		src, err := t.source(attr)
+		src, _, err := t.source(context.Background(), attr)
 		if err != nil {
 			return &pb.ClientStatsPayload{}, err
 		}
