@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
@@ -62,7 +63,7 @@ type Metadata struct {
 }
 
 // NewTranslator creates a new translator with given options.
-func NewTranslator(logger *zap.Logger, options ...TranslatorOption) (*Translator, error) {
+func NewTranslator(set component.TelemetrySettings, options ...TranslatorOption) (*Translator, error) {
 	cfg := translatorConfig{
 		HistMode:                             HistogramModeDistributions,
 		SendHistogramAggregations:            false,
@@ -90,7 +91,7 @@ func NewTranslator(logger *zap.Logger, options ...TranslatorOption) (*Translator
 	cache := newTTLCache(cfg.sweepInterval, cfg.deltaTTL)
 	return &Translator{
 		prevPts: cache,
-		logger:  logger.With(zap.String("component", "metrics translator")),
+		logger:  set.Logger.With(zap.String("component", "metrics translator")),
 		cfg:     cfg,
 	}, nil
 }
