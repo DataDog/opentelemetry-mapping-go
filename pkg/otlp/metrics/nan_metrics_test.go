@@ -155,7 +155,7 @@ func TestNaNMetrics(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, testLogger)
 	consumer := &mockFullConsumer{}
-	_, err := tr.MapMetrics(ctx, md, consumer, nil)
+	_, err := tr.MapMetrics(ctx, md, consumer)
 	require.NoError(t, err)
 
 	assert.ElementsMatch(t, consumer.metrics, []metric{

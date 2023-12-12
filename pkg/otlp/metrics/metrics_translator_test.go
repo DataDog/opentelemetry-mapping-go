@@ -24,13 +24,13 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
+	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
-	"google.golang.org/protobuf/proto"
 )
 
 func TestIsCumulativeMonotonic(t *testing.T) {
@@ -98,12 +98,13 @@ func (t testProvider) Source(context.Context) (source.Source, error) {
 	}, nil
 }
 
-func newTranslator(t *testing.T, logger *zap.Logger) *Translator {
+func newTranslatorWithStatsChannel(t *testing.T, logger *zap.Logger, ch chan []byte) *Translator {
 	options := []TranslatorOption{
 		WithFallbackSourceProvider(testProvider(fallbackHostname)),
 		WithHistogramMode(HistogramModeDistributions),
 		WithNumberMode(NumberModeCumulativeToDelta),
 		WithHistogramAggregations(),
+		WithStatsOut(ch),
 	}
 
 	set := componenttest.NewNopTelemetrySettings()
@@ -115,6 +116,10 @@ func newTranslator(t *testing.T, logger *zap.Logger) *Translator {
 
 	require.NoError(t, err)
 	return tr
+}
+
+func newTranslator(t *testing.T, logger *zap.Logger) *Translator {
+	return newTranslatorWithStatsChannel(t, logger, nil)
 }
 
 type metric struct {
@@ -365,7 +370,7 @@ func TestMapIntMonotonicReportFirstValue(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer, nil)
+	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer)
 	startTs := int(getProcessStartTime()) + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -382,7 +387,7 @@ func TestMapIntMonotonicNotReportFirstValueIfStartTSMatchTS(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(true), consumer, nil)
+	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(true), consumer)
 	assert.Empty(t, consumer.metrics)
 	assert.Empty(t, rmt.Languages)
 }
@@ -395,7 +400,7 @@ func TestMapIntMonotonicReportDiffForFirstValue(t *testing.T) {
 	startTs := int(getProcessStartTime()) + 1
 	// Add an entry to the cache about the timeseries, in this case we send the diff (9) rather than the first value (10).
 	tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+1)), 1)
-	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer, nil)
+	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer)
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -413,7 +418,7 @@ func TestMapRuntimeMetricsHasMapping(t *testing.T) {
 	consumer := &mockFullConsumer{}
 	exampleDims = newDims("process.runtime.go.goroutines")
 	mappedDims := newDims("runtime.go.num_goroutine")
-	rmt, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer, nil)
+	rmt, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -443,7 +448,7 @@ func TestMapRuntimeMetricsHasMappingCollector(t *testing.T) {
 	exampleDims = newDims("process.runtime.go.goroutines")
 	exampleOtelDims := newDims("otel.process.runtime.go.goroutines")
 	mappedDims := newDims("runtime.go.num_goroutine")
-	rmt, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer, nil)
+	rmt, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -470,7 +475,7 @@ func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen0"},
 	}}
-	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes, 1), consumer, nil)
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes, 1), consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -497,7 +502,7 @@ func TestMapSumRuntimeMetricWithAttributesHasMappingCollector(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen0"},
 	}}
-	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes, 1), consumer, nil)
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes, 1), consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -520,7 +525,7 @@ func TestMapGaugeRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen1"},
 	}}
-	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeGauge, attributes, 1), consumer, nil)
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeGauge, attributes, 1), consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -540,7 +545,7 @@ func TestMapHistogramRuntimeMetricHasMapping(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
 
-	rmt, err := tr.MapMetrics(ctx, createTestHistogramMetric("process.runtime.jvm.threads.count"), consumer, nil)
+	rmt, err := tr.MapMetrics(ctx, createTestHistogramMetric("process.runtime.jvm.threads.count"), consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -569,7 +574,7 @@ func TestMapHistogramRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen1"},
 	}}
-	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeHistogram, attributes, 1), consumer, nil)
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeHistogram, attributes, 1), consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -601,7 +606,7 @@ func TestMapRuntimeMetricWithTwoAttributesHasMapping(t *testing.T) {
 		key:    "type",
 		values: []string{"heap"},
 	}}
-	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 1), consumer, nil)
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 1), consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -628,7 +633,7 @@ func TestMapRuntimeMetricWithTwoAttributesMultipleDataPointsHasMapping(t *testin
 		key:    "type",
 		values: []string{"heap", "heap", "heap"},
 	}}
-	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 3), consumer, nil)
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 3), consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -656,7 +661,7 @@ func TestMapRuntimeMetricsMultipleLanguageTags(t *testing.T) {
 	consumer := &mockFullConsumer{}
 	exampleDims = newDims("process.runtime.go.goroutines")
 	md1 := createTestIntCumulativeMonotonicMetrics(false)
-	rmt, err := tr.MapMetrics(ctx, md1, consumer, nil)
+	rmt, err := tr.MapMetrics(ctx, md1, consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -665,7 +670,7 @@ func TestMapRuntimeMetricsMultipleLanguageTags(t *testing.T) {
 	exampleDims = newDims("process.runtime.go.lookups")
 	md2 := createTestIntCumulativeMonotonicMetrics(false)
 	md1.ResourceMetrics().MoveAndAppendTo(md2.ResourceMetrics())
-	rmt, err = tr.MapMetrics(ctx, md2, consumer, nil)
+	rmt, err = tr.MapMetrics(ctx, md2, consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -674,7 +679,7 @@ func TestMapRuntimeMetricsMultipleLanguageTags(t *testing.T) {
 	exampleDims = newDims("process.runtime.dotnet.exceptions.count")
 	md3 := createTestIntCumulativeMonotonicMetrics(false)
 	md2.ResourceMetrics().MoveAndAppendTo(md3.ResourceMetrics())
-	rmt, err = tr.MapMetrics(ctx, md3, consumer, nil)
+	rmt, err = tr.MapMetrics(ctx, md3, consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -683,7 +688,7 @@ func TestMapRuntimeMetricsMultipleLanguageTags(t *testing.T) {
 	exampleDims = newDims("process.runtime.jvm.classes.current_loaded")
 	md4 := createTestIntCumulativeMonotonicMetrics(false)
 	md3.ResourceMetrics().MoveAndAppendTo(md4.ResourceMetrics())
-	rmt, err = tr.MapMetrics(ctx, md4, consumer, nil)
+	rmt, err = tr.MapMetrics(ctx, md4, consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -698,7 +703,7 @@ func TestMapGaugeRuntimeMetricWithInvalidAttributes(t *testing.T) {
 		key:    "type",
 		values: []string{"heap2"},
 	}}
-	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 1), consumer, nil)
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 1), consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -717,7 +722,7 @@ func TestMapRuntimeMetricsNoMapping(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
 	exampleDims = newDims("runtime.go.mem.live_objects")
-	rmt, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer, nil)
+	rmt, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false), consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -741,7 +746,7 @@ func TestMapSystemMetrics(t *testing.T) {
 	)
 	require.NoError(t, err)
 	consumer := &mockFullConsumer{}
-	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("system.filesystem.utilization", pmetric.MetricTypeGauge, nil, 1), consumer, nil)
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("system.filesystem.utilization", pmetric.MetricTypeGauge, nil, 1), consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -887,7 +892,7 @@ func TestMapDoubleMonotonicReportFirstValue(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(false), consumer, nil)
+	tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(false), consumer)
 	startTs := int(getProcessStartTime()) + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -903,7 +908,7 @@ func TestMapDoubleMonotonicNotReportFirstValueIfStartTSMatchTS(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(true), consumer, nil)
+	tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(true), consumer)
 	assert.Empty(t, consumer.metrics)
 }
 
@@ -911,20 +916,22 @@ func TestMapAPMStats(t *testing.T) {
 	consumer := &mockFullConsumer{}
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
-	tr := newTranslator(t, logger)
+	ch := make(chan []byte, 10)
+	tr := newTranslatorWithStatsChannel(t, logger, ch)
 	want := &pb.StatsPayload{
-		Stats: []*pb.ClientStatsPayload{statsPayloads[0], statsPayloads[1]},
+		Stats: []*pb.ClientStatsPayload{
+			statsPayloads[0], statsPayloads[1],
+		},
 	}
 	md, err := tr.StatsToMetrics(want)
 	assert.NoError(t, err)
 
 	ctx := context.Background()
-	ch := make(chan []byte, 10)
-	tr.MapMetrics(ctx, md, consumer, ch)
+	tr.MapMetrics(ctx, md, consumer)
+	msg := <-ch
+	require.NotNil(t, msg)
 	got := &pb.StatsPayload{}
-
-	payload := <-ch
-	err = proto.Unmarshal(payload, got)
+	err = proto.Unmarshal(msg, got)
 	assert.NoError(t, err)
 	assert.True(t, proto.Equal(want, got))
 }
@@ -937,7 +944,7 @@ func TestMapDoubleMonotonicReportDiffForFirstValue(t *testing.T) {
 	startTs := int(getProcessStartTime()) + 1
 	// Add an entry to the cache about the timeseries, in this case we send the diff (9) rather than the first value (10).
 	tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+1)), 1)
-	tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(false), consumer, nil)
+	tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(false), consumer)
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{

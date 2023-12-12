@@ -40,6 +40,8 @@ type translatorConfig struct {
 	deltaTTL      int64
 
 	fallbackSourceProvider source.Provider
+	// statsOut is the channel where the translator will send its APM statsPayload bytes
+	statsOut chan<- []byte
 }
 
 // TranslatorOption is a translator creation option.
@@ -123,7 +125,6 @@ const (
 // The default mode is HistogramModeOff.
 func WithHistogramMode(mode HistogramMode) TranslatorOption {
 	return func(t *translatorConfig) error {
-
 		switch mode {
 		case HistogramModeNoBuckets, HistogramModeCounters, HistogramModeDistributions:
 			t.HistMode = mode
@@ -167,6 +168,14 @@ const (
 func WithNumberMode(mode NumberMode) TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.NumberMode = mode
+		return nil
+	}
+}
+
+// WithStatsOut sets the channel where the translator will send its APM statsPayload bytes
+func WithStatsOut(statsOut chan<- []byte) TranslatorOption {
+	return func(t *translatorConfig) error {
+		t.statsOut = statsOut
 		return nil
 	}
 }
