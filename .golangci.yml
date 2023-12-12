@@ -1,7 +1,6 @@
 issues:
   # Do not limit the number of issues per linter.
   max-issues-per-linter: 0
-
   # Do not limit the number of times a same issue is reported.
   max-same-issues: 0
   exclude-rules:
@@ -11,7 +10,6 @@ issues:
         - errcheck
     - text: "appendAssign"
       linters: gocritic
-
 linters:
   disable-all: true
   enable:
@@ -27,10 +25,9 @@ linters:
     - revive
     - staticcheck
     - tenv
-    - unconvert 
+    - unconvert
     - unparam
     - unused
-
 linters-settings:
   depguard:
     include-go-root: true
@@ -51,23 +48,20 @@ linters-settings:
           - github.com/lightstep/go-expohisto
           - github.com/patrickmn/go-cache
           - github.com/stretchr/testify
+          - github.com/gogo/protobuf/jsonpb
           - golang.org/x/exp
           - gopkg.in/yaml.v3
           - go.uber.org
-          
   staticcheck:
     go: "1.20"
-    checks: ["all",
-             "-ST1000", "-ST1003", "-ST1016", "-ST1020", "-ST1021", "-ST1022", # These ones are disabled by default on staticcheck
-             "-ST1013", # Use HTTP code enums instead of integers
-             "-SA1019", "-SA4011", "-SA4031" # Disabling these to re-enable golanci-lint default tests
-             ]
+    checks: ["all", "-ST1000", "-ST1003", "-ST1016", "-ST1020", "-ST1021", "-ST1022", # These ones are disabled by default on staticcheck
+      "-ST1013", # Use HTTP code enums instead of integers
+      "-SA1019", "-SA4011", "-SA4031", # Disabling these to re-enable golanci-lint default tests
+    ]
   gofmt:
     simplify: true
-  
   govet:
     check-shadowing: true
-
   revive:
     rules:
       - name: package-comments

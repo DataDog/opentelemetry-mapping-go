@@ -25,10 +25,7 @@ import (
 // This is used as Metric name and Attribute key.
 const keyStatsPayload = "dd.internal.stats.payload"
 
-var (
-	marshaler   = &jsonpb.Marshaler{}
-	unmarshaler = &jsonpb.Unmarshaler{}
-)
+var marshaler = &jsonpb.Marshaler{}
 
 // UnsetHostnamePlaceholder is the string used as a hostname when the hostname can not be extracted from span attributes
 // by the processor. Upon decoding the metrics, the Translator will use its configured fallback SourceProvider to replace
