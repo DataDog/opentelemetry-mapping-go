@@ -53,12 +53,16 @@ func (*noSourceProvider) Source(context.Context) (source.Source, error) {
 	return source.Source{Kind: source.HostnameKind, Identifier: ""}, nil
 }
 
+type instruments struct {
+	missingSources otelmetric.Int64Counter
+}
+
 // Translator is a metrics translator.
 type Translator struct {
-	prevPts        *ttlCache
-	logger         *zap.Logger
-	missingSources otelmetric.Int64Counter
-	cfg            translatorConfig
+	prevPts     *ttlCache
+	logger      *zap.Logger
+	instruments instruments
+	cfg         translatorConfig
 }
 
 // Metadata specifies information about the outcome of the MapMetrics call.
@@ -104,10 +108,10 @@ func NewTranslator(set component.TelemetrySettings, options ...TranslatorOption)
 	}
 
 	return &Translator{
-		prevPts:        cache,
-		logger:         set.Logger.With(zap.String("component", "metrics translator")),
-		missingSources: missingSources,
-		cfg:            cfg,
+		prevPts:     cache,
+		logger:      set.Logger.With(zap.String("component", "metrics translator")),
+		instruments: instruments{missingSources: missingSources},
+		cfg:         cfg,
 	}, nil
 }
 
@@ -697,7 +701,7 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 
 			if !hasSource && ilm.Scope().Name() != meterName {
 				// Only count metrics if they do not come from the translator itself.
-				t.missingSources.Add(ctx, int64(metricsArray.Len()))
+				t.instruments.missingSources.Add(ctx, int64(metricsArray.Len()))
 			}
 
 			var additionalTags []string
