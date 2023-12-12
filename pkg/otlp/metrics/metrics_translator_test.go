@@ -26,6 +26,7 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
@@ -105,8 +106,10 @@ func newTranslator(t *testing.T, logger *zap.Logger) *Translator {
 		WithHistogramAggregations(),
 	}
 
+	set := componenttest.NewNopTelemetrySettings()
+	set.Logger = logger
 	tr, err := NewTranslator(
-		logger,
+		set,
 		options...,
 	)
 
@@ -432,7 +435,7 @@ func TestMapRuntimeMetricsHasMapping(t *testing.T) {
 func TestMapRuntimeMetricsHasMappingCollector(t *testing.T) {
 	ctx := context.Background()
 	tr, err := NewTranslator(
-		zap.NewNop(),
+		componenttest.NewNopTelemetrySettings(),
 		WithRemapping(),
 	)
 	require.NoError(t, err)
@@ -485,7 +488,7 @@ func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 func TestMapSumRuntimeMetricWithAttributesHasMappingCollector(t *testing.T) {
 	ctx := context.Background()
 	tr, err := NewTranslator(
-		zap.NewNop(),
+		componenttest.NewNopTelemetrySettings(),
 		WithRemapping(),
 	)
 	require.NoError(t, err)
@@ -733,7 +736,7 @@ func TestMapRuntimeMetricsNoMapping(t *testing.T) {
 func TestMapSystemMetrics(t *testing.T) {
 	ctx := context.Background()
 	tr, err := NewTranslator(
-		zap.NewNop(),
+		componenttest.NewNopTelemetrySettings(),
 		WithRemapping(),
 	)
 	require.NoError(t, err)

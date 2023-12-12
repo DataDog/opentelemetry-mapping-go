@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
@@ -85,7 +86,7 @@ func TestDeltaHistogramTranslatorOptions(t *testing.T) {
 
 	for _, testinstance := range tests {
 		t.Run(testinstance.name, func(t *testing.T) {
-			translator, err := NewTranslator(zap.NewNop(), testinstance.options...)
+			translator, err := NewTranslator(componenttest.NewNopTelemetrySettings(), testinstance.options...)
 			if testinstance.err != "" {
 				assert.EqualError(t, err, testinstance.err)
 				return
@@ -150,7 +151,7 @@ func TestCumulativeHistogramTranslatorOptions(t *testing.T) {
 
 	for _, testinstance := range tests {
 		t.Run(testinstance.name, func(t *testing.T) {
-			translator, err := NewTranslator(zap.NewNop(), testinstance.options...)
+			translator, err := NewTranslator(componenttest.NewNopTelemetrySettings(), testinstance.options...)
 			require.NoError(t, err)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 		})
@@ -187,13 +188,11 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			expectedUnsupportedAggregationTemporality: 1,
 		},
 		{
-			name:     "resource-attributes-as-tags",
-			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
-			ddogfile: "testdata/datadogdata/histogram/simple-exponential_res-tags.json",
-			options: []TranslatorOption{
-				WithResourceAttributesAsTags(),
-			},
-			expectedUnknownMetricType:                 1,
+			name:                      "resource-attributes-as-tags",
+			otlpfile:                  "testdata/otlpdata/histogram/simple-exponential.json",
+			ddogfile:                  "testdata/datadogdata/histogram/simple-exponential_res-tags.json",
+			options:                   []TranslatorOption{},
+			expectedUnknownMetricType: 1,
 			expectedUnsupportedAggregationTemporality: 1,
 		},
 		{
@@ -242,7 +241,6 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_res-ilmd-tags.json",
 			options: []TranslatorOption{
-				WithResourceAttributesAsTags(),
 				WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
@@ -254,7 +252,6 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_cs-both-tags.json",
 			options: []TranslatorOption{
 				WithHistogramAggregations(),
-				WithResourceAttributesAsTags(),
 				WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
@@ -266,7 +263,6 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_all.json",
 			options: []TranslatorOption{
 				WithHistogramAggregations(),
-				WithResourceAttributesAsTags(),
 				WithInstrumentationLibraryMetadataAsTags(),
 				WithInstrumentationScopeMetadataAsTags(),
 			},
@@ -277,9 +273,10 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 
 	for _, testinstance := range tests {
 		t.Run(testinstance.name, func(t *testing.T) {
+			set := componenttest.NewNopTelemetrySettings()
 			core, observed := observer.New(zapcore.DebugLevel)
-			testLogger := zap.New(core)
-			translator, err := NewTranslator(testLogger, testinstance.options...)
+			set.Logger = zap.New(core)
+			translator, err := NewTranslator(set, testinstance.options...)
 			require.NoError(t, err)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 			assert.Equal(t, testinstance.expectedUnknownMetricType, observed.FilterMessage("Unknown or unsupported metric type").Len())

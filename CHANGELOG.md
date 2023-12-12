@@ -4,6 +4,23 @@
 
 <!-- next version -->
 
+## v0.9.0
+
+### 🛑 Breaking changes 🛑
+
+- `pkg/metrics`: Remove `WithResourceAttributesAsTags()` and `translatorConfig.ResourceAttributesAsTags` (#219)
+- `pkg/otlp/metrics`: Change signature of `NewTranslator` to accept `component.TelemetrySettings` instead of `zap.Logger` (#218)
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/logs`: DataDog log timestamp (ie. '@timestamp') now includes milliseconds. (#152)
+- `pkg/otlp/metric`: Add `datadog.otlp_translator.metrics.missing_source` counter, which counts the number of metrics that are missing a source (e.g. hostname). (#220)
+- `pkg/inframetadata`: Add support for GOOS and GOARCH values (#185)
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/otlp/metrics`: Removes runtime metric mapping for process.runtime.jvm.gc.duration -> jvm.gc.parnew.time (#213)
+
 ## v0.8.3
 
 ### 💡 Enhancements 💡
