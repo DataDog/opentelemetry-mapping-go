@@ -22,11 +22,11 @@ import (
 
 type translatorConfig struct {
 	// metrics export behavior
-	HistMode                  HistogramMode
-	SendHistogramAggregations bool
-	Quantiles                 bool
-	NumberMode                NumberMode
-	InitialCumulMonoValueMode InitialCumulMonoValueMode
+	HistMode                             HistogramMode
+	SendHistogramAggregations            bool
+	Quantiles                            bool
+	NumberMode                           NumberMode
+	InitialCumulMonoValueMode            InitialCumulMonoValueMode
 	InstrumentationLibraryMetadataAsTags bool
 	InstrumentationScopeMetadataAsTags   bool
 

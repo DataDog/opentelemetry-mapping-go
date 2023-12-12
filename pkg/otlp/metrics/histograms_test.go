@@ -187,11 +187,11 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			expectedUnsupportedAggregationTemporality: 1,
 		},
 		{
-			name:     "resource-attributes-as-tags",
-			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
-			ddogfile: "testdata/datadogdata/histogram/simple-exponential_res-tags.json",
-			options: []TranslatorOption{},
-			expectedUnknownMetricType:                 1,
+			name:                      "resource-attributes-as-tags",
+			otlpfile:                  "testdata/otlpdata/histogram/simple-exponential.json",
+			ddogfile:                  "testdata/datadogdata/histogram/simple-exponential_res-tags.json",
+			options:                   []TranslatorOption{},
+			expectedUnknownMetricType: 1,
 			expectedUnsupportedAggregationTemporality: 1,
 		},
 		{
