@@ -5,10 +5,10 @@ change_type: enhancement
 component: pkg/otlp/metric
 
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: Add `datadog.otlp_translator.metrics.missing_source` counter, which counts the number of scope metrics that are missing a source (e.g. hostname).
+note: Add `datadog.otlp_translator.metrics.missing_source` counter, which counts the number of metrics that are missing a source (e.g. hostname).
 
 # The PR related to this change
-issues: []
+issues: [220]
 
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
