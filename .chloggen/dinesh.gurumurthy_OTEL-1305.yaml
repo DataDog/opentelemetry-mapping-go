@@ -1,9 +1,9 @@
 # One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
-change_type:
+change_type: breaking
 # The name of the component (e.g. pkg/quantile)
 component: pkg/otlp/metrics
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: The PR introduces a breaking API change for MapMetrics. StatsPayload are sent on out channel provided.
+note: StatsPayload are now sent on out channel provided.
 # The PR related to this change
 issues: []
 # (Optional) One or more lines of additional information to render under the primary note.
