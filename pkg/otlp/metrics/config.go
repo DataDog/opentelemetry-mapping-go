@@ -22,15 +22,11 @@ import (
 
 type translatorConfig struct {
 	// metrics export behavior
-	HistMode                  HistogramMode
-	SendHistogramAggregations bool
-	Quantiles                 bool
-	NumberMode                NumberMode
-	InitialCumulMonoValueMode InitialCumulMonoValueMode
-	ResourceAttributesAsTags  bool
-	// Deprecated: use InstrumentationScopeMetadataAsTags instead in favor of
-	// https://github.com/open-telemetry/opentelemetry-proto/releases/tag/v0.15.0
-	// Both must not be enabled at the same time.
+	HistMode                             HistogramMode
+	SendHistogramAggregations            bool
+	Quantiles                            bool
+	NumberMode                           NumberMode
+	InitialCumulMonoValueMode            InitialCumulMonoValueMode
 	InstrumentationLibraryMetadataAsTags bool
 	InstrumentationScopeMetadataAsTags   bool
 
@@ -91,14 +87,6 @@ func WithFallbackSourceProvider(provider source.Provider) TranslatorOption {
 func WithQuantiles() TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.Quantiles = true
-		return nil
-	}
-}
-
-// WithResourceAttributesAsTags sets resource attributes as tags.
-func WithResourceAttributesAsTags() TranslatorOption {
-	return func(t *translatorConfig) error {
-		t.ResourceAttributesAsTags = true
 		return nil
 	}
 }

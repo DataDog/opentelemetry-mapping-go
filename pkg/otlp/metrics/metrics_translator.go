@@ -70,7 +70,6 @@ func NewTranslator(set component.TelemetrySettings, options ...TranslatorOption)
 		Quantiles:                            false,
 		NumberMode:                           NumberModeCumulativeToDelta,
 		InitialCumulMonoValueMode:            InitialCumulMonoValueModeAuto,
-		ResourceAttributesAsTags:             false,
 		InstrumentationLibraryMetadataAsTags: false,
 		sweepInterval:                        1800,
 		deltaTTL:                             3600,

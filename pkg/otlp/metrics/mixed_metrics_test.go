@@ -33,13 +33,11 @@ func TestMapMetrics(t *testing.T) {
 			expectedUnsupportedAggregationTemporality: 2,
 		},
 		{
-			name:     "resource-attributes-as-tags",
-			otlpfile: "testdata/otlpdata/mixed/simple.json",
-			ddogfile: "testdata/datadogdata/mixed/simple_res-tags.json",
-			options: []TranslatorOption{
-				WithResourceAttributesAsTags(),
-			},
-			expectedUnknownMetricType:                 1,
+			name:                      "resource-attributes-as-tags",
+			otlpfile:                  "testdata/otlpdata/mixed/simple.json",
+			ddogfile:                  "testdata/datadogdata/mixed/simple_res-tags.json",
+			options:                   []TranslatorOption{},
+			expectedUnknownMetricType: 1,
 			expectedUnsupportedAggregationTemporality: 2,
 		},
 		{
@@ -88,7 +86,6 @@ func TestMapMetrics(t *testing.T) {
 			otlpfile: "testdata/otlpdata/mixed/simple.json",
 			ddogfile: "testdata/datadogdata/mixed/simple_res-ilmd-tags.json",
 			options: []TranslatorOption{
-				WithResourceAttributesAsTags(),
 				WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
@@ -100,7 +97,6 @@ func TestMapMetrics(t *testing.T) {
 			ddogfile: "testdata/datadogdata/mixed/simple_cs-both-tags.json",
 			options: []TranslatorOption{
 				WithHistogramAggregations(),
-				WithResourceAttributesAsTags(),
 				WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
@@ -112,7 +108,6 @@ func TestMapMetrics(t *testing.T) {
 			ddogfile: "testdata/datadogdata/mixed/simple_all.json",
 			options: []TranslatorOption{
 				WithHistogramAggregations(),
-				WithResourceAttributesAsTags(),
 				WithInstrumentationLibraryMetadataAsTags(),
 				WithInstrumentationScopeMetadataAsTags(),
 			},
