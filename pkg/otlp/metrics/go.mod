@@ -8,7 +8,6 @@ require (
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.9.0
 	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.9.0
 	github.com/DataDog/sketches-go v1.4.3
-	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.3
 	github.com/lightstep/go-expohisto v1.0.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
