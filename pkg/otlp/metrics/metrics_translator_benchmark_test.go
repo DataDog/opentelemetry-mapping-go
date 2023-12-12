@@ -22,6 +22,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 
@@ -52,8 +53,10 @@ func newBenchmarkTranslator(b *testing.B, logger *zap.Logger, opts ...Translator
 		WithNumberMode(NumberModeCumulativeToDelta),
 	}, opts...)
 
+	set := componenttest.NewNopTelemetrySettings()
+	set.Logger = logger
 	tr, err := NewTranslator(
-		logger,
+		set,
 		options...,
 	)
 

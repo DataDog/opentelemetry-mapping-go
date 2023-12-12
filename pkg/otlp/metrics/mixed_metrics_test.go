@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
@@ -142,9 +143,10 @@ func TestMapMetrics(t *testing.T) {
 
 	for _, testinstance := range tests {
 		t.Run(testinstance.name, func(t *testing.T) {
+			set := componenttest.NewNopTelemetrySettings()
 			core, observed := observer.New(zapcore.DebugLevel)
-			testLogger := zap.New(core)
-			translator, err := NewTranslator(testLogger, testinstance.options...)
+			set.Logger = zap.New(core)
+			translator, err := NewTranslator(set, testinstance.options...)
 			require.NoError(t, err)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 			assert.Equal(t, testinstance.expectedUnknownMetricType, observed.FilterMessage("Unknown or unsupported metric type").Len())
