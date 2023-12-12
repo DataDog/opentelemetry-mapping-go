@@ -190,9 +190,7 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			name:     "resource-attributes-as-tags",
 			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_res-tags.json",
-			options: []TranslatorOption{
-				WithResourceAttributesAsTags(),
-			},
+			options: []TranslatorOption{},
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 1,
 		},
@@ -242,7 +240,6 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			otlpfile: "testdata/otlpdata/histogram/simple-exponential.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_res-ilmd-tags.json",
 			options: []TranslatorOption{
-				WithResourceAttributesAsTags(),
 				WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
@@ -254,7 +251,6 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_cs-both-tags.json",
 			options: []TranslatorOption{
 				WithHistogramAggregations(),
-				WithResourceAttributesAsTags(),
 				WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
@@ -266,7 +262,6 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			ddogfile: "testdata/datadogdata/histogram/simple-exponential_all.json",
 			options: []TranslatorOption{
 				WithHistogramAggregations(),
-				WithResourceAttributesAsTags(),
 				WithInstrumentationLibraryMetadataAsTags(),
 				WithInstrumentationScopeMetadataAsTags(),
 			},

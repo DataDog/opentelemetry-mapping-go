@@ -69,7 +69,6 @@ func NewTranslator(logger *zap.Logger, options ...TranslatorOption) (*Translator
 		Quantiles:                            false,
 		NumberMode:                           NumberModeCumulativeToDelta,
 		InitialCumulMonoValueMode:            InitialCumulMonoValueModeAuto,
-		ResourceAttributesAsTags:             false,
 		InstrumentationLibraryMetadataAsTags: false,
 		sweepInterval:                        1800,
 		deltaTTL:                             3600,
