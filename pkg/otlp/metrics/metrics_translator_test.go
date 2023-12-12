@@ -17,7 +17,6 @@ package metrics
 import (
 	"context"
 	"math"
-	"strings"
 	"testing"
 	"time"
 
@@ -25,12 +24,12 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
-	"github.com/gogo/protobuf/jsonpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestIsCumulativeMonotonic(t *testing.T) {
@@ -917,17 +916,14 @@ func TestMapAPMStats(t *testing.T) {
 	assert.NoError(t, err)
 
 	ctx := context.Background()
-	ch := make(chan string, 10)
+	ch := make(chan []byte, 10)
 	tr.MapMetrics(ctx, md, consumer, ch)
-	unmarshaler := jsonpb.Unmarshaler{}
 	got := &pb.StatsPayload{}
+
 	payload := <-ch
-	if payload == "" {
-		assert.Fail(t, "payload is empty")
-	}
-	err = unmarshaler.Unmarshal(strings.NewReader(payload), got)
+	err = proto.Unmarshal(payload, got)
 	assert.NoError(t, err)
-	require.Equal(t, want, got)
+	assert.True(t, proto.Equal(want, got))
 }
 
 func TestMapDoubleMonotonicReportDiffForFirstValue(t *testing.T) {

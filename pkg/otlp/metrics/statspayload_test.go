@@ -15,12 +15,10 @@
 package metrics
 
 import (
-	"strings"
 	"testing"
 
 	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
 	"github.com/DataDog/sketches-go/ddsketch"
-	"github.com/gogo/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
@@ -173,9 +171,9 @@ func TestConversion(t *testing.T) {
 					// these metrics are an APM Stats payload; consume it as such
 					for l := 0; l < md.Sum().DataPoints().Len(); l++ {
 						if payload, ok := md.Sum().DataPoints().At(l).Attributes().Get(keyStatsPayload); ok {
-							unmarshaler := &jsonpb.Unmarshaler{}
+
 							stats := &pb.StatsPayload{}
-							err = unmarshaler.Unmarshal(strings.NewReader(payload.Str()), stats)
+							err = proto.Unmarshal(payload.Bytes().AsRaw(), stats)
 							assert.NoError(t, err)
 							results = append(results, stats)
 						}
@@ -185,12 +183,7 @@ func TestConversion(t *testing.T) {
 			}
 		}
 
-		assert.Equal(t, 1, len(results))
-		marsher := &jsonpb.Marshaler{}
-		ws, err := marsher.MarshalToString(want)
-		assert.NoError(t, err)
-		got, err := marsher.MarshalToString(results[0])
-		assert.NoError(t, err)
-		assert.Equal(t, ws, got)
+		assert.Len(t, results, 1)
+		assert.True(t, proto.Equal(want, results[0]))
 	})
 }

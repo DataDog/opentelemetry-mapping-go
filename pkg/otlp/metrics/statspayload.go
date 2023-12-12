@@ -16,16 +16,14 @@ package metrics
 
 import (
 	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
-	"github.com/gogo/protobuf/jsonpb"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
 )
 
 // keyStatsPayload is the key for the stats payload in the attributes map.
 // This is used as Metric name and Attribute key.
 const keyStatsPayload = "dd.internal.stats.payload"
-
-var marshaler = &jsonpb.Marshaler{}
 
 // UnsetHostnamePlaceholder is the string used as a hostname when the hostname can not be extracted from span attributes
 // by the processor. Upon decoding the metrics, the Translator will use its configured fallback SourceProvider to replace
@@ -44,7 +42,7 @@ const keyAPMStats = "_dd.apm_stats"
 
 // StatsToMetrics converts a StatsPayload to a pdata.Metrics
 func (t *Translator) StatsToMetrics(sp *pb.StatsPayload) (pmetric.Metrics, error) {
-	payload, err := marshaler.MarshalToString(sp)
+	bytes, err := proto.Marshal(sp)
 	if err != nil {
 		t.logger.Error("Failed to marshal stats payload", zap.Error(err))
 		return pmetric.NewMetrics(), err
@@ -60,6 +58,7 @@ func (t *Translator) StatsToMetrics(sp *pb.StatsPayload) (pmetric.Metrics, error
 	sum := mx.SetEmptySum()
 	sum.SetIsMonotonic(false)
 	dp := sum.DataPoints().AppendEmpty()
-	dp.Attributes().PutStr(keyStatsPayload, payload)
+	byteSlice := dp.Attributes().PutEmptyBytes(keyStatsPayload)
+	byteSlice.Append(bytes...)
 	return mmx, nil
 }
