@@ -21,15 +21,16 @@ import (
 	"testing"
 	"time"
 
-	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 	"github.com/lightstep/go-expohisto/structure"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
+
+	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 )
 
 var _ SketchConsumer = (*sketchConsumer)(nil)
@@ -365,6 +366,7 @@ func TestExactHistogramStats(t *testing.T) {
 }
 
 func TestInfiniteBounds(t *testing.T) {
+
 	tests := []struct {
 		name    string
 		getHist func() pmetric.Metrics
