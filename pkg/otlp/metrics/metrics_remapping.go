@@ -98,6 +98,13 @@ func remapKafkaMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 		copyMetric(all, m, "kafka.request.produce.time.avg", 1, kv{"type", "produce"})
 		copyMetric(all, m, "kafka.request.fetch_consumer.time.avg", 1, kv{"type", "fetchconsumer"})
 		copyMetric(all, m, "kafka.request.fetch_follower.time.avg", 1, kv{"type", "fetchfollower"})
+	// kafka metrics receiver
+	case "kafka.partition.current_offset":
+		copyMetric(all, m, "kafka.broker_offset", 1)
+	case "kafka.consumer_group.lag":
+		copyMetric(all, m, "kafka.consumer_lag", 1)
+	case "kafka.consumer_group.offset":
+		copyMetric(all, m, "kafka.consumer_offset", 1)
 	}
 }
 
