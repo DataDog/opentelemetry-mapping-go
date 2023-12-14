@@ -198,22 +198,8 @@ func extractHostNameAndServiceName(resourceAttrs pcommon.Map, logAttrs pcommon.M
 	if src, ok := attributes.SourceFromAttrs(resourceAttrs); ok && src.Kind == source.HostnameKind {
 		host = src.Identifier
 	}
-	// hostName is blank from resource
-	// we need to derive from log attributes
-	if host == "" {
-		if src, ok := attributes.SourceFromAttrs(logAttrs); ok && src.Kind == source.HostnameKind {
-			host = src.Identifier
-		}
-	}
 	if s, ok := resourceAttrs.Get(conventions.AttributeServiceName); ok {
 		service = s.AsString()
-	}
-	// serviceName is blank from resource
-	// we need to derive from log attributes
-	if service == "" {
-		if s, ok := logAttrs.Get(conventions.AttributeServiceName); ok {
-			service = s.AsString()
-		}
 	}
 	return host, service
 }

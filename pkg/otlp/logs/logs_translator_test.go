@@ -130,17 +130,17 @@ func TestTransform(t *testing.T) {
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().PutStr("app", "test")
-					l.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					l.SetSeverityNumber(5)
 					return l
 				}(),
 				res: func() pcommon.Resource {
 					r := pcommon.NewResource()
+					r.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					return r
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("service:otlp_col"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -159,17 +159,17 @@ func TestTransform(t *testing.T) {
 					l.Attributes().PutStr("app", "test")
 					l.SetSpanID(spanID)
 					l.SetTraceID(traceID)
-					l.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					l.SetSeverityNumber(5)
 					return l
 				}(),
 				res: func() pcommon.Resource {
 					r := pcommon.NewResource()
+					r.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					return r
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("service:otlp_col"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -192,17 +192,17 @@ func TestTransform(t *testing.T) {
 					l.Attributes().PutStr("app", "test")
 					l.Attributes().PutStr("spanid", "2e26da881214cd7c")
 					l.Attributes().PutStr("traceid", "437ab4d83468c540bb0f3398a39faa59")
-					l.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					l.SetSeverityNumber(5)
 					return l
 				}(),
 				res: func() pcommon.Resource {
 					r := pcommon.NewResource()
+					r.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					return r
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("service:otlp_col"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -225,17 +225,17 @@ func TestTransform(t *testing.T) {
 					l.Attributes().PutStr("app", "test")
 					l.Attributes().PutStr("span_id", "2e26da881214cd7c")
 					l.Attributes().PutStr("trace_id", "740112b325075be8c80a48de336ebc67")
-					l.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					l.SetSeverityNumber(5)
 					return l
 				}(),
 				res: func() pcommon.Resource {
 					r := pcommon.NewResource()
+					r.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					return r
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("service:otlp_col"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -258,17 +258,17 @@ func TestTransform(t *testing.T) {
 					l.Attributes().PutStr("app", "test")
 					l.Attributes().PutStr("spanid", "2e26da881214cd7c")
 					l.Attributes().PutStr("traceid", "invalidtraceid")
-					l.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					l.SetSeverityNumber(5)
 					return l
 				}(),
 				res: func() pcommon.Resource {
 					r := pcommon.NewResource()
+					r.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					return r
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("service:otlp_col"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -290,18 +290,18 @@ func TestTransform(t *testing.T) {
 					l.Attributes().PutStr("app", "test")
 					l.SetSpanID(spanID)
 					l.SetTraceID(traceID)
-					l.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					l.SetSeverityText("alert")
 					l.SetSeverityNumber(5)
 					return l
 				}(),
 				res: func() pcommon.Resource {
 					r := pcommon.NewResource()
+					r.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					return r
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("service:otlp_col"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -325,18 +325,18 @@ func TestTransform(t *testing.T) {
 					l.Attributes().PutStr("app", "test")
 					l.SetSpanID(spanID)
 					l.SetTraceID(traceID)
-					l.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					l.SetSeverityNumber(13)
 					l.Body().SetStr("This is log")
 					return l
 				}(),
 				res: func() pcommon.Resource {
 					r := pcommon.NewResource()
+					r.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					return r
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("service:otlp_col"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -360,18 +360,18 @@ func TestTransform(t *testing.T) {
 					l.Attributes().PutStr("app", "test")
 					l.SetSpanID(spanID)
 					l.SetTraceID(traceID)
-					l.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					l.Attributes().PutStr("level", "error")
 					l.Body().SetStr("This is log")
 					return l
 				}(),
 				res: func() pcommon.Resource {
 					r := pcommon.NewResource()
+					r.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					return r
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("service:otlp_col"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
