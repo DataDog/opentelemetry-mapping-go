@@ -15,19 +15,23 @@
 package logs
 
 import (
+	"context"
 	"encoding/binary"
 	"encoding/hex"
 	"strconv"
 	"strings"
 
+	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/plog"
+	conventions "go.opentelemetry.io/collector/semconv/v1.6.1"
+	"go.opentelemetry.io/otel/attribute"
+	"go.uber.org/zap"
+
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadog"
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadogV2"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
-	"go.opentelemetry.io/collector/pdata/pcommon"
-	"go.opentelemetry.io/collector/pdata/plog"
-	conventions "go.opentelemetry.io/collector/semconv/v1.6.1"
-	"go.uber.org/zap"
 )
 
 const (
@@ -59,10 +63,24 @@ const (
 	logLevelFatal = "fatal"
 )
 
-// Transform converts the log record in lr, which came in with the resource in res to a Datadog log item.
-// the variable specifies if the log body should be sent as an attribute or as a plain message.
-func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) datadogV2.HTTPLogItem {
-	host, service := extractHostNameAndServiceName(res.Attributes(), lr.Attributes())
+var (
+	signalTypeSet = attribute.NewSet(attribute.String("signal", "logs"))
+)
+
+type Translator struct {
+	logger               *zap.Logger
+	attributesTranslator *attributes.Translator
+}
+
+func NewTranslator(set component.TelemetrySettings, attributesTranslator *attributes.Translator) (*Translator, error) {
+	return &Translator{
+		logger:               set.Logger,
+		attributesTranslator: attributesTranslator,
+	}, nil
+}
+
+func (t *Translator) MapLogs(lr plog.LogRecord, res pcommon.Resource) datadogV2.HTTPLogItem {
+	host, service := t.extractHostNameAndServiceName(res.Attributes(), lr.Attributes())
 
 	l := datadogV2.HTTPLogItem{
 		AdditionalProperties: make(map[string]string),
@@ -87,7 +105,7 @@ func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) data
 		case "traceid", "trace_id", "contextmap.traceid", "oteltraceid":
 			traceID, err := decodeTraceID(v.AsString())
 			if err != nil {
-				logger.Warn("failed to decode trace id",
+				t.logger.Warn("failed to decode trace id",
 					zap.String("trace_id", v.AsString()),
 					zap.Error(err))
 				break
@@ -99,7 +117,7 @@ func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) data
 		case "spanid", "span_id", "contextmap.spanid", "otelspanid":
 			spanID, err := decodeSpanID(v.AsString())
 			if err != nil {
-				logger.Warn("failed to decode span id",
+				t.logger.Warn("failed to decode span id",
 					zap.String("span_id", v.AsString()),
 					zap.Error(err))
 				break
@@ -194,13 +212,15 @@ func flattenAttribute(key string, val pcommon.Value, depth int) map[string]strin
 	return result
 }
 
-func extractHostNameAndServiceName(resourceAttrs pcommon.Map, logAttrs pcommon.Map) (host string, service string) {
-	if src, ok := attributes.SourceFromAttrs(resourceAttrs); ok && src.Kind == source.HostnameKind {
+func (t *Translator) extractHostNameAndServiceName(resourceAttrs pcommon.Map, logAttrs pcommon.Map) (host string, service string) {
+	// TODO: This maps the same resource multiple times and generates the metric multiple times :(
+	if src, ok := t.attributesTranslator.MapToSource(context.Background(), resourceAttrs, signalTypeSet); ok && src.Kind == source.HostnameKind {
 		host = src.Identifier
 	}
 	// hostName is blank from resource
 	// we need to derive from log attributes
 	if host == "" {
+		// TODO: This is wrong, and we are using SourceFromAttrs to avoid generating metric points
 		if src, ok := attributes.SourceFromAttrs(logAttrs); ok && src.Kind == source.HostnameKind {
 			host = src.Identifier
 		}

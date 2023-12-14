@@ -20,7 +20,10 @@ import (
 
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadog"
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadogV2"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	conventions "go.opentelemetry.io/collector/semconv/v1.6.1"
@@ -28,7 +31,8 @@ import (
 )
 
 func TestTransform(t *testing.T) {
-	testLogger := zaptest.NewLogger(t)
+	testTelemetry := componenttest.NewNopTelemetrySettings()
+	testTelemetry.Logger = zaptest.NewLogger(t)
 	traceID := [16]byte{0x08, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x0, 0x0, 0x0, 0x0, 0x0a}
 	var spanID [8]byte
 	copy(spanID[:], traceID[8:])
@@ -582,7 +586,11 @@ func TestTransform(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := Transform(tt.args.lr, tt.args.res, testLogger)
+			attributesTranslator, err := attributes.NewTranslator(testTelemetry)
+			require.NoError(t, err)
+			translator, err := NewTranslator(testTelemetry, attributesTranslator)
+			require.NoError(t, err)
+			got := translator.MapLogs(tt.args.lr, tt.args.res)
 
 			gs, err := got.MarshalJSON()
 			if err != nil {
