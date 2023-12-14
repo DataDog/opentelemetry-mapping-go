@@ -43,16 +43,16 @@ const (
 var (
 	_ source.Provider = (*noSourceProvider)(nil)
 
-	rateAsGaugeMetrics = map[string]string{
-		"kafka.net.bytes_out.rate":                "ok",
-		"kafka.net.bytes_in.rate":                 "ok",
-		"kafka.replication.isr_shrinks.rate":      "ok",
-		"kafka.replication.isr_expands.rate":      "ok",
-		"kafka.replication.leader_elections.rate": "ok",
-		"jvm.gc.minor_collection_count":           "ok",
-		"jvm.gc.major_collection_count":           "ok",
-		"jvm.gc.minor_collection_time":            "ok",
-		"jvm.gc.major_collection_time":            "ok",
+	rateAsGaugeMetrics = map[string]struct{}{
+		"kafka.net.bytes_out.rate":                {},
+		"kafka.net.bytes_in.rate":                 {},
+		"kafka.replication.isr_shrinks.rate":      {},
+		"kafka.replication.isr_expands.rate":      {},
+		"kafka.replication.leader_elections.rate": {},
+		"jvm.gc.minor_collection_count":           {},
+		"jvm.gc.major_collection_count":           {},
+		"jvm.gc.minor_collection_time":            {},
+		"jvm.gc.major_collection_time":            {},
 	}
 )
 
@@ -209,9 +209,9 @@ func (t *Translator) mapNumberMonotonicMetrics(
 		}
 
 		if dx, ok := t.prevPts.MonotonicDiff(pointDims, startTs, ts, val); ok {
-			// For the purpose of the POC using a map here for simplicity. Will likely 
+			// For the purpose of the POC using a map here for simplicity. Will likely
 			// need to create a new func to use in this case.
-			if rateAsGaugeMetrics[dims.name] == "ok" {
+			if _, ok := rateAsGaugeMetrics[dims.name]; ok {
 				consumer.ConsumeTimeSeries(ctx, pointDims, Gauge, ts, dx)
 			} else {
 				consumer.ConsumeTimeSeries(ctx, pointDims, Count, ts, dx)

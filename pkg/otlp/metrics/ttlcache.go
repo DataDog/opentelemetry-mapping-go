@@ -83,10 +83,10 @@ func (t *ttlCache) putAndGetDiff(
 		}
 		dx = val - cnt.value
 
-		// For the purpose of the POC using a map here for simplicity. Will likely 
+		// For the purpose of the POC using a map here for simplicity. Will likely
 		// need to create a new func to use in this case.
-		if ok := rateAsGaugeMetrics[dimensions.name]; ok == "ok" {
-			dx = dx / time.Duration(ts - cnt.ts).Seconds()
+		if _, ok := rateAsGaugeMetrics[dimensions.name]; ok {
+			dx = dx / time.Duration(ts-cnt.ts).Seconds()
 		}
 
 		// If sequence is monotonic and diff is negative, there has been a reset.
