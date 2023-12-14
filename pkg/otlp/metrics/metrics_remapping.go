@@ -255,9 +255,6 @@ func copyMetricWithAttr(dest pmetric.MetricSlice, m pmetric.Metric, newname stri
 				dp.SetDoubleValue(dp.DoubleValue() / div)
 			}
 		}
-		// Rather than having metricAttrs map we can extend copyMetric to take in an attribute map for attributes
-		// that need to be added to the new metric. To avoid cluttering this PR and chaging func signature, using
-		// map.
 		for k, v := range attr {
 			dp.Attributes().PutStr(k, v)
 		}
