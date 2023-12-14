@@ -535,8 +535,6 @@ outer:
 		}
 	}
 	return found == len(want.Stats)
-
-	
 }
 
 // fakeT implements testing.T

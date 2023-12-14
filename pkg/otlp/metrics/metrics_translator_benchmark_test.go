@@ -20,12 +20,13 @@ import (
 	"math"
 	"testing"
 
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
+
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 )
 
 const (

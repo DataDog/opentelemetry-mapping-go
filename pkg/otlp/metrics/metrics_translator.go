@@ -23,6 +23,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -30,11 +33,8 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
 
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics/internal/instrumentationlibrary"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics/internal/instrumentationscope"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 )
 
 const (
@@ -716,6 +716,16 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			newMetrics := pmetric.NewMetricSlice()
 			for k := 0; k < metricsArray.Len(); k++ {
 				md := metricsArray.At(k)
+				if md.Name() == keyStatsPayload && md.Type() == pmetric.MetricTypeSum {
+
+					// these metrics are an APM Stats payload; consume it as such
+					for l := 0; l < md.Sum().DataPoints().Len(); l++ {
+						if payload, ok := md.Sum().DataPoints().At(l).Attributes().Get(keyStatsPayload); ok && t.cfg.statsOut != nil && payload.Type() == pcommon.ValueTypeBytes {
+							t.cfg.statsOut <- payload.Bytes().AsRaw()
+						}
+					}
+					continue
+				}
 				if v, ok := runtimeMetricsMappings[md.Name()]; ok {
 					metadata.Languages = extractLanguageTag(md.Name(), metadata.Languages)
 					for _, mp := range v {

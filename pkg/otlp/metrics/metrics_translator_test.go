@@ -30,6 +30,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestIsCumulativeMonotonic(t *testing.T) {
@@ -923,6 +924,28 @@ func TestMapAPMStats(t *testing.T) {
 	ctx := context.Background()
 	tr.MapMetrics(ctx, md, consumer)
 	require.Equal(t, consumer.apmstats, statsPayloads)
+}
+
+func TestMapAPMStatsWithBytes(t *testing.T) {
+	consumer := &mockFullConsumer{}
+	logger, err := zap.NewDevelopment()
+	require.NoError(t, err)
+	ch := make(chan []byte, 10)
+	tr := newTranslatorWithStatsChannel(t, logger, ch)
+	want := &pb.StatsPayload{
+		Stats: []*pb.ClientStatsPayload{statsPayloads[0], statsPayloads[1]},
+	}
+	md, err := tr.StatsToMetrics(want)
+	assert.NoError(t, err)
+
+	ctx := context.Background()
+	tr.MapMetrics(ctx, md, consumer)
+	got := &pb.StatsPayload{}
+
+	payload := <-ch
+	err = proto.Unmarshal(payload, got)
+	assert.NoError(t, err)
+	assert.True(t, proto.Equal(want, got))
 }
 
 func TestMapDoubleMonotonicReportDiffForFirstValue(t *testing.T) {

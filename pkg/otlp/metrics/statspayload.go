@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"strings"
 
+	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
 	"github.com/DataDog/sketches-go/ddsketch"
 	"github.com/DataDog/sketches-go/ddsketch/mapping"
 	"github.com/DataDog/sketches-go/ddsketch/pb/sketchpb"
@@ -27,10 +29,6 @@ import (
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
-
-	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
-	
 )
 
 // keyAPMStats specifies the key name of the resource attribute which identifies resource metrics
@@ -479,7 +477,6 @@ func getInt(m pcommon.Map, k string) uint64 {
 	return uint64(v.Int())
 }
 
-
 // StatsToMetrics converts a StatsPayload to a pdata.Metrics
 func (t *Translator) StatsToMetrics(sp *pb.StatsPayload) (pmetric.Metrics, error) {
 	bytes, err := proto.Marshal(sp)
@@ -489,8 +486,6 @@ func (t *Translator) StatsToMetrics(sp *pb.StatsPayload) (pmetric.Metrics, error
 	}
 	mmx := pmetric.NewMetrics()
 	rmx := mmx.ResourceMetrics().AppendEmpty()
-	rmx.Resource().Attributes().PutBool(keyAPMStats, true)
-
 	smx := rmx.ScopeMetrics().AppendEmpty()
 	mslice := smx.Metrics()
 	mx := mslice.AppendEmpty()
