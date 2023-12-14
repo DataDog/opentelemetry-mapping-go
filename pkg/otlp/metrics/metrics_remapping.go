@@ -81,11 +81,11 @@ func remapKafkaMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 		copyMetricWithAttr(all, m, "kafka.request.fetch_follower.time.avg", 1, map[string]string{"type": "RequestMetrics"}, kv{"type", "fetchfollower"})
 	// kafka metrics receiver
 	case "kafka.partition.current_offset":
-		copyMetric(all, m, "kafka.broker_offset", 1)
+		copyMetricWithAttr(all, m, "kafka.broker_offset", 1, nil)
 	case "kafka.consumer_group.lag":
-		copyMetric(all, m, "kafka.consumer_lag", 1)
+		copyMetricWithAttr(all, m, "kafka.consumer_lag", 1, nil)
 	case "kafka.consumer_group.offset":
-		copyMetric(all, m, "kafka.consumer_offset", 1)
+		copyMetricWithAttr(all, m, "kafka.consumer_offset", 1, nil)
 	}
 }
 
@@ -255,8 +255,14 @@ func copyMetricWithAttr(dest pmetric.MetricSlice, m pmetric.Metric, newname stri
 				dp.SetDoubleValue(dp.DoubleValue() / div)
 			}
 		}
-		for k, v := range attr {
-			dp.Attributes().PutStr(k, v)
+		if attr != nil {
+			for k, v := range attr {
+				dp.Attributes().PutStr(k, v)
+			}
+		}
+		// Need to refactor.
+		if v, ok := dp.Attributes().Get("group"); ok {
+			dp.Attributes().PutStr("consumer_group", v.AsString())
 		}
 		return false
 	})
