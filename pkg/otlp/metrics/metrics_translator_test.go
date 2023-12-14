@@ -24,7 +24,6 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
-	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
@@ -273,7 +272,7 @@ func TestMapIntMonotonicMetrics(t *testing.T) {
 		cumulative[i] = cumulative[i-1] + deltas[i-1]
 	}
 
-	// Map to OpenTelemetry format
+	//Map to OpenTelemetry format
 	slice := pmetric.NewNumberDataPointSlice()
 	slice.EnsureCapacity(len(cumulative))
 	for i, val := range cumulative {
@@ -795,7 +794,7 @@ func TestMapDoubleMonotonicMetrics(t *testing.T) {
 		cumulative[i] = cumulative[i-1] + deltas[i-1]
 	}
 
-	// Map to OpenTelemetry format
+	//Map to OpenTelemetry format
 	slice := pmetric.NewNumberDataPointSlice()
 	slice.EnsureCapacity(len(cumulative))
 	for i, val := range cumulative {
@@ -916,24 +915,14 @@ func TestMapAPMStats(t *testing.T) {
 	consumer := &mockFullConsumer{}
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
-	ch := make(chan []byte, 10)
-	tr := newTranslatorWithStatsChannel(t, logger, ch)
-	want := &pb.StatsPayload{
-		Stats: []*pb.ClientStatsPayload{
-			statsPayloads[0], statsPayloads[1],
-		},
-	}
-	md, err := tr.StatsToMetrics(want)
-	assert.NoError(t, err)
+	tr := newTranslator(t, logger)
+	md := tr.StatsPayloadToMetrics(&pb.StatsPayload{
+		Stats: []*pb.ClientStatsPayload{statsPayloads[0], statsPayloads[1]},
+	})
 
 	ctx := context.Background()
 	tr.MapMetrics(ctx, md, consumer)
-	msg := <-ch
-	require.NotNil(t, msg)
-	got := &pb.StatsPayload{}
-	err = proto.Unmarshal(msg, got)
-	assert.NoError(t, err)
-	assert.True(t, proto.Equal(want, got))
+	require.Equal(t, consumer.apmstats, statsPayloads)
 }
 
 func TestMapDoubleMonotonicReportDiffForFirstValue(t *testing.T) {
