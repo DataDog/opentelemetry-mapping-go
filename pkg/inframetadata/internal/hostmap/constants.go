@@ -89,10 +89,15 @@ var cpuAttributesMap map[string]string = map[string]string{
 	fieldCPUStepping:  attributeHostCPUStepping,
 }
 
-var cpuMetricsMap map[string]string = map[string]string{
-	metricSystemCPUPhysicalCount: fieldCPUCores,
-	metricSystemCPULogicalCount:  fieldCPULogicalProcessors,
-	metricSystemCPUFrequency:     fieldCPUMHz,
+type cpuMetricsData struct {
+	FieldName        string
+	ConversionFactor float64
+}
+
+var cpuMetricsMap map[string]cpuMetricsData = map[string]cpuMetricsData{
+	metricSystemCPUPhysicalCount: {FieldName: fieldCPUCores},
+	metricSystemCPULogicalCount:  {FieldName: fieldCPULogicalProcessors},
+	metricSystemCPUFrequency:     {FieldName: fieldCPUMHz, ConversionFactor: 1e-6},
 }
 
 // TrackedMetrics is the set of metrics that are tracked by the hostmap.

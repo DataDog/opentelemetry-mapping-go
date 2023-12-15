@@ -220,9 +220,12 @@ func (m *HostMap) UpdateFromMetric(host string, metric pmetric.Metric) {
 	md, _ := m.newOrFetchHostMetadata(host)
 
 	// Gohai - CPU
-	field, ok := cpuMetricsMap[metric.Name()]
+	data, ok := cpuMetricsMap[metric.Name()]
 	if ok {
-		md.CPU()[field] = value
+		if data.ConversionFactor != 0 {
+			value = value * data.ConversionFactor
+		}
+		md.CPU()[data.FieldName] = fmt.Sprintf("%g", value)
 	}
 }
 

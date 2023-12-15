@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	conventions "go.opentelemetry.io/collector/semconv/v1.18.0"
 	"go.uber.org/multierr"
 
@@ -16,10 +17,25 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/payload"
 )
 
+func BuildMetric[N int64 | float64](name string, value N) *pmetric.Metric {
+	m := pmetric.NewMetric()
+	m.SetEmptyGauge()
+	m.SetName(name)
+	dp := m.Gauge().DataPoints().AppendEmpty()
+	switch any(value).(type) {
+	case int64:
+		dp.SetIntValue(int64(value))
+	case float64:
+		dp.SetDoubleValue(float64(value))
+	}
+	return &m
+}
+
 func TestUpdate(t *testing.T) {
 	hostInfo := []struct {
 		hostname        string
 		attributes      map[string]any
+		metric          *pmetric.Metric
 		expectedChanged bool
 		expectedErrs    []string
 	}{
@@ -42,6 +58,7 @@ func TestUpdate(t *testing.T) {
 				attributeHostCPUStepping:           1,
 				attributeHostCPUCacheL2Size:        12288000,
 			},
+			metric:          BuildMetric[int64](metricSystemCPUPhysicalCount, 32),
 			expectedChanged: false,
 		},
 		{
@@ -53,6 +70,7 @@ func TestUpdate(t *testing.T) {
 				conventions.AttributeHostName:      "host-1-hostname",
 				conventions.AttributeOSDescription: "Fedora Linux",
 			},
+			metric:          BuildMetric[float64](metricSystemCPUFrequency, 400_000_005.5),
 			expectedChanged: false,
 		},
 		{
@@ -114,6 +132,9 @@ func TestUpdate(t *testing.T) {
 		} else {
 			assert.NoError(t, err)
 		}
+		if info.metric != nil {
+			hostMap.UpdateFromMetric(info.hostname, *info.metric)
+		}
 	}
 
 	hosts := hostMap.Flush()
@@ -141,13 +162,15 @@ func TestUpdate(t *testing.T) {
 			fieldPlatformKernelRelease:    "5.19.0-43-generic",
 			fieldPlatformKernelVersion:    "#82~18.04.1-Ubuntu SMP Fri Apr 16 15:10:02 UTC 2021",
 		})
-		assert.Equal(t, md.Payload.Gohai.Gohai.CPU, map[string]any{
+		assert.Equal(t, md.Payload.Gohai.Gohai.CPU, map[string]string{
 			fieldCPUCacheSize: "12288000",
 			fieldCPUFamily:    "6",
 			fieldCPUModel:     "10",
 			fieldCPUModelName: "11th Gen Intel(R) Core(TM) i7-1185G7 @ 3.00GHz",
 			fieldCPUStepping:  "1",
 			fieldCPUVendorID:  "GenuineIntel",
+			fieldCPUCores:     "32",
+			fieldCPUMHz:       "400.0000055",
 		})
 		assert.Nil(t, md.Payload.Gohai.Gohai.FileSystem)
 		assert.Nil(t, md.Payload.Gohai.Gohai.Memory)
