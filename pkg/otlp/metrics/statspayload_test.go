@@ -492,7 +492,7 @@ func TestConversion(t *testing.T) {
 		var results []*pb.StatsPayload
 		for i := 0; i < mx.ResourceMetrics().Len(); i++ {
 			rm := mx.ResourceMetrics().At(i)
-			for i := 0; i < rm.ScopeMetrics().Len(); i++ {
+			for j := 0; j < rm.ScopeMetrics().Len(); j++ {
 				sm := rm.ScopeMetrics().At(i)
 				for i := 0; i < sm.Metrics().Len(); i++ {
 					md := sm.Metrics().At(i)

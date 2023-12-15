@@ -3,7 +3,7 @@ change_type: enhancement
 # The name of the component (e.g. pkg/quantile)
 component: pkg/otlp/metrics
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: StatsPayload can now sent on out channel provided.
+note: StatsPayload can now be sent on out channel provided.
 # The PR related to this change
 issues: [216]
 # (Optional) One or more lines of additional information to render under the primary note.
