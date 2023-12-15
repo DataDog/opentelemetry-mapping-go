@@ -493,7 +493,7 @@ func TestConversion(t *testing.T) {
 		for i := 0; i < mx.ResourceMetrics().Len(); i++ {
 			rm := mx.ResourceMetrics().At(i)
 			for j := 0; j < rm.ScopeMetrics().Len(); j++ {
-				sm := rm.ScopeMetrics().At(i)
+				sm := rm.ScopeMetrics().At(j)
 				for k := 0; k < sm.Metrics().Len(); k++ {
 					md := sm.Metrics().At(k)
 					// these metrics are an APM Stats payload; consume it as such
