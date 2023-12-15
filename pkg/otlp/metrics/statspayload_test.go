@@ -494,8 +494,8 @@ func TestConversion(t *testing.T) {
 			rm := mx.ResourceMetrics().At(i)
 			for j := 0; j < rm.ScopeMetrics().Len(); j++ {
 				sm := rm.ScopeMetrics().At(i)
-				for i := 0; i < sm.Metrics().Len(); i++ {
-					md := sm.Metrics().At(i)
+				for k := 0; k < sm.Metrics().Len(); k++ {
+					md := sm.Metrics().At(k)
 					// these metrics are an APM Stats payload; consume it as such
 					for l := 0; l < md.Sum().DataPoints().Len(); l++ {
 						if payload, ok := md.Sum().DataPoints().At(l).Attributes().Get(keyStatsPayload); ok {
