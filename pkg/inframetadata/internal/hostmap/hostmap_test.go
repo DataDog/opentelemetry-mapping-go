@@ -141,7 +141,7 @@ func TestUpdate(t *testing.T) {
 			fieldPlatformKernelRelease:    "5.19.0-43-generic",
 			fieldPlatformKernelVersion:    "#82~18.04.1-Ubuntu SMP Fri Apr 16 15:10:02 UTC 2021",
 		})
-		assert.Equal(t, md.Payload.Gohai.Gohai.CPU, map[string]string{
+		assert.Equal(t, md.Payload.Gohai.Gohai.CPU, map[string]any{
 			fieldCPUCacheSize: "12288000",
 			fieldCPUFamily:    "6",
 			fieldCPUModel:     "10",

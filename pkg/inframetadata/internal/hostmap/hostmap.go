@@ -105,7 +105,7 @@ func (m *HostMap) Set(md payload.HostMetadata) error {
 }
 
 // newOrFetchHostMetadata returns the host metadata payload for a given host or creates a new one.
-// This method is NOT thread-safe and should be called from within a mutex.
+// This method is NOT thread-safe and should be called while holding the m.mu mutex.
 func (m *HostMap) newOrFetchHostMetadata(host string) (payload.HostMetadata, bool) {
 	md, ok := m.hosts[host]
 	if !ok {
@@ -189,7 +189,9 @@ func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, md pa
 
 func (m *HostMap) UpdateFromMetric(host string, metric pmetric.Metric) {
 	var point pmetric.NumberDataPoint
-	switch metric.MetricType() {
+
+	// Take last available point
+	switch metric.Type() {
 	case pmetric.MetricTypeGauge:
 		lastIndex := metric.Gauge().DataPoints().Len() - 1
 		point = metric.Gauge().DataPoints().At(lastIndex)
@@ -201,6 +203,7 @@ func (m *HostMap) UpdateFromMetric(host string, metric pmetric.Metric) {
 		return
 	}
 
+	// Take value from point
 	var value float64
 	switch point.ValueType() {
 	case pmetric.NumberDataPointValueTypeInt:

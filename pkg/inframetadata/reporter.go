@@ -168,7 +168,7 @@ func (r *Reporter) ConsumeMetrics(md pmetric.Metrics) error {
 			metricsArray := ilms.At(j).Metrics()
 			for k := 0; k < metricsArray.Len(); k++ {
 				metric := metricsArray.At(k)
-				if _, ok := hostmap.KnownMetrics[metric.Name()]; ok {
+				if _, ok := hostmap.TrackedMetrics[metric.Name()]; ok {
 					r.hostMap.UpdateFromMetric(host, metric)
 				}
 			}
