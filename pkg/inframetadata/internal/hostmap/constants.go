@@ -107,3 +107,17 @@ var TrackedMetrics map[string]struct{} = map[string]struct{}{
 	metricSystemCPUFrequency:     {},
 	metricSystemMemoryLimit:      {},
 }
+
+// Network related OpenTelemetry Semantic Conventions for resource attributes.
+// TODO: Replace by conventions constants once available.
+const (
+	attributeHostIP  = "host.ip"
+	attributeHostMAC = "host.mac"
+)
+
+// This set of constants represent fields in the Gohai payload's Network field.
+const (
+	fieldNetworkIPAddressIPv4 = "ipaddress"
+	fieldNetworkIPAddressIPv6 = "ipaddressv6"
+	fieldNetworkMACAddress    = "macaddress"
+)

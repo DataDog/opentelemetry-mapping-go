@@ -31,6 +31,111 @@ func BuildMetric[N int64 | float64](name string, value N) *pmetric.Metric {
 	return &m
 }
 
+func TestStrSliceField(t *testing.T) {
+	tests := []struct {
+		attributes  map[string]any
+		key         string
+		expected    []string
+		expectedOk  bool
+		expectedErr string
+	}{
+		{
+			attributes:  map[string]any{},
+			key:         "nonexistingkey",
+			expected:    nil,
+			expectedOk:  false,
+			expectedErr: "",
+		},
+		{
+			attributes: map[string]any{
+				"host.ip": "192.168.1.1",
+			},
+			key:         "host.ip",
+			expected:    nil,
+			expectedOk:  false,
+			expectedErr: "\"host.ip\" has type \"Str\", expected type \"Slice\" instead",
+		},
+		{
+			attributes: map[string]any{
+				"host.ip": []any{},
+			},
+			key:         "host.ip",
+			expected:    nil,
+			expectedOk:  false,
+			expectedErr: "\"host.ip\" is an empty slice, expected at least one item",
+		},
+		{
+			attributes: map[string]any{
+				"host.ip": []any{"192.168.1.1", true},
+			},
+			key:         "host.ip",
+			expected:    nil,
+			expectedOk:  false,
+			expectedErr: "host.ip[1] has type \"Bool\", expected type \"Str\" instead",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.key+"/"+tt.expectedErr, func(t *testing.T) {
+			res := testutils.NewResourceFromMap(t, tt.attributes)
+			actual, ok, err := strSliceField(res.Attributes(), tt.key)
+			assert.Equal(t, tt.expected, actual)
+			assert.Equal(t, tt.expectedOk, ok)
+			if tt.expectedErr != "" {
+				assert.EqualError(t, err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestIsIPv4(t *testing.T) {
+	// Test cases come from https://stackoverflow.com/a/48519490
+	tests := []struct {
+		ip     string
+		isIPv4 bool
+	}{
+		{ip: "192.168.0.1", isIPv4: true},
+		{ip: "192.168.0.1:80", isIPv4: true},
+		{ip: "::FFFF:C0A8:1", isIPv4: false},
+		{ip: "::FFFF:C0A8:0001", isIPv4: false},
+		{ip: "0000:0000:0000:0000:0000:FFFF:C0A8:1", isIPv4: false},
+		{ip: "::FFFF:C0A8:1%1", isIPv4: false},
+		{ip: "::FFFF:192.168.0.1", isIPv4: false},
+		{ip: "[::FFFF:C0A8:1]:80", isIPv4: false},
+		{ip: "[::FFFF:C0A8:1%1]:80", isIPv4: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.ip, func(t *testing.T) {
+			assert.Equal(t, tt.isIPv4, isIPv4(tt.ip))
+		})
+	}
+}
+
+func TestIEEERAToGolangFormat(t *testing.T) {
+	tests := []struct {
+		ieeeRA       string
+		golangFormat string
+	}{
+		{
+			ieeeRA:       "AB-01-00-00-00-00-00-00",
+			golangFormat: "ab:01:00:00:00:00:00:00",
+		},
+		{
+			ieeeRA:       "AB-CD-EF-00-00-00",
+			golangFormat: "ab:cd:ef:00:00:00",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.ieeeRA, func(t *testing.T) {
+			assert.Equal(t, tt.golangFormat, ieeeRAtoGolangFormat(tt.ieeeRA))
+		})
+	}
+}
+
 func TestUpdate(t *testing.T) {
 	hostInfo := []struct {
 		hostname        string
@@ -57,6 +162,8 @@ func TestUpdate(t *testing.T) {
 				attributeHostCPUModelName:          "11th Gen Intel(R) Core(TM) i7-1185G7 @ 3.00GHz",
 				attributeHostCPUStepping:           1,
 				attributeHostCPUCacheL2Size:        12288000,
+				attributeHostIP:                    []any{"192.168.1.140", "fe80::abc2:4a28:737a:609e"},
+				attributeHostMAC:                   []any{"AC-DE-48-23-45-67", "AC-DE-48-23-45-67-01-9F"},
 			},
 			metric:          BuildMetric[int64](metricSystemCPUPhysicalCount, 32),
 			expectedChanged: false,
@@ -172,9 +279,13 @@ func TestUpdate(t *testing.T) {
 			fieldCPUCores:     "32",
 			fieldCPUMHz:       "400.0000055",
 		})
+		assert.Equal(t, md.Payload.Gohai.Gohai.Network, map[string]string{
+			fieldNetworkIPAddressIPv4: "192.168.1.140",
+			fieldNetworkIPAddressIPv6: "fe80::abc2:4a28:737a:609e",
+			fieldNetworkMACAddress:    "ac:de:48:23:45:67",
+		})
 		assert.Nil(t, md.Payload.Gohai.Gohai.FileSystem)
 		assert.Nil(t, md.Payload.Gohai.Gohai.Memory)
-		assert.Nil(t, md.Payload.Gohai.Gohai.Network)
 	}
 
 	if assert.Contains(t, hosts, "host-2-hostid") {
@@ -193,9 +304,9 @@ func TestUpdate(t *testing.T) {
 			fieldPlatformGOOARCH:          "arm64",
 		})
 		assert.Empty(t, md.Payload.Gohai.Gohai.CPU)
+		assert.Empty(t, md.Payload.Gohai.Gohai.Network)
 		assert.Nil(t, md.Payload.Gohai.Gohai.FileSystem)
 		assert.Nil(t, md.Payload.Gohai.Gohai.Memory)
-		assert.Nil(t, md.Payload.Gohai.Gohai.Network)
 	}
 
 	assert.Empty(t, hostMap.Flush(), "returned map must be empty after double flush")

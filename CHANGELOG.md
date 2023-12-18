@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.10.0
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics`: StatsPayload can now be sent on out channel provided. (#216)
+
 ## v0.9.0
 
 ### 🛑 Breaking changes 🛑

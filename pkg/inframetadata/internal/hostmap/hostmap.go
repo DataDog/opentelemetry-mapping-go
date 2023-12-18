@@ -7,6 +7,7 @@ package hostmap
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -57,6 +58,60 @@ func strField(m pcommon.Map, key string) (string, bool, error) {
 	}
 
 	return value, true, nil
+}
+
+// strSliceField gets a field as a slice from a resource attribute map.
+// It can handle fields of type "Slice".
+// It returns:
+// - The field's value, if available
+// - Whether the field was present in the map
+// - Any errors found in the process
+func strSliceField(m pcommon.Map, key string) ([]string, bool, error) {
+	val, ok := m.Get(key)
+	if !ok {
+		// Field not available, don't update but don't fail either
+		return nil, false, nil
+	}
+	if val.Type() != pcommon.ValueTypeSlice {
+		return nil, false, fmt.Errorf("%q has type %q, expected type \"Slice\" instead", key, val.Type())
+	}
+	if val.Slice().Len() == 0 {
+		return nil, false, fmt.Errorf("%q is an empty slice, expected at least one item", key)
+	}
+
+	var strSlice []string
+	for i := 0; i < val.Slice().Len(); i++ {
+		item := val.Slice().At(i)
+		if item.Type() != pcommon.ValueTypeStr {
+			return nil, false, fmt.Errorf("%s[%d] has type %q, expected type \"Str\" instead", key, i, item.Type())
+		}
+		strSlice = append(strSlice, item.Str())
+	}
+	return strSlice, true, nil
+}
+
+// isIPv4 checks if a string is an IPv4 address.
+// From https://stackoverflow.com/a/48519490
+func isIPv4(address string) bool {
+	return strings.Count(address, ":") < 2
+}
+
+var macReplacer = strings.NewReplacer("-", ":")
+
+// ieeeRAtoGolangFormat converts a MAC address from IEEE RA format to the Go format for MAC addresses.
+// The Gohai payload expects MAC addresses in the Go format.
+//
+// Per the spec: "MAC Addresses MUST be represented in IEEE RA hexadecimal form: as hyphen-separated
+// octets in uppercase hexadecimal form from most to least significant."
+//
+// Golang returns MAC addresses as colon-separated octets in lowercase hexadecimal form from most
+// to least significant, so we need to:
+// - Replace hyphens with colons
+// - Convert to lowercase
+//
+// This is the inverse of toIEEERA from the resource detection processor system detector.
+func ieeeRAtoGolangFormat(IEEERAMACaddress string) string {
+	return strings.ToLower(macReplacer.Replace(IEEERAMACaddress))
 }
 
 // isAWS checks if a resource attribute map
@@ -179,6 +234,44 @@ func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, md pa
 			old := md.CPU()[field]
 			changed = changed || old != strVal
 			md.CPU()[field] = strVal
+		}
+	}
+
+	// Gohai - Network
+	if macAddresses, ok, fieldErr := strSliceField(res.Attributes(), attributeHostMAC); fieldErr != nil {
+		err = multierr.Append(err, fieldErr)
+	} else if ok {
+		old := md.Network()[fieldNetworkMACAddress]
+		// Take the first MAC addresses for consistency with the Agent's implementation
+		// Map from IEEE RA format to the Go format for MAC addresses.
+		new := ieeeRAtoGolangFormat(macAddresses[0])
+		changed = changed || old != new
+		md.Network()[fieldNetworkMACAddress] = new
+	}
+
+	if ipAddresses, ok, fieldErr := strSliceField(res.Attributes(), attributeHostIP); fieldErr != nil {
+		err = multierr.Append(err, fieldErr)
+	} else if ok {
+		oldIPv4 := md.Network()[fieldNetworkIPAddressIPv4]
+		oldIPv6 := md.Network()[fieldNetworkIPAddressIPv6]
+
+		var foundIPv4 bool
+		var foundIPv6 bool
+		// Take the first IPv4 and the first IPv6 addresses for consistency with the Agent's implementation
+		for _, ip := range ipAddresses {
+			if foundIPv4 && foundIPv6 {
+				break
+			}
+
+			if !foundIPv4 && isIPv4(ip) {
+				changed = changed || oldIPv4 != ip
+				md.Network()[fieldNetworkIPAddressIPv4] = ip
+				foundIPv4 = true
+			} else if !foundIPv6 { // not IPv4, so it must be IPv6
+				changed = changed || oldIPv6 != ip
+				md.Network()[fieldNetworkIPAddressIPv6] = ip
+				foundIPv6 = true
+			}
 		}
 	}
 

@@ -4,9 +4,9 @@ go 1.20
 
 require (
 	github.com/DataDog/datadog-agent/pkg/proto v0.50.0-rc.1
-	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.9.0
-	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.9.0
-	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.9.0
+	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.10.0
+	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.10.0
+	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.10.0
 	github.com/DataDog/sketches-go v1.4.3
 	github.com/golang/protobuf v1.5.3
 	github.com/lightstep/go-expohisto v1.0.0
@@ -18,6 +18,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.21.0
 	go.uber.org/zap v1.26.0
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
+	google.golang.org/protobuf v1.31.0
 )
 
 require (
@@ -52,7 +53,6 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230822172742-b8732ec3820d // indirect
 	google.golang.org/grpc v1.59.0 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 

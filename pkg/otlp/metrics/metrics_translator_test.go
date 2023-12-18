@@ -20,17 +20,17 @@ import (
 	"testing"
 	"time"
 
+	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
-
-	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestIsCumulativeMonotonic(t *testing.T) {
@@ -98,12 +98,13 @@ func (t testProvider) Source(context.Context) (source.Source, error) {
 	}, nil
 }
 
-func newTranslator(t *testing.T, logger *zap.Logger) *Translator {
+func newTranslatorWithStatsChannel(t *testing.T, logger *zap.Logger, ch chan []byte) *Translator {
 	options := []TranslatorOption{
 		WithFallbackSourceProvider(testProvider(fallbackHostname)),
 		WithHistogramMode(HistogramModeDistributions),
 		WithNumberMode(NumberModeCumulativeToDelta),
 		WithHistogramAggregations(),
+		WithStatsOut(ch),
 	}
 
 	set := componenttest.NewNopTelemetrySettings()
@@ -115,6 +116,10 @@ func newTranslator(t *testing.T, logger *zap.Logger) *Translator {
 
 	require.NoError(t, err)
 	return tr
+}
+
+func newTranslator(t *testing.T, logger *zap.Logger) *Translator {
+	return newTranslatorWithStatsChannel(t, logger, nil)
 }
 
 type metric struct {
@@ -919,6 +924,28 @@ func TestMapAPMStats(t *testing.T) {
 	ctx := context.Background()
 	tr.MapMetrics(ctx, md, consumer)
 	require.Equal(t, consumer.apmstats, statsPayloads)
+}
+
+func TestMapAPMStatsWithBytes(t *testing.T) {
+	consumer := &mockFullConsumer{}
+	logger, err := zap.NewDevelopment()
+	require.NoError(t, err)
+	ch := make(chan []byte, 10)
+	tr := newTranslatorWithStatsChannel(t, logger, ch)
+	want := &pb.StatsPayload{
+		Stats: []*pb.ClientStatsPayload{statsPayloads[0], statsPayloads[1]},
+	}
+	md, err := tr.StatsToMetrics(want)
+	assert.NoError(t, err)
+
+	ctx := context.Background()
+	tr.MapMetrics(ctx, md, consumer)
+	got := &pb.StatsPayload{}
+
+	payload := <-ch
+	err = proto.Unmarshal(payload, got)
+	assert.NoError(t, err)
+	assert.True(t, proto.Equal(want, got))
 }
 
 func TestMapDoubleMonotonicReportDiffForFirstValue(t *testing.T) {
