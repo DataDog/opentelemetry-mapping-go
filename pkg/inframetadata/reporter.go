@@ -147,6 +147,8 @@ func (r *Reporter) ConsumeResource(res pcommon.Resource) error {
 	return nil
 }
 
+// ConsumeMetrics checks if a metric is tracked by the reporter
+// and if so updates the host metadata accordingly.
 func (r *Reporter) ConsumeMetrics(md pmetric.Metrics) error {
 	rms := md.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
