@@ -158,7 +158,8 @@ func (r *Reporter) ConsumeMetrics(md pmetric.Metrics) error {
 			return fmt.Errorf("failed to check resource: %w", err)
 		} else if !ok {
 			// The resource should not be used for host metadata.
-			return nil
+			// Go to next resource.
+			continue
 		}
 
 		host, ok := r.hostname(res)
