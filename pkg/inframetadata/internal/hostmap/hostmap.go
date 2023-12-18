@@ -281,20 +281,22 @@ func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, md pa
 }
 
 func (m *HostMap) UpdateFromMetric(host string, metric pmetric.Metric) {
-	var point pmetric.NumberDataPoint
-
 	// Take last available point
+	var datapoints pmetric.NumberDataPointSlice
 	switch metric.Type() {
 	case pmetric.MetricTypeGauge:
-		lastIndex := metric.Gauge().DataPoints().Len() - 1
-		point = metric.Gauge().DataPoints().At(lastIndex)
+		datapoints = metric.Gauge().DataPoints()
 	case pmetric.MetricTypeSum:
-		lastIndex := metric.Sum().DataPoints().Len() - 1
-		point = metric.Sum().DataPoints().At(lastIndex)
+		datapoints = metric.Sum().DataPoints()
 	default:
-		// unsupported type
-		return
+		return // unsupported type
 	}
+	nPoints := datapoints.Len()
+	if nPoints == 0 {
+		return // no points
+	}
+	lastIndex := nPoints - 1
+	point := datapoints.At(lastIndex)
 
 	// Take value from point
 	var value float64
