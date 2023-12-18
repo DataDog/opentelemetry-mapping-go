@@ -97,7 +97,7 @@ func isIPv4(address string) bool {
 
 var macReplacer = strings.NewReplacer("-", ":")
 
-// toGolangFormat converts a MAC address from IEEE RA format to the Go format for MAC addresses.
+// ieeeRAtoGolangFormat converts a MAC address from IEEE RA format to the Go format for MAC addresses.
 // The Gohai payload expects MAC addresses in the Go format.
 //
 // Per the spec: "MAC Addresses MUST be represented in IEEE RA hexadecimal form: as hyphen-separated

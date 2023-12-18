@@ -46,7 +46,7 @@ func (p *Payload) CPU() map[string]string {
 	return p.Gohai.Gohai.CPU.(map[string]string)
 }
 
-// CPU returns a reference to the Gohai payload 'cpu' map.
+// Network returns a reference to the Gohai payload 'network' map.
 func (p *Payload) Network() map[string]string {
 	return p.Gohai.Gohai.Network.(map[string]string)
 }
