@@ -31,6 +31,101 @@ const (
 func remapMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	remapSystemMetrics(all, m)
 	remapContainerMetrics(all, m)
+	remapKafkaMetrics(all, m)
+	remapJvmMetrics(all, m)
+}
+
+func remapKafkaMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
+	name := m.Name()
+	if !strings.HasPrefix(name, "kafka.") {
+		// not a kafka metric
+		return
+	}
+	switch name {
+	// no change necessary, as - gets converted to _.
+	case "kafka.producer.request-rate":
+		copyMetricWithAttr(all, m, "kafka.producer.request_rate", 1, map[string]string{"type": "producer-metrics"})
+	case "kafka.producer.response-rate":
+		copyMetricWithAttr(all, m, "kafka.producer.response_rate", 1, map[string]string{"type": "producer-metrics"})
+	case "kafka.producer.request-latency-avg":
+		copyMetricWithAttr(all, m, "kafka.producer.request_latency_avg", 1, map[string]string{"type": "producer-metrics"})
+	case "kafka.producer.outgoing-byte-rate":
+		copyMetricWithAttr(all, m, "kafka.producer.bytes_out", 1, map[string]string{"type": "producer-metrics"})
+	case "kafka.producer.io-wait-time-ns-avg":
+		copyMetricWithAttr(all, m, "kafka.producer.io_wait", 1, map[string]string{"type": "producer-metrics"})
+	case "kafka.producer.byte-rate":
+		// may need to add tags client, topic.
+		copyMetricWithAttr(all, m, "kafka.producer.bytes_out", 1, map[string]string{"type": "producer-topic-metrics"})
+	case "kafka.consumer.total.bytes-consumed-rate":
+		copyMetricWithAttr(all, m, "kafka.consumer.bytes_in", 1, map[string]string{"type": "consumer-fetch-manager-metrics"})
+	case "kafka.consumer.total.records-consumed-rate":
+		copyMetricWithAttr(all, m, "kafka.consumer.messages_in", 1, map[string]string{"type": "consumer-fetch-manager-metrics"})
+	case "kafka.network.io":
+		copyMetricWithAttr(all, m, "kafka.net.bytes_out.rate", 1, map[string]string{"type": "BrokerTopicMetrics"}, kv{"state", "out"})
+		copyMetricWithAttr(all, m, "kafka.net.bytes_in.rate", 1, map[string]string{"type": "BrokerTopicMetrics"}, kv{"state", "in"})
+	case "kafka.purgatory.size":
+		copyMetricWithAttr(all, m, "kafka.request.producer_request_purgatory.size", 1, map[string]string{"type": "DelayedOperationPurgatory"}, kv{"type", "produce"})
+		copyMetricWithAttr(all, m, "kafka.request.fetch_request_purgatory.size", 1, map[string]string{"type": "DelayedOperationPurgatory"}, kv{"type", "fetch"})
+	case "kafka.partition.under_replicated":
+		copyMetricWithAttr(all, m, "kafka.replication.under_replicated_partitions", 1, map[string]string{"type": "ReplicaManager"})
+	case "kafka.isr.operation.count":
+		copyMetricWithAttr(all, m, "kafka.replication.isr_shrinks.rate", 1, map[string]string{"type": "ReplicaManager"}, kv{"operation", "shrink"})
+		copyMetricWithAttr(all, m, "kafka.replication.isr_expands.rate", 1, map[string]string{"type": "ReplicaManager"}, kv{"operation", "extract"})
+	case "kafka.leader.election.rate":
+		copyMetricWithAttr(all, m, "kafka.replication.leader_elections.rate", 1, map[string]string{"type": "ControllerStats"})
+	case "kafka.partition.offline":
+		copyMetricWithAttr(all, m, "kafka.replication.offline_partitions_count", 1, map[string]string{"type": "KafkaController"})
+	case "kafka.request.time.avg":
+		copyMetricWithAttr(all, m, "kafka.request.produce.time.avg", 1, map[string]string{"type": "RequestMetrics"}, kv{"type", "produce"})
+		copyMetricWithAttr(all, m, "kafka.request.fetch_consumer.time.avg", 1, map[string]string{"type": "RequestMetrics"}, kv{"type", "fetchconsumer"})
+		copyMetricWithAttr(all, m, "kafka.request.fetch_follower.time.avg", 1, map[string]string{"type": "RequestMetrics"}, kv{"type", "fetchfollower"})
+	// kafka metrics receiver
+	case "kafka.partition.current_offset":
+		copyMetricWithAttr(all, m, "kafka.broker_offset", 1, nil)
+	case "kafka.consumer_group.lag":
+		copyMetricWithAttr(all, m, "kafka.consumer_lag", 1, nil)
+	case "kafka.consumer_group.offset":
+		copyMetricWithAttr(all, m, "kafka.consumer_offset", 1, nil)
+	}
+}
+
+func remapJvmMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
+	name := m.Name()
+	if !strings.HasPrefix(name, "jvm.") {
+		// not a jvm metric
+		return
+	}
+	switch name {
+	case "jvm.gc.collections.count":
+		// Young Gen Collectors
+		copyMetricWithAttr(all, m, "jvm.gc.minor_collection_count", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "Copy"})
+		copyMetricWithAttr(all, m, "jvm.gc.minor_collection_count", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "PS Scavenge"})
+		copyMetricWithAttr(all, m, "jvm.gc.minor_collection_count", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "ParNew"})
+		copyMetricWithAttr(all, m, "jvm.gc.minor_collection_count", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "G1 Young Generation"})
+		// Old Gen Collectors
+		copyMetricWithAttr(all, m, "jvm.gc.major_collection_count", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "MarkSweepCompact"})
+		copyMetricWithAttr(all, m, "jvm.gc.major_collection_count", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "PS MarkSweep"})
+		copyMetricWithAttr(all, m, "jvm.gc.major_collection_count", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "ConcurrentMarkSweep"})
+		copyMetricWithAttr(all, m, "jvm.gc.major_collection_count", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "G1 Mixed Generation"})
+		copyMetricWithAttr(all, m, "jvm.gc.major_collection_count", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "G1 Old Generation"})
+		copyMetricWithAttr(all, m, "jvm.gc.major_collection_count", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "Shenandoah Cycles"})
+		copyMetricWithAttr(all, m, "jvm.gc.major_collection_count", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "ZGC"})
+
+	case "jvm.gc.collections.elapsed":
+		// Young Gen Collectors
+		copyMetricWithAttr(all, m, "jvm.gc.minor_collection_time", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "Copy"})
+		copyMetricWithAttr(all, m, "jvm.gc.minor_collection_time", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "PS Scavenge"})
+		copyMetricWithAttr(all, m, "jvm.gc.minor_collection_time", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "ParNew"})
+		copyMetricWithAttr(all, m, "jvm.gc.minor_collection_time", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "G1 Young Generation"})
+		// Old Gen Collectors
+		copyMetricWithAttr(all, m, "jvm.gc.major_collection_time", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "MarkSweepCompact"})
+		copyMetricWithAttr(all, m, "jvm.gc.major_collection_time", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "PS MarkSweep"})
+		copyMetricWithAttr(all, m, "jvm.gc.major_collection_time", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "ConcurrentMarkSweep"})
+		copyMetricWithAttr(all, m, "jvm.gc.major_collection_time", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "G1 Mixed Generation"})
+		copyMetricWithAttr(all, m, "jvm.gc.major_collection_time", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "G1 Old Generation"})
+		copyMetricWithAttr(all, m, "jvm.gc.major_collection_time", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "Shenandoah Cycles"})
+		copyMetricWithAttr(all, m, "jvm.gc.major_collection_time", 1, map[string]string{"type": "GarbageCollector"}, kv{"name", "ZGC"})
+	}
 }
 
 // remapSystemMetrics extracts system metrics from m and appends them to all.
@@ -128,6 +223,57 @@ func remapContainerMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 
 // kv represents a key/value pair.
 type kv struct{ K, V string }
+
+// Rather than creating new func we can extend copyMetric to take in an attribute map for attributes
+// that need to be added to the new metric. To avoid cluttering this PR and chaging func signature, using other func.
+func copyMetricWithAttr(dest pmetric.MetricSlice, m pmetric.Metric, newname string, div float64, attr map[string]string, filter ...kv) (pmetric.Metric, bool) {
+	newm := pmetric.NewMetric()
+	m.CopyTo(newm)
+	newm.SetName(newname)
+	var dps pmetric.NumberDataPointSlice
+	switch newm.Type() {
+	case pmetric.MetricTypeGauge:
+		dps = newm.Gauge().DataPoints()
+	case pmetric.MetricTypeSum:
+		dps = newm.Sum().DataPoints()
+	default:
+		// invalid metric type
+		return newm, false
+	}
+	dps.RemoveIf(func(dp pmetric.NumberDataPoint) bool {
+		if !hasAny(dp, filter...) {
+			return true
+		}
+		switch dp.ValueType() {
+		case pmetric.NumberDataPointValueTypeInt:
+			if div >= 1 {
+				// avoid division by zero
+				dp.SetIntValue(dp.IntValue() / int64(div))
+			}
+		case pmetric.NumberDataPointValueTypeDouble:
+			if div != 0 {
+				dp.SetDoubleValue(dp.DoubleValue() / div)
+			}
+		}
+		if attr != nil {
+			for k, v := range attr {
+				dp.Attributes().PutStr(k, v)
+			}
+		}
+		// Need to refactor.
+		if v, ok := dp.Attributes().Get("group"); ok {
+			dp.Attributes().PutStr("consumer_group", v.AsString())
+		}
+		return false
+	})
+	if dps.Len() > 0 {
+		// if we have datapoints, copy it
+		addm := dest.AppendEmpty()
+		newm.CopyTo(addm)
+		return addm, true
+	}
+	return newm, false
+}
 
 // copyMetric copies metric m to dest. The new metric's name will be newname, and all of its datapoints will
 // be divided by div. If filter is provided, only the data points that have *either* of the specified string
