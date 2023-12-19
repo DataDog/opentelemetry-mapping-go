@@ -684,7 +684,6 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			return metadata, err
 		}
 		if !hasSource {
-			// Only count metrics if they do not come from the translator itself.
 			t.instruments.missingSources.Add(ctx, 1, otelmetric.WithAttributeSet(signalTypeSet))
 		}
 
