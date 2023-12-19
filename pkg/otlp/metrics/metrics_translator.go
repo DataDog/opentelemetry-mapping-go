@@ -105,7 +105,7 @@ func NewTranslator(set component.TelemetrySettings, options ...TranslatorOption)
 	meter := set.MeterProvider.Meter(meterName)
 	missingSources, err := meter.Int64Counter(
 		missingSourceMetricName,
-		otelmetric.WithDescription("OTLP metrics that are missing a source (e.g. hostname)"),
+		otelmetric.WithDescription("OTLP resources that are missing a source (e.g. hostname)"),
 		otelmetric.WithUnit("{resource}"),
 	)
 	if err != nil {
