@@ -29,6 +29,7 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
+	"go.opentelemetry.io/otel/attribute"
 	otelmetric "go.opentelemetry.io/otel/metric"
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
@@ -41,8 +42,12 @@ const (
 	metricName             string = "metric name"
 	errNoBucketsNoSumCount string = "no buckets mode and no send count sum are incompatible"
 
-	meterName               string = "github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics"
-	missingSourceMetricName string = "datadog.otlp_translator.metrics.missing_source"
+	meterName               string = "github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
+	missingSourceMetricName string = "datadog.otlp_translator.resources.missing_source"
+)
+
+var (
+	signalTypeSet = attribute.NewSet(attribute.String("signal", "metrics"))
 )
 
 var _ source.Provider = (*noSourceProvider)(nil)
@@ -100,8 +105,8 @@ func NewTranslator(set component.TelemetrySettings, options ...TranslatorOption)
 	meter := set.MeterProvider.Meter(meterName)
 	missingSources, err := meter.Int64Counter(
 		missingSourceMetricName,
-		otelmetric.WithDescription("OTLP metrics that are missing a source (e.g. hostname)"),
-		otelmetric.WithUnit("[metric]"),
+		otelmetric.WithDescription("OTLP resources that are missing a source (e.g. hostname)"),
+		otelmetric.WithUnit("{resource}"),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build missing source counter: %w", err)
@@ -678,6 +683,10 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 		if err != nil {
 			return metadata, err
 		}
+		if !hasSource {
+			t.instruments.missingSources.Add(ctx, 1, otelmetric.WithAttributeSet(signalTypeSet))
+		}
+
 		var host string
 		switch src.Kind {
 		case source.HostnameKind:
@@ -698,11 +707,6 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 		for j := 0; j < ilms.Len(); j++ {
 			ilm := ilms.At(j)
 			metricsArray := ilm.Metrics()
-
-			if !hasSource && ilm.Scope().Name() != meterName {
-				// Only count metrics if they do not come from the translator itself.
-				t.instruments.missingSources.Add(ctx, int64(metricsArray.Len()))
-			}
 
 			var additionalTags []string
 			if t.cfg.InstrumentationScopeMetadataAsTags {
