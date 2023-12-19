@@ -47,7 +47,7 @@ const (
 )
 
 var (
-	signalTypeSet = attribute.NewSet(attribute.String("signal", "logs"))
+	signalTypeSet = attribute.NewSet(attribute.String("signal", "metrics"))
 )
 
 var _ source.Provider = (*noSourceProvider)(nil)
