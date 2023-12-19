@@ -63,7 +63,7 @@ func TestInternalTelemetryMetrics(t *testing.T) {
 			name:               "simple",
 			otlpfile:           "testdata/otlpdata/source/simple.json",
 			ddogfile:           "testdata/datadogdata/source/simple.json",
-			expectedNumMissing: 4,
+			expectedNumMissing: 1,
 		},
 	}
 
