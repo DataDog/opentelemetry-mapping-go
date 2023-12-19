@@ -9,12 +9,27 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	conventions "go.opentelemetry.io/collector/semconv/v1.18.0"
 	"go.uber.org/multierr"
 
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/internal/testutils"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/payload"
 )
+
+func BuildMetric[N int64 | float64](name string, value N) *pmetric.Metric {
+	m := pmetric.NewMetric()
+	m.SetEmptyGauge()
+	m.SetName(name)
+	dp := m.Gauge().DataPoints().AppendEmpty()
+	switch any(value).(type) {
+	case int64:
+		dp.SetIntValue(int64(value))
+	case float64:
+		dp.SetDoubleValue(float64(value))
+	}
+	return &m
+}
 
 func TestStrSliceField(t *testing.T) {
 	tests := []struct {
@@ -125,6 +140,7 @@ func TestUpdate(t *testing.T) {
 	hostInfo := []struct {
 		hostname        string
 		attributes      map[string]any
+		metric          *pmetric.Metric
 		expectedChanged bool
 		expectedErrs    []string
 	}{
@@ -149,6 +165,7 @@ func TestUpdate(t *testing.T) {
 				attributeHostIP:                    []any{"192.168.1.140", "fe80::abc2:4a28:737a:609e"},
 				attributeHostMAC:                   []any{"AC-DE-48-23-45-67", "AC-DE-48-23-45-67-01-9F"},
 			},
+			metric:          BuildMetric[int64](metricSystemCPUPhysicalCount, 32),
 			expectedChanged: false,
 		},
 		{
@@ -160,6 +177,7 @@ func TestUpdate(t *testing.T) {
 				conventions.AttributeHostName:      "host-1-hostname",
 				conventions.AttributeOSDescription: "Fedora Linux",
 			},
+			metric:          BuildMetric[float64](metricSystemCPUFrequency, 400_000_005.5),
 			expectedChanged: false,
 		},
 		{
@@ -221,6 +239,9 @@ func TestUpdate(t *testing.T) {
 		} else {
 			assert.NoError(t, err)
 		}
+		if info.metric != nil {
+			hostMap.UpdateFromMetric(info.hostname, *info.metric)
+		}
 	}
 
 	hosts := hostMap.Flush()
@@ -255,6 +276,8 @@ func TestUpdate(t *testing.T) {
 			fieldCPUModelName: "11th Gen Intel(R) Core(TM) i7-1185G7 @ 3.00GHz",
 			fieldCPUStepping:  "1",
 			fieldCPUVendorID:  "GenuineIntel",
+			fieldCPUCores:     "32",
+			fieldCPUMHz:       "400.0000055",
 		})
 		assert.Equal(t, md.Payload.Gohai.Gohai.Network, map[string]string{
 			fieldNetworkIPAddressIPv4: "192.168.1.140",

@@ -29,7 +29,7 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
-	otelmetric "go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/attribute"
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
 
@@ -40,9 +40,10 @@ import (
 const (
 	metricName             string = "metric name"
 	errNoBucketsNoSumCount string = "no buckets mode and no send count sum are incompatible"
+)
 
-	meterName               string = "github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics"
-	missingSourceMetricName string = "datadog.otlp_translator.metrics.missing_source"
+var (
+	signalTypeSet = attribute.NewSet(attribute.String("signal", "metrics"))
 )
 
 var _ source.Provider = (*noSourceProvider)(nil)
@@ -53,16 +54,12 @@ func (*noSourceProvider) Source(context.Context) (source.Source, error) {
 	return source.Source{Kind: source.HostnameKind, Identifier: ""}, nil
 }
 
-type instruments struct {
-	missingSources otelmetric.Int64Counter
-}
-
 // Translator is a metrics translator.
 type Translator struct {
-	prevPts     *ttlCache
-	logger      *zap.Logger
-	instruments instruments
-	cfg         translatorConfig
+	prevPts              *ttlCache
+	logger               *zap.Logger
+	attributesTranslator *attributes.Translator
+	cfg                  translatorConfig
 }
 
 // Metadata specifies information about the outcome of the MapMetrics call.
@@ -72,7 +69,7 @@ type Metadata struct {
 }
 
 // NewTranslator creates a new translator with given options.
-func NewTranslator(set component.TelemetrySettings, options ...TranslatorOption) (*Translator, error) {
+func NewTranslator(set component.TelemetrySettings, attributesTranslator *attributes.Translator, options ...TranslatorOption) (*Translator, error) {
 	cfg := translatorConfig{
 		HistMode:                             HistogramModeDistributions,
 		SendHistogramAggregations:            false,
@@ -97,21 +94,12 @@ func NewTranslator(set component.TelemetrySettings, options ...TranslatorOption)
 	}
 
 	cache := newTTLCache(cfg.sweepInterval, cfg.deltaTTL)
-	meter := set.MeterProvider.Meter(meterName)
-	missingSources, err := meter.Int64Counter(
-		missingSourceMetricName,
-		otelmetric.WithDescription("OTLP metrics that are missing a source (e.g. hostname)"),
-		otelmetric.WithUnit("[metric]"),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to build missing source counter: %w", err)
-	}
 
 	return &Translator{
-		prevPts:     cache,
-		logger:      set.Logger.With(zap.String("component", "metrics translator")),
-		instruments: instruments{missingSources: missingSources},
-		cfg:         cfg,
+		prevPts:              cache,
+		logger:               set.Logger.With(zap.String("component", "metrics translator")),
+		attributesTranslator: attributesTranslator,
+		cfg:                  cfg,
 	}, nil
 }
 
@@ -214,9 +202,17 @@ func (t *Translator) mapNumberMonotonicMetrics(
 			continue
 		}
 
-		if dx, ok := t.prevPts.MonotonicDiff(pointDims, startTs, ts, val); ok {
+		dx, firstPoint, dropPoint := t.prevPts.MonotonicDiff(pointDims, startTs, ts, val)
+		if dropPoint {
+			t.logger.Debug("Dropping point: timestamp is older or equal to timestamp of previous point received", zap.String(metricName, pointDims.name))
+			continue
+		}
+
+		if !firstPoint {
 			consumer.ConsumeTimeSeries(ctx, pointDims, Count, ts, dx)
 		} else if i == 0 && t.shouldConsumeInitialValue(startTs, ts) {
+			// We only compute the first point in the timeseries if it is the first value in the datapoint slice.
+			// Todo: Investigate why we don't compute first val if i > 0 and add reason as comment.
 			consumer.ConsumeTimeSeries(ctx, pointDims, Count, ts, val)
 		}
 	}
@@ -544,16 +540,16 @@ func (t *Translator) mapSummaryMetrics(
 	}
 }
 
-func (t *Translator) source(ctx context.Context, m pcommon.Map) (source.Source, bool, error) {
-	src, hasSource := attributes.SourceFromAttrs(m)
+func (t *Translator) source(ctx context.Context, res pcommon.Resource) (source.Source, error) {
+	src, hasSource := t.attributesTranslator.ResourceToSource(ctx, res, signalTypeSet)
 	if !hasSource {
 		var err error
 		src, err = t.cfg.fallbackSourceProvider.Source(ctx)
 		if err != nil {
-			return source.Source{}, false, fmt.Errorf("failed to get fallback source: %w", err)
+			return source.Source{}, fmt.Errorf("failed to get fallback source: %w", err)
 		}
 	}
-	return src, hasSource, nil
+	return src, nil
 }
 
 // extractLanguageTag appends a new language tag to languageTags if a new language tag is found from the given name
@@ -674,10 +670,11 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			consumer.ConsumeAPMStats(sp)
 			continue
 		}
-		src, hasSource, err := t.source(ctx, rm.Resource().Attributes())
+		src, err := t.source(ctx, rm.Resource())
 		if err != nil {
 			return metadata, err
 		}
+
 		var host string
 		switch src.Kind {
 		case source.HostnameKind:
@@ -698,11 +695,6 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 		for j := 0; j < ilms.Len(); j++ {
 			ilm := ilms.At(j)
 			metricsArray := ilm.Metrics()
-
-			if !hasSource && ilm.Scope().Name() != meterName {
-				// Only count metrics if they do not come from the translator itself.
-				t.instruments.missingSources.Add(ctx, int64(metricsArray.Len()))
-			}
 
 			var additionalTags []string
 			if t.cfg.InstrumentationScopeMetadataAsTags {

@@ -3,7 +3,7 @@
 // This product includes software developed at Datadog (https://www.datadoghq.com/).
 // Copyright 2022-present Datadog, Inc.
 
-package metrics
+package attributes
 
 import (
 	"context"
@@ -12,6 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/otel/attribute"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 )
@@ -53,32 +55,26 @@ func AssertHasSumMetric[N int64 | float64](t *testing.T, rm *metricdata.Resource
 }
 
 func TestInternalTelemetryMetrics(t *testing.T) {
-	tests := []struct {
-		name               string
-		otlpfile           string
-		ddogfile           string
-		expectedNumMissing int64
-	}{
-		{
-			name:               "simple",
-			otlpfile:           "testdata/otlpdata/source/simple.json",
-			ddogfile:           "testdata/datadogdata/source/simple.json",
-			expectedNumMissing: 4,
-		},
-	}
+	set := componenttest.NewNopTelemetrySettings()
+	reader := sdkmetric.NewManualReader(sdkmetric.WithTemporalitySelector(deltaSelector))
+	set.MeterProvider = sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader))
+	translator, err := NewTranslator(set)
+	require.NoError(t, err)
 
-	for _, testinstance := range tests {
-		t.Run(testinstance.name, func(t *testing.T) {
-			set := componenttest.NewNopTelemetrySettings()
-			reader := sdkmetric.NewManualReader(sdkmetric.WithTemporalitySelector(deltaSelector))
-			set.MeterProvider = sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader))
-			translator, err := NewTranslator(set)
-			require.NoError(t, err)
-			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
+	resWithHostname := pcommon.NewResource()
+	resWithHostname.Attributes().FromRaw(map[string]any{
+		"datadog.host.name": "testhost",
+	})
 
-			rm := &metricdata.ResourceMetrics{}
-			assert.NoError(t, reader.Collect(context.Background(), rm))
-			AssertHasSumMetric[int64](t, rm, missingSourceMetricName, testinstance.expectedNumMissing)
-		})
-	}
+	resWithoutHostname := pcommon.NewResource()
+
+	attributeSet := attribute.NewSet(attribute.String("signal", "test"))
+
+	_, _ = translator.ResourceToSource(context.Background(), resWithHostname, attributeSet)
+	_, _ = translator.ResourceToSource(context.Background(), resWithoutHostname, attributeSet)
+	_, _ = translator.ResourceToSource(context.Background(), resWithoutHostname, attributeSet)
+
+	rm := &metricdata.ResourceMetrics{}
+	assert.NoError(t, reader.Collect(context.Background(), rm))
+	AssertHasSumMetric[int64](t, rm, missingSourceMetricName, 2)
 }
