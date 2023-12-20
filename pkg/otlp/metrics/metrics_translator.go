@@ -69,7 +69,7 @@ type Metadata struct {
 }
 
 // NewTranslator creates a new translator with given options.
-func NewTranslator(set component.TelemetrySettings, options ...TranslatorOption) (*Translator, error) {
+func NewTranslator(set component.TelemetrySettings, attributesTranslator *attributes.Translator, options ...TranslatorOption) (*Translator, error) {
 	cfg := translatorConfig{
 		HistMode:                             HistogramModeDistributions,
 		SendHistogramAggregations:            false,
@@ -94,12 +94,6 @@ func NewTranslator(set component.TelemetrySettings, options ...TranslatorOption)
 	}
 
 	cache := newTTLCache(cfg.sweepInterval, cfg.deltaTTL)
-
-	// TODO: Pass as argument instead.
-	attributesTranslator, err := attributes.NewTranslator(set)
-	if err != nil {
-		return nil, fmt.Errorf("failed to build attributes translator: %w", err)
-	}
 
 	return &Translator{
 		prevPts:              cache,

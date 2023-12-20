@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
 	"github.com/stretchr/testify/assert"
@@ -22,6 +23,16 @@ import (
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
+
+func NewTestTranslator(t testing.TB, options ...TranslatorOption) *Translator {
+	t.Helper()
+	set := componenttest.NewNopTelemetrySettings()
+	attributesTranslator, err := attributes.NewTranslator(set)
+	require.NoError(t, err)
+	translator, err := NewTranslator(set, attributesTranslator, options...)
+	require.NoError(t, err)
+	return translator
+}
 
 // TestMetrics is the struct used for serializing Datadog metrics for generating testdata.
 // It contains sketches (distributions) and timeseries (all other types).
@@ -225,8 +236,7 @@ func TestAssertTranslatorMapFailure(t *testing.T) {
 	// Compare OTLP file with incorrect output
 	ddogfile := "testdata/datadogdata/histogram/simple-delta_nobuckets-cs.json"
 
-	translator, err := NewTranslator(componenttest.NewNopTelemetrySettings(), WithHistogramMode(HistogramModeDistributions))
-	require.NoError(t, err)
+	translator := NewTestTranslator(t, WithHistogramMode(HistogramModeDistributions))
 	mockTesting := &testingTMock{t}
 	assert.False(t, AssertTranslatorMap(mockTesting, translator, otlpfile, ddogfile), "AssertTranslatorMap should have failed but did not")
 	actualFile := ddogfile + ".actual"
