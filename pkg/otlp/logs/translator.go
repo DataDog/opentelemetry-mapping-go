@@ -15,40 +15,82 @@
 package logs
 
 import (
+	"context"
+
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadogV2"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
+	conventions "go.opentelemetry.io/collector/semconv/v1.6.1"
+	"go.opentelemetry.io/otel/attribute"
+)
+
+var (
+	signalTypeSet = attribute.NewSet(attribute.String("signal", "logs"))
 )
 
 // Translator of OTLP logs to Datadog format
 type Translator struct {
-	set     component.TelemetrySettings
-	otelTag string
+	set                  component.TelemetrySettings
+	attributesTranslator *attributes.Translator
+	otelTag              string
 }
 
 // NewTranslator returns a new Translator
-func NewTranslator(set component.TelemetrySettings, otelSource string) (*Translator, error) {
+func NewTranslator(set component.TelemetrySettings, attributesTranslator *attributes.Translator, otelSource string) (*Translator, error) {
 	return &Translator{
-		set:     set,
-		otelTag: "otel_source:" + otelSource,
+		set:                  set,
+		attributesTranslator: attributesTranslator,
+		otelTag:              "otel_source:" + otelSource,
 	}, nil
 }
 
+func (t *Translator) hostNameAndServiceNameFromResource(ctx context.Context, res pcommon.Resource) (host string, service string) {
+	if src, ok := t.attributesTranslator.ResourceToSource(ctx, res, signalTypeSet); ok && src.Kind == source.HostnameKind {
+		host = src.Identifier
+	}
+	if s, ok := res.Attributes().Get(conventions.AttributeServiceName); ok {
+		service = s.AsString()
+	}
+	return host, service
+}
+
+func (t *Translator) hostFromAttributes(ctx context.Context, attrs pcommon.Map) string {
+	if src, ok := t.attributesTranslator.AttributesToSource(ctx, attrs); ok && src.Kind == source.HostnameKind {
+		return src.Identifier
+	}
+	return ""
+}
+
 // MapLogs from OTLP format to Datadog format.
-func (t *Translator) MapLogs(ld plog.Logs) []datadogV2.HTTPLogItem {
+func (t *Translator) MapLogs(ctx context.Context, ld plog.Logs) []datadogV2.HTTPLogItem {
 	rsl := ld.ResourceLogs()
 	var payloads []datadogV2.HTTPLogItem
 	for i := 0; i < rsl.Len(); i++ {
 		rl := rsl.At(i)
 		sls := rl.ScopeLogs()
 		res := rl.Resource()
+		host, service := t.hostNameAndServiceNameFromResource(ctx, res)
 		for j := 0; j < sls.Len(); j++ {
 			sl := sls.At(j)
 			lsl := sl.LogRecords()
 			// iterate over Logs
 			for k := 0; k < lsl.Len(); k++ {
 				log := lsl.At(k)
-				payload := Transform(log, res, t.set.Logger)
+				// HACK: Check for host and service in log record attributes
+				// This is not aligned with the specification and will be removed in the future.
+				if host == "" {
+					host = t.hostFromAttributes(ctx, log.Attributes())
+				}
+				if service == "" {
+					if s, ok := log.Attributes().Get(conventions.AttributeServiceName); ok {
+						service = s.AsString()
+					}
+				}
+
+				payload := transform(log, host, service, res, t.set.Logger)
 				ddtags := payload.GetDdtags()
 				if ddtags != "" {
 					payload.SetDdtags(ddtags + "," + t.otelTag)
