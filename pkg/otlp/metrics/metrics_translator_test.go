@@ -20,16 +20,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/pdata/pcommon"
-	"go.opentelemetry.io/collector/pdata/pmetric"
-	"go.uber.org/zap"
-
 	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/pmetric"
+	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestIsCumulativeMonotonic(t *testing.T) {
@@ -97,21 +98,28 @@ func (t testProvider) Source(context.Context) (source.Source, error) {
 	}, nil
 }
 
-func newTranslator(t *testing.T, logger *zap.Logger) *Translator {
+func newTranslatorWithStatsChannel(t *testing.T, logger *zap.Logger, ch chan []byte) *Translator {
 	options := []TranslatorOption{
 		WithFallbackSourceProvider(testProvider(fallbackHostname)),
 		WithHistogramMode(HistogramModeDistributions),
 		WithNumberMode(NumberModeCumulativeToDelta),
 		WithHistogramAggregations(),
+		WithStatsOut(ch),
 	}
 
+	set := componenttest.NewNopTelemetrySettings()
+	set.Logger = logger
 	tr, err := NewTranslator(
-		logger,
+		set,
 		options...,
 	)
 
 	require.NoError(t, err)
 	return tr
+}
+
+func newTranslator(t *testing.T, logger *zap.Logger) *Translator {
+	return newTranslatorWithStatsChannel(t, logger, nil)
 }
 
 type metric struct {
@@ -432,7 +440,7 @@ func TestMapRuntimeMetricsHasMapping(t *testing.T) {
 func TestMapRuntimeMetricsHasMappingCollector(t *testing.T) {
 	ctx := context.Background()
 	tr, err := NewTranslator(
-		zap.NewNop(),
+		componenttest.NewNopTelemetrySettings(),
 		WithRemapping(),
 	)
 	require.NoError(t, err)
@@ -485,7 +493,7 @@ func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 func TestMapSumRuntimeMetricWithAttributesHasMappingCollector(t *testing.T) {
 	ctx := context.Background()
 	tr, err := NewTranslator(
-		zap.NewNop(),
+		componenttest.NewNopTelemetrySettings(),
 		WithRemapping(),
 	)
 	require.NoError(t, err)
@@ -537,7 +545,7 @@ func TestMapHistogramRuntimeMetricHasMapping(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
 
-	rmt, err := tr.MapMetrics(ctx, createTestHistogramMetric("process.runtime.jvm.gc.duration"), consumer)
+	rmt, err := tr.MapMetrics(ctx, createTestHistogramMetric("process.runtime.jvm.threads.count"), consumer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -545,14 +553,14 @@ func TestMapHistogramRuntimeMetricHasMapping(t *testing.T) {
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
-			newCountWithHost(newDims("process.runtime.jvm.gc.duration.count"), uint64(seconds(startTs+1)), 100, fallbackHostname),
-			newCountWithHost(newDims("process.runtime.jvm.gc.duration.sum"), uint64(seconds(startTs+1)), 0, fallbackHostname),
-			newGaugeWithHost(newDims("process.runtime.jvm.gc.duration.min"), uint64(seconds(startTs+1)), -100, fallbackHostname),
-			newGaugeWithHost(newDims("process.runtime.jvm.gc.duration.max"), uint64(seconds(startTs+1)), 100, fallbackHostname),
-			newCountWithHost(newDims("jvm.gc.parnew.time.count"), uint64(seconds(startTs+1)), 100, fallbackHostname),
-			newCountWithHost(newDims("jvm.gc.parnew.time.sum"), uint64(seconds(startTs+1)), 0, fallbackHostname),
-			newGaugeWithHost(newDims("jvm.gc.parnew.time.min"), uint64(seconds(startTs+1)), -100, fallbackHostname),
-			newGaugeWithHost(newDims("jvm.gc.parnew.time.max"), uint64(seconds(startTs+1)), 100, fallbackHostname),
+			newCountWithHost(newDims("process.runtime.jvm.threads.count.count"), uint64(seconds(startTs+1)), 100, fallbackHostname),
+			newCountWithHost(newDims("process.runtime.jvm.threads.count.sum"), uint64(seconds(startTs+1)), 0, fallbackHostname),
+			newGaugeWithHost(newDims("process.runtime.jvm.threads.count.min"), uint64(seconds(startTs+1)), -100, fallbackHostname),
+			newGaugeWithHost(newDims("process.runtime.jvm.threads.count.max"), uint64(seconds(startTs+1)), 100, fallbackHostname),
+			newCountWithHost(newDims("jvm.thread_count.count"), uint64(seconds(startTs+1)), 100, fallbackHostname),
+			newCountWithHost(newDims("jvm.thread_count.sum"), uint64(seconds(startTs+1)), 0, fallbackHostname),
+			newGaugeWithHost(newDims("jvm.thread_count.min"), uint64(seconds(startTs+1)), -100, fallbackHostname),
+			newGaugeWithHost(newDims("jvm.thread_count.max"), uint64(seconds(startTs+1)), 100, fallbackHostname),
 		},
 	)
 	assert.Equal(t, []string{"jvm"}, rmt.Languages)
@@ -733,7 +741,7 @@ func TestMapRuntimeMetricsNoMapping(t *testing.T) {
 func TestMapSystemMetrics(t *testing.T) {
 	ctx := context.Background()
 	tr, err := NewTranslator(
-		zap.NewNop(),
+		componenttest.NewNopTelemetrySettings(),
 		WithRemapping(),
 	)
 	require.NoError(t, err)
@@ -916,6 +924,28 @@ func TestMapAPMStats(t *testing.T) {
 	ctx := context.Background()
 	tr.MapMetrics(ctx, md, consumer)
 	require.Equal(t, consumer.apmstats, statsPayloads)
+}
+
+func TestMapAPMStatsWithBytes(t *testing.T) {
+	consumer := &mockFullConsumer{}
+	logger, err := zap.NewDevelopment()
+	require.NoError(t, err)
+	ch := make(chan []byte, 10)
+	tr := newTranslatorWithStatsChannel(t, logger, ch)
+	want := &pb.StatsPayload{
+		Stats: []*pb.ClientStatsPayload{statsPayloads[0], statsPayloads[1]},
+	}
+	md, err := tr.StatsToMetrics(want)
+	assert.NoError(t, err)
+
+	ctx := context.Background()
+	tr.MapMetrics(ctx, md, consumer)
+	got := &pb.StatsPayload{}
+
+	payload := <-ch
+	err = proto.Unmarshal(payload, got)
+	assert.NoError(t, err)
+	assert.True(t, proto.Equal(want, got))
 }
 
 func TestMapDoubleMonotonicReportDiffForFirstValue(t *testing.T) {

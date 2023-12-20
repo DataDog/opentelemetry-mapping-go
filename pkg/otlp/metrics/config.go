@@ -22,15 +22,11 @@ import (
 
 type translatorConfig struct {
 	// metrics export behavior
-	HistMode                  HistogramMode
-	SendHistogramAggregations bool
-	Quantiles                 bool
-	NumberMode                NumberMode
-	InitialCumulMonoValueMode InitialCumulMonoValueMode
-	ResourceAttributesAsTags  bool
-	// Deprecated: use InstrumentationScopeMetadataAsTags instead in favor of
-	// https://github.com/open-telemetry/opentelemetry-proto/releases/tag/v0.15.0
-	// Both must not be enabled at the same time.
+	HistMode                             HistogramMode
+	SendHistogramAggregations            bool
+	Quantiles                            bool
+	NumberMode                           NumberMode
+	InitialCumulMonoValueMode            InitialCumulMonoValueMode
 	InstrumentationLibraryMetadataAsTags bool
 	InstrumentationScopeMetadataAsTags   bool
 
@@ -46,6 +42,8 @@ type translatorConfig struct {
 	deltaTTL      int64
 
 	fallbackSourceProvider source.Provider
+	// statsOut is the channel where the translator will send its APM statsPayload bytes
+	statsOut chan<- []byte
 }
 
 // TranslatorOption is a translator creation option.
@@ -97,14 +95,6 @@ func WithQuantiles() TranslatorOption {
 	}
 }
 
-// WithResourceAttributesAsTags sets resource attributes as tags.
-func WithResourceAttributesAsTags() TranslatorOption {
-	return func(t *translatorConfig) error {
-		t.ResourceAttributesAsTags = true
-		return nil
-	}
-}
-
 // WithInstrumentationLibraryMetadataAsTags sets instrumentation library metadata as tags.
 func WithInstrumentationLibraryMetadataAsTags() TranslatorOption {
 	return func(t *translatorConfig) error {
@@ -137,7 +127,6 @@ const (
 // The default mode is HistogramModeOff.
 func WithHistogramMode(mode HistogramMode) TranslatorOption {
 	return func(t *translatorConfig) error {
-
 		switch mode {
 		case HistogramModeNoBuckets, HistogramModeCounters, HistogramModeDistributions:
 			t.HistMode = mode
@@ -189,6 +178,14 @@ const (
 func WithNumberMode(mode NumberMode) TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.NumberMode = mode
+		return nil
+	}
+}
+
+// WithStatsOut sets the channel where the translator will send its APM statsPayload bytes
+func WithStatsOut(statsOut chan<- []byte) TranslatorOption {
+	return func(t *translatorConfig) error {
+		t.statsOut = statsOut
 		return nil
 	}
 }

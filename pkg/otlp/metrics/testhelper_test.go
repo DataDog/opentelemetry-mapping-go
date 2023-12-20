@@ -19,8 +19,8 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
-	"go.uber.org/zap"
 )
 
 // TestMetrics is the struct used for serializing Datadog metrics for generating testdata.
@@ -224,8 +224,7 @@ func TestAssertTranslatorMapFailure(t *testing.T) {
 	otlpfile := "testdata/otlpdata/histogram/simple-delta.json"
 	// Compare OTLP file with incorrect output
 	ddogfile := "testdata/datadogdata/histogram/simple-delta_nobuckets-cs.json"
-
-	translator, err := NewTranslator(zap.NewNop(), WithOriginProduct(OriginProductDatadogExporter), WithHistogramMode(HistogramModeDistributions))
+	translator, err := NewTranslator(componenttest.NewNopTelemetrySettings(),  WithOriginProduct(OriginProductDatadogExporter), WithHistogramMode(HistogramModeDistributions))
 	require.NoError(t, err)
 	mockTesting := &testingTMock{t}
 	assert.False(t, AssertTranslatorMap(mockTesting, translator, otlpfile, ddogfile), "AssertTranslatorMap should have failed but did not")

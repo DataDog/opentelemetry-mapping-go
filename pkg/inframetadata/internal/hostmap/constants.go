@@ -21,6 +21,8 @@ const (
 const (
 	fieldPlatformHostname         = "hostname"
 	fieldPlatformOS               = "os"
+	fieldPlatformGOOS             = "GOOS"
+	fieldPlatformGOOARCH          = "GOOARCH"
 	fieldPlatformProcessor        = "processor"
 	fieldPlatformMachine          = "machine"
 	fieldPlatformHardwarePlatform = "hardware_platform"
@@ -33,6 +35,8 @@ const (
 // and resource attribute names (semantic conventions or not).
 var platformAttributesMap map[string]string = map[string]string{
 	fieldPlatformOS:               conventions.AttributeOSDescription,
+	fieldPlatformGOOS:             conventions.AttributeOSType,
+	fieldPlatformGOOARCH:          conventions.AttributeHostArch,
 	fieldPlatformProcessor:        conventions.AttributeHostArch,
 	fieldPlatformMachine:          conventions.AttributeHostArch,
 	fieldPlatformHardwarePlatform: conventions.AttributeHostArch,
@@ -52,14 +56,26 @@ const (
 	attributeHostCPUCacheL2Size = "host.cpu.cache.l2.size"
 )
 
+// CPU related OpenTelemetry Semantic Conventions for metrics.
+// TODO: Replace by conventions constants once available.
+const (
+	metricSystemCPUPhysicalCount = "system.cpu.physical.count"
+	metricSystemCPULogicalCount  = "system.cpu.logical.count"
+	metricSystemCPUFrequency     = "system.cpu.frequency"
+	metricSystemMemoryLimit      = "system.memory.limit"
+)
+
 // This set of constants represent fields in the Gohai payload's CPU field.
 const (
-	fieldCPUVendorID  = "vendor_id"
-	fieldCPUModelName = "model_name"
-	fieldCPUCacheSize = "cache_size"
-	fieldCPUFamily    = "family"
-	fieldCPUModel     = "model"
-	fieldCPUStepping  = "stepping"
+	fieldCPUVendorID          = "vendor_id"
+	fieldCPUModelName         = "model_name"
+	fieldCPUCacheSize         = "cache_size"
+	fieldCPUFamily            = "family"
+	fieldCPUModel             = "model"
+	fieldCPUStepping          = "stepping"
+	fieldCPUCores             = "cpu_cores"
+	fieldCPULogicalProcessors = "cpu_logical_processors"
+	fieldCPUMHz               = "mhz"
 )
 
 // cpuAttributesMap defines the mapping between Gohai fieldCPU fields
@@ -72,3 +88,36 @@ var cpuAttributesMap map[string]string = map[string]string{
 	fieldCPUModel:     attributeHostCPUModelID,
 	fieldCPUStepping:  attributeHostCPUStepping,
 }
+
+type cpuMetricsData struct {
+	FieldName        string
+	ConversionFactor float64
+}
+
+var cpuMetricsMap map[string]cpuMetricsData = map[string]cpuMetricsData{
+	metricSystemCPUPhysicalCount: {FieldName: fieldCPUCores},
+	metricSystemCPULogicalCount:  {FieldName: fieldCPULogicalProcessors},
+	metricSystemCPUFrequency:     {FieldName: fieldCPUMHz, ConversionFactor: 1e-6},
+}
+
+// TrackedMetrics is the set of metrics that are tracked by the hostmap.
+var TrackedMetrics map[string]struct{} = map[string]struct{}{
+	metricSystemCPUPhysicalCount: {},
+	metricSystemCPULogicalCount:  {},
+	metricSystemCPUFrequency:     {},
+	metricSystemMemoryLimit:      {},
+}
+
+// Network related OpenTelemetry Semantic Conventions for resource attributes.
+// TODO: Replace by conventions constants once available.
+const (
+	attributeHostIP  = "host.ip"
+	attributeHostMAC = "host.mac"
+)
+
+// This set of constants represent fields in the Gohai payload's Network field.
+const (
+	fieldNetworkIPAddressIPv4 = "ipaddress"
+	fieldNetworkIPAddressIPv6 = "ipaddressv6"
+	fieldNetworkMACAddress    = "macaddress"
+)

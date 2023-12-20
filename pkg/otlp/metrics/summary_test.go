@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
+	"go.opentelemetry.io/collector/component/componenttest"
 )
 
 func TestSummaryMetrics(t *testing.T) {
@@ -60,7 +60,7 @@ func TestSummaryMetrics(t *testing.T) {
 				[]TranslatorOption{WithOriginProduct(OriginProductDatadogExporter)},
 				testinstance.options...,
 			)
-			translator, err := NewTranslator(zap.NewNop(), options...)
+			translator, err := NewTranslator(componenttest.NewNopTelemetrySettings(), options...)
 			require.NoError(t, err)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 		})

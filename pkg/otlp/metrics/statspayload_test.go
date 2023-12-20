@@ -487,6 +487,32 @@ func TestConversion(t *testing.T) {
 		if found != len(want.Stats) {
 			t.Fatalf("Found %d/%d", found, len(want.Stats))
 		}
+		mx, err := trans.StatsToMetrics(want)
+		assert.NoError(t, err)
+		var results []*pb.StatsPayload
+		for i := 0; i < mx.ResourceMetrics().Len(); i++ {
+			rm := mx.ResourceMetrics().At(i)
+			for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+				sm := rm.ScopeMetrics().At(j)
+				for k := 0; k < sm.Metrics().Len(); k++ {
+					md := sm.Metrics().At(k)
+					// these metrics are an APM Stats payload; consume it as such
+					for l := 0; l < md.Sum().DataPoints().Len(); l++ {
+						if payload, ok := md.Sum().DataPoints().At(l).Attributes().Get(keyStatsPayload); ok {
+
+							stats := &pb.StatsPayload{}
+							err = proto.Unmarshal(payload.Bytes().AsRaw(), stats)
+							assert.NoError(t, err)
+							results = append(results, stats)
+						}
+					}
+					assert.NoError(t, err)
+				}
+			}
+		}
+
+		assert.Len(t, results, 1)
+		assert.True(t, proto.Equal(want, results[0]))
 	})
 }
 

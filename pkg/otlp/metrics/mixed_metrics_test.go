@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
@@ -32,13 +33,11 @@ func TestMapMetrics(t *testing.T) {
 			expectedUnsupportedAggregationTemporality: 2,
 		},
 		{
-			name:     "resource-attributes-as-tags",
-			otlpfile: "testdata/otlpdata/mixed/simple.json",
-			ddogfile: "testdata/datadogdata/mixed/simple_res-tags.json",
-			options: []TranslatorOption{
-				WithResourceAttributesAsTags(),
-			},
-			expectedUnknownMetricType:                 1,
+			name:                      "resource-attributes-as-tags",
+			otlpfile:                  "testdata/otlpdata/mixed/simple.json",
+			ddogfile:                  "testdata/datadogdata/mixed/simple_res-tags.json",
+			options:                   []TranslatorOption{},
+			expectedUnknownMetricType: 1,
 			expectedUnsupportedAggregationTemporality: 2,
 		},
 		{
@@ -87,7 +86,6 @@ func TestMapMetrics(t *testing.T) {
 			otlpfile: "testdata/otlpdata/mixed/simple.json",
 			ddogfile: "testdata/datadogdata/mixed/simple_res-ilmd-tags.json",
 			options: []TranslatorOption{
-				WithResourceAttributesAsTags(),
 				WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
@@ -99,7 +97,6 @@ func TestMapMetrics(t *testing.T) {
 			ddogfile: "testdata/datadogdata/mixed/simple_cs-both-tags.json",
 			options: []TranslatorOption{
 				WithHistogramAggregations(),
-				WithResourceAttributesAsTags(),
 				WithInstrumentationLibraryMetadataAsTags(),
 			},
 			expectedUnknownMetricType:                 1,
@@ -111,7 +108,6 @@ func TestMapMetrics(t *testing.T) {
 			ddogfile: "testdata/datadogdata/mixed/simple_all.json",
 			options: []TranslatorOption{
 				WithHistogramAggregations(),
-				WithResourceAttributesAsTags(),
 				WithInstrumentationLibraryMetadataAsTags(),
 				WithInstrumentationScopeMetadataAsTags(),
 			},
@@ -142,13 +138,14 @@ func TestMapMetrics(t *testing.T) {
 
 	for _, testinstance := range tests {
 		t.Run(testinstance.name, func(t *testing.T) {
+			set := componenttest.NewNopTelemetrySettings()
 			core, observed := observer.New(zapcore.DebugLevel)
-			testLogger := zap.New(core)
 			options := append(
 				[]TranslatorOption{WithOriginProduct(OriginProductDatadogExporter)},
 				testinstance.options...,
 			)
-			translator, err := NewTranslator(testLogger, options...)
+			set.Logger = zap.New(core)
+			translator, err := NewTranslator(set, options...)
 			require.NoError(t, err)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 			assert.Equal(t, testinstance.expectedUnknownMetricType, observed.FilterMessage("Unknown or unsupported metric type").Len())

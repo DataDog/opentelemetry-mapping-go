@@ -51,6 +51,7 @@ linters-settings:
           - github.com/lightstep/go-expohisto
           - github.com/patrickmn/go-cache
           - github.com/stretchr/testify
+          - google.golang.org/protobuf/proto
           - golang.org/x/exp
           - gopkg.in/yaml.v3
           - go.uber.org
