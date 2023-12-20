@@ -61,9 +61,9 @@ const (
 
 // Transform converts the log record in lr, which came in with the resource in res to a Datadog log item.
 // the variable specifies if the log body should be sent as an attribute or as a plain message.
+// Deprecated: use Translator instead.
 func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) datadogV2.HTTPLogItem {
 	host, service := extractHostNameAndServiceName(res.Attributes(), lr.Attributes())
-
 	l := datadogV2.HTTPLogItem{
 		AdditionalProperties: make(map[string]string),
 	}
