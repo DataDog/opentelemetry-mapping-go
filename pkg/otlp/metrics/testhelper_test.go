@@ -224,7 +224,7 @@ func TestAssertTranslatorMapFailure(t *testing.T) {
 	otlpfile := "testdata/otlpdata/histogram/simple-delta.json"
 	// Compare OTLP file with incorrect output
 	ddogfile := "testdata/datadogdata/histogram/simple-delta_nobuckets-cs.json"
-	translator, err := NewTranslator(componenttest.NewNopTelemetrySettings(),  WithOriginProduct(OriginProductDatadogExporter), WithHistogramMode(HistogramModeDistributions))
+	translator, err := NewTranslator(componenttest.NewNopTelemetrySettings(), WithOriginProduct(OriginProductDatadogExporter), WithHistogramMode(HistogramModeDistributions))
 	require.NoError(t, err)
 	mockTesting := &testingTMock{t}
 	assert.False(t, AssertTranslatorMap(mockTesting, translator, otlpfile, ddogfile), "AssertTranslatorMap should have failed but did not")

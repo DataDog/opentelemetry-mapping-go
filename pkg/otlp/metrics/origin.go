@@ -23,11 +23,11 @@ import (
 type OriginProduct int32
 
 const (
-	OriginProductUnknown OriginProduct = iota
+	OriginProductUnknown OriginProduct = 0
 	// OriginProductDatadogAgent is the origin for metrics coming from the Datadog Agent OTLP Ingest.
-	OriginProductDatadogAgent
+	OriginProductDatadogAgent OriginProduct = 10
 	// OriginProductDatadogExporter is the origin for metrics coming from the OTel Collector Datadog Exporter.
-	OriginProductDatadogExporter
+	OriginProductDatadogExporter OriginProduct = 17
 )
 
 func (o OriginProduct) String() string {
@@ -48,7 +48,7 @@ type OriginCategory int32
 
 // OriginCategoryOTLP is the origin category for all metrics coming from OTLP.
 // All metrics produced by the translator MUST have origin category set to OTLP.
-const OriginCategoryOTLP OriginCategory = 0
+const OriginCategoryOTLP OriginCategory = 17
 
 func (o OriginCategory) String() string {
 	switch o {
@@ -64,49 +64,49 @@ type OriginService int32
 
 // List all receivers that set the scope name.
 const (
-	OriginServiceUnknown OriginService = iota
-	OriginServiceActiveDirectoryDSReceiver
-	OriginServiceAerospikeReceiver
-	OriginServiceApacheReceiver
-	OriginServiceApacheSparkReceiver
-	OriginServiceAzureMonitorReceiver
-	OriginServiceBigIPReceiver
-	OriginServiceChronyReceiver
-	OriginServiceCouchDBReceiver
-	OriginServiceDockerStatsReceiver
-	OriginServiceElasticsearchReceiver
-	OriginServiceExpVarReceiver
-	OriginServiceFileStatsReceiver
-	OriginServiceFlinkMetricsReceiver
-	OriginServiceGitProviderReceiver
-	OriginServiceHAProxyReceiver
-	OriginServiceHostMetricsReceiver
-	OriginServiceHTTPCheckReceiver
-	OriginServiceIISReceiver
-	OriginServiceK8SClusterReceiver
-	OriginServiceKafkaMetricsReceiver
-	OriginServiceKubeletStatsReceiver
-	OriginServiceMemcachedReceiver
-	OriginServiceMongoDBAtlasReceiver
-	OriginServiceMongoDBReceiver
-	OriginServiceMySQLReceiver
-	OriginServiceNginxReceiver
-	OriginServiceNSXTReceiver
-	OriginServiceOracleDBReceiver
-	OriginServicePostgreSQLReceiver
-	OriginServicePrometheusReceiver
-	OriginServiceRabbitMQReceiver
-	OriginServiceRedisReceiver
-	OriginServiceRiakReceiver
-	OriginServiceSAPHANAReceiver
-	OriginServiceSNMPReceiver
-	OriginServiceSnowflakeReceiver
-	OriginServiceSplunkEnterpriseReceiver
-	OriginServiceSQLServerReceiver
-	OriginServiceSSHCheckReceiver
-	OriginServiceStatsDReceiver
-	OriginServiceVCenterReceiver
-	OriginServiceZookeeperReceiver
+	OriginServiceUnknown                   OriginService = 0
+	OriginServiceActiveDirectoryDSReceiver OriginService = 251
+	OriginServiceAerospikeReceiver         OriginService = 252
+	OriginServiceApacheReceiver            OriginService = 253
+	OriginServiceApacheSparkReceiver       OriginService = 254
+	OriginServiceAzureMonitorReceiver      OriginService = 255
+	OriginServiceBigIPReceiver             OriginService = 256
+	OriginServiceChronyReceiver            OriginService = 257
+	OriginServiceCouchDBReceiver           OriginService = 258
+	OriginServiceDockerStatsReceiver       OriginService = 217
+	OriginServiceElasticsearchReceiver     OriginService = 218
+	OriginServiceExpVarReceiver            OriginService = 219
+	OriginServiceFileStatsReceiver         OriginService = 220
+	OriginServiceFlinkMetricsReceiver      OriginService = 221
+	OriginServiceGitProviderReceiver       OriginService = 222
+	OriginServiceHAProxyReceiver           OriginService = 223
+	OriginServiceHostMetricsReceiver       OriginService = 224
+	OriginServiceHTTPCheckReceiver         OriginService = 225
+	OriginServiceIISReceiver               OriginService = 226
+	OriginServiceK8SClusterReceiver        OriginService = 227
+	OriginServiceKafkaMetricsReceiver      OriginService = 228
+	OriginServiceKubeletStatsReceiver      OriginService = 229
+	OriginServiceMemcachedReceiver         OriginService = 230
+	OriginServiceMongoDBAtlasReceiver      OriginService = 231
+	OriginServiceMongoDBReceiver           OriginService = 232
+	OriginServiceMySQLReceiver             OriginService = 233
+	OriginServiceNginxReceiver             OriginService = 234
+	OriginServiceNSXTReceiver              OriginService = 235
+	OriginServiceOracleDBReceiver          OriginService = 236
+	OriginServicePostgreSQLReceiver        OriginService = 237
+	OriginServicePrometheusReceiver        OriginService = 238
+	OriginServiceRabbitMQReceiver          OriginService = 239
+	OriginServiceRedisReceiver             OriginService = 240
+	OriginServiceRiakReceiver              OriginService = 241
+	OriginServiceSAPHANAReceiver           OriginService = 242
+	OriginServiceSNMPReceiver              OriginService = 243
+	OriginServiceSnowflakeReceiver         OriginService = 244
+	OriginServiceSplunkEnterpriseReceiver  OriginService = 245
+	OriginServiceSQLServerReceiver         OriginService = 246
+	OriginServiceSSHCheckReceiver          OriginService = 247
+	OriginServiceStatsDReceiver            OriginService = 248
+	OriginServiceVCenterReceiver           OriginService = 249
+	OriginServiceZookeeperReceiver         OriginService = 250
 )
 
 func originServiceFromScopeName(scopeName string) OriginService {
