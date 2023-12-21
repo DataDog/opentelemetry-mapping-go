@@ -4,6 +4,30 @@
 
 <!-- next version -->
 
+## v0.11.0
+
+### 🛑 Breaking changes 🛑
+
+- `pkg/otlp/logs`: Pass `attributes.Translator` explicitly to `logs.Translator` (#231)
+- `pkg/otlp/metrics`: Pass `attributes.Translator` explicitly to `metrics.Translator` (#231)
+- `pkg/otlp/metrics`: Rename `datadog.otlp_translator.metrics.missing_source` to `datadog.otlp_translator.resources.missing_source` with `signal:metrics` attribute. (#229)
+
+### 🚩 Deprecations 🚩
+
+- `pkg/otlp/attributes`: Deprecate SourceFromAttrs in favor of attributes.Translator (#231)
+- `pkg/otlp/logs`: Deprecate `logs.Transform` in favor of `logs.Translator` (#230)
+
+### 💡 Enhancements 💡
+
+- `pkg/inframetadata`: Add support for host.ip and host.mac semantic conventions for host metadata (#225)
+- `pkg/otlp/metrics`: Add support for system metrics in host metadata (#184)
+  The following metrics are now added as host metadata if present:
+  - `system.cpu.physical.count`
+  - `system.cpu.logical.count`
+  - `system.cpu.frequency`
+  - `system.memory.limit`
+  
+
 ## v0.10.0
 
 ### 💡 Enhancements 💡
