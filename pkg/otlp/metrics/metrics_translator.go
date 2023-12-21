@@ -202,13 +202,13 @@ func (t *Translator) mapNumberMonotonicMetrics(
 			continue
 		}
 
-		dx, firstPoint, dropPoint := t.prevPts.MonotonicDiff(pointDims, startTs, ts, val)
-		if dropPoint {
+		dx, isFirstPoint, shouldDropPoint := t.prevPts.MonotonicDiff(pointDims, startTs, ts, val)
+		if shouldDropPoint {
 			t.logger.Debug("Dropping point: timestamp is older or equal to timestamp of previous point received", zap.String(metricName, pointDims.name))
 			continue
 		}
 
-		if !firstPoint {
+		if !isFirstPoint {
 			consumer.ConsumeTimeSeries(ctx, pointDims, Count, ts, dx)
 		} else if i == 0 && t.shouldConsumeInitialValue(startTs, ts) {
 			// We only compute the first point in the timeseries if it is the first value in the datapoint slice.
