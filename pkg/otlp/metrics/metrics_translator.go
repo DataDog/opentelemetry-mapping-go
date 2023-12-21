@@ -30,7 +30,6 @@ import (
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/otel/attribute"
-	otelmetric "go.opentelemetry.io/otel/metric"
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
 
@@ -41,9 +40,6 @@ import (
 const (
 	metricName             string = "metric name"
 	errNoBucketsNoSumCount string = "no buckets mode and no send count sum are incompatible"
-
-	meterName               string = "github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
-	missingSourceMetricName string = "datadog.otlp_translator.resources.missing_source"
 )
 
 var (
@@ -58,16 +54,12 @@ func (*noSourceProvider) Source(context.Context) (source.Source, error) {
 	return source.Source{Kind: source.HostnameKind, Identifier: ""}, nil
 }
 
-type instruments struct {
-	missingSources otelmetric.Int64Counter
-}
-
 // Translator is a metrics translator.
 type Translator struct {
-	prevPts     *ttlCache
-	logger      *zap.Logger
-	instruments instruments
-	cfg         translatorConfig
+	prevPts              *ttlCache
+	logger               *zap.Logger
+	attributesTranslator *attributes.Translator
+	cfg                  translatorConfig
 }
 
 // Metadata specifies information about the outcome of the MapMetrics call.
@@ -77,7 +69,7 @@ type Metadata struct {
 }
 
 // NewTranslator creates a new translator with given options.
-func NewTranslator(set component.TelemetrySettings, options ...TranslatorOption) (*Translator, error) {
+func NewTranslator(set component.TelemetrySettings, attributesTranslator *attributes.Translator, options ...TranslatorOption) (*Translator, error) {
 	cfg := translatorConfig{
 		HistMode:                             HistogramModeDistributions,
 		SendHistogramAggregations:            false,
@@ -103,21 +95,12 @@ func NewTranslator(set component.TelemetrySettings, options ...TranslatorOption)
 	}
 
 	cache := newTTLCache(cfg.sweepInterval, cfg.deltaTTL)
-	meter := set.MeterProvider.Meter(meterName)
-	missingSources, err := meter.Int64Counter(
-		missingSourceMetricName,
-		otelmetric.WithDescription("OTLP resources that are missing a source (e.g. hostname)"),
-		otelmetric.WithUnit("{resource}"),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to build missing source counter: %w", err)
-	}
 
 	return &Translator{
-		prevPts:     cache,
-		logger:      set.Logger.With(zap.String("component", "metrics translator")),
-		instruments: instruments{missingSources: missingSources},
-		cfg:         cfg,
+		prevPts:              cache,
+		logger:               set.Logger.With(zap.String("component", "metrics translator")),
+		attributesTranslator: attributesTranslator,
+		cfg:                  cfg,
 	}, nil
 }
 
@@ -550,16 +533,16 @@ func (t *Translator) mapSummaryMetrics(
 	}
 }
 
-func (t *Translator) source(ctx context.Context, m pcommon.Map) (source.Source, bool, error) {
-	src, hasSource := attributes.SourceFromAttrs(m)
+func (t *Translator) source(ctx context.Context, res pcommon.Resource) (source.Source, error) {
+	src, hasSource := t.attributesTranslator.ResourceToSource(ctx, res, signalTypeSet)
 	if !hasSource {
 		var err error
 		src, err = t.cfg.fallbackSourceProvider.Source(ctx)
 		if err != nil {
-			return source.Source{}, false, fmt.Errorf("failed to get fallback source: %w", err)
+			return source.Source{}, fmt.Errorf("failed to get fallback source: %w", err)
 		}
 	}
-	return src, hasSource, nil
+	return src, nil
 }
 
 // extractLanguageTag appends a new language tag to languageTags if a new language tag is found from the given name
@@ -680,12 +663,9 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 			consumer.ConsumeAPMStats(sp)
 			continue
 		}
-		src, hasSource, err := t.source(ctx, rm.Resource().Attributes())
+		src, err := t.source(ctx, rm.Resource())
 		if err != nil {
 			return metadata, err
-		}
-		if !hasSource {
-			t.instruments.missingSources.Add(ctx, 1, otelmetric.WithAttributeSet(signalTypeSet))
 		}
 
 		var host string

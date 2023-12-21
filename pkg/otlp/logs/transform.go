@@ -64,6 +64,10 @@ const (
 // Deprecated: use Translator instead.
 func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) datadogV2.HTTPLogItem {
 	host, service := extractHostNameAndServiceName(res.Attributes(), lr.Attributes())
+	return transform(lr, host, service, res, logger)
+}
+
+func transform(lr plog.LogRecord, host, service string, res pcommon.Resource, logger *zap.Logger) datadogV2.HTTPLogItem {
 	l := datadogV2.HTTPLogItem{
 		AdditionalProperties: make(map[string]string),
 	}
@@ -198,8 +202,8 @@ func extractHostNameAndServiceName(resourceAttrs pcommon.Map, logAttrs pcommon.M
 	if src, ok := attributes.SourceFromAttrs(resourceAttrs); ok && src.Kind == source.HostnameKind {
 		host = src.Identifier
 	}
-	// hostName is blank from resource
-	// we need to derive from log attributes
+	// HACK: Check for host in log record attributes if not present in resource attributes.
+	// This is not aligned with the specification and will be removed in the future.
 	if host == "" {
 		if src, ok := attributes.SourceFromAttrs(logAttrs); ok && src.Kind == source.HostnameKind {
 			host = src.Identifier
@@ -208,8 +212,8 @@ func extractHostNameAndServiceName(resourceAttrs pcommon.Map, logAttrs pcommon.M
 	if s, ok := resourceAttrs.Get(conventions.AttributeServiceName); ok {
 		service = s.AsString()
 	}
-	// serviceName is blank from resource
-	// we need to derive from log attributes
+	// HACK: Check for service in log record attributes if not present in resource attributes.
+	// This is not aligned with the specification and will be removed in the future.
 	if service == "" {
 		if s, ok := logAttrs.Get(conventions.AttributeServiceName); ok {
 			service = s.AsString()

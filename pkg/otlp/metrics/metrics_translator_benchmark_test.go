@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
@@ -55,13 +54,7 @@ func newBenchmarkTranslator(b *testing.B, logger *zap.Logger, opts ...Translator
 
 	set := componenttest.NewNopTelemetrySettings()
 	set.Logger = logger
-	tr, err := NewTranslator(
-		set,
-		options...,
-	)
-
-	require.NoError(b, err)
-	return tr
+	return NewTestTranslator(b, options...)
 }
 
 // createBenchmarkGaugeMetrics creates n Gauge data points.

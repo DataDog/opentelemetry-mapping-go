@@ -8,6 +8,7 @@ package metrics
 import (
 	"testing"
 
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
@@ -90,7 +91,10 @@ func TestDeltaHistogramTranslatorOptions(t *testing.T) {
 				[]TranslatorOption{WithOriginProduct(OriginProductDatadogExporter)},
 				testinstance.options...,
 			)
-			translator, err := NewTranslator(componenttest.NewNopTelemetrySettings(), options...)
+			set := componenttest.NewNopTelemetrySettings()
+			attributesTranslator, err := attributes.NewTranslator(set)
+			require.NoError(t, err)
+			translator, err := NewTranslator(set, attributesTranslator, options...)
 			if testinstance.err != "" {
 				assert.EqualError(t, err, testinstance.err)
 				return
@@ -159,8 +163,7 @@ func TestCumulativeHistogramTranslatorOptions(t *testing.T) {
 				[]TranslatorOption{WithOriginProduct(OriginProductDatadogExporter)},
 				testinstance.options...,
 			)
-			translator, err := NewTranslator(componenttest.NewNopTelemetrySettings(), options...)
-			require.NoError(t, err)
+			translator := NewTestTranslator(t, options...)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 		})
 	}
@@ -288,7 +291,9 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 				testinstance.options...,
 			)
 			set.Logger = zap.New(core)
-			translator, err := NewTranslator(set, options...)
+			attributesTranslator, err := attributes.NewTranslator(set)
+			require.NoError(t, err)
+			translator, err := NewTranslator(set, attributesTranslator, options...)
 			require.NoError(t, err)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 			assert.Equal(t, testinstance.expectedUnknownMetricType, observed.FilterMessage("Unknown or unsupported metric type").Len())

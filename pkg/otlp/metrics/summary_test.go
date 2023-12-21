@@ -7,9 +7,6 @@ package metrics
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/component/componenttest"
 )
 
 func TestSummaryMetrics(t *testing.T) {
@@ -60,8 +57,7 @@ func TestSummaryMetrics(t *testing.T) {
 				[]TranslatorOption{WithOriginProduct(OriginProductDatadogExporter)},
 				testinstance.options...,
 			)
-			translator, err := NewTranslator(componenttest.NewNopTelemetrySettings(), options...)
-			require.NoError(t, err)
+			translator := NewTestTranslator(t, options...)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 		})
 	}
