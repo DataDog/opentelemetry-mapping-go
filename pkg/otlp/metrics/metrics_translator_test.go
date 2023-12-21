@@ -416,9 +416,9 @@ func TestMapIntMonotonicWithRebootBeginningOfSlice(t *testing.T) {
 	assert.Empty(t, rmt.Languages)
 }
 
-// This test validates that an unusable point (point which timestamp is older or equal to the one in cache)
-// which occurs within a NumberDataPointSlice is ignored.
-func TestMapIntMonotonicIgnoreUnusablePointWithinSlice(t *testing.T) {
+// This test validates that a point (within a NumberDataPointSlice) with a timestamp older or equal
+// to the timestamp of previous point received is dropped.
+func TestMapIntMonotonicDropPointPointWithinSlice(t *testing.T) {
 	t.Run("equal", func(t *testing.T) {
 		startTs := int(getProcessStartTime()) + 1
 		md := pmetric.NewMetrics()
@@ -504,9 +504,9 @@ func TestMapIntMonotonicIgnoreUnusablePointWithinSlice(t *testing.T) {
 	})
 }
 
-// Regression Test: This test validates that an unusable point (point which timestamp is older or equal to the one in cache)
-// is ignored and not computed as a first val when it occurs as the first point in a NumberDataPointSlice.
-func TestMapIntMonotonicIgnoreUnusablePointBeginningOfSlice(t *testing.T) {
+// Regression Test: This test validates that a point (the first point in a NumberDataPointSlice) with a timestamp older or equal
+// to the timestamp of previous point received is dropped and not computed as a first val.
+func TestMapIntMonotonicDropPointPointBeginningOfSlice(t *testing.T) {
 	t.Run("equal", func(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
@@ -1143,9 +1143,9 @@ func TestMapDoubleMonotonicWithRebootBeginningOfSlice(t *testing.T) {
 	assert.Empty(t, rmt.Languages)
 }
 
-// This test validates that an unusable point (point which timestamp is older or equal to the one in cache)
-// which occurs within a NumberDataPointSlice is ignored.
-func TestMapDoubleMonotonicIgnoreUnusablePointWithinSlice(t *testing.T) {
+// This test validates that a point (within a NumberDataPointSlice) with a timestamp older or equal
+// to the timestamp of previous point received is dropped.
+func TestMapDoubleMonotonicDropPointPointWithinSlice(t *testing.T) {
 	t.Run("equal", func(t *testing.T) {
 		startTs := int(getProcessStartTime()) + 1
 		md := pmetric.NewMetrics()
@@ -1231,9 +1231,9 @@ func TestMapDoubleMonotonicIgnoreUnusablePointWithinSlice(t *testing.T) {
 	})
 }
 
-// Regression Test: This test validates that an unusable point (point which timestamp is older or equal to the one in cache)
-// is ignored and not computed as a first val when it occurs as the first point in a NumberDataPointSlice.
-func TestMapDoubleMonotonicIgnoreUnusablePointBeginningOfSlice(t *testing.T) {
+// Regression Test: This test validates that a point (the first point in a NumberDataPointSlice) with a timestamp older or equal
+// to the timestamp of previous point received is dropped and not computed as a first val.
+func TestMapDoubleMonotonicDropPointPointBeginningOfSlice(t *testing.T) {
 	t.Run("equal", func(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
