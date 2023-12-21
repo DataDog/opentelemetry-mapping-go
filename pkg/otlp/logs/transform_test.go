@@ -15,20 +15,23 @@
 package logs
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadog"
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadogV2"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	conventions "go.opentelemetry.io/collector/semconv/v1.6.1"
 	"go.uber.org/zap/zaptest"
 )
 
-func TestTransform(t *testing.T) {
-	testLogger := zaptest.NewLogger(t)
+func TestTranslator(t *testing.T) {
 	traceID := [16]byte{0x08, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x0, 0x0, 0x0, 0x0, 0x0a}
 	var spanID [8]byte
 	copy(spanID[:], traceID[8:])
@@ -57,7 +60,7 @@ func TestTransform(t *testing.T) {
 				res: pcommon.NewResource(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				AdditionalProperties: map[string]string{
 					"app":              "test",
@@ -83,7 +86,7 @@ func TestTransform(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString("service:otlp_col"),
+				Ddtags:  datadog.PtrString("service:otlp_col,otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -112,7 +115,7 @@ func TestTransform(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString("service:otlp_col,foo:bar"),
+				Ddtags:  datadog.PtrString("service:otlp_col,foo:bar,otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -140,7 +143,7 @@ func TestTransform(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -169,7 +172,7 @@ func TestTransform(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -202,7 +205,7 @@ func TestTransform(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -235,7 +238,7 @@ func TestTransform(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -268,7 +271,7 @@ func TestTransform(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -301,7 +304,7 @@ func TestTransform(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -336,7 +339,7 @@ func TestTransform(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -371,7 +374,7 @@ func TestTransform(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -403,7 +406,7 @@ func TestTransform(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString("service:otlp_col"),
+				Ddtags:  datadog.PtrString("service:otlp_col,otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
 				AdditionalProperties: map[string]string{
@@ -432,7 +435,7 @@ func TestTransform(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				AdditionalProperties: map[string]string{
 					"app":              "test",
@@ -471,7 +474,7 @@ func TestTransform(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				AdditionalProperties: map[string]string{
 					"root.nest1.nest2":         "val",
@@ -495,7 +498,7 @@ func TestTransform(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				AdditionalProperties: map[string]string{
 					"status": "",
@@ -545,7 +548,7 @@ func TestTransform(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				AdditionalProperties: map[string]string{
 					"nest1.nest2.nest3.nest4.nest5.nest6.nest7.nest8.nest9.nest10": "{\"nest11\":{\"nest12\":\"ok\"}}",
@@ -569,7 +572,7 @@ func TestTransform(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString(""),
+				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				AdditionalProperties: map[string]string{
 					"status":           "debug",
@@ -580,9 +583,24 @@ func TestTransform(t *testing.T) {
 			},
 		},
 	}
+
+	set := componenttest.NewNopTelemetrySettings()
+	set.Logger = zaptest.NewLogger(t)
+	attributesTranslator, err := attributes.NewTranslator(set)
+	require.NoError(t, err)
+	translator, err := NewTranslator(set, attributesTranslator, "test")
+	require.NoError(t, err)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := Transform(tt.args.lr, tt.args.res, testLogger)
+			logs := plog.NewLogs()
+			rl := logs.ResourceLogs().AppendEmpty()
+			tt.args.res.MoveTo(rl.Resource())
+			tt.args.lr.CopyTo(rl.ScopeLogs().AppendEmpty().LogRecords().AppendEmpty())
+
+			payloads := translator.MapLogs(context.Background(), logs)
+			require.Len(t, payloads, 1)
+			got := payloads[0]
 
 			gs, err := got.MarshalJSON()
 			if err != nil {

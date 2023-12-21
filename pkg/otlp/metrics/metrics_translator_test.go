@@ -21,6 +21,7 @@ import (
 	"time"
 
 	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
@@ -109,8 +110,12 @@ func newTranslatorWithStatsChannel(t *testing.T, logger *zap.Logger, ch chan []b
 
 	set := componenttest.NewNopTelemetrySettings()
 	set.Logger = logger
+
+	attributesTranslator, err := attributes.NewTranslator(set)
+	require.NoError(t, err)
 	tr, err := NewTranslator(
 		set,
+		attributesTranslator,
 		options...,
 	)
 
@@ -439,11 +444,7 @@ func TestMapRuntimeMetricsHasMapping(t *testing.T) {
 
 func TestMapRuntimeMetricsHasMappingCollector(t *testing.T) {
 	ctx := context.Background()
-	tr, err := NewTranslator(
-		componenttest.NewNopTelemetrySettings(),
-		WithRemapping(),
-	)
-	require.NoError(t, err)
+	tr := NewTestTranslator(t, WithRemapping())
 	consumer := &mockFullConsumer{}
 	exampleDims = newDims("process.runtime.go.goroutines")
 	exampleOtelDims := newDims("otel.process.runtime.go.goroutines")
@@ -492,11 +493,7 @@ func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 
 func TestMapSumRuntimeMetricWithAttributesHasMappingCollector(t *testing.T) {
 	ctx := context.Background()
-	tr, err := NewTranslator(
-		componenttest.NewNopTelemetrySettings(),
-		WithRemapping(),
-	)
-	require.NoError(t, err)
+	tr := NewTestTranslator(t, WithRemapping())
 	consumer := &mockFullConsumer{}
 	attributes := []runtimeMetricAttribute{{
 		key:    "generation",
@@ -740,11 +737,7 @@ func TestMapRuntimeMetricsNoMapping(t *testing.T) {
 
 func TestMapSystemMetrics(t *testing.T) {
 	ctx := context.Background()
-	tr, err := NewTranslator(
-		componenttest.NewNopTelemetrySettings(),
-		WithRemapping(),
-	)
-	require.NoError(t, err)
+	tr := NewTestTranslator(t, WithRemapping())
 	consumer := &mockFullConsumer{}
 	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("system.filesystem.utilization", pmetric.MetricTypeGauge, nil, 1), consumer)
 	if err != nil {
