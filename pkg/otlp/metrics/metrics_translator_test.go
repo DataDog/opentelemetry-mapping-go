@@ -347,7 +347,9 @@ func TestMapIntMonotonicDifferentDimensions(t *testing.T) {
 	)
 }
 
-func TestMapIntMonotonicWithReboot(t *testing.T) {
+// This test checks that in the case of a reboot within a NumberDataPointSlice,
+// we cache the value but we do NOT compute first value for the value at reset.
+func TestMapIntMonotonicWithRebootWithinSlice(t *testing.T) {
 	values := []int64{0, 30, 0, 20}
 	slice := pmetric.NewNumberDataPointSlice()
 	slice.EnsureCapacity(len(values))
@@ -371,6 +373,221 @@ func TestMapIntMonotonicWithReboot(t *testing.T) {
 	)
 }
 
+// This test checks that in the case of a reboot at the first point in a NumberDataPointSlice,
+// we cache the value AND compute first value.
+func TestMapIntMonotonicWithRebootBeginningOfSlice(t *testing.T) {
+	tr := newTranslator(t, zap.NewNop())
+	dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
+	startTs := int(getProcessStartTime()) + 1
+	md := pmetric.NewMetrics()
+	met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
+	met.SetName(dims.name)
+	met.SetEmptySum()
+	met.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+	met.Sum().SetIsMonotonic(true)
+	dpsInt := met.Sum().DataPoints()
+	dpsInt.EnsureCapacity(3)
+
+	// dpInt1
+	tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+2)), 10)
+
+	dpInt2 := dpsInt.AppendEmpty()
+	dpInt2.SetStartTimestamp(seconds(startTs))
+	// point is smaller than previous point. This is a reset. Cache this point and submit as new value.
+	dpInt2.SetTimestamp(seconds(startTs + 3))
+	dpInt2.SetIntValue(5)
+
+	dpInt3 := dpsInt.AppendEmpty()
+	dpInt3.SetStartTimestamp(seconds(startTs))
+	dpInt3.SetTimestamp(seconds(startTs + 4))
+	dpInt3.SetIntValue(30)
+
+	ctx := context.Background()
+	consumer := &mockFullConsumer{}
+
+	rmt, _ := tr.MapMetrics(ctx, md, consumer)
+	assert.ElementsMatch(t,
+		consumer.metrics,
+		[]metric{
+			newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+4)), 25, fallbackHostname),
+		},
+	)
+	assert.Empty(t, rmt.Languages)
+}
+
+// This test validates that a point (within a NumberDataPointSlice) with a timestamp older or equal
+// to the timestamp of previous point received is dropped.
+func TestMapIntMonotonicDropPointPointWithinSlice(t *testing.T) {
+	t.Run("equal", func(t *testing.T) {
+		startTs := int(getProcessStartTime()) + 1
+		md := pmetric.NewMetrics()
+		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
+		met.SetName(exampleDims.name)
+		met.SetEmptySum()
+		met.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+		met.Sum().SetIsMonotonic(true)
+		dpsInt := met.Sum().DataPoints()
+		dpsInt.EnsureCapacity(3)
+
+		dpInt := dpsInt.AppendEmpty()
+		dpInt.SetStartTimestamp(seconds(startTs))
+		dpInt.SetTimestamp(seconds(startTs + 2))
+		dpInt.SetIntValue(10)
+
+		dpInt2 := dpsInt.AppendEmpty()
+		dpInt2.SetStartTimestamp(seconds(startTs))
+		// duplicate timestamp to dpInt. This point should be ignored.
+		dpInt2.SetTimestamp(seconds(startTs + 2))
+		dpInt2.SetIntValue(20)
+
+		dpInt3 := dpsInt.AppendEmpty()
+		dpInt3.SetStartTimestamp(seconds(startTs))
+		dpInt3.SetTimestamp(seconds(startTs + 4))
+		dpInt3.SetIntValue(40)
+
+		ctx := context.Background()
+		tr := newTranslator(t, zap.NewNop())
+		consumer := &mockFullConsumer{}
+
+		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		assert.ElementsMatch(t,
+			consumer.metrics,
+			[]metric{
+				newCountWithHost(exampleDims, uint64(seconds(startTs+2)), 10, fallbackHostname),
+				newCountWithHost(exampleDims, uint64(seconds(startTs+4)), 30, fallbackHostname),
+			},
+		)
+		assert.Empty(t, rmt.Languages)
+	})
+
+	t.Run("older", func(t *testing.T) {
+		startTs := int(getProcessStartTime()) + 1
+		md := pmetric.NewMetrics()
+		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
+		met.SetName(exampleDims.name)
+		met.SetEmptySum()
+		met.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+		met.Sum().SetIsMonotonic(true)
+		dpsInt := met.Sum().DataPoints()
+		dpsInt.EnsureCapacity(3)
+
+		dpInt := dpsInt.AppendEmpty()
+		dpInt.SetStartTimestamp(seconds(startTs))
+		dpInt.SetTimestamp(seconds(startTs + 3))
+		dpInt.SetIntValue(10)
+
+		dpInt2 := dpsInt.AppendEmpty()
+		dpInt2.SetStartTimestamp(seconds(startTs))
+		// lower timestamp than dpInt. This point should be ignored.
+		dpInt2.SetTimestamp(seconds(startTs + 2))
+		dpInt2.SetIntValue(25)
+
+		dpInt3 := dpsInt.AppendEmpty()
+		dpInt3.SetStartTimestamp(seconds(startTs))
+		dpInt3.SetTimestamp(seconds(startTs + 5))
+		dpInt3.SetIntValue(40)
+
+		ctx := context.Background()
+		tr := newTranslator(t, zap.NewNop())
+		consumer := &mockFullConsumer{}
+
+		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		assert.ElementsMatch(t,
+			consumer.metrics,
+			[]metric{
+				newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 10, fallbackHostname),
+				newCountWithHost(exampleDims, uint64(seconds(startTs+5)), 30, fallbackHostname),
+			},
+		)
+		assert.Empty(t, rmt.Languages)
+	})
+}
+
+// Regression Test: This test validates that a point (the first point in a NumberDataPointSlice) with a timestamp older or equal
+// to the timestamp of previous point received is dropped and not computed as a first val.
+func TestMapIntMonotonicDropPointPointBeginningOfSlice(t *testing.T) {
+	t.Run("equal", func(t *testing.T) {
+		tr := newTranslator(t, zap.NewNop())
+		dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
+		startTs := int(getProcessStartTime()) + 1
+		md := pmetric.NewMetrics()
+		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
+		met.SetName(dims.name)
+		met.SetEmptySum()
+		met.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+		met.Sum().SetIsMonotonic(true)
+		dpsInt := met.Sum().DataPoints()
+		dpsInt.EnsureCapacity(3)
+
+		// dpInt1
+		tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+2)), 10)
+
+		dpInt2 := dpsInt.AppendEmpty()
+		dpInt2.SetStartTimestamp(seconds(startTs))
+		// duplicate timestamp to dpInt. This point should be ignored and not used as first val
+		dpInt2.SetTimestamp(seconds(startTs + 2))
+		dpInt2.SetIntValue(20)
+
+		dpInt3 := dpsInt.AppendEmpty()
+		dpInt3.SetStartTimestamp(seconds(startTs))
+		dpInt3.SetTimestamp(seconds(startTs + 4))
+		dpInt3.SetIntValue(40)
+
+		ctx := context.Background()
+		consumer := &mockFullConsumer{}
+
+		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		assert.ElementsMatch(t,
+			consumer.metrics,
+			[]metric{
+				newCountWithHost(exampleDims, uint64(seconds(startTs+4)), 30, fallbackHostname),
+			},
+		)
+		assert.Empty(t, rmt.Languages)
+	})
+
+	t.Run("older", func(t *testing.T) {
+		tr := newTranslator(t, zap.NewNop())
+		dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
+		startTs := int(getProcessStartTime()) + 1
+		md := pmetric.NewMetrics()
+		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
+		met.SetName(dims.name)
+		met.SetEmptySum()
+		met.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+		met.Sum().SetIsMonotonic(true)
+		dpsInt := met.Sum().DataPoints()
+		dpsInt.EnsureCapacity(3)
+
+		// dpInt1
+		tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+3)), 10)
+
+		dpInt2 := dpsInt.AppendEmpty()
+		dpInt2.SetStartTimestamp(seconds(startTs))
+		// lower timestamp than dpInt. This point should be ignored and not used as first val
+		dpInt2.SetTimestamp(seconds(startTs + 2))
+		dpInt2.SetIntValue(20)
+
+		dpInt3 := dpsInt.AppendEmpty()
+		dpInt3.SetStartTimestamp(seconds(startTs))
+		dpInt3.SetTimestamp(seconds(startTs + 5))
+		dpInt3.SetIntValue(40)
+
+		ctx := context.Background()
+		consumer := &mockFullConsumer{}
+
+		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		assert.ElementsMatch(t,
+			consumer.metrics,
+			[]metric{
+				newCountWithHost(exampleDims, uint64(seconds(startTs+5)), 30, fallbackHostname),
+			},
+		)
+		assert.Empty(t, rmt.Languages)
+	})
+}
+
 func TestMapIntMonotonicReportFirstValue(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
@@ -380,9 +597,9 @@ func TestMapIntMonotonicReportFirstValue(t *testing.T) {
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
-			newCountWithHost(exampleDims, uint64(seconds(startTs+1)), 10, fallbackHostname),
-			newCountWithHost(exampleDims, uint64(seconds(startTs+2)), 5, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+2)), 10, fallbackHostname),
 			newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+4)), 5, fallbackHostname),
 		},
 	)
 	assert.Empty(t, rmt.Languages)
@@ -409,9 +626,9 @@ func TestMapIntMonotonicReportDiffForFirstValue(t *testing.T) {
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
-			newCountWithHost(exampleDims, uint64(seconds(startTs+1)), 9, fallbackHostname),
-			newCountWithHost(exampleDims, uint64(seconds(startTs+2)), 5, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+2)), 9, fallbackHostname),
 			newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+4)), 5, fallbackHostname),
 		},
 	)
 	assert.Empty(t, rmt.Languages)
@@ -431,12 +648,12 @@ func TestMapRuntimeMetricsHasMapping(t *testing.T) {
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
-			newCountWithHost(exampleDims, uint64(seconds(startTs+1)), 10, fallbackHostname),
-			newCountWithHost(exampleDims, uint64(seconds(startTs+2)), 5, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+2)), 10, fallbackHostname),
 			newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
-			newCountWithHost(mappedDims, uint64(seconds(startTs+1)), 10, fallbackHostname),
-			newCountWithHost(mappedDims, uint64(seconds(startTs+2)), 5, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+4)), 5, fallbackHostname),
+			newCountWithHost(mappedDims, uint64(seconds(startTs+2)), 10, fallbackHostname),
 			newCountWithHost(mappedDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
+			newCountWithHost(mappedDims, uint64(seconds(startTs+4)), 5, fallbackHostname),
 		},
 	)
 	assert.Equal(t, []string{"go"}, rmt.Languages)
@@ -457,12 +674,12 @@ func TestMapRuntimeMetricsHasMappingCollector(t *testing.T) {
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
-			newCount(exampleOtelDims, uint64(seconds(startTs+1)), 10),
-			newCount(exampleOtelDims, uint64(seconds(startTs+2)), 5),
+			newCount(exampleOtelDims, uint64(seconds(startTs+2)), 10),
 			newCount(exampleOtelDims, uint64(seconds(startTs+3)), 5),
-			newCount(mappedDims, uint64(seconds(startTs+1)), 10),
-			newCount(mappedDims, uint64(seconds(startTs+2)), 5),
+			newCount(exampleOtelDims, uint64(seconds(startTs+4)), 5),
+			newCount(mappedDims, uint64(seconds(startTs+2)), 10),
 			newCount(mappedDims, uint64(seconds(startTs+3)), 5),
+			newCount(mappedDims, uint64(seconds(startTs+4)), 5),
 		},
 	)
 	assert.Equal(t, []string{"go"}, rmt.Languages)
@@ -727,9 +944,9 @@ func TestMapRuntimeMetricsNoMapping(t *testing.T) {
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
-			newCountWithHost(exampleDims, uint64(seconds(startTs+1)), 10, fallbackHostname),
-			newCountWithHost(exampleDims, uint64(seconds(startTs+2)), 5, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+2)), 10, fallbackHostname),
 			newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+4)), 5, fallbackHostname),
 		},
 	)
 	assert.Empty(t, rmt.Languages)
@@ -857,7 +1074,9 @@ func TestMapDoubleMonotonicDifferentDimensions(t *testing.T) {
 	)
 }
 
-func TestMapDoubleMonotonicWithReboot(t *testing.T) {
+// This test checks that in the case of a reboot within a NumberDataPointSlice,
+// we cache the value but we do NOT compute first value for the value at reset.
+func TestMapDoubleMonotonicWithRebootWithinSlice(t *testing.T) {
 	values := []float64{0, 30, 0, 20}
 	slice := pmetric.NewNumberDataPointSlice()
 	slice.EnsureCapacity(len(values))
@@ -881,6 +1100,221 @@ func TestMapDoubleMonotonicWithReboot(t *testing.T) {
 	)
 }
 
+// This test checks that in the case of a reboot at the first point in a NumberDataPointSlice,
+// we cache the value AND compute first value.
+func TestMapDoubleMonotonicWithRebootBeginningOfSlice(t *testing.T) {
+	tr := newTranslator(t, zap.NewNop())
+	dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
+	startTs := int(getProcessStartTime()) + 1
+	md := pmetric.NewMetrics()
+	met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
+	met.SetName(dims.name)
+	met.SetEmptySum()
+	met.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+	met.Sum().SetIsMonotonic(true)
+	dpsInt := met.Sum().DataPoints()
+	dpsInt.EnsureCapacity(3)
+
+	// dpInt1
+	tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+2)), 10)
+
+	dpInt2 := dpsInt.AppendEmpty()
+	dpInt2.SetStartTimestamp(seconds(startTs))
+	// point is smaller than previous point. This is a reset. Cache this point and submit as new value.
+	dpInt2.SetTimestamp(seconds(startTs + 3))
+	dpInt2.SetDoubleValue(5)
+
+	dpInt3 := dpsInt.AppendEmpty()
+	dpInt3.SetStartTimestamp(seconds(startTs))
+	dpInt3.SetTimestamp(seconds(startTs + 4))
+	dpInt3.SetDoubleValue(30)
+
+	ctx := context.Background()
+	consumer := &mockFullConsumer{}
+
+	rmt, _ := tr.MapMetrics(ctx, md, consumer)
+	assert.ElementsMatch(t,
+		consumer.metrics,
+		[]metric{
+			newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+4)), 25, fallbackHostname),
+		},
+	)
+	assert.Empty(t, rmt.Languages)
+}
+
+// This test validates that a point (within a NumberDataPointSlice) with a timestamp older or equal
+// to the timestamp of previous point received is dropped.
+func TestMapDoubleMonotonicDropPointPointWithinSlice(t *testing.T) {
+	t.Run("equal", func(t *testing.T) {
+		startTs := int(getProcessStartTime()) + 1
+		md := pmetric.NewMetrics()
+		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
+		met.SetName(exampleDims.name)
+		met.SetEmptySum()
+		met.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+		met.Sum().SetIsMonotonic(true)
+		dpsInt := met.Sum().DataPoints()
+		dpsInt.EnsureCapacity(3)
+
+		dpInt := dpsInt.AppendEmpty()
+		dpInt.SetStartTimestamp(seconds(startTs))
+		dpInt.SetTimestamp(seconds(startTs + 2))
+		dpInt.SetDoubleValue(10)
+
+		dpInt2 := dpsInt.AppendEmpty()
+		dpInt2.SetStartTimestamp(seconds(startTs))
+		// duplicate timestamp to dpInt. This point should be ignored.
+		dpInt2.SetTimestamp(seconds(startTs + 2))
+		dpInt2.SetDoubleValue(20)
+
+		dpInt3 := dpsInt.AppendEmpty()
+		dpInt3.SetStartTimestamp(seconds(startTs))
+		dpInt3.SetTimestamp(seconds(startTs + 4))
+		dpInt3.SetDoubleValue(40)
+
+		ctx := context.Background()
+		tr := newTranslator(t, zap.NewNop())
+		consumer := &mockFullConsumer{}
+
+		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		assert.ElementsMatch(t,
+			consumer.metrics,
+			[]metric{
+				newCountWithHost(exampleDims, uint64(seconds(startTs+2)), 10, fallbackHostname),
+				newCountWithHost(exampleDims, uint64(seconds(startTs+4)), 30, fallbackHostname),
+			},
+		)
+		assert.Empty(t, rmt.Languages)
+	})
+
+	t.Run("older", func(t *testing.T) {
+		startTs := int(getProcessStartTime()) + 1
+		md := pmetric.NewMetrics()
+		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
+		met.SetName(exampleDims.name)
+		met.SetEmptySum()
+		met.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+		met.Sum().SetIsMonotonic(true)
+		dpsInt := met.Sum().DataPoints()
+		dpsInt.EnsureCapacity(3)
+
+		dpInt := dpsInt.AppendEmpty()
+		dpInt.SetStartTimestamp(seconds(startTs))
+		dpInt.SetTimestamp(seconds(startTs + 3))
+		dpInt.SetDoubleValue(10)
+
+		dpInt2 := dpsInt.AppendEmpty()
+		dpInt2.SetStartTimestamp(seconds(startTs))
+		// lower timestamp than dpInt. This point should be ignored.
+		dpInt2.SetTimestamp(seconds(startTs + 2))
+		dpInt2.SetDoubleValue(25)
+
+		dpInt3 := dpsInt.AppendEmpty()
+		dpInt3.SetStartTimestamp(seconds(startTs))
+		dpInt3.SetTimestamp(seconds(startTs + 5))
+		dpInt3.SetDoubleValue(40)
+
+		ctx := context.Background()
+		tr := newTranslator(t, zap.NewNop())
+		consumer := &mockFullConsumer{}
+
+		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		assert.ElementsMatch(t,
+			consumer.metrics,
+			[]metric{
+				newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 10, fallbackHostname),
+				newCountWithHost(exampleDims, uint64(seconds(startTs+5)), 30, fallbackHostname),
+			},
+		)
+		assert.Empty(t, rmt.Languages)
+	})
+}
+
+// Regression Test: This test validates that a point (the first point in a NumberDataPointSlice) with a timestamp older or equal
+// to the timestamp of previous point received is dropped and not computed as a first val.
+func TestMapDoubleMonotonicDropPointPointBeginningOfSlice(t *testing.T) {
+	t.Run("equal", func(t *testing.T) {
+		tr := newTranslator(t, zap.NewNop())
+		dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
+		startTs := int(getProcessStartTime()) + 1
+		md := pmetric.NewMetrics()
+		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
+		met.SetName(dims.name)
+		met.SetEmptySum()
+		met.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+		met.Sum().SetIsMonotonic(true)
+		dpsInt := met.Sum().DataPoints()
+		dpsInt.EnsureCapacity(3)
+
+		// dpInt1
+		tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+2)), 10)
+
+		dpInt2 := dpsInt.AppendEmpty()
+		dpInt2.SetStartTimestamp(seconds(startTs))
+		// duplicate timestamp to dpInt. This point should be ignored and not used as first val
+		dpInt2.SetTimestamp(seconds(startTs + 2))
+		dpInt2.SetDoubleValue(20)
+
+		dpInt3 := dpsInt.AppendEmpty()
+		dpInt3.SetStartTimestamp(seconds(startTs))
+		dpInt3.SetTimestamp(seconds(startTs + 4))
+		dpInt3.SetDoubleValue(40)
+
+		ctx := context.Background()
+		consumer := &mockFullConsumer{}
+
+		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		assert.ElementsMatch(t,
+			consumer.metrics,
+			[]metric{
+				newCountWithHost(exampleDims, uint64(seconds(startTs+4)), 30, fallbackHostname),
+			},
+		)
+		assert.Empty(t, rmt.Languages)
+	})
+
+	t.Run("older", func(t *testing.T) {
+		tr := newTranslator(t, zap.NewNop())
+		dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
+		startTs := int(getProcessStartTime()) + 1
+		md := pmetric.NewMetrics()
+		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
+		met.SetName(dims.name)
+		met.SetEmptySum()
+		met.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+		met.Sum().SetIsMonotonic(true)
+		dpsInt := met.Sum().DataPoints()
+		dpsInt.EnsureCapacity(3)
+
+		// dpInt1
+		tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+3)), 10)
+
+		dpInt2 := dpsInt.AppendEmpty()
+		dpInt2.SetStartTimestamp(seconds(startTs))
+		// lower timestamp than dpInt. This point should be ignored and not used as first val
+		dpInt2.SetTimestamp(seconds(startTs + 2))
+		dpInt2.SetDoubleValue(20)
+
+		dpInt3 := dpsInt.AppendEmpty()
+		dpInt3.SetStartTimestamp(seconds(startTs))
+		dpInt3.SetTimestamp(seconds(startTs + 5))
+		dpInt3.SetDoubleValue(40)
+
+		ctx := context.Background()
+		consumer := &mockFullConsumer{}
+
+		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		assert.ElementsMatch(t,
+			consumer.metrics,
+			[]metric{
+				newCountWithHost(exampleDims, uint64(seconds(startTs+5)), 30, fallbackHostname),
+			},
+		)
+		assert.Empty(t, rmt.Languages)
+	})
+}
+
 func TestMapDoubleMonotonicReportFirstValue(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
@@ -890,9 +1324,9 @@ func TestMapDoubleMonotonicReportFirstValue(t *testing.T) {
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
-			newCountWithHost(exampleDims, uint64(seconds(startTs+1)), 10, fallbackHostname),
-			newCountWithHost(exampleDims, uint64(seconds(startTs+2)), 5, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+2)), 10, fallbackHostname),
 			newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+4)), 5, fallbackHostname),
 		},
 	)
 }
@@ -953,9 +1387,9 @@ func TestMapDoubleMonotonicReportDiffForFirstValue(t *testing.T) {
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
-			newCountWithHost(exampleDims, uint64(seconds(startTs+1)), 9, fallbackHostname),
-			newCountWithHost(exampleDims, uint64(seconds(startTs+2)), 5, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+2)), 9, fallbackHostname),
 			newCountWithHost(exampleDims, uint64(seconds(startTs+3)), 5, fallbackHostname),
+			newCountWithHost(exampleDims, uint64(seconds(startTs+4)), 5, fallbackHostname),
 		},
 	)
 }
@@ -1087,7 +1521,7 @@ func createTestIntCumulativeMonotonicMetrics(tsmatch bool) pmetric.Metrics {
 		if tsmatch {
 			dpInt.SetTimestamp(seconds(startTs))
 		} else {
-			dpInt.SetTimestamp(seconds(startTs + i + 1))
+			dpInt.SetTimestamp(seconds(startTs + i + 2))
 		}
 		dpInt.SetIntValue(val)
 	}
@@ -1113,7 +1547,7 @@ func createTestDoubleCumulativeMonotonicMetrics(tsmatch bool) pmetric.Metrics {
 		if tsmatch {
 			dpInt.SetTimestamp(seconds(startTs))
 		} else {
-			dpInt.SetTimestamp(seconds(startTs + i + 1))
+			dpInt.SetTimestamp(seconds(startTs + i + 2))
 		}
 		dpInt.SetDoubleValue(val)
 	}
