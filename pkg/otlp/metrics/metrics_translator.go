@@ -43,7 +43,10 @@ const (
 )
 
 var (
-	signalTypeSet = attribute.NewSet(attribute.String("signal", "metrics"))
+	signalTypeSet      = attribute.NewSet(attribute.String("signal", "metrics"))
+	rateAsGaugeMetrics = map[string]struct{}{
+		"placeholder.rate.as.gauge.metric": {},
+	}
 )
 
 var _ source.Provider = (*noSourceProvider)(nil)
@@ -199,6 +202,16 @@ func (t *Translator) mapNumberMonotonicMetrics(
 		}
 
 		if t.isSkippable(pointDims.name, val) {
+			continue
+		}
+
+		if _, ok := rateAsGaugeMetrics[pointDims.name]; ok {
+			dx, isFirstPoint, shouldDropPoint := t.prevPts.MonotonicRate(pointDims, startTs, ts, val)
+			if shouldDropPoint {
+				t.logger.Debug("Dropping point: timestamp is older or equal to timestamp of previous point received", zap.String(metricName, pointDims.name))
+			} else if !isFirstPoint {
+				consumer.ConsumeTimeSeries(ctx, pointDims, Gauge, ts, dx)
+			}
 			continue
 		}
 

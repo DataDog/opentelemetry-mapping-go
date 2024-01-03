@@ -16,6 +16,7 @@ package metrics
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -28,29 +29,57 @@ func newTestCache() *ttlCache {
 var dims = &Dimensions{name: "test"}
 
 func TestMonotonicDiffUnknownStart(t *testing.T) {
-	startTs := uint64(0) // equivalent to start being unset
-	prevPts := newTestCache()
+	t.Run("diff", func(t *testing.T) {
+		startTs := uint64(0) // equivalent to start being unset
+		prevPts := newTestCache()
 
-	_, firstPoint, dropPoint := prevPts.MonotonicDiff(dims, startTs, 1, 5)
-	assert.True(t, firstPoint)
-	assert.False(t, dropPoint, "first point")
+		_, firstPoint, dropPoint := prevPts.MonotonicDiff(dims, startTs, 1, 5)
+		assert.True(t, firstPoint)
+		assert.False(t, dropPoint, "first point")
 
-	_, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 1, 6)
-	assert.False(t, firstPoint)
-	assert.True(t, dropPoint, "new ts == old ts")
+		_, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 1, 6)
+		assert.False(t, firstPoint)
+		assert.True(t, dropPoint, "new ts == old ts")
 
-	_, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 0, 0)
-	assert.False(t, firstPoint)
-	assert.True(t, dropPoint, "new ts < old ts")
+		_, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 0, 0)
+		assert.False(t, firstPoint)
+		assert.True(t, dropPoint, "new ts < old ts")
 
-	_, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 2, 2)
-	assert.True(t, firstPoint, "new < old => there has been a reset")
-	assert.False(t, dropPoint, "first point")
+		_, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 2, 2)
+		assert.True(t, firstPoint, "new < old => there has been a reset")
+		assert.False(t, dropPoint, "first point")
 
-	dx, firstPoint, dropPoint := prevPts.MonotonicDiff(dims, startTs, 3, 4)
-	assert.False(t, firstPoint)
-	assert.False(t, dropPoint)
-	assert.Equal(t, 2.0, dx, "expected diff 2.0 with (0,2,2) value")
+		dx, firstPoint, dropPoint := prevPts.MonotonicDiff(dims, startTs, 3, 4)
+		assert.False(t, firstPoint)
+		assert.False(t, dropPoint)
+		assert.Equal(t, 2.0, dx, "expected diff 2.0 with (0,2,2) value")
+	})
+	t.Run("rate", func(t *testing.T) {
+		startTs := uint64(0) // equivalent to start being unset
+		prevPts := newTestCache()
+		sec := uint64(time.Second)
+
+		_, firstPoint, dropPoint := prevPts.MonotonicRate(dims, startTs, 1*sec, 5)
+		assert.True(t, firstPoint)
+		assert.False(t, dropPoint, "first point")
+
+		_, firstPoint, dropPoint = prevPts.MonotonicRate(dims, startTs, 1*sec, 6)
+		assert.False(t, firstPoint)
+		assert.True(t, dropPoint, "new ts == old ts")
+
+		_, firstPoint, dropPoint = prevPts.MonotonicRate(dims, startTs, 0*sec, 0)
+		assert.False(t, firstPoint)
+		assert.True(t, dropPoint, "new ts < old ts")
+
+		_, firstPoint, dropPoint = prevPts.MonotonicRate(dims, startTs, 2*sec, 2)
+		assert.True(t, firstPoint, "new < old => there has been a reset")
+		assert.False(t, dropPoint, "first point")
+
+		dx, firstPoint, dropPoint := prevPts.MonotonicRate(dims, startTs, 4*sec, 6)
+		assert.False(t, firstPoint)
+		assert.False(t, dropPoint)
+		assert.Equal(t, 2.0, dx, "expected rate (6-2)/(4s-2s)")
+	})
 }
 
 func TestDiffUnknownStart(t *testing.T) {
@@ -69,51 +98,102 @@ func TestDiffUnknownStart(t *testing.T) {
 }
 
 func TestMonotonicDiffKnownStart(t *testing.T) {
-	startTs := uint64(1)
-	prevPts := newTestCache()
+	t.Run("diff", func(t *testing.T) {
+		startTs := uint64(1)
+		prevPts := newTestCache()
 
-	_, firstPoint, dropPoint := prevPts.MonotonicDiff(dims, startTs, 1, 5)
-	assert.True(t, firstPoint)
-	assert.False(t, dropPoint, "first point")
+		_, firstPoint, dropPoint := prevPts.MonotonicDiff(dims, startTs, 1, 5)
+		assert.True(t, firstPoint)
+		assert.False(t, dropPoint, "first point")
 
-	_, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 1, 6)
-	assert.False(t, firstPoint)
-	assert.True(t, dropPoint, "new ts == old ts")
+		_, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 1, 6)
+		assert.False(t, firstPoint)
+		assert.True(t, dropPoint, "new ts == old ts")
 
-	_, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 0, 0)
-	assert.False(t, firstPoint)
-	assert.True(t, dropPoint, "new ts < old ts")
+		_, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 0, 0)
+		assert.False(t, firstPoint)
+		assert.True(t, dropPoint, "new ts < old ts")
 
-	_, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 2, 2)
-	assert.True(t, firstPoint, "new < old => there has been a reset")
-	assert.False(t, dropPoint, "first point")
+		_, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 2, 2)
+		assert.True(t, firstPoint, "new < old => there has been a reset")
+		assert.False(t, dropPoint, "first point")
 
-	dx, firstPoint, dropPoint := prevPts.MonotonicDiff(dims, startTs, 3, 4)
-	assert.False(t, firstPoint)
-	assert.False(t, dropPoint)
-	assert.Equal(t, 2.0, dx, "expected diff 2.0 with (0,2,2) value")
+		dx, firstPoint, dropPoint := prevPts.MonotonicDiff(dims, startTs, 3, 4)
+		assert.False(t, firstPoint)
+		assert.False(t, dropPoint)
+		assert.Equal(t, 2.0, dx, "expected diff 2.0 with (0,2,2) value")
 
-	startTs = uint64(4) // simulate reset with startTs = ts
+		startTs = uint64(4) // simulate reset with startTs = ts
 
-	_, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, startTs, 8)
-	assert.True(t, firstPoint, "startTs = ts, there has been a reset")
-	assert.False(t, dropPoint, "first point")
+		_, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, startTs, 8)
+		assert.True(t, firstPoint, "startTs = ts, there has been a reset")
+		assert.False(t, dropPoint, "first point")
 
-	dx, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 5, 9)
-	assert.False(t, firstPoint)
-	assert.False(t, dropPoint, "same startTs, old >= new")
-	assert.Equal(t, 1.0, dx, "expected diff 1.0 with (4,4,8) value")
+		dx, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 5, 9)
+		assert.False(t, firstPoint)
+		assert.False(t, dropPoint, "same startTs, old >= new")
+		assert.Equal(t, 1.0, dx, "expected diff 1.0 with (4,4,8) value")
 
-	startTs = uint64(6)
+		startTs = uint64(6)
 
-	_, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 7, 1)
-	assert.True(t, firstPoint)
-	assert.False(t, dropPoint, "first point")
+		_, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 7, 1)
+		assert.True(t, firstPoint)
+		assert.False(t, dropPoint, "first point")
 
-	dx, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 8, 10)
-	assert.False(t, firstPoint)
-	assert.False(t, dropPoint, "same startTs, old >= new")
-	assert.Equal(t, 9.0, dx, "expected diff 9.0 with (6,7,1) value")
+		dx, firstPoint, dropPoint = prevPts.MonotonicDiff(dims, startTs, 8, 10)
+		assert.False(t, firstPoint)
+		assert.False(t, dropPoint, "same startTs, old >= new")
+		assert.Equal(t, 9.0, dx, "expected diff 9.0 with (6,7,1) value")
+	})
+
+	t.Run("rate", func(t *testing.T) {
+		startTs := uint64(time.Second)
+		prevPts := newTestCache()
+		sec := uint64(time.Second)
+
+		_, firstPoint, dropPoint := prevPts.MonotonicRate(dims, startTs, 1*sec, 5)
+		assert.True(t, firstPoint)
+		assert.False(t, dropPoint, "first point")
+
+		_, firstPoint, dropPoint = prevPts.MonotonicRate(dims, startTs, 1*sec, 6)
+		assert.False(t, firstPoint)
+		assert.True(t, dropPoint, "new ts == old ts")
+
+		_, firstPoint, dropPoint = prevPts.MonotonicRate(dims, startTs, 0*sec, 0)
+		assert.False(t, firstPoint)
+		assert.True(t, dropPoint, "new ts < old ts")
+
+		_, firstPoint, dropPoint = prevPts.MonotonicRate(dims, startTs, 2*sec, 2)
+		assert.True(t, firstPoint, "new < old => there has been a reset")
+		assert.False(t, dropPoint, "first point")
+
+		dx, firstPoint, dropPoint := prevPts.MonotonicRate(dims, startTs, 3*sec, 6)
+		assert.False(t, firstPoint)
+		assert.False(t, dropPoint)
+		assert.Equal(t, 4.0, dx, "expected rate (6-2)/(3s-2s)")
+
+		startTs = uint64(4*time.Second) // simulate reset with startTs = ts
+
+		_, firstPoint, dropPoint = prevPts.MonotonicRate(dims, startTs, startTs, 8)
+		assert.True(t, firstPoint, "startTs = ts, there has been a reset")
+		assert.False(t, dropPoint, "first point")
+
+		dx, firstPoint, dropPoint = prevPts.MonotonicRate(dims, startTs, 6*sec, 12)
+		assert.False(t, firstPoint)
+		assert.False(t, dropPoint, "same startTs, old > new")
+		assert.Equal(t, 2.0, dx, "expected rate (12-8)/(6s-4s)")
+
+		startTs = uint64(8*time.Second)
+
+		_, firstPoint, dropPoint = prevPts.MonotonicRate(dims, startTs, 9*sec, 1)
+		assert.True(t, firstPoint)
+		assert.False(t, dropPoint, "first point")
+
+		dx, firstPoint, dropPoint = prevPts.MonotonicRate(dims, startTs, 12*sec, 10)
+		assert.False(t, firstPoint)
+		assert.False(t, dropPoint, "same startTs, old > new")
+		assert.Equal(t, 3.0, dx, "expected rate (10-1)/(12s-9s)")
+	})
 }
 
 func TestDiffKnownStart(t *testing.T) {
