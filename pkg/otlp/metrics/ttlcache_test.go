@@ -172,7 +172,7 @@ func TestMonotonicDiffKnownStart(t *testing.T) {
 		assert.False(t, dropPoint)
 		assert.Equal(t, 4.0, dx, "expected rate (6-2)/(3s-2s)")
 
-		startTs = uint64(4*time.Second) // simulate reset with startTs = ts
+		startTs = uint64(4 * time.Second) // simulate reset with startTs = ts
 
 		_, firstPoint, dropPoint = prevPts.MonotonicRate(dims, startTs, startTs, 8)
 		assert.True(t, firstPoint, "startTs = ts, there has been a reset")
@@ -183,7 +183,7 @@ func TestMonotonicDiffKnownStart(t *testing.T) {
 		assert.False(t, dropPoint, "same startTs, old > new")
 		assert.Equal(t, 2.0, dx, "expected rate (12-8)/(6s-4s)")
 
-		startTs = uint64(8*time.Second)
+		startTs = uint64(8 * time.Second)
 
 		_, firstPoint, dropPoint = prevPts.MonotonicRate(dims, startTs, 9*sec, 1)
 		assert.True(t, firstPoint)

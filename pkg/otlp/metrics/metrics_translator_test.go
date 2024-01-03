@@ -1852,7 +1852,6 @@ func TestMapDoubleMonotonicRateDontReportFirstValue(t *testing.T) {
 	assert.Empty(t, rmt.Languages)
 }
 
-
 func TestMapDoubleMonotonicNotReportFirstValueIfStartTSMatchTS(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
@@ -1935,7 +1934,6 @@ func TestMapDoubleMonotonicReportRateForFirstValue(t *testing.T) {
 	)
 	assert.Empty(t, rmt.Languages)
 }
-
 
 func TestMapDoubleMonotonicOutOfOrder(t *testing.T) {
 	stamps := []int{1, 0, 2, 3}
