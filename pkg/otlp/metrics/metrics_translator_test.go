@@ -1366,7 +1366,7 @@ func TestMapDoubleMonotonicMetrics(t *testing.T) {
 		expected := make([]metric, len(deltas))
 		for i, val := range deltas {
 			// divide val by submission interval (10s)
-			expected[i] = newGauge(rateAsGaugeDims, uint64(seconds((i+1)*10)), float64(val)/10.0)
+			expected[i] = newGauge(rateAsGaugeDims, uint64(seconds((i+1)*10)), val/10.0)
 		}
 
 		ctx := context.Background()
