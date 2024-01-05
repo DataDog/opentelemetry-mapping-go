@@ -54,7 +54,7 @@ func TestSummaryMetrics(t *testing.T) {
 	for _, testinstance := range tests {
 		t.Run(testinstance.name, func(t *testing.T) {
 			options := append(
-				[]TranslatorOption{WithOriginProduct(OriginProductDatadogExporter)},
+				[]TranslatorOption{WithOriginProduct(OriginProductDatadogAgent)},
 				testinstance.options...,
 			)
 			translator := NewTestTranslator(t, options...)

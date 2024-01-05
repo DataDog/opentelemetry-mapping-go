@@ -26,8 +26,6 @@ const (
 	OriginProductUnknown OriginProduct = 0
 	// OriginProductDatadogAgent is the origin for metrics coming from the Datadog Agent OTLP Ingest.
 	OriginProductDatadogAgent OriginProduct = 10
-	// OriginProductDatadogExporter is the origin for metrics coming from the OTel Collector Datadog Exporter.
-	OriginProductDatadogExporter OriginProduct = 17
 )
 
 func (o OriginProduct) String() string {
@@ -36,8 +34,6 @@ func (o OriginProduct) String() string {
 		return "unknown"
 	case OriginProductDatadogAgent:
 		return "datadog-agent"
-	case OriginProductDatadogExporter:
-		return "datadog-exporter"
 	default:
 		return fmt.Sprintf("OriginProduct(%d)", o)
 	}

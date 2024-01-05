@@ -88,7 +88,7 @@ func TestDeltaHistogramTranslatorOptions(t *testing.T) {
 	for _, testinstance := range tests {
 		t.Run(testinstance.name, func(t *testing.T) {
 			options := append(
-				[]TranslatorOption{WithOriginProduct(OriginProductDatadogExporter)},
+				[]TranslatorOption{WithOriginProduct(OriginProductDatadogAgent)},
 				testinstance.options...,
 			)
 			set := componenttest.NewNopTelemetrySettings()
@@ -160,7 +160,7 @@ func TestCumulativeHistogramTranslatorOptions(t *testing.T) {
 	for _, testinstance := range tests {
 		t.Run(testinstance.name, func(t *testing.T) {
 			options := append(
-				[]TranslatorOption{WithOriginProduct(OriginProductDatadogExporter)},
+				[]TranslatorOption{WithOriginProduct(OriginProductDatadogAgent)},
 				testinstance.options...,
 			)
 			translator := NewTestTranslator(t, options...)
@@ -287,7 +287,7 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			set := componenttest.NewNopTelemetrySettings()
 			core, observed := observer.New(zapcore.DebugLevel)
 			options := append(
-				[]TranslatorOption{WithOriginProduct(OriginProductDatadogExporter)},
+				[]TranslatorOption{WithOriginProduct(OriginProductDatadogAgent)},
 				testinstance.options...,
 			)
 			set.Logger = zap.New(core)

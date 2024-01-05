@@ -142,7 +142,7 @@ func TestMapMetrics(t *testing.T) {
 			set := componenttest.NewNopTelemetrySettings()
 			core, observed := observer.New(zapcore.DebugLevel)
 			options := append(
-				[]TranslatorOption{WithOriginProduct(OriginProductDatadogExporter)},
+				[]TranslatorOption{WithOriginProduct(OriginProductDatadogAgent)},
 				testinstance.options...,
 			)
 			set.Logger = zap.New(core)
