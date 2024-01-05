@@ -49,3 +49,11 @@ func TestOriginServiceFromScopeName(t *testing.T) {
 		})
 	}
 }
+
+func TestOriginFull(t *testing.T) {
+	translator := NewTestTranslator(t, WithOriginProduct(OriginProduct(42)))
+	AssertTranslatorMap(t, translator,
+		"testdata/otlpdata/origin/origin.json",
+		"testdata/datadogdata/origin/origin.json",
+	)
+}
