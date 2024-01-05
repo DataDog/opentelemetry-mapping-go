@@ -268,7 +268,7 @@ func seconds(i int) pcommon.Timestamp {
 }
 
 var exampleDims = newDims("metric.example")
-var rateAsGaugeDims = newDims("placeholder.rate.as.gauge.metric")
+var rateAsGaugeDims = newDims("kafka.net.bytes_out.rate")
 
 func TestMapIntMonotonicMetrics(t *testing.T) {
 	t.Run("diff", func(t *testing.T) {

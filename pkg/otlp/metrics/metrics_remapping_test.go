@@ -274,9 +274,34 @@ func TestRemapMetrics(t *testing.T) {
 			in:  metric("container.network.io.usage.rx_packets", point{f: 15}),
 			out: []pmetric.Metric{metric("container.net.rcvd.packets", point{f: 15})},
 		},
+
+		// kafka
+		{
+			in:  metric("kafka.producer.request-rate", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.producer.request_rate", point{f: 1, attrs: map[string]any{"type": "producer-metrics"}})},
+		},
+		{
+			in:  metric("kafka.producer.response-rate", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.producer.response_rate", point{f: 1, attrs: map[string]any{"type": "producer-metrics"}})},
+		},
+		{
+			in:  metric("kafka.producer.request-latency-avg", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.producer.request_latency_avg", point{f: 1, attrs: map[string]any{"type": "producer-metrics"}})},
+		},
 	} {
 		lena := dest.Len()
-		checkprefix := strings.HasPrefix(tt.in.Name(), "system.") || strings.HasPrefix(tt.in.Name(), "process.")
+		checkprefix := strings.HasPrefix(tt.in.Name(), "system.") ||
+			strings.HasPrefix(tt.in.Name(), "process.") ||
+
+			tt.in.Name() == "kafka.producer.request-rate" ||
+			tt.in.Name() == "kafka.producer.response-rate" ||
+			tt.in.Name() == "kafka.producer.request-latency-avg" ||
+
+			tt.in.Name() == "kafka.consumer.fetch-size-avg" ||
+			tt.in.Name() == "kafka.producer.compression-rate" ||
+			tt.in.Name() == "kafka.producer.record-error-rate" ||
+			tt.in.Name() == "kafka.producer.record-retry-rate" ||
+			tt.in.Name() == "kafka.producer.record-send-rate"
 		remapMetrics(dest, tt.in)
 		if checkprefix {
 			require.True(t, strings.HasPrefix(tt.in.Name(), "otel."), "system.* and process.* metrics need to be prepended with the otel.* namespace")
@@ -289,7 +314,7 @@ func TestRemapMetrics(t *testing.T) {
 
 }
 
-func TestCopyMetric(t *testing.T) {
+func TestCopyMetricWithAttr(t *testing.T) {
 	m := pmetric.NewMetric()
 	m.SetName("test.metric")
 	m.SetDescription("metric-description")
@@ -306,7 +331,7 @@ func TestCopyMetric(t *testing.T) {
 		dp.Attributes().FromRaw(map[string]any{"human": "Ann", "age": 25})
 
 		t.Run("plain", func(t *testing.T) {
-			out, ok := copyMetric(dest, m, "copied.test.metric", 1)
+			out, ok := copyMetricWithAttr(dest, m, "copied.test.metric", 1, attributesMapping{})
 			require.True(t, ok)
 			require.Equal(t, m.Name(), "test.metric")
 			require.Equal(t, out.Name(), "copied.test.metric")
@@ -315,7 +340,7 @@ func TestCopyMetric(t *testing.T) {
 		})
 
 		t.Run("div", func(t *testing.T) {
-			out, ok := copyMetric(dest, m, "copied.test.metric", 2)
+			out, ok := copyMetricWithAttr(dest, m, "copied.test.metric", 2, attributesMapping{})
 			require.True(t, ok)
 			require.Equal(t, out.Name(), "copied.test.metric")
 			require.Equal(t, out.Gauge().DataPoints().At(0).DoubleValue(), 6.)
@@ -324,7 +349,7 @@ func TestCopyMetric(t *testing.T) {
 		})
 
 		t.Run("filter", func(t *testing.T) {
-			out, ok := copyMetric(dest, m, "copied.test.metric", 1, kv{"human", "Ann"})
+			out, ok := copyMetricWithAttr(dest, m, "copied.test.metric", 1, attributesMapping{}, kv{"human", "Ann"})
 			require.True(t, ok)
 			require.Equal(t, out.Name(), "copied.test.metric")
 			require.Equal(t, out.Gauge().DataPoints().Len(), 1)
@@ -333,8 +358,33 @@ func TestCopyMetric(t *testing.T) {
 			require.Equal(t, dest.At(dest.Len()-1), out)
 		})
 
+		t.Run("attributesMapping", func(t *testing.T) {
+			out, ok := copyMetricWithAttr(dest, m, "copied.test.metric", 1, attributesMapping{
+				fixed:   map[string]string{"fixed.attr": "ok"},
+				dynamic: map[string]string{"fruit": "remapped_fruit"},
+			})
+			require.True(t, ok)
+			require.Equal(t, m.Name(), "test.metric")
+			require.Equal(t, out.Name(), "copied.test.metric")
+
+			aa, bb := pmetric.NewMetric(), pmetric.NewMetric()
+			m.CopyTo(aa)
+			out.CopyTo(bb)
+
+			aa.SetName("common.name")
+			// add attributes mappings manually.
+			aa.Gauge().DataPoints().At(0).Attributes().PutStr("fixed.attr", "ok")
+			aa.Gauge().DataPoints().At(0).Attributes().PutStr("remapped_fruit", "apple")
+			aa.Gauge().DataPoints().At(1).Attributes().PutStr("fixed.attr", "ok")
+
+			bb.SetName("common.name")
+			require.Equal(t, aa, bb)
+
+			require.Equal(t, dest.At(dest.Len()-1), out)
+		})
+
 		t.Run("none", func(t *testing.T) {
-			_, ok := copyMetric(dest, m, "copied.test.metric", 1, kv{"human", "Paul"})
+			_, ok := copyMetricWithAttr(dest, m, "copied.test.metric", 1, attributesMapping{}, kv{"human", "Paul"})
 			require.False(t, ok)
 		})
 	})
@@ -343,7 +393,7 @@ func TestCopyMetric(t *testing.T) {
 		dp := m.SetEmptySum().DataPoints().AppendEmpty()
 		dp.SetDoubleValue(12)
 		dp.Attributes().FromRaw(map[string]any{"fruit": "apple", "count": 15})
-		out, ok := copyMetric(dest, m, "copied.test.metric", 1)
+		out, ok := copyMetricWithAttr(dest, m, "copied.test.metric", 1, attributesMapping{})
 		require.True(t, ok)
 		require.Equal(t, out.Name(), "copied.test.metric")
 		sameExceptName(t, m, out)
@@ -356,7 +406,7 @@ func TestCopyMetric(t *testing.T) {
 		dp.SetMax(44)
 		dp.SetMin(3)
 		dp.SetSum(120)
-		_, ok := copyMetric(dest, m, "copied.test.metric", 1)
+		_, ok := copyMetricWithAttr(dest, m, "copied.test.metric", 1, attributesMapping{})
 		require.False(t, ok)
 	})
 }
