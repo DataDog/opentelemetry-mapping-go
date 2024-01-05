@@ -1,0 +1,53 @@
+{
+  "Sketches": null,
+  "TimeSeries": [
+    {
+      "Name": "unknown.receiver.metric",
+      "Tags": [],
+      "Host": "res-hostname",
+      "OriginID": "",
+      "OriginProduct": 42,
+      "OriginCategory": 17,
+      "OriginService": 0,
+      "Type": "gauge",
+      "Timestamp": 1667560641226420924,
+      "Value": 1
+    },
+    {
+      "Name": "system.memory.limit",
+      "Tags": [],
+      "Host": "res-hostname",
+      "OriginID": "",
+      "OriginProduct": 42,
+      "OriginCategory": 17,
+      "OriginService": 224,
+      "Type": "gauge",
+      "Timestamp": 1667560641226420924,
+      "Value": 1
+    },
+    {
+      "Name": "prometheus.receiver.metric",
+      "Tags": [],
+      "Host": "res-hostname",
+      "OriginID": "",
+      "OriginProduct": 42,
+      "OriginCategory": 17,
+      "OriginService": 238,
+      "Type": "gauge",
+      "Timestamp": 1667560641226420924,
+      "Value": 1
+    },
+    {
+      "Name": "datadog.otlp_translator.resource.missing_source",
+      "Tags": [],
+      "Host": "res-hostname",
+      "OriginID": "",
+      "OriginProduct": 42,
+      "OriginCategory": 17,
+      "OriginService": 0,
+      "Type": "gauge",
+      "Timestamp": 1667560641226420924,
+      "Value": 37
+    }
+  ]
+}
