@@ -7,7 +7,6 @@ package hostmap
 
 import (
 	"fmt"
-	"slices"
 	"strings"
 	"sync"
 
@@ -175,6 +174,22 @@ func (m *HostMap) newOrFetchHostMetadata(host string) (payload.HostMetadata, boo
 	return md, ok
 }
 
+// equalSlices checks if two slices are equal.
+// Vendored from https://cs.opensource.google/go/go/+/refs/tags/go1.21.5:src/slices/slices.go;l=18
+// To preserve compatibility with Go 1.20.
+// Can be replaced by slices.Equal when we drop support for Go 1.20.
+func equalSlices[S ~[]E, E comparable](s1, s2 S) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i := range s1 {
+		if s1[i] != s2[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // Update the information about a given host by providing a resource.
 // The function reports:
 //   - Whether the information about the `host` has changed
@@ -202,7 +217,7 @@ func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, md pa
 		err = multierr.Append(err, tagsErr)
 	} else {
 		old := md.Tags.OTel
-		changed = changed || !slices.Equal[[]string](old, tags)
+		changed = changed || !equalSlices[[]string](old, tags)
 		md.Tags.OTel = tags
 	}
 
