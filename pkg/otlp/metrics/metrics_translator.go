@@ -80,6 +80,7 @@ func NewTranslator(set component.TelemetrySettings, attributesTranslator *attrib
 		sweepInterval:                        1800,
 		deltaTTL:                             3600,
 		fallbackSourceProvider:               &noSourceProvider{},
+		originProduct:                        OriginProductUnknown,
 	}
 
 	for _, opt := range options {
@@ -705,6 +706,8 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 				additionalTags = attributeTags
 			}
 
+			scopeName := ilm.Scope().Name()
+
 			newMetrics := pmetric.NewMetricSlice()
 			for k := 0; k < metricsArray.Len(); k++ {
 				md := metricsArray.At(k)
@@ -740,24 +743,27 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 				if t.cfg.withRemapping {
 					remapMetrics(newMetrics, md)
 				}
-				t.mapToDDFormat(ctx, md, consumer, additionalTags, host, rattrs)
+				t.mapToDDFormat(ctx, md, consumer, additionalTags, host, scopeName, rattrs)
 			}
 
 			for k := 0; k < newMetrics.Len(); k++ {
 				md := newMetrics.At(k)
-				t.mapToDDFormat(ctx, md, consumer, additionalTags, host, rattrs)
+				t.mapToDDFormat(ctx, md, consumer, additionalTags, host, scopeName, rattrs)
 			}
 		}
 	}
 	return metadata, nil
 }
 
-func (t *Translator) mapToDDFormat(ctx context.Context, md pmetric.Metric, consumer Consumer, additionalTags []string, host string, rattrs pcommon.Map) {
+func (t *Translator) mapToDDFormat(ctx context.Context, md pmetric.Metric, consumer Consumer, additionalTags []string, host string, scopeName string, rattrs pcommon.Map) {
 	baseDims := &Dimensions{
-		name:     md.Name(),
-		tags:     additionalTags,
-		host:     host,
-		originID: attributes.OriginIDFromAttributes(rattrs),
+		name:           md.Name(),
+		tags:           additionalTags,
+		host:           host,
+		originID:       attributes.OriginIDFromAttributes(rattrs),
+		originProduct:  t.cfg.originProduct,
+		originCategory: OriginCategoryOTLP,
+		originService:  originServiceFromScopeName(scopeName),
 	}
 	switch md.Type() {
 	case pmetric.MetricTypeGauge:
