@@ -3,7 +3,7 @@ module github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics
 go 1.20
 
 require (
-	github.com/DataDog/datadog-agent/pkg/proto v0.50.0-rc.1
+	github.com/DataDog/datadog-agent/pkg/proto v0.51.0-rc.1
 	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.11.0
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.11.0
 	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.11.0
@@ -44,8 +44,8 @@ require (
 	go.opentelemetry.io/otel/metric v1.21.0 // indirect
 	go.opentelemetry.io/otel/trace v1.21.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/net v0.18.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/net v0.19.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230822172742-b8732ec3820d // indirect
 	google.golang.org/grpc v1.59.0 // indirect
