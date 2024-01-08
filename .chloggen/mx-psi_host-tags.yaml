@@ -1,0 +1,17 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: enhancement
+
+# The name of the component (e.g. pkg/quantile)
+component: pkg/inframetadata
+
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: "Resource attributes prefixed by `datadog.host.tag.` are now added as host tags for the host associated with the resource. "
+
+# The PR related to this change
+issues: [233]
+
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext: | 
+  For example, a resource attribute `datadog.host.tag.foo: bar` will be added as a host tag `foo:bar` for the host associated with the resource.
