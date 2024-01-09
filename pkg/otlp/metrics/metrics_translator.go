@@ -44,9 +44,7 @@ const (
 
 var (
 	signalTypeSet      = attribute.NewSet(attribute.String("signal", "metrics"))
-	rateAsGaugeMetrics = map[string]struct{}{
-		"placeholder.rate.as.gauge.metric": {},
-	}
+	rateAsGaugeMetrics = map[string]struct{}{}
 )
 
 var _ source.Provider = (*noSourceProvider)(nil)
