@@ -53,7 +53,11 @@ func TestSummaryMetrics(t *testing.T) {
 
 	for _, testinstance := range tests {
 		t.Run(testinstance.name, func(t *testing.T) {
-			translator := NewTestTranslator(t, testinstance.options...)
+			options := append(
+				[]TranslatorOption{WithOriginProduct(OriginProductDatadogAgent)},
+				testinstance.options...,
+			)
+			translator := NewTestTranslator(t, options...)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 		})
 	}

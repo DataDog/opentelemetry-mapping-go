@@ -7,6 +7,9 @@
       ],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 10,
+      "OriginCategory": 17,
+      "OriginService": 0,
       "Timestamp": 1667560641226420924,
       "Summary": {
         "Min": -100,
@@ -31,6 +34,9 @@
       ],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 10,
+      "OriginCategory": 17,
+      "OriginService": 0,
       "Type": "count",
       "Timestamp": 1667560641226420924,
       "Value": 20
@@ -42,6 +48,9 @@
       ],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 10,
+      "OriginCategory": 17,
+      "OriginService": 0,
       "Type": "count",
       "Timestamp": 1667560641226420924,
       "Value": 3.141592653589793
@@ -53,6 +62,9 @@
       ],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 10,
+      "OriginCategory": 17,
+      "OriginService": 0,
       "Type": "gauge",
       "Timestamp": 1667560641226420924,
       "Value": -100
@@ -64,6 +76,9 @@
       ],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 10,
+      "OriginCategory": 17,
+      "OriginService": 0,
       "Type": "gauge",
       "Timestamp": 1667560641226420924,
       "Value": 100

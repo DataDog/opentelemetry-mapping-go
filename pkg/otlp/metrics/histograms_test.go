@@ -87,10 +87,14 @@ func TestDeltaHistogramTranslatorOptions(t *testing.T) {
 
 	for _, testinstance := range tests {
 		t.Run(testinstance.name, func(t *testing.T) {
+			options := append(
+				[]TranslatorOption{WithOriginProduct(OriginProductDatadogAgent)},
+				testinstance.options...,
+			)
 			set := componenttest.NewNopTelemetrySettings()
 			attributesTranslator, err := attributes.NewTranslator(set)
 			require.NoError(t, err)
-			translator, err := NewTranslator(set, attributesTranslator, testinstance.options...)
+			translator, err := NewTranslator(set, attributesTranslator, options...)
 			if testinstance.err != "" {
 				assert.EqualError(t, err, testinstance.err)
 				return
@@ -155,7 +159,11 @@ func TestCumulativeHistogramTranslatorOptions(t *testing.T) {
 
 	for _, testinstance := range tests {
 		t.Run(testinstance.name, func(t *testing.T) {
-			translator := NewTestTranslator(t, testinstance.options...)
+			options := append(
+				[]TranslatorOption{WithOriginProduct(OriginProductDatadogAgent)},
+				testinstance.options...,
+			)
+			translator := NewTestTranslator(t, options...)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 		})
 	}
@@ -278,10 +286,14 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 		t.Run(testinstance.name, func(t *testing.T) {
 			set := componenttest.NewNopTelemetrySettings()
 			core, observed := observer.New(zapcore.DebugLevel)
+			options := append(
+				[]TranslatorOption{WithOriginProduct(OriginProductDatadogAgent)},
+				testinstance.options...,
+			)
 			set.Logger = zap.New(core)
 			attributesTranslator, err := attributes.NewTranslator(set)
 			require.NoError(t, err)
-			translator, err := NewTranslator(set, attributesTranslator, testinstance.options...)
+			translator, err := NewTranslator(set, attributesTranslator, options...)
 			require.NoError(t, err)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 			assert.Equal(t, testinstance.expectedUnknownMetricType, observed.FilterMessage("Unknown or unsupported metric type").Len())

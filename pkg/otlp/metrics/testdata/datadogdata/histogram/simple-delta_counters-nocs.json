@@ -10,6 +10,9 @@
       ],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 10,
+      "OriginCategory": 17,
+      "OriginService": 0,
       "Type": "count",
       "Timestamp": 1667560641226420924,
       "Value": 2
@@ -23,6 +26,9 @@
       ],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 10,
+      "OriginCategory": 17,
+      "OriginService": 0,
       "Type": "count",
       "Timestamp": 1667560641226420924,
       "Value": 18
