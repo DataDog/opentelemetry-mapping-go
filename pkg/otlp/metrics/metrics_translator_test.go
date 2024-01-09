@@ -311,7 +311,7 @@ func TestMapIntMonotonicMetrics(t *testing.T) {
 		rateAsGaugeMetrics = map[string]struct{}{
 			"placeholder.rate.as.gauge.metric": {},
 		}
-	
+
 		slice := buildMonotonicIntPoints(deltas)
 
 		expected := make([]metric, len(deltas))
@@ -410,7 +410,7 @@ func TestMapIntMonotonicWithRebootWithinSlice(t *testing.T) {
 	t.Run("rate", func(t *testing.T) {
 		rateAsGaugeMetrics = map[string]struct{}{
 			"placeholder.rate.as.gauge.metric": {},
-		}	
+		}
 		slice := buildMonotonicIntRebootPoints()
 		ctx := context.Background()
 		tr := newTranslator(t, zap.NewNop())
@@ -475,7 +475,7 @@ func TestMapIntMonotonicWithRebootBeginningOfSlice(t *testing.T) {
 		assert.Empty(t, rmt.Languages)
 	})
 
-	t.Run("rate", func(t *testing.T) {	
+	t.Run("rate", func(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		dims := &Dimensions{name: rateAsGaugeDims.name, host: fallbackHostname}
 		startTs := int(getProcessStartTime()) + 1
@@ -1363,7 +1363,7 @@ func TestMapDoubleMonotonicMetrics(t *testing.T) {
 		rateAsGaugeMetrics = map[string]struct{}{
 			"placeholder.rate.as.gauge.metric": {},
 		}
-	
+
 		slice := buildMonotonicDoublePoints(deltas)
 
 		expected := make([]metric, len(deltas))
@@ -1465,7 +1465,7 @@ func TestMapDoubleMonotonicWithRebootWithinSlice(t *testing.T) {
 		rateAsGaugeMetrics = map[string]struct{}{
 			"placeholder.rate.as.gauge.metric": {},
 		}
-	
+
 		slice := buildMonotonicDoubleRebootPoints()
 
 		ctx := context.Background()
@@ -1531,7 +1531,7 @@ func TestMapDoubleMonotonicWithRebootBeginningOfSlice(t *testing.T) {
 		rateAsGaugeMetrics = map[string]struct{}{
 			"placeholder.rate.as.gauge.metric": {},
 		}
-	
+
 		tr := newTranslator(t, zap.NewNop())
 		dims := &Dimensions{name: rateAsGaugeDims.name, host: fallbackHostname}
 		startTs := int(getProcessStartTime()) + 1
