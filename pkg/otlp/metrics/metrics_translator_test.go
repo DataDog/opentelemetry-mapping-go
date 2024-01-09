@@ -270,29 +270,32 @@ func seconds(i int) pcommon.Timestamp {
 var exampleDims = newDims("metric.example")
 var rateAsGaugeDims = newDims("placeholder.rate.as.gauge.metric")
 
+func buildMonotonicIntPoints(deltas []int64) (slice pmetric.NumberDataPointSlice) {
+	cumulative := make([]int64, len(deltas)+1)
+	cumulative[0] = 0
+	for i := 1; i < len(cumulative); i++ {
+		cumulative[i] = cumulative[i-1] + deltas[i-1]
+	}
+
+	slice = pmetric.NewNumberDataPointSlice()
+	slice.EnsureCapacity(len(cumulative))
+	for i, val := range cumulative {
+		point := slice.AppendEmpty()
+		point.SetIntValue(val)
+		point.SetTimestamp(seconds(i * 10))
+	}
+
+	return
+}
+
 func TestMapIntMonotonicMetrics(t *testing.T) {
+	deltas := []int64{1, 2, 200, 3, 7, 0}
 	t.Run("diff", func(t *testing.T) {
-		// Create list of values
-		deltas := []int64{1, 2, 200, 3, 7, 0}
-		cumulative := make([]int64, len(deltas)+1)
-		cumulative[0] = 0
-		for i := 1; i < len(cumulative); i++ {
-			cumulative[i] = cumulative[i-1] + deltas[i-1]
-		}
+		slice := buildMonotonicIntPoints(deltas)
 
-		//Map to OpenTelemetry format
-		slice := pmetric.NewNumberDataPointSlice()
-		slice.EnsureCapacity(len(cumulative))
-		for i, val := range cumulative {
-			point := slice.AppendEmpty()
-			point.SetIntValue(val)
-			point.SetTimestamp(seconds(i))
-		}
-
-		// Map to Datadog format
 		expected := make([]metric, len(deltas))
 		for i, val := range deltas {
-			expected[i] = newCount(exampleDims, uint64(seconds(i+1)), float64(val))
+			expected[i] = newCount(exampleDims, uint64(seconds((i+1)*10)), float64(val))
 		}
 
 		ctx := context.Background()
@@ -304,24 +307,8 @@ func TestMapIntMonotonicMetrics(t *testing.T) {
 	})
 
 	t.Run("rate", func(t *testing.T) {
-		// Create list of values
-		deltas := []int64{1, 2, 200, 3, 7, 0}
-		cumulative := make([]int64, len(deltas)+1)
-		cumulative[0] = 0
-		for i := 1; i < len(cumulative); i++ {
-			cumulative[i] = cumulative[i-1] + deltas[i-1]
-		}
+		slice := buildMonotonicIntPoints(deltas)
 
-		//Map to OpenTelemetry format
-		slice := pmetric.NewNumberDataPointSlice()
-		slice.EnsureCapacity(len(cumulative))
-		for i, val := range cumulative {
-			point := slice.AppendEmpty()
-			point.SetIntValue(val)
-			point.SetTimestamp(seconds(i * 10))
-		}
-
-		// Map to Datadog format
 		expected := make([]metric, len(deltas))
 		for i, val := range deltas {
 			// divide val by submission interval (10s)
@@ -383,20 +370,25 @@ func TestMapIntMonotonicDifferentDimensions(t *testing.T) {
 	)
 }
 
+func buildMonotonicIntRebootPoints() (slice pmetric.NumberDataPointSlice) {
+	values := []int64{0, 30, 0, 20}
+	slice = pmetric.NewNumberDataPointSlice()
+	slice.EnsureCapacity(len(values))
+
+	for i, val := range values {
+		point := slice.AppendEmpty()
+		point.SetTimestamp(seconds(i * 10))
+		point.SetIntValue(val)
+	}
+
+	return
+}
+
 // This test checks that in the case of a reboot within a NumberDataPointSlice,
 // we cache the value but we do NOT compute first value for the value at reset.
 func TestMapIntMonotonicWithRebootWithinSlice(t *testing.T) {
 	t.Run("diff", func(t *testing.T) {
-		values := []int64{0, 30, 0, 20}
-		slice := pmetric.NewNumberDataPointSlice()
-		slice.EnsureCapacity(len(values))
-
-		for i, val := range values {
-			point := slice.AppendEmpty()
-			point.SetTimestamp(seconds(i))
-			point.SetIntValue(val)
-		}
-
+		slice := buildMonotonicIntRebootPoints()
 		ctx := context.Background()
 		tr := newTranslator(t, zap.NewNop())
 		consumer := &mockTimeSeriesConsumer{}
@@ -404,23 +396,14 @@ func TestMapIntMonotonicWithRebootWithinSlice(t *testing.T) {
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
-				newCount(exampleDims, uint64(seconds(1)), 30),
-				newCount(exampleDims, uint64(seconds(3)), 20),
+				newCount(exampleDims, uint64(seconds(10)), 30),
+				newCount(exampleDims, uint64(seconds(30)), 20),
 			},
 		)
 	})
 
 	t.Run("rate", func(t *testing.T) {
-		values := []int64{0, 30, 0, 20}
-		slice := pmetric.NewNumberDataPointSlice()
-		slice.EnsureCapacity(len(values))
-
-		for i, val := range values {
-			point := slice.AppendEmpty()
-			point.SetTimestamp(seconds(i * 10))
-			point.SetIntValue(val)
-		}
-
+		slice := buildMonotonicIntRebootPoints()
 		ctx := context.Background()
 		tr := newTranslator(t, zap.NewNop())
 		consumer := &mockTimeSeriesConsumer{}
@@ -1312,28 +1295,32 @@ func TestMapIntMonotonicOutOfOrder(t *testing.T) {
 	)
 }
 
+func buildMonotonicDoublePoints(deltas []float64) (slice pmetric.NumberDataPointSlice) {
+	cumulative := make([]float64, len(deltas)+1)
+	cumulative[0] = 0
+	for i := 1; i < len(cumulative); i++ {
+		cumulative[i] = cumulative[i-1] + deltas[i-1]
+	}
+
+	slice = pmetric.NewNumberDataPointSlice()
+	slice.EnsureCapacity(len(cumulative))
+	for i, val := range cumulative {
+		point := slice.AppendEmpty()
+		point.SetDoubleValue(val)
+		point.SetTimestamp(seconds(i * 10))
+	}
+
+	return
+}
+
 func TestMapDoubleMonotonicMetrics(t *testing.T) {
+	deltas := []float64{1, 2, 200, 3, 7, 0}
 	t.Run("diff", func(t *testing.T) {
-		deltas := []float64{1, 2, 200, 3, 7, 0}
-		cumulative := make([]float64, len(deltas)+1)
-		cumulative[0] = 0
-		for i := 1; i < len(cumulative); i++ {
-			cumulative[i] = cumulative[i-1] + deltas[i-1]
-		}
+		slice := buildMonotonicDoublePoints(deltas)
 
-		//Map to OpenTelemetry format
-		slice := pmetric.NewNumberDataPointSlice()
-		slice.EnsureCapacity(len(cumulative))
-		for i, val := range cumulative {
-			point := slice.AppendEmpty()
-			point.SetDoubleValue(val)
-			point.SetTimestamp(seconds(i))
-		}
-
-		// Map to Datadog format
 		expected := make([]metric, len(deltas))
 		for i, val := range deltas {
-			expected[i] = newCount(exampleDims, uint64(seconds(i+1)), val)
+			expected[i] = newCount(exampleDims, uint64(seconds(i+1)*10), val)
 		}
 
 		ctx := context.Background()
@@ -1345,24 +1332,8 @@ func TestMapDoubleMonotonicMetrics(t *testing.T) {
 	})
 
 	t.Run("rate", func(t *testing.T) {
-		// Create list of values
-		deltas := []float64{1, 2, 200, 3, 7, 0}
-		cumulative := make([]float64, len(deltas)+1)
-		cumulative[0] = 0
-		for i := 1; i < len(cumulative); i++ {
-			cumulative[i] = cumulative[i-1] + deltas[i-1]
-		}
+		slice := buildMonotonicDoublePoints(deltas)
 
-		//Map to OpenTelemetry format
-		slice := pmetric.NewNumberDataPointSlice()
-		slice.EnsureCapacity(len(cumulative))
-		for i, val := range cumulative {
-			point := slice.AppendEmpty()
-			point.SetDoubleValue(val)
-			point.SetTimestamp(seconds(i * 10))
-		}
-
-		// Map to Datadog format
 		expected := make([]metric, len(deltas))
 		for i, val := range deltas {
 			// divide val by submission interval (10s)
@@ -1425,19 +1396,25 @@ func TestMapDoubleMonotonicDifferentDimensions(t *testing.T) {
 	)
 }
 
+func buildMonotonicDoubleRebootPoints() (slice pmetric.NumberDataPointSlice) {
+	values := []float64{0, 30, 0, 20}
+	slice = pmetric.NewNumberDataPointSlice()
+	slice.EnsureCapacity(len(values))
+
+	for i, val := range values {
+		point := slice.AppendEmpty()
+		point.SetTimestamp(seconds(i * 10))
+		point.SetDoubleValue(val)
+	}
+
+	return
+}
+
 // This test checks that in the case of a reboot within a NumberDataPointSlice,
 // we cache the value but we do NOT compute first value for the value at reset.
 func TestMapDoubleMonotonicWithRebootWithinSlice(t *testing.T) {
 	t.Run("diff", func(t *testing.T) {
-		values := []float64{0, 30, 0, 20}
-		slice := pmetric.NewNumberDataPointSlice()
-		slice.EnsureCapacity(len(values))
-
-		for i, val := range values {
-			point := slice.AppendEmpty()
-			point.SetTimestamp(seconds(2 * i))
-			point.SetDoubleValue(val)
-		}
+		slice := buildMonotonicDoubleRebootPoints()
 
 		ctx := context.Background()
 		tr := newTranslator(t, zap.NewNop())
@@ -1446,22 +1423,14 @@ func TestMapDoubleMonotonicWithRebootWithinSlice(t *testing.T) {
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
-				newCount(exampleDims, uint64(seconds(2)), 30),
-				newCount(exampleDims, uint64(seconds(6)), 20),
+				newCount(exampleDims, uint64(seconds(10)), 30),
+				newCount(exampleDims, uint64(seconds(30)), 20),
 			},
 		)
 	})
 
 	t.Run("rate", func(t *testing.T) {
-		values := []float64{0, 30, 0, 20}
-		slice := pmetric.NewNumberDataPointSlice()
-		slice.EnsureCapacity(len(values))
-
-		for i, val := range values {
-			point := slice.AppendEmpty()
-			point.SetTimestamp(seconds(i * 10))
-			point.SetDoubleValue(val)
-		}
+		slice := buildMonotonicDoubleRebootPoints()
 
 		ctx := context.Background()
 		tr := newTranslator(t, zap.NewNop())
