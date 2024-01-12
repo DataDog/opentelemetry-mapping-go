@@ -47,7 +47,14 @@ func (t *ttlCache) Diff(dimensions *Dimensions, startTs, ts uint64, val float64)
 // last submitted value (ordered by timestamp). It also returns whether this is a first point and
 // whether it should be dropped.
 func (t *ttlCache) MonotonicDiff(dimensions *Dimensions, startTs, ts uint64, val float64) (float64, bool, bool) {
-	return t.putAndGetMonotonic(dimensions, startTs, ts, val)
+	return t.putAndGetMonotonic(dimensions, startTs, ts, val, false)
+}
+
+// MonotonicRate submits a new value for a given monotonic metric and returns the rate per second since
+// the last submitted value (ordered by timestamp). It also returns whether this is a first point and
+// whether it should be dropped.
+func (t *ttlCache) MonotonicRate(dimensions *Dimensions, startTs, ts uint64, val float64) (float64, bool, bool) {
+	return t.putAndGetMonotonic(dimensions, startTs, ts, val, true)
 }
 
 // isNotFirstPoint determines if this is NOT the first point on a cumulative series:
@@ -74,6 +81,7 @@ func (t *ttlCache) putAndGetMonotonic(
 	dimensions *Dimensions,
 	startTs, ts uint64,
 	val float64,
+	rate bool,
 ) (dx float64, firstPoint bool, dropPoint bool) {
 	// assume it's first point before cache check.
 	firstPoint = true
@@ -87,6 +95,9 @@ func (t *ttlCache) putAndGetMonotonic(
 			return 0, false, true
 		}
 		dx = val - cnt.value
+		if rate {
+			dx = dx / time.Duration(ts-cnt.ts).Seconds()
+		}
 		// If !isNotFirstPoint or dx < 0, there has been a reset. We cache the new value, and firstPoint is true.
 		firstPoint = !isNotFirstPoint(startTs, ts, cnt.startTs) || dx < 0
 	}
