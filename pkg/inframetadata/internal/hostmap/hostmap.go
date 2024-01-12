@@ -54,7 +54,7 @@ func strField(m pcommon.Map, key string) (string, bool, error) {
 	case pcommon.ValueTypeInt:
 		value = val.AsString()
 	default:
-		return "", false, fmt.Errorf("%q has type %q, expected type \"Str\" instead", key, val.Type())
+		return "", false, mismatchErr(key, val.Type(), pcommon.ValueTypeStr)
 	}
 
 	return value, true, nil
@@ -73,7 +73,7 @@ func strSliceField(m pcommon.Map, key string) ([]string, bool, error) {
 		return nil, false, nil
 	}
 	if val.Type() != pcommon.ValueTypeSlice {
-		return nil, false, fmt.Errorf("%q has type %q, expected type \"Slice\" instead", key, val.Type())
+		return nil, false, mismatchErr(key, val.Type(), pcommon.ValueTypeSlice)
 	}
 	if val.Slice().Len() == 0 {
 		return nil, false, fmt.Errorf("%q is an empty slice, expected at least one item", key)
@@ -83,7 +83,7 @@ func strSliceField(m pcommon.Map, key string) ([]string, bool, error) {
 	for i := 0; i < val.Slice().Len(); i++ {
 		item := val.Slice().At(i)
 		if item.Type() != pcommon.ValueTypeStr {
-			return nil, false, fmt.Errorf("%s[%d] has type %q, expected type \"Str\" instead", key, i, item.Type())
+			return nil, false, mismatchErr(fmt.Sprintf("%s[%d]", key, i), item.Type(), pcommon.ValueTypeStr)
 		}
 		strSlice = append(strSlice, item.Str())
 	}
@@ -174,6 +174,22 @@ func (m *HostMap) newOrFetchHostMetadata(host string) (payload.HostMetadata, boo
 	return md, ok
 }
 
+// equalSlices checks if two slices are equal.
+// Vendored from https://cs.opensource.google/go/go/+/refs/tags/go1.21.5:src/slices/slices.go;l=18
+// To preserve compatibility with Go 1.20.
+// Can be replaced by slices.Equal when we drop support for Go 1.20.
+func equalSlices[S ~[]E, E comparable](s1, s2 S) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i := range s1 {
+		if s1[i] != s2[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // Update the information about a given host by providing a resource.
 // The function reports:
 //   - Whether the information about the `host` has changed
@@ -193,6 +209,17 @@ func (m *HostMap) Update(host string, res pcommon.Resource) (changed bool, md pa
 	md, found := m.newOrFetchHostMetadata(host)
 	md.InternalHostname = host
 	md.Meta.Hostname = host
+
+	// Host tags
+	// If a tag was present in a previous resource but is not present
+	// in the current one, it will be removed from the host metadata payload.
+	if tags, tagsErr := getHostTags(res.Attributes()); tagsErr != nil {
+		err = multierr.Append(err, tagsErr)
+	} else {
+		old := md.Tags.OTel
+		changed = changed || !equalSlices[[]string](old, tags)
+		md.Tags.OTel = tags
+	}
 
 	// InstanceID field
 	if iid, ok, err2 := instanceID(res.Attributes()); err2 != nil {

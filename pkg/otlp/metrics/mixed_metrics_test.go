@@ -141,10 +141,14 @@ func TestMapMetrics(t *testing.T) {
 		t.Run(testinstance.name, func(t *testing.T) {
 			set := componenttest.NewNopTelemetrySettings()
 			core, observed := observer.New(zapcore.DebugLevel)
+			options := append(
+				[]TranslatorOption{WithOriginProduct(OriginProductDatadogAgent)},
+				testinstance.options...,
+			)
 			set.Logger = zap.New(core)
 			attributesTranslator, err := attributes.NewTranslator(set)
 			require.NoError(t, err)
-			translator, err := NewTranslator(set, attributesTranslator, testinstance.options...)
+			translator, err := NewTranslator(set, attributesTranslator, options...)
 			require.NoError(t, err)
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 			assert.Equal(t, testinstance.expectedUnknownMetricType, observed.FilterMessage("Unknown or unsupported metric type").Len())

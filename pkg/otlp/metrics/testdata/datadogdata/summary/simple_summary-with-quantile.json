@@ -6,6 +6,9 @@
       "Tags": [],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 10,
+      "OriginCategory": 17,
+      "OriginService": 0,
       "Type": "count",
       "Timestamp": 1669802350921840070,
       "Value": 10
@@ -15,6 +18,9 @@
       "Tags": [],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 10,
+      "OriginCategory": 17,
+      "OriginService": 0,
       "Type": "count",
       "Timestamp": 1669802350921840070,
       "Value": 100
@@ -26,6 +32,9 @@
       ],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 10,
+      "OriginCategory": 17,
+      "OriginService": 0,
       "Type": "gauge",
       "Timestamp": 1669802350921840070,
       "Value": 0
@@ -37,6 +46,9 @@
       ],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 10,
+      "OriginCategory": 17,
+      "OriginService": 0,
       "Type": "gauge",
       "Timestamp": 1669802350921840070,
       "Value": 100
@@ -48,6 +60,9 @@
       ],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 10,
+      "OriginCategory": 17,
+      "OriginService": 0,
       "Type": "gauge",
       "Timestamp": 1669802350921840070,
       "Value": 500
@@ -59,6 +74,9 @@
       ],
       "Host": "hostname",
       "OriginID": "",
+      "OriginProduct": 10,
+      "OriginCategory": 17,
+      "OriginService": 0,
       "Type": "gauge",
       "Timestamp": 1669802350921840070,
       "Value": 600
