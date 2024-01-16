@@ -531,7 +531,6 @@ func TestRemapMetrics(t *testing.T) {
 				"name": "LogFlushRateAndTimeMs",
 			}})},
 		},
-
 		{
 			in: metric("kafka.consumer.bytes-consumed-rate", point{f: 1, attrs: map[string]any{
 				"client-id": "client123",
@@ -840,7 +839,6 @@ func TestCopyMetricWithAttr(t *testing.T) {
 			require.Equal(t, out.Gauge().DataPoints().At(0).Attributes().AsRaw(), map[string]any{"human": "Ann", "age": int64(25)})
 			require.Equal(t, dest.At(dest.Len()-1), out)
 		})
-
 		t.Run("attributesMapping", func(t *testing.T) {
 			out, ok := copyMetricWithAttr(dest, m, "copied.test.metric", 1, attributesMapping{
 				fixed:   map[string]string{"fixed.attr": "ok"},
@@ -865,7 +863,17 @@ func TestCopyMetricWithAttr(t *testing.T) {
 
 			require.Equal(t, dest.At(dest.Len()-1), out)
 		})
-
+		t.Run("dynamicattrmissing", func(t *testing.T) {
+			out, ok := copyMetricWithAttr(dest, m, "copied.test.metric", 1, attributesMapping{
+				dynamic: map[string]string{"nonexistingattr": "remapped_nonexistingattr"},
+			})
+			require.True(t, ok)
+			require.Equal(t, m.Name(), "test.metric")
+			require.Equal(t, out.Name(), "copied.test.metric")
+			// don't add dynamic attribute if it is missing.
+			sameExceptName(t, m, out)
+			require.Equal(t, dest.At(dest.Len()-1), out)
+		})
 		t.Run("none", func(t *testing.T) {
 			_, ok := copyMetricWithAttr(dest, m, "copied.test.metric", 1, attributesMapping{}, kv{"human", "Paul"})
 			require.False(t, ok)
