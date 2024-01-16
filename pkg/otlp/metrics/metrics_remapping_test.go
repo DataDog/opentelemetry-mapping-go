@@ -315,44 +315,48 @@ func TestRemapMetrics(t *testing.T) {
 			out: []pmetric.Metric{metric("kafka.consumer.messages_in", point{f: 1, attrs: map[string]any{"type": "consumer-fetch-manager-metrics"}})},
 		},
 		{
-			in: metric("kafka.network.io", point{f: 1, attrs: map[string]any{
-				"state": "out",
-			}}),
-			out: []pmetric.Metric{metric("kafka.net.bytes_out.rate", point{f: 1, attrs: map[string]any{
-				"type":  "BrokerTopicMetrics",
-				"name":  "BytesOutPerSec",
-				"state": "out",
-			}})},
+			in: metric("kafka.network.io",
+				point{f: 1, attrs: map[string]any{
+					"state": "out",
+				}},
+				point{f: 2, attrs: map[string]any{
+					"state": "in",
+				}},
+			),
+			out: []pmetric.Metric{
+				metric("kafka.net.bytes_out.rate", point{f: 1, attrs: map[string]any{
+					"type":  "BrokerTopicMetrics",
+					"name":  "BytesOutPerSec",
+					"state": "out",
+				}}),
+				metric("kafka.net.bytes_in.rate", point{f: 2, attrs: map[string]any{
+					"type":  "BrokerTopicMetrics",
+					"name":  "BytesInPerSec",
+					"state": "in",
+				}}),
+			},
 		},
 		{
-			in: metric("kafka.network.io", point{f: 1, attrs: map[string]any{
-				"state": "in",
-			}}),
-			out: []pmetric.Metric{metric("kafka.net.bytes_in.rate", point{f: 1, attrs: map[string]any{
-				"type":  "BrokerTopicMetrics",
-				"name":  "BytesInPerSec",
-				"state": "in",
-			}})},
-		},
-		{
-			in: metric("kafka.purgatory.size", point{f: 1, attrs: map[string]any{
-				"type": "produce",
-			}}),
-			out: []pmetric.Metric{metric("kafka.request.producer_request_purgatory.size", point{f: 1, attrs: map[string]any{
-				"type":             "DelayedOperationPurgatory",
-				"name":             "PurgatorySize",
-				"delayedOperation": "Produce",
-			}})},
-		},
-		{
-			in: metric("kafka.purgatory.size", point{f: 1, attrs: map[string]any{
-				"type": "fetch",
-			}}),
-			out: []pmetric.Metric{metric("kafka.request.fetch_request_purgatory.size", point{f: 1, attrs: map[string]any{
-				"type":             "DelayedOperationPurgatory",
-				"name":             "PurgatorySize",
-				"delayedOperation": "Fetch",
-			}})},
+			in: metric("kafka.purgatory.size",
+				point{f: 1, attrs: map[string]any{
+					"type": "produce",
+				}},
+				point{f: 2, attrs: map[string]any{
+					"type": "fetch",
+				}},
+			),
+			out: []pmetric.Metric{
+				metric("kafka.request.producer_request_purgatory.size", point{f: 1, attrs: map[string]any{
+					"type":             "DelayedOperationPurgatory",
+					"name":             "PurgatorySize",
+					"delayedOperation": "Produce",
+				}}),
+				metric("kafka.request.fetch_request_purgatory.size", point{f: 2, attrs: map[string]any{
+					"type":             "DelayedOperationPurgatory",
+					"name":             "PurgatorySize",
+					"delayedOperation": "Fetch",
+				}}),
+			},
 		},
 		{
 			in: metric("kafka.partition.under_replicated", point{f: 1}),
@@ -362,24 +366,26 @@ func TestRemapMetrics(t *testing.T) {
 			}})},
 		},
 		{
-			in: metric("kafka.isr.operation.count", point{f: 1, attrs: map[string]any{
-				"operation": "shrink",
-			}}),
-			out: []pmetric.Metric{metric("kafka.replication.isr_shrinks.rate", point{f: 1, attrs: map[string]any{
-				"type":      "ReplicaManager",
-				"name":      "IsrShrinksPerSec",
-				"operation": "shrink",
-			}})},
-		},
-		{
-			in: metric("kafka.isr.operation.count", point{f: 1, attrs: map[string]any{
-				"operation": "expand",
-			}}),
-			out: []pmetric.Metric{metric("kafka.replication.isr_expands.rate", point{f: 1, attrs: map[string]any{
-				"type":      "ReplicaManager",
-				"name":      "IsrExpandsPerSec",
-				"operation": "expand",
-			}})},
+			in: metric("kafka.isr.operation.count",
+				point{f: 1, attrs: map[string]any{
+					"operation": "shrink",
+				}},
+				point{f: 2, attrs: map[string]any{
+					"operation": "expand",
+				}},
+			),
+			out: []pmetric.Metric{
+				metric("kafka.replication.isr_shrinks.rate", point{f: 1, attrs: map[string]any{
+					"type":      "ReplicaManager",
+					"name":      "IsrShrinksPerSec",
+					"operation": "shrink",
+				}}),
+				metric("kafka.replication.isr_expands.rate", point{f: 2, attrs: map[string]any{
+					"type":      "ReplicaManager",
+					"name":      "IsrExpandsPerSec",
+					"operation": "expand",
+				}}),
+			},
 		},
 		{
 			in: metric("kafka.leader.election.rate", point{f: 1}),
@@ -396,34 +402,34 @@ func TestRemapMetrics(t *testing.T) {
 			}})},
 		},
 		{
-			in: metric("kafka.request.time.avg", point{f: 1, attrs: map[string]any{
-				"type": "produce",
-			}}),
-			out: []pmetric.Metric{metric("kafka.request.produce.time.avg", point{f: 1, attrs: map[string]any{
-				"type":    "RequestMetrics",
-				"name":    "TotalTimeMs",
-				"request": "Produce",
-			}})},
-		},
-		{
-			in: metric("kafka.request.time.avg", point{f: 1, attrs: map[string]any{
-				"type": "fetchconsumer",
-			}}),
-			out: []pmetric.Metric{metric("kafka.request.fetch_consumer.time.avg", point{f: 1, attrs: map[string]any{
-				"type":    "RequestMetrics",
-				"name":    "TotalTimeMs",
-				"request": "FetchConsumer",
-			}})},
-		},
-		{
-			in: metric("kafka.request.time.avg", point{f: 1, attrs: map[string]any{
-				"type": "fetchfollower",
-			}}),
-			out: []pmetric.Metric{metric("kafka.request.fetch_follower.time.avg", point{f: 1, attrs: map[string]any{
-				"type":    "RequestMetrics",
-				"name":    "TotalTimeMs",
-				"request": "FetchFollower",
-			}})},
+			in: metric("kafka.request.time.avg",
+				point{f: 1, attrs: map[string]any{
+					"type": "produce",
+				}},
+				point{f: 2, attrs: map[string]any{
+					"type": "fetchconsumer",
+				}},
+				point{f: 3, attrs: map[string]any{
+					"type": "fetchfollower",
+				}},
+			),
+			out: []pmetric.Metric{
+				metric("kafka.request.produce.time.avg", point{f: 1, attrs: map[string]any{
+					"type":    "RequestMetrics",
+					"name":    "TotalTimeMs",
+					"request": "Produce",
+				}}),
+				metric("kafka.request.fetch_consumer.time.avg", point{f: 2, attrs: map[string]any{
+					"type":    "RequestMetrics",
+					"name":    "TotalTimeMs",
+					"request": "FetchConsumer",
+				}}),
+				metric("kafka.request.fetch_follower.time.avg", point{f: 3, attrs: map[string]any{
+					"type":    "RequestMetrics",
+					"name":    "TotalTimeMs",
+					"request": "FetchFollower",
+				}}),
+			},
 		},
 		{
 			in: metric("kafka.message.count", point{f: 1}),
@@ -433,52 +439,54 @@ func TestRemapMetrics(t *testing.T) {
 			}})},
 		},
 		{
-			in: metric("kafka.request.failed", point{f: 1, attrs: map[string]any{
-				"type": "produce",
-			}}),
-			out: []pmetric.Metric{metric("kafka.request.produce.failed.rate", point{f: 1, attrs: map[string]any{
-				"type": "BrokerTopicMetrics",
-				"name": "FailedProduceRequestsPerSec",
-			}})},
+			in: metric("kafka.request.failed",
+				point{f: 1, attrs: map[string]any{
+					"type": "produce",
+				}},
+				point{f: 2, attrs: map[string]any{
+					"type": "fetch",
+				}},
+			),
+			out: []pmetric.Metric{
+				metric("kafka.request.produce.failed.rate", point{f: 1, attrs: map[string]any{
+					"type": "BrokerTopicMetrics",
+					"name": "FailedProduceRequestsPerSec",
+				}}),
+				metric("kafka.request.fetch.failed.rate", point{f: 2, attrs: map[string]any{
+					"type": "BrokerTopicMetrics",
+					"name": "FailedFetchRequestsPerSec",
+				}}),
+			},
 		},
 		{
-			in: metric("kafka.request.failed", point{f: 1, attrs: map[string]any{
-				"type": "fetch",
-			}}),
-			out: []pmetric.Metric{metric("kafka.request.fetch.failed.rate", point{f: 1, attrs: map[string]any{
-				"type": "BrokerTopicMetrics",
-				"name": "FailedFetchRequestsPerSec",
-			}})},
-		},
-		{
-			in: metric("kafka.request.time.99p", point{f: 1, attrs: map[string]any{
-				"type": "produce",
-			}}),
-			out: []pmetric.Metric{metric("kafka.request.produce.time.99percentile", point{f: 1, attrs: map[string]any{
-				"type":    "RequestMetrics",
-				"name":    "TotalTimeMs",
-				"request": "Produce",
-			}})},
-		},
-		{
-			in: metric("kafka.request.time.99p", point{f: 1, attrs: map[string]any{
-				"type": "fetchconsumer",
-			}}),
-			out: []pmetric.Metric{metric("kafka.request.fetch_consumer.time.99percentile", point{f: 1, attrs: map[string]any{
-				"type":    "RequestMetrics",
-				"name":    "TotalTimeMs",
-				"request": "FetchConsumer",
-			}})},
-		},
-		{
-			in: metric("kafka.request.time.99p", point{f: 1, attrs: map[string]any{
-				"type": "fetchfollower",
-			}}),
-			out: []pmetric.Metric{metric("kafka.request.fetch_follower.time.99percentile", point{f: 1, attrs: map[string]any{
-				"type":    "RequestMetrics",
-				"name":    "TotalTimeMs",
-				"request": "FetchFollower",
-			}})},
+			in: metric("kafka.request.time.99p",
+				point{f: 1, attrs: map[string]any{
+					"type": "produce",
+				}},
+				point{f: 2, attrs: map[string]any{
+					"type": "fetchconsumer",
+				}},
+				point{f: 3, attrs: map[string]any{
+					"type": "fetchfollower",
+				}},
+			),
+			out: []pmetric.Metric{
+				metric("kafka.request.produce.time.99percentile", point{f: 1, attrs: map[string]any{
+					"type":    "RequestMetrics",
+					"name":    "TotalTimeMs",
+					"request": "Produce",
+				}}),
+				metric("kafka.request.fetch_consumer.time.99percentile", point{f: 2, attrs: map[string]any{
+					"type":    "RequestMetrics",
+					"name":    "TotalTimeMs",
+					"request": "FetchConsumer",
+				}}),
+				metric("kafka.request.fetch_follower.time.99percentile", point{f: 3, attrs: map[string]any{
+					"type":    "RequestMetrics",
+					"name":    "TotalTimeMs",
+					"request": "FetchFollower",
+				}}),
+			},
 		},
 		{
 			in: metric("kafka.partition.count", point{f: 1}),
@@ -622,6 +630,146 @@ func TestRemapMetrics(t *testing.T) {
 				"group":          "group123",
 				"consumer_group": "group123",
 			}})},
+		},
+
+		// jvm
+		{
+			in: metric("jvm.gc.collections.count",
+				point{f: 1, attrs: map[string]any{"name": "Copy"}},
+				point{f: 2, attrs: map[string]any{"name": "PS Scavenge"}},
+				point{f: 3, attrs: map[string]any{"name": "ParNew"}},
+				point{f: 4, attrs: map[string]any{"name": "G1 Young Generation"}},
+			),
+			out: []pmetric.Metric{
+				metric("jvm.gc.minor_collection_count",
+					point{f: 1, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "Copy",
+					}},
+					point{f: 2, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "PS Scavenge",
+					}},
+					point{f: 3, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "ParNew",
+					}},
+					point{f: 4, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "G1 Young Generation",
+					}}),
+			},
+		},
+		{
+			in: metric("jvm.gc.collections.count",
+				point{f: 1, attrs: map[string]any{"name": "MarkSweepCompact"}},
+				point{f: 2, attrs: map[string]any{"name": "PS MarkSweep"}},
+				point{f: 3, attrs: map[string]any{"name": "ConcurrentMarkSweep"}},
+				point{f: 4, attrs: map[string]any{"name": "G1 Mixed Generation"}},
+				point{f: 5, attrs: map[string]any{"name": "G1 Old Generation"}},
+				point{f: 6, attrs: map[string]any{"name": "Shenandoah Cycles"}},
+				point{f: 7, attrs: map[string]any{"name": "ZGC"}},
+			),
+			out: []pmetric.Metric{
+				metric("jvm.gc.major_collection_count",
+					point{f: 1, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "MarkSweepCompact",
+					}},
+					point{f: 2, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "PS MarkSweep",
+					}},
+					point{f: 3, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "ConcurrentMarkSweep",
+					}},
+					point{f: 4, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "G1 Mixed Generation",
+					}},
+					point{f: 5, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "G1 Old Generation",
+					}},
+					point{f: 6, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "Shenandoah Cycles",
+					}},
+					point{f: 7, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "ZGC",
+					}}),
+			},
+		},
+		{
+			in: metric("jvm.gc.collections.elapsed",
+				point{f: 1, attrs: map[string]any{"name": "Copy"}},
+				point{f: 2, attrs: map[string]any{"name": "PS Scavenge"}},
+				point{f: 3, attrs: map[string]any{"name": "ParNew"}},
+				point{f: 4, attrs: map[string]any{"name": "G1 Young Generation"}},
+			),
+			out: []pmetric.Metric{
+				metric("jvm.gc.minor_collection_time",
+					point{f: 1, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "Copy",
+					}},
+					point{f: 2, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "PS Scavenge",
+					}},
+					point{f: 3, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "ParNew",
+					}},
+					point{f: 4, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "G1 Young Generation",
+					}}),
+			},
+		},
+		{
+			in: metric("jvm.gc.collections.elapsed",
+				point{f: 1, attrs: map[string]any{"name": "MarkSweepCompact"}},
+				point{f: 2, attrs: map[string]any{"name": "PS MarkSweep"}},
+				point{f: 3, attrs: map[string]any{"name": "ConcurrentMarkSweep"}},
+				point{f: 4, attrs: map[string]any{"name": "G1 Mixed Generation"}},
+				point{f: 5, attrs: map[string]any{"name": "G1 Old Generation"}},
+				point{f: 6, attrs: map[string]any{"name": "Shenandoah Cycles"}},
+				point{f: 7, attrs: map[string]any{"name": "ZGC"}},
+			),
+			out: []pmetric.Metric{
+				metric("jvm.gc.major_collection_time",
+					point{f: 1, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "MarkSweepCompact",
+					}},
+					point{f: 2, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "PS MarkSweep",
+					}},
+					point{f: 3, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "ConcurrentMarkSweep",
+					}},
+					point{f: 4, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "G1 Mixed Generation",
+					}},
+					point{f: 5, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "G1 Old Generation",
+					}},
+					point{f: 6, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "Shenandoah Cycles",
+					}},
+					point{f: 7, attrs: map[string]any{
+						"type": "GarbageCollector",
+						"name": "ZGC",
+					}}),
+			},
 		},
 	} {
 		lena := dest.Len()
