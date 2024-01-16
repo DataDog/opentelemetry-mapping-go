@@ -15,7 +15,6 @@
 package metrics
 
 import (
-	"fmt"
 	"strings"
 
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -192,7 +191,6 @@ func copyMetricWithAttr(dest pmetric.MetricSlice, m pmetric.Metric, newname stri
 		if dynamic := attributesMapping.dynamic; dynamic != nil {
 			for old, new := range dynamic {
 				if v, ok := dp.Attributes().Get(old); ok {
-					fmt.Println("OLD")
 					dp.Attributes().PutStr(new, v.AsString())
 				}
 			}

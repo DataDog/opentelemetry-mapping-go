@@ -7,7 +7,7 @@ import (
 )
 
 // Note: `-` get converted into `_` which will result in some OTel and DD metric
-// having the same name. In order to prevent duplicate stats, prepend by `otel`
+// having the same name. In order to prevent duplicate stats, prepend by `otel.`
 // in these cases.
 func remapKafkaMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	name := m.Name()

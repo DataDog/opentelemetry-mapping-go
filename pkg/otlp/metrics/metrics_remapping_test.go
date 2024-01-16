@@ -19,6 +19,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest/pmetrictest"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
@@ -288,6 +290,339 @@ func TestRemapMetrics(t *testing.T) {
 			in:  metric("kafka.producer.request-latency-avg", point{f: 1}),
 			out: []pmetric.Metric{metric("kafka.producer.request_latency_avg", point{f: 1, attrs: map[string]any{"type": "producer-metrics"}})},
 		},
+		{
+			in:  metric("kafka.producer.outgoing-byte-rate", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.producer.bytes_out", point{f: 1, attrs: map[string]any{"type": "producer-metrics"}})},
+		},
+		{
+			in:  metric("kafka.producer.io-wait-time-ns-avg", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.producer.io_wait", point{f: 1, attrs: map[string]any{"type": "producer-metrics"}})},
+		},
+		{
+			in: metric("kafka.producer.byte-rate", point{f: 1, attrs: map[string]any{"client-id": "client123"}}),
+			out: []pmetric.Metric{metric("kafka.producer.bytes_out", point{f: 1, attrs: map[string]any{
+				"client-id": "client123",
+				"client":    "client123",
+				"type":      "producer-topic-metrics",
+			}})},
+		},
+		{
+			in:  metric("kafka.consumer.total.bytes-consumed-rate", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.consumer.bytes_in", point{f: 1, attrs: map[string]any{"type": "consumer-fetch-manager-metrics"}})},
+		},
+		{
+			in:  metric("kafka.consumer.total.records-consumed-rate", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.consumer.messages_in", point{f: 1, attrs: map[string]any{"type": "consumer-fetch-manager-metrics"}})},
+		},
+		{
+			in: metric("kafka.network.io", point{f: 1, attrs: map[string]any{
+				"state": "out",
+			}}),
+			out: []pmetric.Metric{metric("kafka.net.bytes_out.rate", point{f: 1, attrs: map[string]any{
+				"type":  "BrokerTopicMetrics",
+				"name":  "BytesOutPerSec",
+				"state": "out",
+			}})},
+		},
+		{
+			in: metric("kafka.network.io", point{f: 1, attrs: map[string]any{
+				"state": "in",
+			}}),
+			out: []pmetric.Metric{metric("kafka.net.bytes_in.rate", point{f: 1, attrs: map[string]any{
+				"type":  "BrokerTopicMetrics",
+				"name":  "BytesInPerSec",
+				"state": "in",
+			}})},
+		},
+		{
+			in: metric("kafka.purgatory.size", point{f: 1, attrs: map[string]any{
+				"type": "produce",
+			}}),
+			out: []pmetric.Metric{metric("kafka.request.producer_request_purgatory.size", point{f: 1, attrs: map[string]any{
+				"type":             "DelayedOperationPurgatory",
+				"name":             "PurgatorySize",
+				"delayedOperation": "Produce",
+			}})},
+		},
+		{
+			in: metric("kafka.purgatory.size", point{f: 1, attrs: map[string]any{
+				"type": "fetch",
+			}}),
+			out: []pmetric.Metric{metric("kafka.request.fetch_request_purgatory.size", point{f: 1, attrs: map[string]any{
+				"type":             "DelayedOperationPurgatory",
+				"name":             "PurgatorySize",
+				"delayedOperation": "Fetch",
+			}})},
+		},
+		{
+			in: metric("kafka.partition.under_replicated", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.replication.under_replicated_partitions", point{f: 1, attrs: map[string]any{
+				"type": "ReplicaManager",
+				"name": "UnderReplicatedPartitions",
+			}})},
+		},
+		{
+			in: metric("kafka.isr.operation.count", point{f: 1, attrs: map[string]any{
+				"operation": "shrink",
+			}}),
+			out: []pmetric.Metric{metric("kafka.replication.isr_shrinks.rate", point{f: 1, attrs: map[string]any{
+				"type":      "ReplicaManager",
+				"name":      "IsrShrinksPerSec",
+				"operation": "shrink",
+			}})},
+		},
+		{
+			in: metric("kafka.isr.operation.count", point{f: 1, attrs: map[string]any{
+				"operation": "expand",
+			}}),
+			out: []pmetric.Metric{metric("kafka.replication.isr_expands.rate", point{f: 1, attrs: map[string]any{
+				"type":      "ReplicaManager",
+				"name":      "IsrExpandsPerSec",
+				"operation": "expand",
+			}})},
+		},
+		{
+			in: metric("kafka.leader.election.rate", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.replication.leader_elections.rate", point{f: 1, attrs: map[string]any{
+				"type": "ControllerStats",
+				"name": "LeaderElectionRateAndTimeMs",
+			}})},
+		},
+		{
+			in: metric("kafka.partition.offline", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.replication.offline_partitions_count", point{f: 1, attrs: map[string]any{
+				"type": "KafkaController",
+				"name": "OfflinePartitionsCount",
+			}})},
+		},
+		{
+			in: metric("kafka.request.time.avg", point{f: 1, attrs: map[string]any{
+				"type": "produce",
+			}}),
+			out: []pmetric.Metric{metric("kafka.request.produce.time.avg", point{f: 1, attrs: map[string]any{
+				"type":    "RequestMetrics",
+				"name":    "TotalTimeMs",
+				"request": "Produce",
+			}})},
+		},
+		{
+			in: metric("kafka.request.time.avg", point{f: 1, attrs: map[string]any{
+				"type": "fetchconsumer",
+			}}),
+			out: []pmetric.Metric{metric("kafka.request.fetch_consumer.time.avg", point{f: 1, attrs: map[string]any{
+				"type":    "RequestMetrics",
+				"name":    "TotalTimeMs",
+				"request": "FetchConsumer",
+			}})},
+		},
+		{
+			in: metric("kafka.request.time.avg", point{f: 1, attrs: map[string]any{
+				"type": "fetchfollower",
+			}}),
+			out: []pmetric.Metric{metric("kafka.request.fetch_follower.time.avg", point{f: 1, attrs: map[string]any{
+				"type":    "RequestMetrics",
+				"name":    "TotalTimeMs",
+				"request": "FetchFollower",
+			}})},
+		},
+		{
+			in: metric("kafka.message.count", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.messages_in.rate", point{f: 1, attrs: map[string]any{
+				"type": "BrokerTopicMetrics",
+				"name": "MessagesInPerSec",
+			}})},
+		},
+		{
+			in: metric("kafka.request.failed", point{f: 1, attrs: map[string]any{
+				"type": "produce",
+			}}),
+			out: []pmetric.Metric{metric("kafka.request.produce.failed.rate", point{f: 1, attrs: map[string]any{
+				"type": "BrokerTopicMetrics",
+				"name": "FailedProduceRequestsPerSec",
+			}})},
+		},
+		{
+			in: metric("kafka.request.failed", point{f: 1, attrs: map[string]any{
+				"type": "fetch",
+			}}),
+			out: []pmetric.Metric{metric("kafka.request.fetch.failed.rate", point{f: 1, attrs: map[string]any{
+				"type": "BrokerTopicMetrics",
+				"name": "FailedFetchRequestsPerSec",
+			}})},
+		},
+		{
+			in: metric("kafka.request.time.99p", point{f: 1, attrs: map[string]any{
+				"type": "produce",
+			}}),
+			out: []pmetric.Metric{metric("kafka.request.produce.time.99percentile", point{f: 1, attrs: map[string]any{
+				"type":    "RequestMetrics",
+				"name":    "TotalTimeMs",
+				"request": "Produce",
+			}})},
+		},
+		{
+			in: metric("kafka.request.time.99p", point{f: 1, attrs: map[string]any{
+				"type": "fetchconsumer",
+			}}),
+			out: []pmetric.Metric{metric("kafka.request.fetch_consumer.time.99percentile", point{f: 1, attrs: map[string]any{
+				"type":    "RequestMetrics",
+				"name":    "TotalTimeMs",
+				"request": "FetchConsumer",
+			}})},
+		},
+		{
+			in: metric("kafka.request.time.99p", point{f: 1, attrs: map[string]any{
+				"type": "fetchfollower",
+			}}),
+			out: []pmetric.Metric{metric("kafka.request.fetch_follower.time.99percentile", point{f: 1, attrs: map[string]any{
+				"type":    "RequestMetrics",
+				"name":    "TotalTimeMs",
+				"request": "FetchFollower",
+			}})},
+		},
+		{
+			in: metric("kafka.partition.count", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.replication.partition_count", point{f: 1, attrs: map[string]any{
+				"type": "ReplicaManager",
+				"name": "PartitionCount",
+			}})},
+		},
+		{
+			in: metric("kafka.max.lag", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.replication.max_lag", point{f: 1, attrs: map[string]any{
+				"type":     "ReplicaFetcherManager",
+				"name":     "MaxLag",
+				"clientId": "replica",
+			}})},
+		},
+		{
+			in: metric("kafka.controller.active.count", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.replication.active_controller_count", point{f: 1, attrs: map[string]any{
+				"type": "KafkaController",
+				"name": "ActiveControllerCount",
+			}})},
+		},
+		{
+			in: metric("kafka.unclean.election.rate", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.replication.unclean_leader_elections.rate", point{f: 1, attrs: map[string]any{
+				"type": "ControllerStats",
+				"name": "UncleanLeaderElectionsPerSec",
+			}})},
+		},
+		{
+			in: metric("kafka.request.queue", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.request.channel.queue.size", point{f: 1, attrs: map[string]any{
+				"type": "RequestChannel",
+				"name": "RequestQueueSize",
+			}})},
+		},
+		{
+			in: metric("kafka.logs.flush.time.count", point{f: 1}),
+			out: []pmetric.Metric{metric("kafka.log.flush_rate.rate", point{f: 1, attrs: map[string]any{
+				"type": "LogFlushStats",
+				"name": "LogFlushRateAndTimeMs",
+			}})},
+		},
+
+		{
+			in: metric("kafka.consumer.bytes-consumed-rate", point{f: 1, attrs: map[string]any{
+				"client-id": "client123",
+			}}),
+			out: []pmetric.Metric{metric("kafka.consumer.bytes_consumed", point{f: 1, attrs: map[string]any{
+				"type":      "consumer-fetch-manager-metrics",
+				"client-id": "client123",
+				"client":    "client123",
+			}})},
+		},
+		{
+			in: metric("kafka.consumer.records-consumed-rate", point{f: 1, attrs: map[string]any{
+				"client-id": "client123",
+			}}),
+			out: []pmetric.Metric{metric("kafka.consumer.records_consumed", point{f: 1, attrs: map[string]any{
+				"type":      "consumer-fetch-manager-metrics",
+				"client-id": "client123",
+				"client":    "client123",
+			}})},
+		},
+		{
+			in: metric("kafka.consumer.fetch-size-avg", point{f: 1, attrs: map[string]any{
+				"client-id": "client123",
+			}}),
+			out: []pmetric.Metric{metric("kafka.consumer.fetch_size_avg", point{f: 1, attrs: map[string]any{
+				"type":      "consumer-fetch-manager-metrics",
+				"client-id": "client123",
+				"client":    "client123",
+			}})},
+		},
+		{
+			in: metric("kafka.producer.compression-rate", point{f: 1, attrs: map[string]any{
+				"client-id": "client123",
+			}}),
+			out: []pmetric.Metric{metric("kafka.producer.compression_rate", point{f: 1, attrs: map[string]any{
+				"type":      "producer-topic-metrics",
+				"client-id": "client123",
+				"client":    "client123",
+			}})},
+		},
+		{
+			in: metric("kafka.producer.record-error-rate", point{f: 1, attrs: map[string]any{
+				"client-id": "client123",
+			}}),
+			out: []pmetric.Metric{metric("kafka.producer.record_error_rate", point{f: 1, attrs: map[string]any{
+				"type":      "producer-topic-metrics",
+				"client-id": "client123",
+				"client":    "client123",
+			}})},
+		},
+		{
+			in: metric("kafka.producer.record-retry-rate", point{f: 1, attrs: map[string]any{
+				"client-id": "client123",
+			}}),
+			out: []pmetric.Metric{metric("kafka.producer.record_retry_rate", point{f: 1, attrs: map[string]any{
+				"type":      "producer-topic-metrics",
+				"client-id": "client123",
+				"client":    "client123",
+			}})},
+		},
+		{
+			in: metric("kafka.producer.record-send-rate", point{f: 1, attrs: map[string]any{
+				"client-id": "client123",
+			}}),
+			out: []pmetric.Metric{metric("kafka.producer.record_send_rate", point{f: 1, attrs: map[string]any{
+				"type":      "producer-topic-metrics",
+				"client-id": "client123",
+				"client":    "client123",
+			}})},
+		},
+
+		// kafka metrics receiver
+		{
+			in: metric("kafka.partition.current_offset", point{f: 1, attrs: map[string]any{
+				"group": "group123",
+			}}),
+			out: []pmetric.Metric{metric("kafka.broker_offset", point{f: 1, attrs: map[string]any{
+				"group":          "group123",
+				"consumer_group": "group123",
+			}})},
+		},
+		{
+			in: metric("kafka.consumer_group.lag", point{f: 1, attrs: map[string]any{
+				"group": "group123",
+			}}),
+			out: []pmetric.Metric{metric("kafka.consumer_lag", point{f: 1, attrs: map[string]any{
+				"group":          "group123",
+				"consumer_group": "group123",
+			}})},
+		},
+		{
+			in: metric("kafka.consumer_group.offset", point{f: 1, attrs: map[string]any{
+				"group": "group123",
+			}}),
+			out: []pmetric.Metric{metric("kafka.consumer_offset", point{f: 1, attrs: map[string]any{
+				"group":          "group123",
+				"consumer_group": "group123",
+			}})},
+		},
 	} {
 		lena := dest.Len()
 		checkprefix := strings.HasPrefix(tt.in.Name(), "system.") ||
@@ -304,11 +639,11 @@ func TestRemapMetrics(t *testing.T) {
 			tt.in.Name() == "kafka.producer.record-send-rate"
 		remapMetrics(dest, tt.in)
 		if checkprefix {
-			require.True(t, strings.HasPrefix(tt.in.Name(), "otel."), "system.* and process.* metrics need to be prepended with the otel.* namespace")
+			require.True(t, strings.HasPrefix(tt.in.Name(), "otel."), "system.* and process.*  and a subset of kafka metrics need to be prepended with the otel.* namespace")
 		}
 		require.Equal(t, dest.Len()-lena, len(tt.out), "unexpected number of metrics added")
 		for i, out := range tt.out {
-			require.Equal(t, out, dest.At(dest.Len()-len(tt.out)+i))
+			assert.NoError(t, pmetrictest.CompareMetric(out, dest.At(dest.Len()-len(tt.out)+i)))
 		}
 	}
 
