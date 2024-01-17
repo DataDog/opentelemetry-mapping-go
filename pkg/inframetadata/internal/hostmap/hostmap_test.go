@@ -265,7 +265,6 @@ func TestUpdate(t *testing.T) {
 			Hostname:    "host-1-hostid",
 		})
 		assert.ElementsMatch(t, md.Tags.OTel, []string{"foo:baz", "env:prod"})
-		assert.Equal(t, md.Tags, &payload.HostTags{})
 		assert.Equal(t, md.Payload.Gohai.Gohai.Platform, map[string]any{
 			"hostname":                    "host-1-hostid",
 			fieldPlatformOS:               "Fedora Linux",
