@@ -265,7 +265,7 @@ func TestUpdate(t *testing.T) {
 			Hostname:    "host-1-hostid",
 		})
 		assert.ElementsMatch(t, md.Tags.OTel, []string{"foo:baz", "env:prod"})
-		assert.Equal(t, md.Payload.Gohai.Gohai.Platform, map[string]string{
+		assert.Equal(t, md.Payload.Gohai.Gohai.Platform, map[string]any{
 			"hostname":                    "host-1-hostid",
 			fieldPlatformOS:               "Fedora Linux",
 			fieldPlatformProcessor:        "amd64",
@@ -277,7 +277,7 @@ func TestUpdate(t *testing.T) {
 			fieldPlatformKernelRelease:    "5.19.0-43-generic",
 			fieldPlatformKernelVersion:    "#82~18.04.1-Ubuntu SMP Fri Apr 16 15:10:02 UTC 2021",
 		})
-		assert.Equal(t, md.Payload.Gohai.Gohai.CPU, map[string]string{
+		assert.Equal(t, md.Payload.Gohai.Gohai.CPU, map[string]any{
 			fieldCPUCacheSize: "12288000",
 			fieldCPUFamily:    "6",
 			fieldCPUModel:     "10",
@@ -287,7 +287,7 @@ func TestUpdate(t *testing.T) {
 			fieldCPUCores:     "32",
 			fieldCPUMHz:       "400.0000055",
 		})
-		assert.Equal(t, md.Payload.Gohai.Gohai.Network, map[string]string{
+		assert.Equal(t, md.Payload.Gohai.Gohai.Network, map[string]any{
 			fieldNetworkIPAddressIPv4: "192.168.1.140",
 			fieldNetworkIPAddressIPv6: "fe80::abc2:4a28:737a:609e",
 			fieldNetworkMACAddress:    "ac:de:48:23:45:67",
@@ -304,7 +304,7 @@ func TestUpdate(t *testing.T) {
 			Hostname: "host-2-hostid",
 		})
 		assert.Equal(t, md.Tags, &payload.HostTags{})
-		assert.Equal(t, md.Platform(), map[string]string{
+		assert.Equal(t, md.Platform(), map[string]any{
 			"hostname":                    "host-2-hostid",
 			fieldPlatformProcessor:        "arm64",
 			fieldPlatformMachine:          "arm64",

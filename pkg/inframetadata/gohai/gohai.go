@@ -37,18 +37,18 @@ type Payload struct {
 }
 
 // Platform returns a reference to the Gohai payload 'platform' map.
-func (p *Payload) Platform() map[string]string {
-	return p.Gohai.Gohai.Platform.(map[string]string)
+func (p *Payload) Platform() map[string]any {
+	return p.Gohai.Gohai.Platform.(map[string]any)
 }
 
 // CPU returns a reference to the Gohai payload 'cpu' map.
-func (p *Payload) CPU() map[string]string {
-	return p.Gohai.Gohai.CPU.(map[string]string)
+func (p *Payload) CPU() map[string]any {
+	return p.Gohai.Gohai.CPU.(map[string]any)
 }
 
 // Network returns a reference to the Gohai payload 'network' map.
-func (p *Payload) Network() map[string]string {
-	return p.Gohai.Gohai.Network.(map[string]string)
+func (p *Payload) Network() map[string]any {
+	return p.Gohai.Gohai.Network.(map[string]any)
 }
 
 // gohaiSerializer implements json.Marshaler and json.Unmarshaler on top of a gohai payload
@@ -90,9 +90,9 @@ func NewEmpty() Payload {
 	return Payload{
 		Gohai: gohaiMarshaler{
 			Gohai: &Gohai{
-				Platform: map[string]string{},
-				CPU:      map[string]string{},
-				Network:  map[string]string{},
+				Platform: map[string]any{},
+				CPU:      map[string]any{},
+				Network:  map[string]any{},
 			},
 		},
 	}
