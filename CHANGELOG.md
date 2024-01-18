@@ -4,6 +4,22 @@
 
 <!-- next version -->
 
+## v0.12.0
+
+### 🛑 Breaking changes 🛑
+
+- `pkg/inframetadata`: Switch from map[string]string to map[string]any on Gohai getters (#248)
+  This prevents a crash when updating the metadata for the host the Collector is running on
+  
+
+### 💡 Enhancements 💡
+
+- `pkg/inframetadata`: Resource attributes for deployment environment and cluster name are now automatically added as host tags for the host associated with the resource.  (#233)
+- `pkg/inframetadata`: Resource attributes prefixed by `datadog.host.tag.` are now added as host tags for the host associated with the resource.  (#233)
+  For example, a resource attribute `datadog.host.tag.foo: bar` will be added as a host tag `foo:bar` for the host associated with the resource.
+  
+- `pkg/otlp/metrics`: Set metrics origin category, product and service based on the instrumentation scope. (#203)
+
 ## v0.11.0
 
 ### 🛑 Breaking changes 🛑
