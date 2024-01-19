@@ -24,6 +24,7 @@ var (
 		"pkg/otlp/metrics",
 		"pkg/internal/sketchtest",
 		"pkg/inframetadata",
+		"pkg/inframetadata/gohai/internal/gohaitest",
 	}
 )
 
