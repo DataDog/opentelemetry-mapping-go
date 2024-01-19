@@ -16,3 +16,4 @@ module-sets:
 excluded-modules:
   - github.com/DataDog/opentelemetry-mapping-go/internal/tools
   - github.com/DataDog/opentelemetry-mapping-go/internal/tools/generate-license-file
+  - github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/gohai/internal/gohaitest

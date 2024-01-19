@@ -265,7 +265,7 @@ func TestUpdate(t *testing.T) {
 			Hostname:    "host-1-hostid",
 		})
 		assert.ElementsMatch(t, md.Tags.OTel, []string{"foo:baz", "env:prod"})
-		assert.Equal(t, md.Payload.Gohai.Gohai.Platform, map[string]any{
+		assert.Equal(t, md.Payload.Gohai.Gohai.Platform, map[string]string{
 			"hostname":                    "host-1-hostid",
 			fieldPlatformOS:               "Fedora Linux",
 			fieldPlatformProcessor:        "amd64",
@@ -277,7 +277,7 @@ func TestUpdate(t *testing.T) {
 			fieldPlatformKernelRelease:    "5.19.0-43-generic",
 			fieldPlatformKernelVersion:    "#82~18.04.1-Ubuntu SMP Fri Apr 16 15:10:02 UTC 2021",
 		})
-		assert.Equal(t, md.Payload.Gohai.Gohai.CPU, map[string]any{
+		assert.Equal(t, md.Payload.Gohai.Gohai.CPU, map[string]string{
 			fieldCPUCacheSize: "12288000",
 			fieldCPUFamily:    "6",
 			fieldCPUModel:     "10",
@@ -292,8 +292,8 @@ func TestUpdate(t *testing.T) {
 			fieldNetworkIPAddressIPv6: "fe80::abc2:4a28:737a:609e",
 			fieldNetworkMACAddress:    "ac:de:48:23:45:67",
 		})
-		assert.Nil(t, md.Payload.Gohai.Gohai.FileSystem)
-		assert.Nil(t, md.Payload.Gohai.Gohai.Memory)
+		assert.Empty(t, md.Payload.Gohai.Gohai.FileSystem)
+		assert.Empty(t, md.Payload.Gohai.Gohai.Memory)
 	}
 
 	if assert.Contains(t, hosts, "host-2-hostid") {
@@ -304,7 +304,7 @@ func TestUpdate(t *testing.T) {
 			Hostname: "host-2-hostid",
 		})
 		assert.Equal(t, md.Tags, &payload.HostTags{})
-		assert.Equal(t, md.Platform(), map[string]any{
+		assert.Equal(t, md.Platform(), map[string]string{
 			"hostname":                    "host-2-hostid",
 			fieldPlatformProcessor:        "arm64",
 			fieldPlatformMachine:          "arm64",
@@ -313,8 +313,8 @@ func TestUpdate(t *testing.T) {
 		})
 		assert.Empty(t, md.Payload.Gohai.Gohai.CPU)
 		assert.Empty(t, md.Payload.Gohai.Gohai.Network)
-		assert.Nil(t, md.Payload.Gohai.Gohai.FileSystem)
-		assert.Nil(t, md.Payload.Gohai.Gohai.Memory)
+		assert.Empty(t, md.Payload.Gohai.Gohai.FileSystem)
+		assert.Empty(t, md.Payload.Gohai.Gohai.Memory)
 	}
 
 	assert.Empty(t, hostMap.Flush(), "returned map must be empty after double flush")

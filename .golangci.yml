@@ -44,6 +44,7 @@ linters-settings:
           - $gostd
           - github.com/DataDog/datadog-agent
           - github.com/DataDog/datadog-api-client-go
+          - github.com/DataDog/gohai
           - github.com/DataDog/opentelemetry-mapping-go
           - github.com/DataDog/sketches-go
           - github.com/dustin/go-humanize
