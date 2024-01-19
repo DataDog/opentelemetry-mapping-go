@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.13.0
+
+### 🛑 Breaking changes 🛑
+
+- `pkg/inframetadata`: Make types in gohai more robust. Fix return type of `Network` method. (#250)
+
 ## v0.12.0
 
 ### 🛑 Breaking changes 🛑
