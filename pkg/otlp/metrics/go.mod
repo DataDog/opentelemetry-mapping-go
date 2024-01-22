@@ -3,17 +3,17 @@ module github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics
 go 1.20
 
 require (
-	github.com/DataDog/datadog-agent/pkg/proto v0.51.0-rc.1
-	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.11.0
-	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.11.0
-	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.11.0
+	github.com/DataDog/datadog-agent/pkg/proto v0.52.0-devel
+	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.13.0
+	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.13.0
+	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.13.0
 	github.com/DataDog/sketches-go v1.4.4
 	github.com/golang/protobuf v1.5.3
 	github.com/lightstep/go-expohisto v1.0.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.92.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/stretchr/testify v1.8.4
-	go.opentelemetry.io/collector/component v0.91.0
+	go.opentelemetry.io/collector/component v0.92.0
 	go.opentelemetry.io/collector/pdata v1.0.1
 	go.opentelemetry.io/otel v1.21.0
 	go.uber.org/zap v1.26.0
@@ -40,9 +40,9 @@ require (
 	github.com/philhofer/fwd v1.1.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/tinylib/msgp v1.1.8 // indirect
-	go.opentelemetry.io/collector/config/configtelemetry v0.91.0 // indirect
-	go.opentelemetry.io/collector/confmap v0.91.0 // indirect
-	go.opentelemetry.io/collector/featuregate v1.0.0 // indirect
+	go.opentelemetry.io/collector/config/configtelemetry v0.92.0 // indirect
+	go.opentelemetry.io/collector/confmap v0.92.0 // indirect
+	go.opentelemetry.io/collector/featuregate v1.0.1 // indirect
 	go.opentelemetry.io/collector/semconv v0.92.0 // indirect
 	go.opentelemetry.io/otel/metric v1.21.0 // indirect
 	go.opentelemetry.io/otel/trace v1.21.0 // indirect

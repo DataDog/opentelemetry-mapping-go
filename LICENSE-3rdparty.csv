@@ -136,6 +136,7 @@ pkg/otlp/attributes,google.golang.org/grpc/internal/metadata,Apache-2.0,Google I
 pkg/otlp/attributes,google.golang.org/grpc/internal/pretty,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/resolver,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/resolver/dns,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/resolver/dns/internal,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/resolver/passthrough,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/resolver/unix,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/serviceconfig,Apache-2.0,Google Inc.
@@ -147,6 +148,7 @@ pkg/otlp/attributes,google.golang.org/grpc/keepalive,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/metadata,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/peer,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/resolver,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/resolver/dns,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/serviceconfig,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/stats,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/status,Apache-2.0,Google Inc.
@@ -477,6 +479,7 @@ pkg/inframetadata,google.golang.org/grpc/internal/metadata,Apache-2.0,Google Inc
 pkg/inframetadata,google.golang.org/grpc/internal/pretty,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/resolver,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/resolver/dns,Apache-2.0,Google Inc.
+pkg/inframetadata,google.golang.org/grpc/internal/resolver/dns/internal,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/resolver/passthrough,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/resolver/unix,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/serviceconfig,Apache-2.0,Google Inc.
@@ -488,6 +491,7 @@ pkg/inframetadata,google.golang.org/grpc/keepalive,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/metadata,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/peer,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/resolver,Apache-2.0,Google Inc.
+pkg/inframetadata,google.golang.org/grpc/resolver/dns,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/serviceconfig,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/stats,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/status,Apache-2.0,Google Inc.

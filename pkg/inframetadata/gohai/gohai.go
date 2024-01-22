@@ -20,12 +20,57 @@ import (
 	"encoding/json"
 )
 
+// Gohai is the inner payload for Gohai.
+// Its types must match those returned by Datadog/gohai.
+// The `Collect` methods from DataDog/gohai return an interface{},
+// so we need to carefully define the types of the fields here.
 type Gohai struct {
-	CPU        interface{} `json:"cpu"`
-	FileSystem interface{} `json:"filesystem"`
-	Memory     interface{} `json:"memory"`
-	Network    interface{} `json:"network"`
-	Platform   interface{} `json:"platform"`
+	// CPU contains CPU information.
+	// Type check:
+	// - Collect calls getCPUInfo: https://github.com/DataDog/gohai/blob/4316413/cpu/cpu.go#L63
+	//   - On macOS, getCPUInfo returns a map[string]string: https://github.com/DataDog/gohai/blob/4316413/cpu/cpu_darwin.go#L25
+	//   - On Linux/arm64, getCPUInfo returns a map[string]string: https://github.com/DataDog/gohai/blob/4316413/cpu/cpu_linux_arm64.go#L26
+	//   - On Linux/!arm64, getCPUInfo returns a map[string]string: https://github.com/DataDog/gohai/blob/4316413/cpu/cpu_linux_default.go#L36
+	//   - On Windows, getCPUInfo returns a map[string]string: https://github.com/DataDog/gohai/blob/4316413/cpu/cpu_windows.go#L221
+	//
+	// All branches return a map[string]string, so we can safely define CPU as map[string]string.
+	CPU map[string]string `json:"cpu"`
+
+	// FileSystem contains filesystem information.
+	// Type check:
+	// - Collect calls getFileSystemInfo https://github.com/DataDog/gohai/blob/4316413/filesystem/filesystem_common.go#L23
+	//   - On Linux, getFileSystemInfo calls parseDfOutput: https://github.com/DataDog/gohai/blob/4316413/filesystem/filesystem.go#L39
+	//     - parseDfOutput returns a []any: https://github.com/DataDog/gohai/blob/4316413/filesystem/filesystem.go#L58
+	//   - On Windows, getFileSystemInfo returns a []any: https://github.com/DataDog/gohai/blob/4316413/filesystem/filesystem_windows.go#L121
+	//
+	// All branches return a []any, so we can safely define FileSystem as []any.
+	FileSystem []any `json:"filesystem"`
+
+	// Memory contains memory information.
+	// Type check:
+	// - Collect calls getMemoryInfo: https://github.com/DataDog/gohai/blob/4316413/memory/memory.go#L28
+	//   - On macOS, getMemoryInfo returns a map[string]string: https://github.com/DataDog/gohai/blob/4316413/memory/memory_darwin.go#L16
+	//   - On Linux, getMemoryInfo returns a map[string]string: https://github.com/DataDog/gohai/blob/4316413/memory/memory_linux.go#L24
+	//   - On Windows, getMemoryInfo returns a map[string]string: https://github.com/DataDog/gohai/blob/4316413/memory/memory_windows.go#L29
+	//
+	// All branches return a map[string]string, so we can safely define Memory as map[string]string.
+	Memory map[string]string `json:"memory"`
+
+	// Network contains network information.
+	// Type check:
+	// - Collect calls getNetworkInfo: https://github.com/DataDog/gohai/blob/4316413/network/network_common.go#L41
+	//   - getNetworkInfo returns a map[string]any: https://github.com/DataDog/gohai/blob/4316413/network/network.go#L9
+	//
+	// All branches return a map[string]any, so we can safely define Network as map[string]any.
+	Network map[string]any `json:"network"`
+
+	// Platform contains platform information.
+	// Type check:
+	// - Collect calls getPlatformInfo: https://github.com/DataDog/gohai/blob/4316413/platform/platform.go#L22
+	//   - getPlatformInfo returns a map[string]string: https://github.com/DataDog/gohai/blob/4316413/platform/platform.go#L52
+	//
+	// All branches return a map[string]string, so we can safely define Platform as map[string]string.
+	Platform map[string]string `json:"platform"`
 }
 
 // Payload handles the JSON unmarshalling of the metadata payload
@@ -38,17 +83,17 @@ type Payload struct {
 
 // Platform returns a reference to the Gohai payload 'platform' map.
 func (p *Payload) Platform() map[string]string {
-	return p.Gohai.Gohai.Platform.(map[string]string)
+	return p.Gohai.Gohai.Platform
 }
 
 // CPU returns a reference to the Gohai payload 'cpu' map.
 func (p *Payload) CPU() map[string]string {
-	return p.Gohai.Gohai.CPU.(map[string]string)
+	return p.Gohai.Gohai.CPU
 }
 
 // Network returns a reference to the Gohai payload 'network' map.
-func (p *Payload) Network() map[string]string {
-	return p.Gohai.Gohai.Network.(map[string]string)
+func (p *Payload) Network() map[string]any {
+	return p.Gohai.Gohai.Network
 }
 
 // gohaiSerializer implements json.Marshaler and json.Unmarshaler on top of a gohai payload
@@ -90,9 +135,11 @@ func NewEmpty() Payload {
 	return Payload{
 		Gohai: gohaiMarshaler{
 			Gohai: &Gohai{
-				Platform: map[string]string{},
-				CPU:      map[string]string{},
-				Network:  map[string]string{},
+				CPU:        map[string]string{},
+				FileSystem: []any{},
+				Memory:     map[string]string{},
+				Network:    map[string]any{},
+				Platform:   map[string]string{},
 			},
 		},
 	}

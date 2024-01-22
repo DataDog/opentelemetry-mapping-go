@@ -287,13 +287,13 @@ func TestUpdate(t *testing.T) {
 			fieldCPUCores:     "32",
 			fieldCPUMHz:       "400.0000055",
 		})
-		assert.Equal(t, md.Payload.Gohai.Gohai.Network, map[string]string{
+		assert.Equal(t, md.Payload.Gohai.Gohai.Network, map[string]any{
 			fieldNetworkIPAddressIPv4: "192.168.1.140",
 			fieldNetworkIPAddressIPv6: "fe80::abc2:4a28:737a:609e",
 			fieldNetworkMACAddress:    "ac:de:48:23:45:67",
 		})
-		assert.Nil(t, md.Payload.Gohai.Gohai.FileSystem)
-		assert.Nil(t, md.Payload.Gohai.Gohai.Memory)
+		assert.Empty(t, md.Payload.Gohai.Gohai.FileSystem)
+		assert.Empty(t, md.Payload.Gohai.Gohai.Memory)
 	}
 
 	if assert.Contains(t, hosts, "host-2-hostid") {
@@ -313,8 +313,8 @@ func TestUpdate(t *testing.T) {
 		})
 		assert.Empty(t, md.Payload.Gohai.Gohai.CPU)
 		assert.Empty(t, md.Payload.Gohai.Gohai.Network)
-		assert.Nil(t, md.Payload.Gohai.Gohai.FileSystem)
-		assert.Nil(t, md.Payload.Gohai.Gohai.Memory)
+		assert.Empty(t, md.Payload.Gohai.Gohai.FileSystem)
+		assert.Empty(t, md.Payload.Gohai.Gohai.Memory)
 	}
 
 	assert.Empty(t, hostMap.Flush(), "returned map must be empty after double flush")
