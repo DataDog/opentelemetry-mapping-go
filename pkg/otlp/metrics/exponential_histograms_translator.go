@@ -145,7 +145,7 @@ func (t *Translator) mapExponentialHistogramMetrics(
 			continue
 		}
 
-		agentSketch, err := quantile.ConvertDDSketchIntoSketch(expHistDDSketch)
+		agentSketch, err := quantile.ConvertDDSketchIntoSketch[uint16](expHistDDSketch)
 		if err != nil {
 			t.logger.Debug("Failed to convert DDSketch into Sketch",
 				zap.String("metric name", dims.name),

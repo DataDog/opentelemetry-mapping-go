@@ -10,15 +10,29 @@ import (
 	"unsafe"
 )
 
-var _ memSized = (*sparseStore)(nil)
+// var _ memSized = (*sparseStore)(nil)
 
-type sparseStore struct {
-	bins  binList
-	count int
+type sparseStore[T uint16 | uint32] struct {
+	bins    binList[T]
+	count   int
+	binPool *BinPool[T] // todo[gh] this can probably move up to the Agent sketch
+	// note[gh] could this be hurting our perf?
+}
+
+func (s *sparseStore[T]) initBinPool() {
+	s.binPool = (*BinPool[T])(NewBinPool[T]())
+}
+
+func (s *sparseStore[T]) ClearBinPool() {
+	s.binPool = nil
+}
+
+func (s *sparseStore[T]) Count() int {
+	return s.count
 }
 
 // Cols returns an array of k and n.
-func (s *sparseStore) Cols() (k []int32, n []uint32) {
+func (s *sparseStore[T]) Cols() (k []int32, n []uint32) {
 	if len(s.bins) == 0 {
 		return
 	}
@@ -39,11 +53,12 @@ func (s *sparseStore) Cols() (k []int32, n []uint32) {
 //
 //	used: uses len(bins)
 //	allocated: uses cap(bins)
-func (s *sparseStore) MemSize() (used, allocated int) {
+func (s *sparseStore[T]) MemSize() (used, allocated int) {
 	const (
-		binSize   = int(unsafe.Sizeof(bin{}))
-		storeSize = int(unsafe.Sizeof(sparseStore{}))
+		storeSize = int(unsafe.Sizeof(sparseStore[T]{}))
 	)
+	binSize := int(unsafe.Sizeof(bin[T]{}))
+
 	// cap is used instead of len because an improved algorithm would take advantage
 	// of the unused space after a slice is resized.
 	used = storeSize + (len(s.bins) * binSize)
@@ -53,7 +68,7 @@ func (s *sparseStore) MemSize() (used, allocated int) {
 
 // trimLeft ensures that len(a) <= maxBucketCap. We set maxBucketCap rather high
 // by default to avoid trimming as much as possible.
-func trimLeft(a []bin, maxBucketCap int) []bin {
+func (s *sparseStore[T]) trimLeft(a []bin[T], maxBucketCap int) []bin[T] {
 	// XXX:
 	// 1. Work through overflow cause
 	// 2. CompressMode enum
@@ -69,9 +84,13 @@ func trimLeft(a []bin, maxBucketCap int) []bin {
 	var (
 		nRemove = len(a) - maxBucketCap
 
-		missing  int
-		overflow = getOverflowList()
+		missing int
 	)
+
+	if s.binPool == nil {
+		s.initBinPool()
+	}
+	overflow := s.binPool.getOverflowList()[:0]
 
 	// TODO|PROD: Benchmark a better overflow scheme.
 	// In theory, if we always have the smaller overflow in the lower bucket, we
@@ -85,13 +104,13 @@ func trimLeft(a []bin, maxBucketCap int) []bin {
 	for i := 0; i < nRemove; i++ {
 		missing += int(a[i].n)
 
-		if missing > maxBinWidth {
-			overflow = append(overflow, bin{
+		if missing > int(maxBinWidth[T]()) {
+			overflow = append(overflow, bin[T]{
 				k: a[i].k,
-				n: maxBinWidth,
+				n: maxBinWidth[T](),
 			})
 
-			missing -= maxBinWidth
+			missing -= int(maxBinWidth[T]())
 		}
 	}
 
@@ -104,17 +123,21 @@ func trimLeft(a []bin, maxBucketCap int) []bin {
 
 	copy(a, overflow)
 	copy(a[overflowLen:], a[nRemove:])
-	putOverflowList(overflow)
+	s.binPool.putOverflowList(overflow)
 
 	return a[:maxBucketCap+overflowLen]
 }
 
-func (s *sparseStore) merge(c *Config, o *sparseStore) {
+func (s *sparseStore[T]) merge(c *Config, o *sparseStore[T]) {
 	// TODO|PERF: Compare blocky merge with other methods.
 	// TODO|PERF: We have essentially unlimited tmp space, can we merge into a
 	// dense store and then copy back to the sparse version?
 	s.count += o.count
-	tmp := getBinList()[:0]
+
+	if s.binPool == nil {
+		s.initBinPool()
+	}
+	tmp := s.binPool.getBinList()
 
 	sIdx := 0
 	for _, ob := range o.bins {
@@ -135,13 +158,13 @@ func (s *sparseStore) merge(c *Config, o *sparseStore) {
 		}
 	}
 	tmp = append(tmp, s.bins[sIdx:]...)
-	tmp = trimLeft(tmp, c.binLimit)
+	tmp = s.trimLeft(tmp, c.binLimit)
 	s.bins = s.bins.ensureLen(len(tmp))
 	copy(s.bins, tmp)
-	putBinList(tmp)
+	s.binPool.putBinList(tmp)
 }
 
-func (s *sparseStore) insertCounts(c *Config, kcs []KeyCount) {
+func (s *sparseStore[T]) InsertCounts(c *Config, kcs []KeyCount) {
 
 	// TODO|PERF: A custom uint16 sort should easily beat sort.Sort.
 	// TODO|PERF: Would it be cheaper to sort float64s and then convert to keys?
@@ -151,7 +174,10 @@ func (s *sparseStore) insertCounts(c *Config, kcs []KeyCount) {
 
 	// TODO|PERF: Add a non-allocating fast path. When every key is already contained
 	// in the sketch (and no overflow happens) we can just directly update.
-	tmp := getBinList()
+	if s.binPool == nil {
+		s.initBinPool()
+	}
+	tmp := s.binPool.getBinList()
 
 	var (
 		sIdx, keyIdx int
@@ -188,15 +214,15 @@ func (s *sparseStore) insertCounts(c *Config, kcs []KeyCount) {
 		keyIdx++
 	}
 
-	tmp = trimLeft(tmp, c.binLimit)
+	tmp = s.trimLeft(tmp, c.binLimit)
 
 	// TODO|PERF: reallocate if cap(s.bins) >> len(s.bins)
 	s.bins = s.bins.ensureLen(len(tmp))
 	copy(s.bins, tmp)
-	putBinList(tmp)
+	s.binPool.putBinList(tmp)
 }
 
-func (s *sparseStore) insert(c *Config, keys []Key) {
+func (s *sparseStore[T]) InsertKeys(c *Config, keys []Key) {
 	s.count += len(keys)
 
 	// TODO|PERF: A custom uint16 sort should easily beat sort.Sort.
@@ -207,7 +233,10 @@ func (s *sparseStore) insert(c *Config, keys []Key) {
 
 	// TODO|PERF: Add a non-allocating fast path. When every key is already contained
 	// in the sketch (and no overflow happens) we can just directly update.
-	tmp := getBinList()
+	if s.binPool == nil {
+		s.initBinPool()
+	}
+	tmp := s.binPool.getBinList()[:0]
 
 	var (
 		sIdx, keyIdx int
@@ -242,12 +271,12 @@ func (s *sparseStore) insert(c *Config, keys []Key) {
 		keyIdx += kn
 	}
 
-	tmp = trimLeft(tmp, c.binLimit)
+	tmp = s.trimLeft(tmp, c.binLimit)
 
 	// TODO|PERF: reallocate if cap(s.bins) >> len(s.bins)
 	s.bins = s.bins.ensureLen(len(tmp))
 	copy(s.bins, tmp)
-	putBinList(tmp)
+	s.binPool.putBinList(tmp)
 }
 
 // bufCountLeadingEqual returns the number of consecutive keys in a[i:] that equal a[i].

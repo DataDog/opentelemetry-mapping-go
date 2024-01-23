@@ -14,15 +14,24 @@ import (
 )
 
 func TestPrintBins(t *testing.T) {
-	mb := func(dsl string) []bin {
-		s := ParseSketch(t, dsl)
+	t.Run("uint16", func(t *testing.T) {
+		testPrintBins[uint16](t)
+	})
+	t.Run("uint32", func(t *testing.T) {
+		testPrintBins[uint32](t)
+	})
+}
+
+func testPrintBins[T uint16 | uint32](t *testing.T) {
+	mb := func(dsl string) []bin[T] {
+		s := ParseSketch[T](t, dsl)
 		return s.bins
 	}
 
 	b10 := "0:1 1:1 2:1 3:1 4:1 5:1 6:1 7:1 8:1 9:1"
 
 	for _, tt := range []struct {
-		bins []bin
+		bins []bin[T]
 		w    int
 		exp  string
 	}{
@@ -67,9 +76,9 @@ func TestPrintBins(t *testing.T) {
 	}
 
 	t.Run("demo", func(t *testing.T) {
-		var bins binList
+		var bins binList[T]
 		for i := 0; i < defaultBinPerLine*2+1; i++ {
-			bins = append(bins, bin{k: Key(i), n: 1})
+			bins = append(bins, bin[T]{k: Key(i), n: 1})
 		}
 
 		s := bins.String()

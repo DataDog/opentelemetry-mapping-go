@@ -179,6 +179,15 @@ func TestCreateDDSketchWithSketchMapping(t *testing.T) {
 }
 
 func TestConvertDDSketchIntoSketch(t *testing.T) {
+	t.Run("uint16", func(t *testing.T) {
+		testConvertDDSketchIntoSketch[uint16](t)
+	})
+	t.Run("uint32", func(t *testing.T) {
+		testConvertDDSketchIntoSketch[uint32](t)
+	})
+}
+
+func testConvertDDSketchIntoSketch[T uint16 | uint32](t *testing.T) {
 	// Support of the distribution: [0,N] or [-N,0]
 	N := 1_000.0
 	// Number of points per quantile
@@ -277,7 +286,7 @@ func TestConvertDDSketchIntoSketch(t *testing.T) {
 			convertedSketch, err := createDDSketchWithSketchMapping(sketchConfig, sketch)
 			require.NoError(t, err)
 
-			outputSketch, err := convertDDSketchIntoSketch(sketchConfig, convertedSketch)
+			outputSketch, err := convertDDSketchIntoSketch[T](sketchConfig, convertedSketch)
 			require.NoError(t, err)
 
 			// Conversion accuracy formula taken from:

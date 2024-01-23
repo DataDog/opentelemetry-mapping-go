@@ -13,18 +13,22 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
 )
 
-var _ memSized = (*Sketch)(nil)
+// var _ memSized = (*Sketch[T])(nil)
 
 // A Sketch for tracking quantiles
 // The serialized JSON of Sketch contains the summary only
 // Bins are not included.
-type Sketch struct {
-	sparseStore
+type Sketch[T uint16 | uint32] struct {
+	sparseStore[T]
 
 	Basic summary.Summary `json:"summary"`
 }
 
-func (s *Sketch) String() string {
+func (s *Sketch[T]) Summary() *summary.Summary {
+	return &s.Basic
+}
+
+func (s *Sketch[T]) String() string {
 	var b strings.Builder
 	printSketch(&b, s, Default())
 	return b.String()
@@ -34,7 +38,7 @@ func (s *Sketch) String() string {
 //
 //	used: uses len(bins)
 //	allocated: uses cap(bins)
-func (s *Sketch) MemSize() (used, allocated int) {
+func (s *Sketch[T]) MemSize() (used, allocated int) {
 	const (
 		basicSize = int(unsafe.Sizeof(summary.Summary{}))
 	)
@@ -46,39 +50,42 @@ func (s *Sketch) MemSize() (used, allocated int) {
 }
 
 // InsertMany values into the sketch.
-func (s *Sketch) InsertMany(c *Config, values []float64) {
-	keys := getKeyList()
+func (s *Sketch[T]) InsertMany(c *Config, values []float64) {
+	if s.binPool == nil {
+		s.initBinPool()
+	}
+	keys := s.binPool.getKeyList()
 
 	for _, v := range values {
 		s.Basic.Insert(v)
 		keys = append(keys, c.key(v))
 	}
 
-	s.insert(c, keys)
-	putKeyList(keys)
+	s.InsertKeys(c, keys)
+	s.binPool.putKeyList(keys)
 }
 
 // Reset sketch to its empty state.
-func (s *Sketch) Reset() {
+func (s *Sketch[T]) Reset() {
 	s.Basic.Reset()
 	s.count = 0
 	s.bins = s.bins[:0] // TODO: just release to a size tiered pool.
 }
 
 // GetRawBins return raw bins information as string
-func (s *Sketch) GetRawBins() (int, string) {
+func (s *Sketch[T]) GetRawBins() (int, string) {
 	return s.count, strings.Replace(s.bins.String(), "\n", "", -1)
 }
 
 // Insert a single value into the sketch.
 // NOTE: InsertMany is much more efficient.
-func (s *Sketch) Insert(c *Config, vals ...float64) {
+func (s *Sketch[T]) Insert(c *Config, vals ...float64) {
 	// TODO: remove this
 	s.InsertMany(c, vals)
 }
 
 // Merge o into s, without mutating o.
-func (s *Sketch) Merge(c *Config, o *Sketch) {
+func (s *Sketch[T]) Merge(c *Config, o *Sketch[T]) {
 	s.Basic.Merge(o.Basic)
 	s.merge(c, &o.sparseStore)
 }
@@ -89,7 +96,7 @@ func (s *Sketch) Merge(c *Config, o *Sketch) {
 //
 //		Quantile(c, q <= 0)  = min
 //	 Quantile(c, q >= 1)  = max
-func (s *Sketch) Quantile(c *Config, q float64) float64 {
+func (s *Sketch[T]) Quantile(c *Config, q float64) float64 {
 	switch {
 	case s.count == 0:
 		return 0
@@ -139,7 +146,7 @@ func rank(count int, q float64) float64 {
 }
 
 // CopyTo makes a deep copy of this sketch into dst.
-func (s *Sketch) CopyTo(dst *Sketch) {
+func (s *Sketch[T]) CopyTo(dst *Sketch[T]) {
 	// TODO: pool slices here?
 	dst.bins = dst.bins.ensureLen(s.bins.Len())
 	copy(dst.bins, s.bins)
@@ -148,70 +155,14 @@ func (s *Sketch) CopyTo(dst *Sketch) {
 }
 
 // Copy returns a deep copy
-func (s *Sketch) Copy() *Sketch {
-	dst := &Sketch{}
+func (s *Sketch[T]) Copy() *Sketch[T] {
+	dst := &Sketch[T]{}
 	s.CopyTo(dst)
 	return dst
 }
 
-// Equals returns true if s and o are equivalent.
-func (s *Sketch) Equals(o *Sketch) bool {
-	if s.Basic != o.Basic {
-		return false
-	}
-
-	if s.count != o.count {
-		return false
-	}
-
-	if len(s.bins) != len(o.bins) {
-		return false
-	}
-
-	for i := range s.bins {
-		if o.bins[i] != s.bins[i] {
-			return false
-		}
-	}
-
-	return true
-}
-
-// ApproxEquals checks if s and o are equivalent, with e error allowed for Sum and Average
-func (s *Sketch) ApproxEquals(o *Sketch, e float64) bool {
-	if math.Abs(s.Basic.Sum-o.Basic.Sum) > e {
-		return false
-	}
-
-	if math.Abs(s.Basic.Avg-o.Basic.Avg) > e {
-		return false
-	}
-
-	if s.Basic.Min != o.Basic.Min {
-		return false
-	}
-
-	if s.Basic.Max != o.Basic.Max {
-		return false
-	}
-
-	if s.Basic.Cnt != o.Basic.Cnt {
-		return false
-	}
-
-	if s.count != o.count {
-		return false
-	}
-
-	if len(s.bins) != len(o.bins) {
-		return false
-	}
-
-	for i := range s.bins {
-		if o.bins[i] != s.bins[i] {
-			return false
-		}
-	}
-
-	return true
+// Copy returns a deep copy
+func (s *Sketch[T]) CopyInterface() SketchReader {
+	copy := s.Copy()
+	return copy
 }

@@ -30,7 +30,7 @@ type memSized interface {
 // output:
 //
 //	<k>:<n>...
-func printBins(w io.Writer, bins []bin, maxPerLine int) {
+func printBins[T uint16 | uint32](w io.Writer, bins []bin[T], maxPerLine int) {
 	for i, b := range bins {
 		prefix := ""
 
@@ -45,7 +45,7 @@ func printBins(w io.Writer, bins []bin, maxPerLine int) {
 	}
 }
 
-func printSketch(w io.Writer, s *Sketch, c *Config) {
+func printSketch[T uint16 | uint32](w io.Writer, s *Sketch[T], c *Config) {
 	fmt.Fprintln(w, "sketch:")
 	head := func(s string) {
 		fmt.Fprintln(w, indent(s, 1))

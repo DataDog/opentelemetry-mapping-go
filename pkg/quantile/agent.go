@@ -16,34 +16,42 @@ var agentConfig = Default()
 type Agent struct {
 	Buf      []Key
 	CountBuf []KeyCount
-	Sketch   Sketch
+	Sketch   SketchRW
+}
+
+func NewAgent[T uint16 | uint32]() *Agent {
+	return &Agent{
+		Sketch: &Sketch[T]{},
+	}
 }
 
 // IsEmpty returns true if the sketch is empty
 func (a *Agent) IsEmpty() bool {
-	return a.Sketch.Basic.Cnt == 0 && len(a.Buf) == 0
+	return a.Sketch.Summary().Cnt == 0 && len(a.Buf) == 0
 }
 
 // Finish flushes any pending inserts and returns a deep copy of the sketch.
-func (a *Agent) Finish() *Sketch {
+func (a *Agent) Finish() SketchReader {
 	a.flush()
 
 	if a.IsEmpty() {
 		return nil
 	}
 
-	return a.Sketch.Copy()
+	return a.Sketch.CopyInterface()
 }
 
 // flush buffered values into the sketch.
 func (a *Agent) flush() {
 	if len(a.Buf) != 0 {
-		a.Sketch.insert(agentConfig, a.Buf)
+		a.Sketch.InsertKeys(agentConfig, a.Buf)
+
+		// todo[gh] probably don't throw out these buffers
 		a.Buf = nil
 	}
 
 	if len(a.CountBuf) != 0 {
-		a.Sketch.insertCounts(agentConfig, a.CountBuf)
+		a.Sketch.InsertCounts(agentConfig, a.CountBuf)
 		a.CountBuf = nil
 	}
 }
@@ -63,23 +71,22 @@ func (a *Agent) Insert(v float64, sampleRate float64) {
 	}
 
 	if sampleRate == 1 {
-		a.Sketch.Basic.Insert(v)
+		a.Sketch.Summary().Insert(v)
 		a.Buf = append(a.Buf, k)
-
-		if len(a.Buf) < agentBufCap {
-			return
-		}
 	} else {
 		// use truncated 1 / sampleRate as count to match histograms
 		n := 1 / sampleRate
-		a.Sketch.Basic.InsertN(v, n)
+		a.Sketch.Summary().InsertN(v, n)
 		kc := KeyCount{
 			k: k,
 			n: uint(n),
 		}
 		a.CountBuf = append(a.CountBuf, kc)
 	}
-	a.flush()
+
+	if len(a.Buf) >= agentBufCap || len(a.CountBuf) >= agentBufCap {
+		a.flush()
+	}
 }
 
 // InsertInterpolate linearly interpolates a count from the given lower to upper bounds
@@ -113,7 +120,7 @@ func (a *Agent) InsertInterpolate(lower float64, upper float64, count uint) {
 			if kn > whatsLeft {
 				kn = whatsLeft
 			}
-			a.Sketch.Basic.InsertN(lowerB, float64(kn))
+			a.Sketch.Summary().InsertN(lowerB, float64(kn))
 			a.CountBuf = append(a.CountBuf, KeyCount{k: keys[startIdx], n: uint(kn)})
 			whatsLeft -= kn
 			startIdx = endIdx
@@ -122,7 +129,7 @@ func (a *Agent) InsertInterpolate(lower float64, upper float64, count uint) {
 		endIdx++
 	}
 	if whatsLeft > 0 {
-		a.Sketch.Basic.InsertN(agentConfig.binLow(keys[startIdx]), float64(whatsLeft))
+		a.Sketch.Summary().InsertN(agentConfig.binLow(keys[startIdx]), float64(whatsLeft))
 		a.CountBuf = append(a.CountBuf, KeyCount{k: keys[startIdx], n: uint(whatsLeft)})
 	}
 	a.flush()
