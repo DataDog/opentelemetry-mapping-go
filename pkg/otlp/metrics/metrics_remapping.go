@@ -27,10 +27,14 @@ const (
 	divPercentage = 0.01
 )
 
+var emptyAttributesMapping = attributesMapping{}
+
 // remapMetrics extracts any Datadog specific metrics from m and appends them to all.
 func remapMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	remapSystemMetrics(all, m)
 	remapContainerMetrics(all, m)
+	remapKafkaMetrics(all, m)
+	remapJvmMetrics(all, m)
 }
 
 // remapSystemMetrics extracts system metrics from m and appends them to all.
@@ -42,32 +46,32 @@ func remapSystemMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	}
 	switch name {
 	case "system.cpu.load_average.1m":
-		copyMetric(all, m, "system.load.1", 1)
+		copyMetricWithAttr(all, m, "system.load.1", 1, emptyAttributesMapping)
 	case "system.cpu.load_average.5m":
-		copyMetric(all, m, "system.load.5", 1)
+		copyMetricWithAttr(all, m, "system.load.5", 1, emptyAttributesMapping)
 	case "system.cpu.load_average.15m":
-		copyMetric(all, m, "system.load.15", 1)
+		copyMetricWithAttr(all, m, "system.load.15", 1, emptyAttributesMapping)
 	case "system.cpu.utilization":
-		copyMetric(all, m, "system.cpu.idle", divPercentage, kv{"state", "idle"})
-		copyMetric(all, m, "system.cpu.user", divPercentage, kv{"state", "user"})
-		copyMetric(all, m, "system.cpu.system", divPercentage, kv{"state", "system"})
-		copyMetric(all, m, "system.cpu.iowait", divPercentage, kv{"state", "wait"})
-		copyMetric(all, m, "system.cpu.stolen", divPercentage, kv{"state", "steal"})
+		copyMetricWithAttr(all, m, "system.cpu.idle", divPercentage, emptyAttributesMapping, kv{"state", "idle"})
+		copyMetricWithAttr(all, m, "system.cpu.user", divPercentage, emptyAttributesMapping, kv{"state", "user"})
+		copyMetricWithAttr(all, m, "system.cpu.system", divPercentage, emptyAttributesMapping, kv{"state", "system"})
+		copyMetricWithAttr(all, m, "system.cpu.iowait", divPercentage, emptyAttributesMapping, kv{"state", "wait"})
+		copyMetricWithAttr(all, m, "system.cpu.stolen", divPercentage, emptyAttributesMapping, kv{"state", "steal"})
 	case "system.memory.usage":
-		copyMetric(all, m, "system.mem.total", divMebibytes)
-		copyMetric(all, m, "system.mem.usable", divMebibytes,
+		copyMetricWithAttr(all, m, "system.mem.total", divMebibytes, emptyAttributesMapping)
+		copyMetricWithAttr(all, m, "system.mem.usable", divMebibytes, emptyAttributesMapping,
 			kv{"state", "free"},
 			kv{"state", "cached"},
 			kv{"state", "buffered"},
 		)
 	case "system.network.io":
-		copyMetric(all, m, "system.net.bytes_rcvd", 1, kv{"direction", "receive"})
-		copyMetric(all, m, "system.net.bytes_sent", 1, kv{"direction", "transmit"})
+		copyMetricWithAttr(all, m, "system.net.bytes_rcvd", 1, emptyAttributesMapping, kv{"direction", "receive"})
+		copyMetricWithAttr(all, m, "system.net.bytes_sent", 1, emptyAttributesMapping, kv{"direction", "transmit"})
 	case "system.paging.usage":
-		copyMetric(all, m, "system.swap.free", divMebibytes, kv{"state", "free"})
-		copyMetric(all, m, "system.swap.used", divMebibytes, kv{"state", "used"})
+		copyMetricWithAttr(all, m, "system.swap.free", divMebibytes, emptyAttributesMapping, kv{"state", "free"})
+		copyMetricWithAttr(all, m, "system.swap.used", divMebibytes, emptyAttributesMapping, kv{"state", "used"})
 	case "system.filesystem.utilization":
-		copyMetric(all, m, "system.disk.in_use", 1)
+		copyMetricWithAttr(all, m, "system.disk.in_use", 1, emptyAttributesMapping)
 	}
 	// process.* and system.* metrics need to be prepended with the otel.* namespace
 	m.SetName("otel." + m.Name())
@@ -82,61 +86,76 @@ func remapContainerMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	}
 	switch name {
 	case "container.cpu.usage.total":
-		if addm, ok := copyMetric(all, m, "container.cpu.usage", 1); ok {
+		if addm, ok := copyMetricWithAttr(all, m, "container.cpu.usage", 1, emptyAttributesMapping); ok {
 			addm.SetUnit("nanocore")
 		}
 	case "container.cpu.usage.usermode":
-		if addm, ok := copyMetric(all, m, "container.cpu.user", 1); ok {
+		if addm, ok := copyMetricWithAttr(all, m, "container.cpu.user", 1, emptyAttributesMapping); ok {
 			addm.SetUnit("nanocore")
 		}
 	case "container.cpu.usage.system":
-		if addm, ok := copyMetric(all, m, "container.cpu.system", 1); ok {
+		if addm, ok := copyMetricWithAttr(all, m, "container.cpu.system", 1, emptyAttributesMapping); ok {
 			addm.SetUnit("nanocore")
 		}
 	case "container.cpu.throttling_data.throttled_time":
-		copyMetric(all, m, "container.cpu.throttled", 1)
+		copyMetricWithAttr(all, m, "container.cpu.throttled", 1, emptyAttributesMapping)
 	case "container.cpu.throttling_data.throttled_periods":
-		copyMetric(all, m, "container.cpu.throttled.periods", 1)
+		copyMetricWithAttr(all, m, "container.cpu.throttled.periods", 1, emptyAttributesMapping)
 	case "container.memory.usage.total":
-		copyMetric(all, m, "container.memory.usage", 1)
+		copyMetricWithAttr(all, m, "container.memory.usage", 1, emptyAttributesMapping)
 	case "container.memory.active_anon":
-		copyMetric(all, m, "container.memory.kernel", 1)
+		copyMetricWithAttr(all, m, "container.memory.kernel", 1, emptyAttributesMapping)
 	case "container.memory.hierarchical_memory_limit":
-		copyMetric(all, m, "container.memory.limit", 1)
+		copyMetricWithAttr(all, m, "container.memory.limit", 1, emptyAttributesMapping)
 	case "container.memory.usage.limit":
-		copyMetric(all, m, "container.memory.soft_limit", 1)
+		copyMetricWithAttr(all, m, "container.memory.soft_limit", 1, emptyAttributesMapping)
 	case "container.memory.total_cache":
-		copyMetric(all, m, "container.memory.cache", 1)
+		copyMetricWithAttr(all, m, "container.memory.cache", 1, emptyAttributesMapping)
 	case "container.memory.total_swap":
-		copyMetric(all, m, "container.memory.swap", 1)
+		copyMetricWithAttr(all, m, "container.memory.swap", 1, emptyAttributesMapping)
 	case "container.blockio.io_service_bytes_recursive":
-		copyMetric(all, m, "container.io.write", 1, kv{"operation", "write"})
-		copyMetric(all, m, "container.io.read", 1, kv{"operation", "read"})
+		copyMetricWithAttr(all, m, "container.io.write", 1, emptyAttributesMapping, kv{"operation", "write"})
+		copyMetricWithAttr(all, m, "container.io.read", 1, emptyAttributesMapping, kv{"operation", "read"})
 	case "container.blockio.io_serviced_recursive":
-		copyMetric(all, m, "container.io.write.operations", 1, kv{"operation", "write"})
-		copyMetric(all, m, "container.io.read.operations", 1, kv{"operation", "read"})
+		copyMetricWithAttr(all, m, "container.io.write.operations", 1, emptyAttributesMapping, kv{"operation", "write"})
+		copyMetricWithAttr(all, m, "container.io.read.operations", 1, emptyAttributesMapping, kv{"operation", "read"})
 	case "container.network.io.usage.tx_bytes":
-		copyMetric(all, m, "container.net.sent", 1)
+		copyMetricWithAttr(all, m, "container.net.sent", 1, emptyAttributesMapping)
 	case "container.network.io.usage.tx_packets":
-		copyMetric(all, m, "container.net.sent.packets", 1)
+		copyMetricWithAttr(all, m, "container.net.sent.packets", 1, emptyAttributesMapping)
 	case "container.network.io.usage.rx_bytes":
-		copyMetric(all, m, "container.net.rcvd", 1)
+		copyMetricWithAttr(all, m, "container.net.rcvd", 1, emptyAttributesMapping)
 	case "container.network.io.usage.rx_packets":
-		copyMetric(all, m, "container.net.rcvd.packets", 1)
+		copyMetricWithAttr(all, m, "container.net.rcvd.packets", 1, emptyAttributesMapping)
 	}
 }
 
-// kv represents a key/value pair.
-type kv struct{ K, V string }
+type (
+	// kv represents a key/value pair.
+	kv struct{ K, V string }
+
+	// attributesMapping contains to mapping of attributes from OTel to DD.
+	attributesMapping struct {
+		// fixed represents attributes that need to be mapped where the value is
+		// already known based on the OTel metric name.
+		fixed map[string]string
+		// dynamic represents attributes that need to be mapped where the value needs
+		// to be dynamically pulled from a data point attribute. Typically when the OTel
+		// metric and DD metric have different conventions (e.g. group vs consumer_group).
+		dynamic map[string]string
+	}
+)
 
 // copyMetric copies metric m to dest. The new metric's name will be newname, and all of its datapoints will
 // be divided by div. If filter is provided, only the data points that have *either* of the specified string
 // attributes will be copied over. If the filtering results in no datapoints, no new metric is added to dest.
+// It will add any attributes specified in attributesMapping, by either pulling the value from the datapoint
+// for dynamic attributes, or setting the given attribute for fixed attributes.
 //
 // copyMetric returns the new metric and reports whether it was added to dest.
 //
 // Please note that copyMetric is restricted to the metric types Sum and Gauge.
-func copyMetric(dest pmetric.MetricSlice, m pmetric.Metric, newname string, div float64, filter ...kv) (pmetric.Metric, bool) {
+func copyMetricWithAttr(dest pmetric.MetricSlice, m pmetric.Metric, newname string, div float64, attributesMapping attributesMapping, filter ...kv) (pmetric.Metric, bool) {
 	newm := pmetric.NewMetric()
 	m.CopyTo(newm)
 	newm.SetName(newname)
@@ -163,6 +182,15 @@ func copyMetric(dest pmetric.MetricSlice, m pmetric.Metric, newname string, div 
 		case pmetric.NumberDataPointValueTypeDouble:
 			if div != 0 {
 				dp.SetDoubleValue(dp.DoubleValue() / div)
+			}
+		}
+		// attributes mapping
+		for k, v := range attributesMapping.fixed {
+			dp.Attributes().PutStr(k, v)
+		}
+		for old, new := range attributesMapping.dynamic {
+			if v, ok := dp.Attributes().Get(old); ok {
+				v.CopyTo(dp.Attributes().PutEmpty(new))
 			}
 		}
 		return false

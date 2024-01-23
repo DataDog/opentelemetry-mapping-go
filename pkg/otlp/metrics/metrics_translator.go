@@ -44,7 +44,22 @@ const (
 
 var (
 	signalTypeSet      = attribute.NewSet(attribute.String("signal", "metrics"))
-	rateAsGaugeMetrics = map[string]struct{}{}
+	rateAsGaugeMetrics = map[string]struct{}{
+		"kafka.net.bytes_out.rate":                        {},
+		"kafka.net.bytes_in.rate":                         {},
+		"kafka.replication.isr_shrinks.rate":              {},
+		"kafka.replication.isr_expands.rate":              {},
+		"kafka.replication.leader_elections.rate":         {},
+		"jvm.gc.minor_collection_count":                   {},
+		"jvm.gc.major_collection_count":                   {},
+		"jvm.gc.minor_collection_time":                    {},
+		"jvm.gc.major_collection_time":                    {},
+		"kafka.messages_in.rate":                          {},
+		"kafka.request.produce.failed.rate":               {},
+		"kafka.request.fetch.failed.rate":                 {},
+		"kafka.replication.unclean_leader_elections.rate": {},
+		"kafka.log.flush_rate.rate":                       {},
+	}
 )
 
 var _ source.Provider = (*noSourceProvider)(nil)

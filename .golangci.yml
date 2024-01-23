@@ -42,6 +42,7 @@ linters-settings:
           - $all
         allow:
           - $gostd
+          - github.com/open-telemetry/opentelemetry-collector-contrib
           - github.com/DataDog/datadog-agent
           - github.com/DataDog/datadog-api-client-go
           - github.com/DataDog/gohai
