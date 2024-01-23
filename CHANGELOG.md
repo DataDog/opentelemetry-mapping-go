@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.13.1
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics`: Add kafka metrics mapping. This allows users of the JMX Receiver/JMX Metrics Gatherer and kafka metrics receiver to have access to the OOTB kafka Dashboard. (#239)
+
 ## v0.13.0
 
 ### 🛑 Breaking changes 🛑
