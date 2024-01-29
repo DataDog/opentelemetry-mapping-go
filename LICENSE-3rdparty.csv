@@ -201,7 +201,7 @@ pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch/pb/sketchpb,Apache-2.0,
 pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch/stat,Apache-2.0,"Copyright 2021 DataDog, Inc | Copyright 2021 Datadog, Inc"
 pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch/store,Apache-2.0,"Copyright 2021 DataDog, Inc | Copyright 2021 Datadog, Inc"
 pkg/otlp/metrics,github.com/beorn7/perks/quantile,MIT,Copyright (C) 2013 Blake Mizerany
-pkg/otlp/metrics,github.com/cespare/xxhash/v2,MIT,Copyright (c) 2016 Caleb Spare | Copyright (c) 2016 Caleb Spare
+pkg/otlp/metrics,github.com/cespare/xxhash/v2,MIT,Copyright (c) 2016 Caleb Spare
 pkg/otlp/metrics,github.com/dustin/go-humanize,MIT,Copyright (c) 2005-2008  Dustin Sallings <dustin@spy.net>
 pkg/otlp/metrics,github.com/go-kit/log,MIT,Copyright (c) 2021 Go kit
 pkg/otlp/metrics,github.com/go-kit/log/level,MIT,Copyright (c) 2021 Go kit
