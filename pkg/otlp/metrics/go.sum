@@ -201,11 +201,11 @@ github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9G
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
 github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
 github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.92.0 h1:4lzyQkopk+TXphviuNbpLrwhOxa14Jw7i3SjzD2XjqQ=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.92.0 h1:2cjUFC0jNSqAYcO+ZWUQ8sqPZdAX03Bd90SpsGcnrNY=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.92.0/go.mod h1:SOBg+bs2hOmckkRr/yURA78AuMePwRYIpao4EmI6xdw=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.92.0 h1:sqs1y0Exyxons2mWMAmBSdcdl2UizUgOmoibEBRX/4I=
-github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.92.0/go.mod h1:me0dUlXvkVpDA6bN2z+qAggsXqOBEcm/dFFPw2mp7n8=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/golden v0.93.0 h1:sQ2+pQ1vkZil4CpsjdzSwetleNKMgLoO1uAXwwbbZSY=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.93.0 h1:R0GGB09OWAP1bSVps2brDOOln8pgSgzHU658bdzIb+g=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.93.0/go.mod h1:7SXQW+a9kZ1T1WH9tKwFqfGGefGv8mZxRG/lTsa65uo=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.93.0 h1:2AKT1xw2KNenv/nfRoWueYxQiLJe76Axhb5++4jdgiA=
+github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatautil v0.93.0/go.mod h1:VmP4/AOAPwtpAG4TYHtWha603iLbLRmO7k0d0WbRqrM=
 github.com/patrickmn/go-cache v2.1.0+incompatible h1:HRMgzkcYKYpi3C8ajMPV8OFXaaRUnok+kx1WdO15EQc=
 github.com/patrickmn/go-cache v2.1.0+incompatible/go.mod h1:3Qf8kWWT7OJRJbdiICTKqZju1ZixQ/KpMGzzAfe6+WQ=
 github.com/philhofer/fwd v1.1.2 h1:bnDivRJ1EWPjUIRXV5KfORO897HTbpFAQddBdE8t7Gw=
