@@ -77,6 +77,38 @@ func TestDeltaHistogramTranslatorOptions(t *testing.T) {
 			},
 		},
 		{
+			name:     "empty-delta-no-min-max",
+			otlpfile: "testdata/otlpdata/histogram/empty-delta-no-min-max.json",
+			ddogfile: "testdata/datadogdata/histogram/empty-delta-no-min-max.json",
+			options: []TranslatorOption{
+				WithHistogramMode(HistogramModeDistributions),
+			},
+		},
+		{
+			name:     "empty-delta-with-min-max",
+			otlpfile: "testdata/otlpdata/histogram/empty-delta-with-min-max.json",
+			ddogfile: "testdata/datadogdata/histogram/empty-delta-with-min-max.json",
+			options: []TranslatorOption{
+				WithHistogramMode(HistogramModeDistributions),
+			},
+		},
+		{
+			name:     "single-bucket-delta-no-min-max",
+			otlpfile: "testdata/otlpdata/histogram/single-bucket-delta-no-min-max.json",
+			ddogfile: "testdata/datadogdata/histogram/single-bucket-delta-no-min-max.json",
+			options: []TranslatorOption{
+				WithHistogramMode(HistogramModeDistributions),
+			},
+		},
+		{
+			name:     "single-bucket-delta-with-min-max",
+			otlpfile: "testdata/otlpdata/histogram/single-bucket-delta-with-min-max.json",
+			ddogfile: "testdata/datadogdata/histogram/single-bucket-delta-with-min-max.json",
+			options: []TranslatorOption{
+				WithHistogramMode(HistogramModeDistributions),
+			},
+		},
+		{
 			name: "no-count-sum-no-buckets",
 			options: []TranslatorOption{
 				WithHistogramMode(HistogramModeNoBuckets),
