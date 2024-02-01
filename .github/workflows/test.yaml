@@ -23,7 +23,7 @@ jobs:
           go-version: 1.20.7
       - name: Cache Go
         id: go-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/go/bin
@@ -51,14 +51,14 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Cache Go
         id: go-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/go/bin
             ~/go/pkg/mod
           key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
       - name: Cache Build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/go-build
           key: unittest-${{ runner.os }}-go-build-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
@@ -77,14 +77,14 @@ jobs:
           go-version: ~1.20.7
       - name: Cache Go
         id: go-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/go/bin
             ~/go/pkg/mod
           key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
       - name: Cache Build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/go-build
           key: lint-${{ runner.os }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
@@ -116,7 +116,7 @@ jobs:
 
       - name: Cache Go
         id: go-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/go/bin
