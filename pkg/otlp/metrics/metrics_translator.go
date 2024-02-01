@@ -245,15 +245,15 @@ func (t *Translator) mapNumberMonotonicMetrics(
 	}
 }
 
-func getBounds(p pmetric.HistogramDataPoint, idx int) (lowerBound float64, upperBound float64) {
+func getBounds(explicitBounds pcommon.Float64Slice, idx int) (lowerBound float64, upperBound float64) {
 	// See https://github.com/open-telemetry/opentelemetry-proto/blob/v0.10.0/opentelemetry/proto/metrics/v1/metrics.proto#L427-L439
 	lowerBound = math.Inf(-1)
 	upperBound = math.Inf(1)
 	if idx > 0 {
-		lowerBound = p.ExplicitBounds().At(idx - 1)
+		lowerBound = explicitBounds.At(idx - 1)
 	}
-	if idx < p.ExplicitBounds().Len() {
-		upperBound = p.ExplicitBounds().At(idx)
+	if idx < explicitBounds.Len() {
+		upperBound = explicitBounds.At(idx)
 	}
 	return
 }
@@ -288,6 +288,31 @@ func (t *Translator) getSketchBuckets(
 	ts := uint64(p.Timestamp())
 	as := &quantile.Agent{}
 
+	bucketCounts := p.BucketCounts()
+	explicitBounds := p.ExplicitBounds()
+	// From the spec (https://github.com/open-telemetry/opentelemetry-specification/blob/v1.29.0/specification/metrics/data-model.md#histogram):
+	// > A Histogram without buckets conveys a population in terms of only the sum and count,
+	// > and may be interpreted as a histogram with single bucket covering (-Inf, +Inf).
+	if bucketCounts.Len() == 0 && histInfo.ok {
+		bucketCounts = pcommon.NewUInt64Slice()
+		explicitBounds = pcommon.NewFloat64Slice()
+
+		if histInfo.hasMinFromLastTimeWindow {
+			// Add an empty bucket from -inf to min.
+			bucketCounts.Append(0)
+			explicitBounds.Append(p.Min())
+		}
+
+		// Add a single bucket with the total histogram count to the sketch.
+		bucketCounts.Append(histInfo.count)
+
+		if histInfo.hasMaxFromLastTimeWindow {
+			// Add an empty bucket from max to +inf.
+			bucketCounts.Append(0)
+			explicitBounds.Append(p.Max())
+		}
+	}
+
 	// After the loop,
 	// - minBound contains the lower bound of the lowest nonzero bucket,
 	// - maxBound contains the upper bound of the highest nonzero bucket
@@ -295,8 +320,8 @@ func (t *Translator) getSketchBuckets(
 	//   there was at least a nonzero bucket.
 	var minBound, maxBound float64
 	var minBoundSet bool
-	for j := 0; j < p.BucketCounts().Len(); j++ {
-		lowerBound, upperBound := getBounds(p, j)
+	for j := 0; j < bucketCounts.Len(); j++ {
+		lowerBound, upperBound := getBounds(explicitBounds, j)
 		originalLowerBound, originalUpperBound := lowerBound, upperBound
 
 		// Compute temporary bucketTags to have unique keys in the t.prevPts cache for each bucket
@@ -316,7 +341,7 @@ func (t *Translator) getSketchBuckets(
 			lowerBound = upperBound
 		}
 
-		count := p.BucketCounts().At(j)
+		count := bucketCounts.At(j)
 		var nonZeroBucket bool
 		if delta {
 			nonZeroBucket = count > 0
@@ -388,7 +413,7 @@ func (t *Translator) getLegacyBuckets(
 	// https://github.com/DataDog/integrations-core/blob/7.30.1/datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/transformers/histogram.py
 	baseBucketDims := pointDims.WithSuffix("bucket")
 	for idx := 0; idx < p.BucketCounts().Len(); idx++ {
-		lowerBound, upperBound := getBounds(p, idx)
+		lowerBound, upperBound := getBounds(p.ExplicitBounds(), idx)
 		bucketDims := baseBucketDims.AddTags(
 			fmt.Sprintf("lower_bound:%s", formatFloat(lowerBound)),
 			fmt.Sprintf("upper_bound:%s", formatFloat(upperBound)),
