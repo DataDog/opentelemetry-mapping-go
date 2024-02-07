@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.13.3
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics`: Adds support for stable JVM metrics introduced in opentelemetry-java-instrumentation v2.0.0. (#265)
+
 ## v0.13.2
 
 ### 🧰 Bug fixes 🧰
