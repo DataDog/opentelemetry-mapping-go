@@ -5,6 +5,7 @@ var runtimeMetricPrefixLanguageMap = map[string]string{
 	"process.runtime.go":     "go",
 	"process.runtime.dotnet": "dotnet",
 	"process.runtime.jvm":    "jvm",
+	"jvm":                    "jvm",
 }
 
 // runtimeMetricMapping defines the fields needed to map OTel runtime metrics to their equivalent
@@ -85,6 +86,140 @@ var dotnetRuntimeMetricsMappings = runtimeMetricMappingList{
 		attributes: []runtimeMetricAttribute{{
 			key:    "generation",
 			values: []string{"gen2"},
+		}},
+	}},
+}
+
+var stableJavaRuntimeMetricsMappings = runtimeMetricMappingList{
+	"jvm.thread.count":           {{mappedName: "jvm.thread_count"}},
+	"jvm.class.count":            {{mappedName: "jvm.loaded_classes"}},
+	"jvm.system.cpu.utilization": {{mappedName: "jvm.cpu_load.system"}},
+	"jvm.cpu.recent_utilization": {{mappedName: "jvm.cpu_load.process"}},
+	"jvm.memory.used": {{
+		mappedName: "jvm.heap_memory",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.memory.type",
+			values: []string{"heap"},
+		}},
+	}, {
+		mappedName: "jvm.non_heap_memory",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.memory.type",
+			values: []string{"non_heap"},
+		}},
+	}, {
+		mappedName: "jvm.gc.old_gen_size",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.memory.pool.name",
+			values: []string{"G1 Old Gen", "Tenured Gen", "PS Old Gen"},
+		}, {
+			key:    "jvm.memory.type",
+			values: []string{"heap"},
+		}},
+	}, {
+		mappedName: "jvm.gc.eden_size",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.memory.pool.name",
+			values: []string{"G1 Eden Space", "Eden Space", "Par Eden Space", "PS Eden Space"},
+		}, {
+			key:    "jvm.memory.type",
+			values: []string{"heap"},
+		}},
+	}, {
+		mappedName: "jvm.gc.survivor_size",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.memory.pool.name",
+			values: []string{"G1 Survivor Space", "Survivor Space", "Par Survivor Space", "PS Survivor Space"},
+		}, {
+			key:    "jvm.memory.type",
+			values: []string{"heap"},
+		}},
+	}, {
+		mappedName: "jvm.gc.metaspace_size",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.memory.pool.name",
+			values: []string{"Metaspace"},
+		}, {
+			key:    "jvm.memory.type",
+			values: []string{"non_heap"},
+		}},
+	}},
+	"jvm.memory.committed": {{
+		mappedName: "jvm.heap_memory_committed",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.memory.type",
+			values: []string{"heap"},
+		}},
+	}, {
+		mappedName: "jvm.non_heap_memory_committed",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.memory.type",
+			values: []string{"non_heap"},
+		}},
+	}},
+	"jvm.memory.init": {{
+		mappedName: "jvm.heap_memory_init",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.memory.type",
+			values: []string{"heap"},
+		}},
+	}, {
+		mappedName: "jvm.non_heap_memory_init",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.memory.type",
+			values: []string{"non_heap"},
+		}},
+	}},
+	"jvm.memory.limit": {{
+		mappedName: "jvm.heap_memory_max",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.memory.type",
+			values: []string{"heap"},
+		}},
+	}, {
+		mappedName: "jvm.non_heap_memory_max",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.memory.type",
+			values: []string{"non_heap"},
+		}},
+	}},
+	"jvm.buffer.memory.usage": {{
+		mappedName: "jvm.buffer_pool.direct.used",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.buffer.pool.name",
+			values: []string{"direct"},
+		}},
+	}, {
+		mappedName: "jvm.buffer_pool.mapped.used",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.buffer.pool.name",
+			values: []string{"mapped"},
+		}},
+	}},
+	"jvm.buffer.count": {{
+		mappedName: "jvm.buffer_pool.direct.count",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.buffer.pool.name",
+			values: []string{"direct"},
+		}},
+	}, {
+		mappedName: "jvm.buffer_pool.mapped.count",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.buffer.pool.name",
+			values: []string{"mapped"},
+		}},
+	}},
+	"jvm.buffer.memory.limit": {{
+		mappedName: "jvm.buffer_pool.direct.limit",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.buffer.pool.name",
+			values: []string{"direct"},
+		}},
+	}, {
+		mappedName: "jvm.buffer_pool.mapped.limit",
+		attributes: []runtimeMetricAttribute{{
+			key:    "jvm.buffer.pool.name",
+			values: []string{"mapped"},
 		}},
 	}},
 }
@@ -232,6 +367,9 @@ func getRuntimeMetricsMappings() runtimeMetricMappingList {
 		res[k] = v
 	}
 	for k, v := range javaRuntimeMetricsMappings {
+		res[k] = v
+	}
+	for k, v := range stableJavaRuntimeMetricsMappings {
 		res[k] = v
 	}
 	return res
