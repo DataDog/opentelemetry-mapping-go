@@ -31,26 +31,21 @@ pkg/quantile,google.golang.org/protobuf/reflect/protoreflect,BSD-3-Clause,Copyri
 pkg/quantile,google.golang.org/protobuf/reflect/protoregistry,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/runtime/protoiface,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/runtime/protoimpl,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
-pkg/otlp/attributes,contrib.go.opencensus.io/exporter/prometheus,Apache-2.0,"Copyright 2017, OpenCensus Authors"
 pkg/otlp/attributes,github.com/beorn7/perks/quantile,MIT,Copyright (C) 2013 Blake Mizerany
 pkg/otlp/attributes,github.com/cespare/xxhash/v2,MIT,Copyright (c) 2016 Caleb Spare
-pkg/otlp/attributes,github.com/go-kit/log,MIT,Copyright (c) 2021 Go kit
-pkg/otlp/attributes,github.com/go-kit/log/level,MIT,Copyright (c) 2021 Go kit
-pkg/otlp/attributes,github.com/go-logfmt/logfmt,MIT,Copyright (c) 2015 go-logfmt
 pkg/otlp/attributes,github.com/go-logr/logr,Apache-2.0,Copyright 2019 The logr Authors.
 pkg/otlp/attributes,github.com/go-logr/logr/funcr,Apache-2.0,Copyright 2019 The logr Authors.
 pkg/otlp/attributes,github.com/go-logr/stdr,Apache-2.0,Copyright 2019 The logr Authors.
+pkg/otlp/attributes,github.com/go-viper/mapstructure/v2,MIT,Copyright (c) 2013 Mitchell Hashimoto
 pkg/otlp/attributes,github.com/gogo/protobuf/gogoproto,BSD-3-Clause,"Copyright (c) 2013, The GoGo Authors. All rights reserved | Copyright 2010 The Go Authors.  All rights reserved | Sendgrid, Inc | Vastech SA (PTY) LTD | Walter Schulze <awalterschulze@gmail.com> | Anton Povarov <anton.povarov@gmail.com> | Brian Goff <cpuguy83@gmail.com> | Clayton Coleman <ccoleman@redhat.com> | Denis Smirnov <denis.smirnov.91@gmail.com> | DongYun Kang <ceram1000@gmail.com> | Dwayne Schultz <dschultz@pivotal.io> | Georg Apitz <gapitz@pivotal.io> | Gustav Paul <gustav.paul@gmail.com> | Johan Brandhorst <johan.brandhorst@gmail.com> | John Shahid <jvshahid@gmail.com> | John Tuley <john@tuley.org> | Laurent <laurent@adyoulike.com> | Patrick Lee <patrick@dropbox.com> | Peter Edge <peter.edge@gmail.com> | Roger Johansson <rogeralsing@gmail.com> | Sam Nguyen <sam.nguyen@sendgrid.com> | Sergio Arbeo <serabe@gmail.com> | Stephen J Day <stephen.day@docker.com> | Tamir Duberstein <tamird@gmail.com> | Todd Eisenberger <teisenberger@dropbox.com> | Tormod Erevik Lea <tormodlea@gmail.com> | Vyacheslav Kim <kane@sendgrid.com> | Walter Schulze <awalterschulze@gmail.com>"
 pkg/otlp/attributes,github.com/gogo/protobuf/proto,BSD-3-Clause,"Copyright (c) 2013, The GoGo Authors. All rights reserved | Copyright 2010 The Go Authors.  All rights reserved | Sendgrid, Inc | Vastech SA (PTY) LTD | Walter Schulze <awalterschulze@gmail.com> | Anton Povarov <anton.povarov@gmail.com> | Brian Goff <cpuguy83@gmail.com> | Clayton Coleman <ccoleman@redhat.com> | Denis Smirnov <denis.smirnov.91@gmail.com> | DongYun Kang <ceram1000@gmail.com> | Dwayne Schultz <dschultz@pivotal.io> | Georg Apitz <gapitz@pivotal.io> | Gustav Paul <gustav.paul@gmail.com> | Johan Brandhorst <johan.brandhorst@gmail.com> | John Shahid <jvshahid@gmail.com> | John Tuley <john@tuley.org> | Laurent <laurent@adyoulike.com> | Patrick Lee <patrick@dropbox.com> | Peter Edge <peter.edge@gmail.com> | Roger Johansson <rogeralsing@gmail.com> | Sam Nguyen <sam.nguyen@sendgrid.com> | Sergio Arbeo <serabe@gmail.com> | Stephen J Day <stephen.day@docker.com> | Tamir Duberstein <tamird@gmail.com> | Todd Eisenberger <teisenberger@dropbox.com> | Tormod Erevik Lea <tormodlea@gmail.com> | Vyacheslav Kim <kane@sendgrid.com> | Walter Schulze <awalterschulze@gmail.com>"
 pkg/otlp/attributes,github.com/gogo/protobuf/protoc-gen-gogo/descriptor,BSD-3-Clause,"Copyright (c) 2013, The GoGo Authors. All rights reserved | Copyright 2010 The Go Authors.  All rights reserved | Sendgrid, Inc | Vastech SA (PTY) LTD | Walter Schulze <awalterschulze@gmail.com> | Anton Povarov <anton.povarov@gmail.com> | Brian Goff <cpuguy83@gmail.com> | Clayton Coleman <ccoleman@redhat.com> | Denis Smirnov <denis.smirnov.91@gmail.com> | DongYun Kang <ceram1000@gmail.com> | Dwayne Schultz <dschultz@pivotal.io> | Georg Apitz <gapitz@pivotal.io> | Gustav Paul <gustav.paul@gmail.com> | Johan Brandhorst <johan.brandhorst@gmail.com> | John Shahid <jvshahid@gmail.com> | John Tuley <john@tuley.org> | Laurent <laurent@adyoulike.com> | Patrick Lee <patrick@dropbox.com> | Peter Edge <peter.edge@gmail.com> | Roger Johansson <rogeralsing@gmail.com> | Sam Nguyen <sam.nguyen@sendgrid.com> | Sergio Arbeo <serabe@gmail.com> | Stephen J Day <stephen.day@docker.com> | Tamir Duberstein <tamird@gmail.com> | Todd Eisenberger <teisenberger@dropbox.com> | Tormod Erevik Lea <tormodlea@gmail.com> | Vyacheslav Kim <kane@sendgrid.com> | Walter Schulze <awalterschulze@gmail.com>"
-pkg/otlp/attributes,github.com/golang/groupcache/lru,Apache-2.0,Copyright 2012 Google Inc.
 pkg/otlp/attributes,github.com/golang/protobuf/jsonpb,BSD-3-Clause,Copyright 2010 The Go Authors.  All rights reserved
 pkg/otlp/attributes,github.com/golang/protobuf/proto,BSD-3-Clause,Copyright 2010 The Go Authors.  All rights reserved
 pkg/otlp/attributes,github.com/golang/protobuf/ptypes,BSD-3-Clause,Copyright 2010 The Go Authors.  All rights reserved
 pkg/otlp/attributes,github.com/golang/protobuf/ptypes/any,BSD-3-Clause,Copyright 2010 The Go Authors.  All rights reserved
 pkg/otlp/attributes,github.com/golang/protobuf/ptypes/duration,BSD-3-Clause,Copyright 2010 The Go Authors.  All rights reserved
 pkg/otlp/attributes,github.com/golang/protobuf/ptypes/timestamp,BSD-3-Clause,Copyright 2010 The Go Authors.  All rights reserved
-pkg/otlp/attributes,github.com/hashicorp/go-version,MPL-2.0,"copyright doctrines of fair use, fair dealing, or other equivalents"
 pkg/otlp/attributes,github.com/knadh/koanf/maps,MIT,"Copyright (c) 2019, Kailash Nadh. https://github.com/knadh"
 pkg/otlp/attributes,github.com/knadh/koanf/providers/confmap,MIT,"Copyright (c) 2019, Kailash Nadh. https://github.com/knadh"
 pkg/otlp/attributes,github.com/knadh/koanf/v2,MIT,"Copyright (c) 2019, Kailash Nadh. https://github.com/knadh"
@@ -67,28 +62,10 @@ pkg/otlp/attributes,github.com/prometheus/common/model,Apache-2.0,Copyright 2015
 pkg/otlp/attributes,github.com/prometheus/procfs,Apache-2.0,Copyright 2014-2015 The Prometheus Authors
 pkg/otlp/attributes,github.com/prometheus/procfs/internal/fs,Apache-2.0,Copyright 2014-2015 The Prometheus Authors
 pkg/otlp/attributes,github.com/prometheus/procfs/internal/util,Apache-2.0,Copyright 2014-2015 The Prometheus Authors
-pkg/otlp/attributes,github.com/prometheus/statsd_exporter/pkg/level,Apache-2.0,Copyright 2013-2015 The Prometheus Authors
-pkg/otlp/attributes,github.com/prometheus/statsd_exporter/pkg/mapper,Apache-2.0,Copyright 2013-2015 The Prometheus Authors
-pkg/otlp/attributes,github.com/prometheus/statsd_exporter/pkg/mapper/fsm,Apache-2.0,Copyright 2013-2015 The Prometheus Authors
-pkg/otlp/attributes,go.opencensus.io,Apache-2.0,Google Inc.
-pkg/otlp/attributes,go.opencensus.io/internal,Apache-2.0,Google Inc.
-pkg/otlp/attributes,go.opencensus.io/internal/tagencoding,Apache-2.0,Google Inc.
-pkg/otlp/attributes,go.opencensus.io/metric/metricdata,Apache-2.0,Google Inc.
-pkg/otlp/attributes,go.opencensus.io/metric/metricexport,Apache-2.0,Google Inc.
-pkg/otlp/attributes,go.opencensus.io/metric/metricproducer,Apache-2.0,Google Inc.
-pkg/otlp/attributes,go.opencensus.io/resource,Apache-2.0,Google Inc.
-pkg/otlp/attributes,go.opencensus.io/stats,Apache-2.0,Google Inc.
-pkg/otlp/attributes,go.opencensus.io/stats/internal,Apache-2.0,Google Inc.
-pkg/otlp/attributes,go.opencensus.io/stats/view,Apache-2.0,Google Inc.
-pkg/otlp/attributes,go.opencensus.io/tag,Apache-2.0,Google Inc.
-pkg/otlp/attributes,go.opencensus.io/trace,Apache-2.0,Google Inc.
-pkg/otlp/attributes,go.opencensus.io/trace/internal,Apache-2.0,Google Inc.
-pkg/otlp/attributes,go.opencensus.io/trace/tracestate,Apache-2.0,Google Inc.
 pkg/otlp/attributes,go.opentelemetry.io/collector/component,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/collector/config/configtelemetry,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/collector/confmap,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/collector/confmap/internal/mapstructure,Apache-2.0,Copyright The OpenTelemetry Authors
-pkg/otlp/attributes,go.opentelemetry.io/collector/featuregate,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal/data,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal/data/protogen/collector/logs/v1,Apache-2.0,Copyright The OpenTelemetry Authors
@@ -121,6 +98,7 @@ pkg/otlp/attributes,go.opentelemetry.io/otel/sdk/internal/env,Apache-2.0,Copyrig
 pkg/otlp/attributes,go.opentelemetry.io/otel/sdk/metric,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/otel/sdk/metric/internal,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/otel/sdk/metric/internal/aggregate,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/otlp/attributes,go.opentelemetry.io/otel/sdk/metric/internal/exemplar,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/otel/sdk/metric/internal/x,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/otel/sdk/metric/metricdata,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/otel/sdk/resource,Apache-2.0,Copyright The OpenTelemetry Authors
@@ -238,7 +216,6 @@ pkg/otlp/attributes,google.golang.org/protobuf/types/descriptorpb,BSD-3-Clause,C
 pkg/otlp/attributes,google.golang.org/protobuf/types/known/anypb,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/otlp/attributes,google.golang.org/protobuf/types/known/durationpb,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/otlp/attributes,google.golang.org/protobuf/types/known/timestamppb,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
-pkg/otlp/attributes,gopkg.in/yaml.v2,Apache-2.0,Copyright 2011-2016 Canonical Ltd
 pkg/otlp/metrics,github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace,Apache-2.0,"Copyright 2016-present Datadog, Inc"
 pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
 pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/azure,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
@@ -459,6 +436,7 @@ pkg/inframetadata,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attribute
 pkg/inframetadata,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/gcp,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
 pkg/inframetadata,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
 pkg/inframetadata,github.com/davecgh/go-spew/spew,ISC,Copyright (c) 2012-2016 Dave Collins <dave@davec.name>
+pkg/inframetadata,github.com/go-viper/mapstructure/v2,MIT,Copyright (c) 2013 Mitchell Hashimoto
 pkg/inframetadata,github.com/gogo/protobuf/gogoproto,BSD-3-Clause,"Copyright (c) 2013, The GoGo Authors. All rights reserved | Copyright 2010 The Go Authors.  All rights reserved | Sendgrid, Inc | Vastech SA (PTY) LTD | Walter Schulze <awalterschulze@gmail.com> | Anton Povarov <anton.povarov@gmail.com> | Brian Goff <cpuguy83@gmail.com> | Clayton Coleman <ccoleman@redhat.com> | Denis Smirnov <denis.smirnov.91@gmail.com> | DongYun Kang <ceram1000@gmail.com> | Dwayne Schultz <dschultz@pivotal.io> | Georg Apitz <gapitz@pivotal.io> | Gustav Paul <gustav.paul@gmail.com> | Johan Brandhorst <johan.brandhorst@gmail.com> | John Shahid <jvshahid@gmail.com> | John Tuley <john@tuley.org> | Laurent <laurent@adyoulike.com> | Patrick Lee <patrick@dropbox.com> | Peter Edge <peter.edge@gmail.com> | Roger Johansson <rogeralsing@gmail.com> | Sam Nguyen <sam.nguyen@sendgrid.com> | Sergio Arbeo <serabe@gmail.com> | Stephen J Day <stephen.day@docker.com> | Tamir Duberstein <tamird@gmail.com> | Todd Eisenberger <teisenberger@dropbox.com> | Tormod Erevik Lea <tormodlea@gmail.com> | Vyacheslav Kim <kane@sendgrid.com> | Walter Schulze <awalterschulze@gmail.com>"
 pkg/inframetadata,github.com/gogo/protobuf/jsonpb,BSD-3-Clause,"Copyright (c) 2013, The GoGo Authors. All rights reserved | Copyright 2010 The Go Authors.  All rights reserved | Sendgrid, Inc | Vastech SA (PTY) LTD | Walter Schulze <awalterschulze@gmail.com> | Anton Povarov <anton.povarov@gmail.com> | Brian Goff <cpuguy83@gmail.com> | Clayton Coleman <ccoleman@redhat.com> | Denis Smirnov <denis.smirnov.91@gmail.com> | DongYun Kang <ceram1000@gmail.com> | Dwayne Schultz <dschultz@pivotal.io> | Georg Apitz <gapitz@pivotal.io> | Gustav Paul <gustav.paul@gmail.com> | Johan Brandhorst <johan.brandhorst@gmail.com> | John Shahid <jvshahid@gmail.com> | John Tuley <john@tuley.org> | Laurent <laurent@adyoulike.com> | Patrick Lee <patrick@dropbox.com> | Peter Edge <peter.edge@gmail.com> | Roger Johansson <rogeralsing@gmail.com> | Sam Nguyen <sam.nguyen@sendgrid.com> | Sergio Arbeo <serabe@gmail.com> | Stephen J Day <stephen.day@docker.com> | Tamir Duberstein <tamird@gmail.com> | Todd Eisenberger <teisenberger@dropbox.com> | Tormod Erevik Lea <tormodlea@gmail.com> | Vyacheslav Kim <kane@sendgrid.com> | Walter Schulze <awalterschulze@gmail.com>"
 pkg/inframetadata,github.com/gogo/protobuf/proto,BSD-3-Clause,"Copyright (c) 2013, The GoGo Authors. All rights reserved | Copyright 2010 The Go Authors.  All rights reserved | Sendgrid, Inc | Vastech SA (PTY) LTD | Walter Schulze <awalterschulze@gmail.com> | Anton Povarov <anton.povarov@gmail.com> | Brian Goff <cpuguy83@gmail.com> | Clayton Coleman <ccoleman@redhat.com> | Denis Smirnov <denis.smirnov.91@gmail.com> | DongYun Kang <ceram1000@gmail.com> | Dwayne Schultz <dschultz@pivotal.io> | Georg Apitz <gapitz@pivotal.io> | Gustav Paul <gustav.paul@gmail.com> | Johan Brandhorst <johan.brandhorst@gmail.com> | John Shahid <jvshahid@gmail.com> | John Tuley <john@tuley.org> | Laurent <laurent@adyoulike.com> | Patrick Lee <patrick@dropbox.com> | Peter Edge <peter.edge@gmail.com> | Roger Johansson <rogeralsing@gmail.com> | Sam Nguyen <sam.nguyen@sendgrid.com> | Sergio Arbeo <serabe@gmail.com> | Stephen J Day <stephen.day@docker.com> | Tamir Duberstein <tamird@gmail.com> | Todd Eisenberger <teisenberger@dropbox.com> | Tormod Erevik Lea <tormodlea@gmail.com> | Vyacheslav Kim <kane@sendgrid.com> | Walter Schulze <awalterschulze@gmail.com>"
@@ -471,7 +449,6 @@ pkg/inframetadata,github.com/golang/protobuf/ptypes,BSD-3-Clause,Copyright 2010 
 pkg/inframetadata,github.com/golang/protobuf/ptypes/any,BSD-3-Clause,Copyright 2010 The Go Authors.  All rights reserved
 pkg/inframetadata,github.com/golang/protobuf/ptypes/duration,BSD-3-Clause,Copyright 2010 The Go Authors.  All rights reserved
 pkg/inframetadata,github.com/golang/protobuf/ptypes/timestamp,BSD-3-Clause,Copyright 2010 The Go Authors.  All rights reserved
-pkg/inframetadata,github.com/hashicorp/go-version,MPL-2.0,"copyright doctrines of fair use, fair dealing, or other equivalents"
 pkg/inframetadata,github.com/json-iterator/go,MIT,Copyright (c) 2016 json-iterator
 pkg/inframetadata,github.com/knadh/koanf/maps,MIT,"Copyright (c) 2019, Kailash Nadh. https://github.com/knadh"
 pkg/inframetadata,github.com/knadh/koanf/providers/confmap,MIT,"Copyright (c) 2019, Kailash Nadh. https://github.com/knadh"
@@ -488,7 +465,6 @@ pkg/inframetadata,go.opentelemetry.io/collector/component,Apache-2.0,Copyright T
 pkg/inframetadata,go.opentelemetry.io/collector/config/configtelemetry,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/inframetadata,go.opentelemetry.io/collector/confmap,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/inframetadata,go.opentelemetry.io/collector/confmap/internal/mapstructure,Apache-2.0,Copyright The OpenTelemetry Authors
-pkg/inframetadata,go.opentelemetry.io/collector/featuregate,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/inframetadata,go.opentelemetry.io/collector/pdata/internal,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/inframetadata,go.opentelemetry.io/collector/pdata/internal/data,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/inframetadata,go.opentelemetry.io/collector/pdata/internal/data/protogen/collector/logs/v1,Apache-2.0,Copyright The OpenTelemetry Authors
