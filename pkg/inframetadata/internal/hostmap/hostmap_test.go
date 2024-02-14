@@ -264,7 +264,7 @@ func TestUpdate(t *testing.T) {
 			EC2Hostname: "host-1-hostname",
 			Hostname:    "host-1-hostid",
 		})
-		assert.ElementsMatch(t, md.Tags.OTel, []string{"foo:baz", "env:prod"})
+		assert.ElementsMatch(t, md.Tags.OTel, []string{"cloud_provider:aws", "foo:baz", "env:prod"})
 		assert.Equal(t, md.Payload.Gohai.Gohai.Platform, map[string]string{
 			"hostname":                    "host-1-hostid",
 			fieldPlatformOS:               "Fedora Linux",
@@ -303,7 +303,7 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, md.Meta, &payload.Meta{
 			Hostname: "host-2-hostid",
 		})
-		assert.Equal(t, md.Tags, &payload.HostTags{})
+		assert.ElementsMatch(t, md.Tags.OTel, []string{"cloud_provider:azure"})
 		assert.Equal(t, md.Platform(), map[string]string{
 			"hostname":                    "host-2-hostid",
 			fieldPlatformProcessor:        "arm64",

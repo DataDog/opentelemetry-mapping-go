@@ -20,6 +20,9 @@ const hostTagPrefix = "datadog.host.tag."
 var hostTagMapping = map[string]string{
 	conventions.AttributeDeploymentEnvironment: "env",
 	conventions.AttributeK8SClusterName:        "cluster_name",
+	conventions.AttributeCloudProvider:         "cloud_provider",
+	conventions.AttributeCloudRegion:           "region",
+	conventions.AttributeCloudAvailabilityZone: "zone",
 }
 
 // assertStringValue returns the string value of the given value, or an error if the value is not a string.
