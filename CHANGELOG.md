@@ -4,6 +4,14 @@
 
 <!-- next version -->
 
+## v0.13.4
+
+### 💡 Enhancements 💡
+
+- `inframetadata`: Automatically map `cloud.region`, `cloud.availability_zone` and `cloud.provider` to the `region`, `zone` and `cloud_provider` host tags. (#276)
+  - This will only happen if you have opted-in to mapping resource attributes to host metadata.
+  
+
 ## v0.13.3
 
 ### 💡 Enhancements 💡
