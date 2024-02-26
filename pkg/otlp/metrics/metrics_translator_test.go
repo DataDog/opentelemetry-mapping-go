@@ -1830,20 +1830,6 @@ func TestMapDoubleMonotonicNotReportFirstValueIfStartTSMatchTS(t *testing.T) {
 	assert.Empty(t, consumer.metrics)
 }
 
-func TestMapAPMStats(t *testing.T) {
-	consumer := &mockFullConsumer{}
-	logger, err := zap.NewDevelopment()
-	require.NoError(t, err)
-	tr := newTranslator(t, logger)
-	md := tr.StatsPayloadToMetrics(&pb.StatsPayload{
-		Stats: []*pb.ClientStatsPayload{statsPayloads[0], statsPayloads[1]},
-	})
-
-	ctx := context.Background()
-	tr.MapMetrics(ctx, md, consumer)
-	require.Equal(t, consumer.apmstats, statsPayloads)
-}
-
 func TestMapAPMStatsWithBytes(t *testing.T) {
 	consumer := &mockFullConsumer{}
 	logger, err := zap.NewDevelopment()
