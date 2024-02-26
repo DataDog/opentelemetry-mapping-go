@@ -1,9 +1,5 @@
 module github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics
 
-go 1.21
-
-toolchain go1.21.6
-
 require (
 	github.com/DataDog/datadog-agent/pkg/proto v0.52.0-rc.1
 	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.13.4
