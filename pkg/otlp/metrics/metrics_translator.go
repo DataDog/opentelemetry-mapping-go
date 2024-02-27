@@ -713,15 +713,6 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 	rms := md.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
-		if v, ok := rm.Resource().Attributes().Get(keyAPMStats); ok && v.Bool() {
-			// these resource metrics are an APM Stats payload; consume it as such
-			sp, err := t.statsPayloadFromMetrics(rm)
-			if err != nil {
-				return metadata, fmt.Errorf("error extracting APM Stats from Metrics: %w", err)
-			}
-			consumer.ConsumeAPMStats(sp)
-			continue
-		}
 		src, err := t.source(ctx, rm.Resource())
 		if err != nil {
 			return metadata, err
