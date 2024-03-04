@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.13.4
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/collector/pdata v1.1.0
 	go.opentelemetry.io/collector/semconv v0.94.1
 	go.uber.org/multierr v1.11.0
