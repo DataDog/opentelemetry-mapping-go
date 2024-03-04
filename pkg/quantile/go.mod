@@ -6,7 +6,7 @@ require (
 	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.13.4
 	github.com/DataDog/sketches-go v1.4.4
 	github.com/dustin/go-humanize v1.0.1
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
