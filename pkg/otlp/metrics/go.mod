@@ -49,7 +49,7 @@ require (
 	github.com/tinylib/msgp v1.1.8 // indirect
 	go.opentelemetry.io/collector/config/configtelemetry v0.94.1 // indirect
 	go.opentelemetry.io/collector/confmap v0.94.1 // indirect
-	go.opentelemetry.io/collector/semconv v0.94.1 // indirect
+	go.opentelemetry.io/collector/semconv v0.95.0 // indirect
 	go.opentelemetry.io/otel/exporters/prometheus v0.45.1 // indirect
 	go.opentelemetry.io/otel/metric v1.24.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.24.0 // indirect
