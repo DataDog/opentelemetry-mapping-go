@@ -148,6 +148,8 @@ func TestUpdate(t *testing.T) {
 			hostname: "host-1-hostid",
 			attributes: map[string]any{
 				conventions.AttributeCloudProvider:         conventions.AttributeCloudProviderAWS,
+				conventions.AttributeCloudRegion:           "us-east-1",
+				conventions.AttributeCloudAvailabilityZone: "us-east-1c",
 				conventions.AttributeHostID:                "host-1-hostid",
 				conventions.AttributeHostName:              "host-1-hostname",
 				conventions.AttributeOSDescription:         "Fedora Linux",
@@ -175,6 +177,8 @@ func TestUpdate(t *testing.T) {
 			hostname: "host-1-hostid",
 			attributes: map[string]any{
 				conventions.AttributeCloudProvider:         conventions.AttributeCloudProviderAWS,
+				conventions.AttributeCloudRegion:           "us-east-1",
+				conventions.AttributeCloudAvailabilityZone: "us-east-1c",
 				conventions.AttributeHostID:                "host-1-hostid",
 				conventions.AttributeHostName:              "host-1-hostname",
 				conventions.AttributeOSDescription:         "Fedora Linux",
@@ -189,6 +193,8 @@ func TestUpdate(t *testing.T) {
 			hostname: "host-1-hostid",
 			attributes: map[string]any{
 				conventions.AttributeCloudProvider:         conventions.AttributeCloudProviderAWS,
+				conventions.AttributeCloudRegion:           "us-east-1",
+				conventions.AttributeCloudAvailabilityZone: "us-east-1c",
 				conventions.AttributeHostID:                "host-1-hostid",
 				conventions.AttributeHostName:              "host-1-hostname",
 				conventions.AttributeOSDescription:         true, // wrong type
@@ -207,6 +213,8 @@ func TestUpdate(t *testing.T) {
 			hostname: "host-1-hostid",
 			attributes: map[string]any{
 				conventions.AttributeCloudProvider:         conventions.AttributeCloudProviderAWS,
+				conventions.AttributeCloudRegion:           "us-east-1",
+				conventions.AttributeCloudAvailabilityZone: "us-east-1c",
 				conventions.AttributeHostID:                "host-1-hostid",
 				conventions.AttributeHostName:              "host-1-hostname",
 				conventions.AttributeOSDescription:         true, // wrong type
@@ -264,7 +272,7 @@ func TestUpdate(t *testing.T) {
 			EC2Hostname: "host-1-hostname",
 			Hostname:    "host-1-hostid",
 		})
-		assert.ElementsMatch(t, md.Tags.OTel, []string{"cloud_provider:aws", "foo:baz", "env:prod"})
+		assert.ElementsMatch(t, md.Tags.OTel, []string{"cloud_provider:aws", "region:us-east-1", "zone:us-east-1c", "foo:baz", "env:prod"})
 		assert.Equal(t, md.Payload.Gohai.Gohai.Platform, map[string]string{
 			"hostname":                    "host-1-hostid",
 			fieldPlatformOS:               "Fedora Linux",
