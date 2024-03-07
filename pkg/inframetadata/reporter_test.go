@@ -115,6 +115,7 @@ func TestRun(t *testing.T) {
 	// wait until Reporter has stopped
 	<-ch
 	assert.Equal(t, p.md.Meta.Hostname, "host-1-hostid")
+	assert.Contains(t, p.md.Tags.OTel, "cloud_provider:aws")
 	logs := observed.AllUntimed()
 	assert.Len(t, logs, 1)
 	assert.Equal(t, logs[0].Message, "Failed to send host metadata")
