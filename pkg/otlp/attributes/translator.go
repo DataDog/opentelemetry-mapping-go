@@ -17,11 +17,13 @@ package attributes
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
+	"go.uber.org/zap"
 
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
 )
@@ -30,6 +32,8 @@ const missingSourceMetricName string = "datadog.otlp_translator.resources.missin
 
 // Translator of attributes.
 type Translator struct {
+	onceWarn       sync.Once
+	logger         *zap.Logger
 	missingSources metric.Int64Counter
 }
 
@@ -47,6 +51,7 @@ func NewTranslator(set component.TelemetrySettings) (*Translator, error) {
 
 	return &Translator{
 		missingSources: missingSources,
+		logger:         set.Logger.With(zap.String("component", "attributes.Translator")),
 	}, nil
 }
 
@@ -55,6 +60,13 @@ func (p *Translator) ResourceToSource(ctx context.Context, res pcommon.Resource,
 	src, ok := SourceFromAttrs(res.Attributes())
 	if !ok {
 		p.missingSources.Add(ctx, 1, metric.WithAttributeSet(set))
+		p.onceWarn.Do(func() {
+			p.logger.Info("At least one of the received OTLP resources is missing a source",
+				zap.Any("resource attributes", res.Attributes()),
+				zap.Any("context", set.ToSlice()),
+				zap.String("further info", "https://docs.datadoghq.com/opentelemetry/schema_semantics/hostname/?tab=datadogexporter"),
+			)
+		})
 	}
 
 	return src, ok
