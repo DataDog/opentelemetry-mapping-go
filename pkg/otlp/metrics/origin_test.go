@@ -18,6 +18,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
 func TestOriginServiceFromScopeName(t *testing.T) {
@@ -51,7 +53,8 @@ func TestOriginServiceFromScopeName(t *testing.T) {
 }
 
 func TestOriginFull(t *testing.T) {
-	translator := NewTestTranslator(t, WithOriginProduct(OriginProduct(42)))
+	translator, err := NewTranslator(zap.NewNop(), WithOriginProduct(OriginProduct(42)))
+	require.NoError(t, err)
 	AssertTranslatorMap(t, translator,
 		"testdata/otlpdata/origin/origin.json",
 		"testdata/datadogdata/origin/origin.json",
