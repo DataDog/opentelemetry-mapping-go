@@ -4,6 +4,18 @@
 
 <!-- next version -->
 
+## v0.8.4
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics`: Set metrics origin category, product and service based on the instrumentation scope. (#203)
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/otlp/metric`: Fixes a bug where empty histograms were not being sent to the backend in the distributions mode. (#252)
+  - Empty histograms are now mapped as if they had a single (min, max) bucket.
+  
+
 ## v0.8.3
 
 ### 💡 Enhancements 💡
