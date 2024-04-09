@@ -5,7 +5,7 @@ component: pkg/otlp/attributes
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
 note: Make container mapping public
 # The PR related to this change
-issues: [314]
+issues: [315]
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
 # Use pipe (|) for multiline entries.
