@@ -4,6 +4,20 @@
 
 <!-- next version -->
 
+## v0.14.0
+
+### 🛑 Breaking changes 🛑
+
+- `pkg/otlp/metrics`: Remove dead code from mapping-go for older statstoOTLP conversion (#282)
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/attributes`: Make container mapping public (#315)
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/inframetadata`: Fixes warning log where resource attributes were not correctly logged (#314)
+
 ## v0.13.4
 
 ### 💡 Enhancements 💡
