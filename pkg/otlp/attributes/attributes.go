@@ -36,9 +36,9 @@ var (
 		conventions.AttributeServiceVersion:        "version",
 	}
 
-	// containerMappings defines the mapping between OpenTelemetry semantic conventions
+	// ContainerMappings defines the mapping between OpenTelemetry semantic conventions
 	// and Datadog Agent conventions for containers.
-	containerMappings = map[string]string{
+	ContainerMappings = map[string]string{
 		// Containers
 		conventions.AttributeContainerID:        "container_id",
 		conventions.AttributeContainerName:      "container_name",
@@ -172,7 +172,7 @@ func ContainerTagsFromResourceAttributes(attrs pcommon.Map) map[string]string {
 	ddtags := make(map[string]string)
 	attrs.Range(func(key string, value pcommon.Value) bool {
 		// Semantic Conventions
-		if datadogKey, found := containerMappings[key]; found && value.Str() != "" {
+		if datadogKey, found := ContainerMappings[key]; found && value.Str() != "" {
 			ddtags[datadogKey] = value.Str()
 		}
 		// Custom (datadog.container.tag namespace)
@@ -196,7 +196,7 @@ func ContainerTagsFromResourceAttributes(attrs pcommon.Map) map[string]string {
 func ContainerTagFromAttributes(attr map[string]string) map[string]string {
 	ddtags := make(map[string]string)
 	for key, val := range attr {
-		datadogKey, found := containerMappings[key]
+		datadogKey, found := ContainerMappings[key]
 		if !found {
 			continue
 		}
