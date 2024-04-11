@@ -51,6 +51,15 @@ func TestDeltaHistogramTranslatorOptions(t *testing.T) {
 			},
 		},
 		{
+			name:     "zero-count-histogram",
+			otlpfile: "testdata/otlpdata/histogram/zero-delta.json",
+			ddogfile: "testdata/datadogdata/histogram/zero-delta_dist-cs.json",
+			options: []TranslatorOption{
+				WithHistogramMode(HistogramModeDistributions),
+				WithHistogramAggregations(),
+			},
+		},
+		{
 			name:     "buckets",
 			otlpfile: "testdata/otlpdata/histogram/simple-delta.json",
 			ddogfile: "testdata/datadogdata/histogram/simple-delta_counters-nocs.json",
@@ -150,6 +159,15 @@ func TestCumulativeHistogramTranslatorOptions(t *testing.T) {
 			ddogfile: "testdata/datadogdata/histogram/simple-cumulative_dist-nocs.json",
 			options: []TranslatorOption{
 				WithHistogramMode(HistogramModeDistributions),
+			},
+		},
+		{
+			name:     "distributions",
+			otlpfile: "testdata/otlpdata/histogram/static-cumulative.json",
+			ddogfile: "testdata/datadogdata/histogram/static-cumulative_dist-cs.json",
+			options: []TranslatorOption{
+				WithHistogramMode(HistogramModeDistributions),
+				WithHistogramAggregations(),
 			},
 		},
 		{
