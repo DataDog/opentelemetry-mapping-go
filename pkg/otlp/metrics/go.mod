@@ -18,7 +18,7 @@ require (
 	go.opentelemetry.io/otel v1.24.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
-	google.golang.org/protobuf v1.32.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
