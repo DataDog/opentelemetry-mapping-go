@@ -4,6 +4,13 @@
 
 <!-- next version -->
 
+## v0.15.0
+
+### 🛑 Breaking changes 🛑
+
+- `pkg/otlp/metrics`: Deprecate the APMStatsConsumer interface and remove it from the Consumer interface. (#320)
+  The only breaking change is users can no longer do consumer.(*Consumer).ConsumeAPMStats(), instead they can do consumer.(*APMStatsConsumer).ConsumeAPMStats(). Everything else is backwards-compatible.
+
 ## v0.14.0
 
 ### 🛑 Breaking changes 🛑
