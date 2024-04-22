@@ -14,7 +14,6 @@ import (
 	"strings"
 	"testing"
 
-	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary"
@@ -130,12 +129,6 @@ var _ Consumer = (*testConsumer)(nil)
 
 type testConsumer struct {
 	testMetrics TestMetrics
-}
-
-func (t *testConsumer) ConsumeAPMStats(_ *pb.ClientStatsPayload) {
-	// not used for this consumer, but do warn the user if they
-	// try to use it
-	panic("(*testConsumer).ConsumeAPMStats not implemented")
 }
 
 func (t *testConsumer) ConsumeTimeSeries(

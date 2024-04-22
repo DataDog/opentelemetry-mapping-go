@@ -1,0 +1,16 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: breaking
+
+# The name of the component (e.g. pkg/quantile)
+component: pkg/otlp/metrics
+
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: Deprecate the APMStatsConsumer interface and remove it from the Consumer interface.
+
+# The PR related to this change
+issues: [320]
+
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext: "The only breaking change is users can no longer do consumer.(*Consumer).ConsumeAPMStats(), instead they can do consumer.(*APMStatsConsumer).ConsumeAPMStats(). Everything else is backwards-compatible."
