@@ -44,13 +44,13 @@ type TestMetrics struct {
 // TestDimensions copies the Dimensions struct with public fields.
 // NOTE: Keep this in sync with the Dimensions struct.
 type TestDimensions struct {
-	Name           string
-	Tags           []string
-	Host           string
-	OriginID       string
-	OriginProduct  OriginProduct
-	OriginCategory OriginCategory
-	OriginService  OriginService
+	Name                string
+	Tags                []string
+	Host                string
+	OriginID            string
+	OriginProduct       OriginProduct
+	OriginSubProduct    OriginSubProduct
+	OriginProductDetail OriginProductDetail
 }
 
 type TestSketch struct {
@@ -141,13 +141,13 @@ func (t *testConsumer) ConsumeTimeSeries(
 	t.testMetrics.TimeSeries = append(t.testMetrics.TimeSeries,
 		TestTimeSeries{
 			TestDimensions: TestDimensions{
-				Name:           dimensions.Name(),
-				Tags:           dimensions.Tags(),
-				Host:           dimensions.Host(),
-				OriginID:       dimensions.OriginID(),
-				OriginProduct:  dimensions.OriginProduct(),
-				OriginCategory: dimensions.OriginCategory(),
-				OriginService:  dimensions.OriginService(),
+				Name:                dimensions.Name(),
+				Tags:                dimensions.Tags(),
+				Host:                dimensions.Host(),
+				OriginID:            dimensions.OriginID(),
+				OriginProduct:       dimensions.OriginProduct(),
+				OriginSubProduct:    dimensions.OriginSubProduct(),
+				OriginProductDetail: dimensions.OriginProductDetail(),
 			},
 			Type:      typ,
 			Timestamp: timestamp,
@@ -165,13 +165,13 @@ func (t *testConsumer) ConsumeSketch(
 	t.testMetrics.Sketches = append(t.testMetrics.Sketches,
 		TestSketch{
 			TestDimensions: TestDimensions{
-				Name:           dimensions.Name(),
-				Tags:           dimensions.Tags(),
-				Host:           dimensions.Host(),
-				OriginID:       dimensions.OriginID(),
-				OriginProduct:  dimensions.OriginProduct(),
-				OriginCategory: dimensions.OriginCategory(),
-				OriginService:  dimensions.OriginService(),
+				Name:                dimensions.Name(),
+				Tags:                dimensions.Tags(),
+				Host:                dimensions.Host(),
+				OriginID:            dimensions.OriginID(),
+				OriginProduct:       dimensions.OriginProduct(),
+				OriginSubProduct:    dimensions.OriginSubProduct(),
+				OriginProductDetail: dimensions.OriginProductDetail(),
 			},
 			Timestamp: timestamp,
 			Summary:   sketch.Basic,

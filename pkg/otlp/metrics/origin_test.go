@@ -20,31 +20,31 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestOriginServiceFromScopeName(t *testing.T) {
+func TestOriginProductDetailFromScopeName(t *testing.T) {
 	tests := []struct {
 		scopeName string
-		expected  OriginService
+		expected  OriginProductDetail
 	}{
 		{
 			scopeName: "otelcol/notsupportedreceiver",
-			expected:  OriginServiceUnknown,
+			expected:  OriginProductDetailUnknown,
 		},
 		{
 			scopeName: "otelcol/kubeletstatsreceiver",
-			expected:  OriginServiceKubeletStatsReceiver,
+			expected:  OriginProductDetailKubeletStatsReceiver,
 		},
 		{
 			scopeName: "otelcol/hostmetricsreceiver/memory",
-			expected:  OriginServiceHostMetricsReceiver,
+			expected:  OriginProductDetailHostMetricsReceiver,
 		},
 		{
 			scopeName: "go.opentelemetry.io/otel/metric/example",
-			expected:  OriginServiceUnknown,
+			expected:  OriginProductDetailUnknown,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.scopeName, func(t *testing.T) {
-			service := originServiceFromScopeName(tt.scopeName)
+			service := originProductDetailFromScopeName(tt.scopeName)
 			assert.Equal(t, tt.expected, service)
 		})
 	}
