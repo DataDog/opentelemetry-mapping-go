@@ -1,3 +1,4 @@
+SHELL = /bin/bash
 TOOLS_MOD_DIR := $(CURDIR)/internal/tools
 GOTEST_OPT?= -race -timeout 600s
 
@@ -53,7 +54,7 @@ test:
 .PHONY: test-junit
 test-junit:
 	mkdir -p $(TOOLS_MOD_DIR)/junit
-	set -e; for mod in $(GOMODULES); do \
+	set -e; set -x; for mod in $(GOMODULES); do \
 		cd $$mod && gotestsum --junitfile $(TOOLS_MOD_DIR)/junit/$$RANDOM.xml -- $(GOTEST_OPT) ./... && cd -; \
 	done
 # Run linters for all modules
