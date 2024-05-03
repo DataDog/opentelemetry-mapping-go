@@ -17,4 +17,5 @@ import (
 	_ "go.opentelemetry.io/build-tools/chloggen"
 	_ "go.opentelemetry.io/build-tools/multimod"
 	_ "golang.org/x/exp/cmd/apidiff"
+	_ "gotest.tools/gotestsum"
 )

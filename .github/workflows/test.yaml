@@ -63,7 +63,12 @@ jobs:
           path: ~/.cache/go-build
           key: unittest-${{ runner.os }}-go-build-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
       - name: Run Unit Tests
-        run: make test
+        run: make test-junit
+      - uses: datadog/junit-upload-github-action@v1
+        with:
+          api-key: ${{ secrets.DD_API_KEY }}
+          service: opentelemetry-mapping-go
+          files: /internal/tools/junit/
 
   lint:
     runs-on: ubuntu-latest
