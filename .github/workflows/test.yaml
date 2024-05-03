@@ -65,12 +65,12 @@ jobs:
       - name: Run Unit Tests
         run: make test-junit
       - name: blah
-        run: tree internal/tools/junit/
+        run: tree ./internal/tools/junit/
       - uses: datadog/junit-upload-github-action@v1
         with:
           api-key: ${{ secrets.DD_API_KEY }}
           service: opentelemetry-mapping-go
-          files: internal/tools/junit/
+          files: ./internal/tools/junit/
 
   lint:
     runs-on: ubuntu-latest
