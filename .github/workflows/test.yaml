@@ -68,7 +68,7 @@ jobs:
         run: tree ./internal/tools/junit/
       - uses: datadog/junit-upload-github-action@v1
         with:
-          api-key: ${{ secrets.DD_API_KEY }}
+          api-key: ${{ secrets.DD_CI_API_KEY }}
           service: opentelemetry-mapping-go
           files: ./internal/tools/junit/
 
