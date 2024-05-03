@@ -68,7 +68,7 @@ jobs:
         with:
           api-key: ${{ secrets.DD_API_KEY }}
           service: opentelemetry-mapping-go
-          files: /internal/tools/junit/
+          files: internal/tools/junit/
 
   lint:
     runs-on: ubuntu-latest
