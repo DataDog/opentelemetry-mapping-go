@@ -4,6 +4,16 @@
 
 <!-- next version -->
 
+## v0.16.0
+
+### 🛑 Breaking changes 🛑
+
+- `pkg/otlp/metrics`: Rename metrics origin fields and methods according to new nomenclature. Add OriginProductDatadogExporter value. (#322)
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/inframetadata`: Initialize gohai fields on first access to avoid nil pointer dereference (#306)
+
 ## v0.15.0
 
 ### 🛑 Breaking changes 🛑
