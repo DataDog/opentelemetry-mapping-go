@@ -1,4 +1,6 @@
-TOOLS_MOD_DIR := ./internal/tools
+SHELL = /bin/bash
+TOOLS_MOD_DIR := $(CURDIR)/internal/tools
+GOTEST_OPT?= -race -timeout 600s
 
 .PHONY: install-tools
 install-tools:
@@ -7,6 +9,7 @@ install-tools:
 	cd $(TOOLS_MOD_DIR) && go install github.com/frapposelli/wwhrd
 	cd $(TOOLS_MOD_DIR) && go install github.com/golangci/golangci-lint/cmd/golangci-lint
 	cd $(TOOLS_MOD_DIR) && go install golang.org/x/exp/cmd/apidiff
+	cd $(TOOLS_MOD_DIR) && go install gotest.tools/gotestsum
 	cd $(TOOLS_MOD_DIR)/generate-license-file && go install .
 
 FILENAME?=$(shell git branch --show-current).yaml
@@ -46,7 +49,16 @@ fmt:
 # Run unit test suite for all modules
 .PHONY: test
 test:
-	@$(MAKE) for-all CMD="go test -race -timeout 600s ./..."
+	@$(MAKE) for-all CMD="gotestsum -- $(GOTEST_OPT) ./..."
+
+.PHONY: test-junit
+test-junit:
+	mkdir -p $(TOOLS_MOD_DIR)/junit
+	COUNT=0
+	set -e; for mod in $(GOMODULES); do \
+  		COUNT=$$((COUNT+1)); \
+		cd $$mod && gotestsum --junitfile $(CURDIR)/testresults/$$COUNT-junit.xml -- $(GOTEST_OPT) ./... && cd -; \
+	done
 
 # Run linters for all modules
 # Use 'make lint OPTS="--fix"' to autofix issues.
