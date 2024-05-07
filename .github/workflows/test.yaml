@@ -65,10 +65,13 @@ jobs:
       - name: Run Unit Tests
         run: make test-junit
       - uses: datadog/junit-upload-github-action@v1
+        if: always()
         with:
           api-key: ${{ secrets.DD_CI_API_KEY }}
           service: opentelemetry-mapping-go
-          files: ./internal/tools/junit/
+          files: testresults/
+      - name: cleanup
+        run: rm -rf testresults/
 
   lint:
     runs-on: ubuntu-latest

@@ -54,9 +54,12 @@ test:
 .PHONY: test-junit
 test-junit:
 	mkdir -p $(TOOLS_MOD_DIR)/junit
+	COUNT=0
 	set -e; set -x; for mod in $(GOMODULES); do \
-		cd $$mod && gotestsum --junitfile $(TOOLS_MOD_DIR)/junit/$$mod.xml -- $(GOTEST_OPT) ./... && cd -; \
+  		COUNT=$$((COUNT+1)); \
+		cd $$mod && gotestsum --junitfile $(CURDIR)/testresults/$$COUNT-junit.xml -- $(GOTEST_OPT) ./... && cd -; \
 	done
+
 # Run linters for all modules
 # Use 'make lint OPTS="--fix"' to autofix issues.
 .PHONY: lint
