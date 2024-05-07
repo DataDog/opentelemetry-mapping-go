@@ -55,7 +55,7 @@ test:
 test-junit:
 	mkdir -p $(TOOLS_MOD_DIR)/junit
 	COUNT=0
-	set -e; set -x; for mod in $(GOMODULES); do \
+	set -e; for mod in $(GOMODULES); do \
   		COUNT=$$((COUNT+1)); \
 		cd $$mod && gotestsum --junitfile $(CURDIR)/testresults/$$COUNT-junit.xml -- $(GOTEST_OPT) ./... && cd -; \
 	done
