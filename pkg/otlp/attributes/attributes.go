@@ -154,8 +154,22 @@ func OriginIDFromAttributes(attrs pcommon.Map) (originID string) {
 	// Prefixes come from pkg/util/kubernetes/kubelet and pkg/util/containers.
 	if containerID, ok := attrs.Get(conventions.AttributeContainerID); ok {
 		originID = "container_id://" + containerID.AsString()
+	} else if containerImageName, ok := attrs.Get(conventions.AttributeContainerImageName); ok {
+		originID = "container_image_metadata://" + containerImageName.AsString()
+	} else if ecsTaskArn, ok := attrs.Get(conventions.AttributeAWSECSTaskARN); ok {
+		originID = "ecs_task://" + ecsTaskArn.AsString()
+	} else if hostName, ok := attrs.Get(conventions.AttributeHostName); ok {
+		originID = hostName.AsString()
+	} else if deploymentName, ok := attrs.Get(conventions.AttributeK8SDeploymentName); ok {
+		originID = "deployment://" + deploymentName.AsString()
+	} else if namespace, ok := attrs.Get(conventions.AttributeK8SNamespaceName); ok {
+		originID = "namespace://" + namespace.AsString()
+	} else if nodeUid, ok := attrs.Get(conventions.AttributeK8SNodeUID); ok {
+		originID = "kubernetes_node_uid://" + nodeUid.AsString()
 	} else if podUID, ok := attrs.Get(conventions.AttributeK8SPodUID); ok {
 		originID = "kubernetes_pod_uid://" + podUID.AsString()
+	} else if processPid, ok := attrs.Get(conventions.AttributeProcessPID); ok {
+		originID = "process://" + processPid.AsString()
 	}
 	return
 }
