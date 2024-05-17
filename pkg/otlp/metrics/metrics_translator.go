@@ -151,6 +151,11 @@ func (t *Translator) mapNumberMetrics(
 
 	for i := 0; i < slice.Len(); i++ {
 		p := slice.At(i)
+		if p.Flags().NoRecordedValue() {
+			// No recorded value, skip.
+			continue
+		}
+
 		pointDims := dims.WithAttributeMap(p.Attributes())
 		var val float64
 		switch p.ValueType() {
@@ -203,6 +208,11 @@ func (t *Translator) mapNumberMonotonicMetrics(
 ) {
 	for i := 0; i < slice.Len(); i++ {
 		p := slice.At(i)
+		if p.Flags().NoRecordedValue() {
+			// No recorded value, skip.
+			continue
+		}
+
 		ts := uint64(p.Timestamp())
 		startTs := uint64(p.StartTimestamp())
 		pointDims := dims.WithAttributeMap(p.Attributes())
@@ -450,6 +460,11 @@ func (t *Translator) mapHistogramMetrics(
 ) {
 	for i := 0; i < slice.Len(); i++ {
 		p := slice.At(i)
+		if p.Flags().NoRecordedValue() {
+			// No recorded value, skip.
+			continue
+		}
+
 		startTs := uint64(p.StartTimestamp())
 		ts := uint64(p.Timestamp())
 		pointDims := dims.WithAttributeMap(p.Attributes())
@@ -554,6 +569,11 @@ func (t *Translator) mapSummaryMetrics(
 
 	for i := 0; i < slice.Len(); i++ {
 		p := slice.At(i)
+		if p.Flags().NoRecordedValue() {
+			// No recorded value, skip.
+			continue
+		}
+
 		startTs := uint64(p.StartTimestamp())
 		ts := uint64(p.Timestamp())
 		pointDims := dims.WithAttributeMap(p.Attributes())
