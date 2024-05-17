@@ -151,7 +151,7 @@ func (t *Translator) mapNumberMetrics(
 
 	for i := 0; i < slice.Len(); i++ {
 		p := slice.At(i)
-		pointDims := dims.WithAttributeMap(p.Attributes())
+		pointDims := dims.WithAttributeMap(p.Attributes(), t.cfg.SplatArrayAttributes)
 		var val float64
 		switch p.ValueType() {
 		case pmetric.NumberDataPointValueTypeDouble:
@@ -205,7 +205,7 @@ func (t *Translator) mapNumberMonotonicMetrics(
 		p := slice.At(i)
 		ts := uint64(p.Timestamp())
 		startTs := uint64(p.StartTimestamp())
-		pointDims := dims.WithAttributeMap(p.Attributes())
+		pointDims := dims.WithAttributeMap(p.Attributes(), t.cfg.SplatArrayAttributes)
 
 		var val float64
 		switch p.ValueType() {
@@ -452,7 +452,7 @@ func (t *Translator) mapHistogramMetrics(
 		p := slice.At(i)
 		startTs := uint64(p.StartTimestamp())
 		ts := uint64(p.Timestamp())
-		pointDims := dims.WithAttributeMap(p.Attributes())
+		pointDims := dims.WithAttributeMap(p.Attributes(), t.cfg.SplatArrayAttributes)
 
 		histInfo := histogramInfo{ok: true}
 
@@ -556,7 +556,7 @@ func (t *Translator) mapSummaryMetrics(
 		p := slice.At(i)
 		startTs := uint64(p.StartTimestamp())
 		ts := uint64(p.Timestamp())
-		pointDims := dims.WithAttributeMap(p.Attributes())
+		pointDims := dims.WithAttributeMap(p.Attributes(), t.cfg.SplatArrayAttributes)
 
 		// count and sum are increasing; we treat them as cumulative monotonic sums.
 		{

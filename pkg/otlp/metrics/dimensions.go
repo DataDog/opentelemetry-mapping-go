@@ -78,11 +78,18 @@ func (d *Dimensions) OriginProductDetail() OriginProductDetail {
 }
 
 // getTags maps an attributeMap into a slice of Datadog tags
-func getTags(labels pcommon.Map) []string {
+func getTags(labels pcommon.Map, splat bool) []string {
 	tags := make([]string, 0, labels.Len())
 	labels.Range(func(key string, value pcommon.Value) bool {
-		v := value.AsString()
-		tags = append(tags, utils.FormatKeyValueTag(key, v))
+		if splat && value.Type() == pcommon.ValueTypeSlice {
+			for i := 0; i < value.Slice().Len(); i++ {
+				v := value.Slice().At(i).AsString()
+				tags = append(tags, utils.FormatKeyValueTag(key, v))
+			}
+		} else {
+			v := value.AsString()
+			tags = append(tags, utils.FormatKeyValueTag(key, v))
+		}
 		return true
 	})
 	return tags
@@ -106,8 +113,8 @@ func (d *Dimensions) AddTags(tags ...string) *Dimensions {
 }
 
 // WithAttributeMap creates a new metricDimensions struct with additional tags from attributes.
-func (d *Dimensions) WithAttributeMap(labels pcommon.Map) *Dimensions {
-	return d.AddTags(getTags(labels)...)
+func (d *Dimensions) WithAttributeMap(labels pcommon.Map, splat bool) *Dimensions {
+	return d.AddTags(getTags(labels, splat)...)
 }
 
 // WithSuffix creates a new dimensions struct with an extra name suffix.

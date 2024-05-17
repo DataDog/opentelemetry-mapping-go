@@ -29,6 +29,7 @@ type translatorConfig struct {
 	InitialCumulMonoValueMode            InitialCumulMonoValueMode
 	InstrumentationLibraryMetadataAsTags bool
 	InstrumentationScopeMetadataAsTags   bool
+	SplatArrayAttributes                 bool
 
 	originProduct OriginProduct
 
@@ -212,6 +213,14 @@ const (
 func WithInitialCumulMonoValueMode(mode InitialCumulMonoValueMode) TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.InitialCumulMonoValueMode = mode
+		return nil
+	}
+}
+
+// WithSplatArrayAttributes destructures an array attribute into multiple Datadog tags.
+func WithSplatArrayAttributes() TranslatorOption {
+	return func(t *translatorConfig) error {
+		t.SplatArrayAttributes = true
 		return nil
 	}
 }
