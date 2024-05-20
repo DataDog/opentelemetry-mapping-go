@@ -158,8 +158,6 @@ func OriginIDFromAttributes(attrs pcommon.Map) (originID string) {
 		originID = "container_image_metadata://" + containerImageName.AsString()
 	} else if ecsTaskArn, ok := attrs.Get(conventions.AttributeAWSECSTaskARN); ok {
 		originID = "ecs_task://" + ecsTaskArn.AsString()
-	} else if hostName, ok := attrs.Get(conventions.AttributeHostName); ok {
-		originID = "host://" + hostName.AsString()
 	} else if deploymentName, ok := attrs.Get(conventions.AttributeK8SDeploymentName); ok {
 		originID = "deployment://" + deploymentName.AsString()
 	} else if namespace, ok := attrs.Get(conventions.AttributeK8SNamespaceName); ok {

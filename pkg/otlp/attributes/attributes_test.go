@@ -214,6 +214,50 @@ func TestOriginIDFromAttributes(t *testing.T) {
 			originID: "kubernetes_pod_uid://k8s_pod_uid_goes_here",
 		},
 		{
+			name: "only deployment name",
+			attrs: func() pcommon.Map {
+				attributes := pcommon.NewMap()
+				attributes.FromRaw(map[string]interface{}{
+					conventions.AttributeK8SDeploymentName: "k8s_deployment_name_goes_here",
+				})
+				return attributes
+			}(),
+			originID: "deployment://k8s_deployment_name_goes_here",
+		},
+		{
+			name: "only namespace name",
+			attrs: func() pcommon.Map {
+				attributes := pcommon.NewMap()
+				attributes.FromRaw(map[string]interface{}{
+					conventions.AttributeK8SNamespaceName: "k8s_namespace_goes_here",
+				})
+				return attributes
+			}(),
+			originID: "namespace://k8s_namespace_goes_here",
+		},
+		{
+			name: "only node UID",
+			attrs: func() pcommon.Map {
+				attributes := pcommon.NewMap()
+				attributes.FromRaw(map[string]interface{}{
+					conventions.AttributeK8SNodeUID: "k8s_node_uid_goes_here",
+				})
+				return attributes
+			}(),
+			originID: "kubernetes_node_uid://k8s_node_uid_goes_here",
+		},
+		{
+			name: "only process pid",
+			attrs: func() pcommon.Map {
+				attributes := pcommon.NewMap()
+				attributes.FromRaw(map[string]interface{}{
+					conventions.AttributeProcessPID: "process_pid_goes_here",
+				})
+				return attributes
+			}(),
+			originID: "process://process_pid_goes_here",
+		},
+		{
 			name:  "none",
 			attrs: pcommon.NewMap(),
 		},
