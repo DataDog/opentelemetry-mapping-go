@@ -419,6 +419,40 @@ func TestMapIntMonotonicWithRebootWithinSlice(t *testing.T) {
 	})
 }
 
+// This test checks that in the case of a reboot within a NumberDataPointSlice,
+// we cache the value but we do NOT compute first value for the value at reset.
+func TestMapIntMonotonicWithNoRecordedValueWithinSlice(t *testing.T) {
+
+	buildMonotonicWithNoRecorded := func() (slice pmetric.NumberDataPointSlice) {
+		values := []int64{0, 30, 0, 40}
+		slice = pmetric.NewNumberDataPointSlice()
+		slice.EnsureCapacity(len(values))
+
+		for i, val := range values {
+			point := slice.AppendEmpty()
+			point.SetTimestamp(seconds(i * 10))
+			point.SetIntValue(val)
+		}
+
+		var flags pmetric.DataPointFlags
+		slice.At(2).SetFlags(flags.WithNoRecordedValue(true))
+		return
+	}
+
+	slice := buildMonotonicWithNoRecorded()
+	ctx := context.Background()
+	tr := newTranslator(t, zap.NewNop())
+	consumer := &mockTimeSeriesConsumer{}
+	tr.mapNumberMonotonicMetrics(ctx, consumer, exampleDims, slice)
+	assert.ElementsMatch(t,
+		consumer.metrics,
+		[]metric{
+			newCount(exampleDims, uint64(seconds(10)), 30),
+			newCount(exampleDims, uint64(seconds(30)), 10),
+		},
+	)
+}
+
 // This test checks that in the case of a reboot at the first point in a NumberDataPointSlice:
 // - diff: we cache the value AND compute first value
 // - rate: we cache the value AND don't compute first value
