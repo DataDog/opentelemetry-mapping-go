@@ -78,20 +78,37 @@ func (d *Dimensions) OriginProductDetail() OriginProductDetail {
 }
 
 // getTags maps an attributeMap into a slice of Datadog tags
-func getTags(labels pcommon.Map, splat bool) []string {
+func getTags(labels pcommon.Map) []string {
 	tags := make([]string, 0, labels.Len())
-	labels.Range(func(key string, value pcommon.Value) bool {
-		if splat && value.Type() == pcommon.ValueTypeSlice {
-			for i := 0; i < value.Slice().Len(); i++ {
-				v := value.Slice().At(i).AsString()
-				tags = append(tags, utils.FormatKeyValueTag(key, v))
+	labels.Range(func(key string, val pcommon.Value) bool {
+		v := val.AsString()
+		tags = append(tags, utils.FormatKeyValueTag(key, v))
+		return true
+	})
+	return tags
+}
+
+// getTagsWithSplat maps an attributeMap into a slice of Datadog tags.
+// It will flatten the map values if they are slices.
+func getTagsWithSplat(labels pcommon.Map) []string {
+	// Allocation is a lower bound since we are not traversing the whole map.
+	tags := make([]string, 0, labels.Len())
+
+	var addToTags func(string, pcommon.Value) bool
+	addToTags = func(key string, val pcommon.Value) bool {
+		switch val.Type() {
+		case pcommon.ValueTypeSlice:
+			for i := 0; i < val.Slice().Len(); i++ {
+				_ = addToTags(key, val.Slice().At(i))
 			}
-		} else {
-			v := value.AsString()
+		default:
+			v := val.AsString()
 			tags = append(tags, utils.FormatKeyValueTag(key, v))
 		}
 		return true
-	})
+	}
+
+	labels.Range(addToTags)
 	return tags
 }
 
@@ -114,7 +131,10 @@ func (d *Dimensions) AddTags(tags ...string) *Dimensions {
 
 // WithAttributeMap creates a new metricDimensions struct with additional tags from attributes.
 func (d *Dimensions) WithAttributeMap(labels pcommon.Map, splat bool) *Dimensions {
-	return d.AddTags(getTags(labels, splat)...)
+	if splat {
+		return d.AddTags(getTagsWithSplat(labels)...)
+	}
+	return d.AddTags(getTags(labels)...)
 }
 
 // WithSuffix creates a new dimensions struct with an extra name suffix.

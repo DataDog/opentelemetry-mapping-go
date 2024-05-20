@@ -28,12 +28,13 @@ func TestWithAttributeMap(t *testing.T) {
 		"key2": "val2",
 		"key3": "",
 		"key4": []any{"val4a", "val4b"},
+		"key5": []any{"val5a", []any{"val5b", "val5c", []any{"val5d"}}},
 	})
 
 	dims := Dimensions{}
 	assert.ElementsMatch(t,
 		dims.WithAttributeMap(attributes, false).tags,
-		[...]string{"key1:val1", "key2:val2", "key3:n/a", `key4:["val4a","val4b"]`},
+		[...]string{"key1:val1", "key2:val2", "key3:n/a", `key4:["val4a","val4b"]`, `key5:["val5a",["val5b","val5c",["val5d"]]]`},
 	)
 }
 
@@ -44,12 +45,23 @@ func TestWithAttributeMapSplat(t *testing.T) {
 		"key2": "val2",
 		"key3": "",
 		"key4": []any{"val4a", "val4b"},
+		"key5": []any{"val5a", []any{"val5b", "val5c", []any{"val5d"}}},
 	})
 
 	dims := Dimensions{}
 	assert.ElementsMatch(t,
 		dims.WithAttributeMap(attributes, true).tags,
-		[...]string{"key1:val1", "key2:val2", "key3:n/a", "key4:val4a", "key4:val4b"},
+		[...]string{
+			"key1:val1",
+			"key2:val2",
+			"key3:n/a",
+			"key4:val4a",
+			"key4:val4b",
+			"key5:val5a",
+			"key5:val5b",
+			"key5:val5c",
+			"key5:val5d",
+		},
 	)
 }
 
