@@ -152,6 +152,7 @@ func TagsFromAttributes(attrs pcommon.Map) []string {
 func OriginIDFromAttributes(attrs pcommon.Map) (originID string) {
 	// originID is always empty. Container ID is preferred over Kubernetes pod UID.
 	// Prefixes come from pkg/util/kubernetes/kubelet and pkg/util/containers.
+	// See https://github.com/DataDog/datadog-agent/tree/2b4f456/comp/core/tagger#entity-ids
 	if containerID, ok := attrs.Get(conventions.AttributeContainerID); ok {
 		originID = "container_id://" + containerID.AsString()
 	} else if containerImageName, ok := attrs.Get(conventions.AttributeContainerImageName); ok {
