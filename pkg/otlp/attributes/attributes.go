@@ -92,6 +92,43 @@ var (
 		"app.kubernetes.io/part-of":    "kube_app_part_of",
 		"app.kubernetes.io/managed-by": "kube_app_managed_by",
 	}
+
+	// Kubernetes out of the box Datadog tags
+	// https://docs.datadoghq.com/containers/kubernetes/tag/?tab=containerizedagent#out-of-the-box-tags
+	kubernetesDDTags = map[string]struct{}{
+		"container_id":                {},
+		"display_container_name":      {},
+		"pod_name":                    {},
+		"oshift_deployment":           {},
+		"kube_ownerref_name":          {},
+		"kube_job":                    {},
+		"kube_replica_set":            {},
+		"kube_service":                {},
+		"kube_daemon_set":             {},
+		"kube_container_name":         {},
+		"kube_namespace":              {},
+		"kube_app_name":               {},
+		"kube_app_instance":           {},
+		"kube_app_version":            {},
+		"kube_app_component":          {},
+		"kube_app_part_of":            {},
+		"kube_app_managed_by":         {},
+		"env":                         {},
+		"version":                     {},
+		"service":                     {},
+		"pod_phase":                   {},
+		"oshift_deployment_config":    {},
+		"kube_ownerref_kind":          {},
+		"kube_deployment":             {},
+		"kube_replication_controller": {},
+		"kube_stateful_set":           {},
+		"persistentvolumeclaim":       {},
+		"kube_cronjob":                {},
+		"image_name":                  {},
+		"short_image":                 {},
+		"image_tag":                   {},
+		"eks_fargate_node":            {},
+	}
 )
 
 // TagsFromAttributes converts a selected list of attributes
@@ -131,6 +168,11 @@ func TagsFromAttributes(attrs pcommon.Map) []string {
 		// Kubernetes labels mapping
 		if datadogKey, found := kubernetesMapping[key]; found && value.Str() != "" {
 			tags = append(tags, fmt.Sprintf("%s:%s", datadogKey, value.Str()))
+		}
+
+		// Kubernetes DD tags
+		if _, found := kubernetesDDTags[key]; found {
+			tags = append(tags, fmt.Sprintf("%s:%s", key, value.Str()))
 		}
 		return true
 	})
