@@ -96,9 +96,9 @@ var (
 	// Kubernetes out of the box Datadog tags
 	// https://docs.datadoghq.com/containers/kubernetes/tag/?tab=containerizedagent#out-of-the-box-tags
 	// https://github.com/DataDog/datadog-agent/blob/d33d042d6786e8b85f72bb627fbf06ad8a658031/comp/core/tagger/taggerimpl/collectors/workloadmeta_extract.go
+	// Note: if any OTel semantics happen to overlap with these tag names, they will also be added as Datadog tags.
 	kubernetesDDTags = map[string]struct{}{
 		"architecture":                {},
-		"availability_zone":           {}, // Deprecated
 		"availability-zone":           {},
 		"chronos_job":                 {},
 		"chronos_job_owner":           {},
