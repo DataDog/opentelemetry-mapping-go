@@ -435,7 +435,7 @@ func TestTranslator(t *testing.T) {
 				}(),
 			},
 			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString("otel_source:test"),
+				Ddtags:  datadog.PtrString("service:otlp_col,otel_source:test"),
 				Message: *datadog.PtrString(""),
 				AdditionalProperties: map[string]string{
 					"app":              "test",

@@ -39,6 +39,7 @@ func TestTagsFromAttributes(t *testing.T) {
 		conventions.AttributeDeploymentEnvironment: "prod",
 		conventions.AttributeContainerName:         "custom",
 		"datadog.container.tag.custom.team":        "otel",
+		"kube_cronjob":                             "cron",
 	}
 	attrs := pcommon.NewMap()
 	attrs.FromRaw(attributeMap)
@@ -53,6 +54,7 @@ func TestTagsFromAttributes(t *testing.T) {
 		fmt.Sprintf("%s:%s", "env", "prod"),
 		fmt.Sprintf("%s:%s", "container_name", "custom"),
 		fmt.Sprintf("%s:%s", "custom.team", "otel"),
+		fmt.Sprintf("%s:%s", "kube_cronjob", "cron"),
 	}, TagsFromAttributes(attrs))
 }
 
