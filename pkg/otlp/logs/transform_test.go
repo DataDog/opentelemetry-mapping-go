@@ -285,6 +285,35 @@ func TestTranslator(t *testing.T) {
 			},
 		},
 		{
+			name: "trace from attributes size error",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					l.Attributes().PutStr("app", "test")
+					l.Attributes().PutStr("spanid", "2023675201651514964")
+					l.Attributes().PutStr("traceid", "eb068afe5e53704f3b0dc3d3e1e397cb760549a7b58547db4f1dee845d9101f8db1ccf8fdd0976a9112f")
+					l.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
+					l.SetSeverityNumber(5)
+					return l
+				}(),
+				res: func() pcommon.Resource {
+					r := pcommon.NewResource()
+					return r
+				}(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString("otel_source:test"),
+				Message: *datadog.PtrString(""),
+				Service: datadog.PtrString("otlp_col"),
+				AdditionalProperties: map[string]string{
+					"app":              "test",
+					"status":           "debug",
+					otelSeverityNumber: "5",
+					"service.name":     "otlp_col",
+				},
+			},
+		},
+		{
 			// here SeverityText should take precedence for log status
 			name: "SeverityText",
 			args: args{
