@@ -4,6 +4,19 @@
 
 <!-- next version -->
 
+## v0.17.0
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/attributes`: Adds Kubernetes DD tags to keep when mapping resource attributes. (#334)
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/otlp/logs`: Fix panics on invalid sized trace & span IDs (#340)
+- `pkg/otlp/metrics`: Ignore metric datapoints with 'no recorded value' flag (#330)
+  - This flag is not supported by Datadog, so we just ignore these datapoints.
+  
+
 ## v0.16.1
 
 ### 💡 Enhancements 💡
