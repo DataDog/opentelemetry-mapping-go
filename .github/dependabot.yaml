@@ -1,7 +1,13 @@
 version: 2
 updates:
   - package-ecosystem: gomod
-    directory: /pkg/otlp/metrics
+    directories:
+      - /pkg/otlp/metrics
+      - /pkg/otlp/attributes
+      - /pkg/quantile
+      - /pkg/internal/sketchtest
+      - /pkg/inframetadata
+      - /pkg/otlp/logs
     labels:
       - dependencies
     schedule:
@@ -9,34 +15,6 @@ updates:
     ignore:
       # Ignore internal modules
       - dependency-name: github.com/DataDog/opentelemetry-mapping-go/*
-  - package-ecosystem: gomod
-    directory: /pkg/otlp/attributes
-    labels:
-      - dependencies
-    ignore:
-      # Ignore internal modules
-      - dependency-name: github.com/DataDog/opentelemetry-mapping-go/*
-    schedule:
-      interval: weekly
-  - package-ecosystem: gomod
-    directory: /pkg/quantile
-    labels:
-      - dependencies
-    ignore:
-      # Ignore internal modules
-      - dependency-name: github.com/DataDog/opentelemetry-mapping-go/*
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 100
-  - package-ecosystem: gomod
-    directory: /pkg/internal/sketchtest
-    labels:
-      - dependencies
-    ignore:
-      # Ignore internal modules
-      - dependency-name: github.com/DataDog/opentelemetry-mapping-go/*
-    schedule:
-      interval: weekly
     open-pull-requests-limit: 100
   - package-ecosystem: gomod 
     directory: /internal/tools
