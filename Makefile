@@ -69,7 +69,8 @@ lint:
 # Generate licenses file for compliance. 
 .PHONY: gen-licenses
 gen-licenses:
-	generate-license-file
+	go install $(TOOLS_MOD_DIR)/generate-license-file
+	go run $(TOOLS_MOD_DIR)/generate-license-file
 
 # Do PR for preparing a release
 .PHONY: prerelease
