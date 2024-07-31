@@ -1018,6 +1018,27 @@ func TestMapRuntimeMetricsHasMappingCollector(t *testing.T) {
 	assert.Equal(t, []string{"go"}, rmt.Languages)
 }
 
+func TestMapSystemMetricsRenamedWithoutDatadogMetrics(t *testing.T) {
+	ctx := context.Background()
+	tr := NewTestTranslator(t, WithRemapping(), WithoutDatadogMetrics())
+	consumer := &mockFullConsumer{}
+	exampleDims = newDims("system.cpu.utilization")
+	exampleOtelDims := newDims("otel.system.cpu.utilization")
+	_, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, exampleDims), consumer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	startTs := int(getProcessStartTime()) + 1
+	assert.ElementsMatch(t,
+		consumer.metrics,
+		[]metric{
+			newCount(exampleOtelDims, uint64(seconds(startTs+2)), 10),
+			newCount(exampleOtelDims, uint64(seconds(startTs+3)), 5),
+			newCount(exampleOtelDims, uint64(seconds(startTs+4)), 5),
+		},
+	)
+}
+
 func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
