@@ -37,6 +37,10 @@ type translatorConfig struct {
 	// container.* and system.* metrics).
 	withRemapping bool
 
+	// withoutDatadogMetrics reports whether Datadog metrics should be computed
+	// from OpenTelemetry metrics.
+	withoutDatadogMetrics bool
+
 	// cache configuration
 	sweepInterval int64
 	deltaTTL      int64
@@ -58,6 +62,14 @@ type TranslatorOption func(*translatorConfig) error
 func WithRemapping() TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.withRemapping = true
+		return nil
+	}
+}
+
+// WithoutDatadogMetrics .....
+func WithoutDatadogMetrics() TranslatorOption {
+	return func(t *translatorConfig) error {
+		t.withoutDatadogMetrics = true
 		return nil
 	}
 }
