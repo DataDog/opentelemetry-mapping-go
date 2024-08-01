@@ -804,7 +804,7 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 				}
 				if t.cfg.withRenaming {
 					// Adds `otel*` system and process metrics to avoid conflicts with the Datadog Agent metrics
-					if strings.HasPrefix(md.Name(), "process.") || strings.HasPrefix(md.Name(), "system.") {
+					if isSystemMetric(md.Name()) {
 						md.SetName("otel." + md.Name())
 					}
 				} else if t.cfg.withRemapping {
