@@ -802,12 +802,10 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 						}
 					}
 				}
-				if t.cfg.withRemapping {
-					if t.cfg.withoutDatadogMetrics {
-						md.SetName("otel." + md.Name())
-					} else {
-						remapMetrics(newMetrics, md)
-					}
+				if t.cfg.withRenaming {
+					md.SetName("otel." + md.Name())
+				} else if t.cfg.withRemapping {
+					remapMetrics(newMetrics, md)
 				}
 				t.mapToDDFormat(ctx, md, consumer, additionalTags, host, scopeName, rattrs)
 			}

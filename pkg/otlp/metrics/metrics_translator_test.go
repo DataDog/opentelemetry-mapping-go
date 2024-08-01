@@ -1018,9 +1018,10 @@ func TestMapRuntimeMetricsHasMappingCollector(t *testing.T) {
 	assert.Equal(t, []string{"go"}, rmt.Languages)
 }
 
-func TestMapSystemMetricsRenamedWithoutDatadogMetrics(t *testing.T) {
+func TestMapSystemMetricsRenamedWithRenaming(t *testing.T) {
 	ctx := context.Background()
-	tr := NewTestTranslator(t, WithRemapping(), WithoutDatadogMetrics())
+	// WithRenaming() is used to rename the system metrics, this overrides WithRemapping.
+	tr := NewTestTranslator(t, WithRemapping(), WithRenaming())
 	consumer := &mockFullConsumer{}
 	exampleDims = newDims("system.cpu.utilization")
 	exampleOtelDims := newDims("otel.system.cpu.utilization")
@@ -1029,6 +1030,7 @@ func TestMapSystemMetricsRenamedWithoutDatadogMetrics(t *testing.T) {
 		t.Fatal(err)
 	}
 	startTs := int(getProcessStartTime()) + 1
+	// Ensure datadog metrics are not created (ex: system.cpu.idle, system.cpu.system, etc)
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
