@@ -1,5 +1,5 @@
 # One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
-change_type:
+change_type: new_component
 
 # The name of the component (e.g. pkg/quantile)
 component: pkg/otlp
@@ -8,4 +8,4 @@ component: pkg/otlp
 note: "Add option rename OTEL metrics and not compute DD metrics from OTEL metrics"
 
 # The PR related to this change
-issues: []
+issues: [367]
