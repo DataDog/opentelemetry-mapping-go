@@ -1023,20 +1023,37 @@ func TestMapSystemMetricsRenamedWithRenaming(t *testing.T) {
 	// WithRenaming() is used to rename the system metrics, this overrides WithRemapping.
 	tr := NewTestTranslator(t, WithRemapping(), WithRenaming())
 	consumer := &mockFullConsumer{}
-	exampleDims = newDims("system.cpu.utilization")
-	exampleOtelDims := newDims("otel.system.cpu.utilization")
-	_, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, exampleDims), consumer)
-	if err != nil {
-		t.Fatal(err)
+	systemDims := newDims("system.cpu.utilization")
+	processDims := newDims("process.runtime.go.goroutines")
+	jvmDims := newDims("jvm.memory.used")
+	for _, dims := range []*Dimensions{systemDims, processDims, jvmDims} {
+		_, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, dims), consumer)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 	startTs := int(getProcessStartTime()) + 1
-	// Ensure datadog metrics are not created (ex: system.cpu.idle, system.cpu.system, etc)
+	// Ensure datadog metrics are not created from system.cpu.utilization (ex: system.cpu.idle, system.cpu.system, etc)
+	// Ensure otel.* prefix is added to system and process metrics
+	// Ensure otel.* prefix is not added to jvm metrics
+	expectedSystemDims := newDims("otel.system.cpu.utilization")
+	expectedProcessDims := newDims("otel.process.runtime.go.goroutines")
+	expectedRuntimeDims := newDims("runtime.go.num_goroutine")
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
-			newCount(exampleOtelDims, uint64(seconds(startTs+2)), 10),
-			newCount(exampleOtelDims, uint64(seconds(startTs+3)), 5),
-			newCount(exampleOtelDims, uint64(seconds(startTs+4)), 5),
+			newCount(expectedSystemDims, uint64(seconds(startTs+2)), 10),
+			newCount(expectedSystemDims, uint64(seconds(startTs+3)), 5),
+			newCount(expectedSystemDims, uint64(seconds(startTs+4)), 5),
+			newCount(expectedProcessDims, uint64(seconds(startTs+2)), 10),
+			newCount(expectedProcessDims, uint64(seconds(startTs+3)), 5),
+			newCount(expectedProcessDims, uint64(seconds(startTs+4)), 5),
+			newCount(expectedRuntimeDims, uint64(seconds(startTs+2)), 10),
+			newCount(expectedRuntimeDims, uint64(seconds(startTs+3)), 5),
+			newCount(expectedRuntimeDims, uint64(seconds(startTs+4)), 5),
+			newCount(jvmDims, uint64(seconds(startTs+2)), 10),
+			newCount(jvmDims, uint64(seconds(startTs+3)), 5),
+			newCount(jvmDims, uint64(seconds(startTs+4)), 5),
 		},
 	)
 }
