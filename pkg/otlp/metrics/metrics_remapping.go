@@ -40,8 +40,7 @@ func remapMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 // remapSystemMetrics extracts system metrics from m and appends them to all.
 func remapSystemMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	name := m.Name()
-	if !strings.HasPrefix(name, "process.") && !strings.HasPrefix(name, "system.") {
-		// not a system metric
+	if !isSystemMetric(name) {
 		return
 	}
 	switch name {
@@ -128,6 +127,11 @@ func remapContainerMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	case "container.network.io.usage.rx_packets":
 		copyMetricWithAttr(all, m, "container.net.rcvd.packets", 1, emptyAttributesMapping)
 	}
+}
+
+// isSystemMetric determines whether a metric is a system metric.
+func isSystemMetric(name string) bool {
+	return strings.HasPrefix(name, "process.") || strings.HasPrefix(name, "system.")
 }
 
 type (
