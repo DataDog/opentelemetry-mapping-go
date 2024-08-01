@@ -1,0 +1,11 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type:
+
+# The name of the component (e.g. pkg/quantile)
+component: pkg/otlp
+
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: "Add option rename OTEL metrics and not compute DD metrics from OTEL metrics"
+
+# The PR related to this change
+issues: []
