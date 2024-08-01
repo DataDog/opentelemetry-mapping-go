@@ -37,9 +37,10 @@ type translatorConfig struct {
 	// container.* and system.* metrics).
 	withRemapping bool
 
-	// withRenaming reports whether OpenTelemetry metrics should be renamed with the `otel.` prefix.
-	// Enabling this configuration disables computing Datadog metrics from OpenTelemetry metrics.
-	// This is useful when the translator is running as part of a Collector with the Datadog Agent.
+	// withRenaming reports whether OpenTelemetry system and process metrics should be
+	// renamed with the `otel.` prefix. Enabling this configuration disables computing
+	// Datadog metrics from OpenTelemetry metrics. This is useful when the translator is
+	// running as part of a Collector with the Datadog Agent.
 	withRenaming bool
 
 	// cache configuration
@@ -67,9 +68,9 @@ func WithRemapping() TranslatorOption {
 	}
 }
 
-// withRenaming appends the `otel.` prefix to all OTEL metrics. Also disables the remapping of
-// OpenTelemetry metrics to Datadog metrics. This is useful when the translator is running as
-// part of a Collector with the Datadog Agent.
+// withRenaming appends the `otel.` prefix to otel system and process metrics.
+// Also disables the remapping of OpenTelemetry metrics to Datadog metrics. T
+// This is useful when the translator is running as part of a Collector with the Datadog Agent.
 func WithRenaming() TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.withRenaming = true
