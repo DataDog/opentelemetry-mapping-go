@@ -805,10 +805,8 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 
 				if t.cfg.withRemapping {
 					remapMetrics(newMetrics, md)
-					// to maintain backward compatibility with the old remapping logic
-					// we also need to rename some otel metrics
-					renameMetrics(md)
-				} else if t.cfg.withRenaming {
+				}
+				if t.cfg.withOTelPrefix {
 					renameMetrics(md)
 				}
 

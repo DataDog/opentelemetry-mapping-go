@@ -1018,10 +1018,10 @@ func TestMapRuntimeMetricsHasMappingCollector(t *testing.T) {
 	assert.Equal(t, []string{"go"}, rmt.Languages)
 }
 
-func TestMapSystemMetricsRenamedWithRenaming(t *testing.T) {
+func TestMapSystemMetricsRenamedWithOTelPrefix(t *testing.T) {
 	ctx := context.Background()
-	// WithRenaming() is used to rename the system metrics, this overrides WithRemapping.
-	tr := NewTestTranslator(t, WithRenaming())
+	// WithOTelPrefix() is used to rename the system metrics, this overrides WithRemapping.
+	tr := NewTestTranslator(t, WithOTelPrefix())
 	consumer := &mockFullConsumer{}
 	systemDims := newDims("system.cpu.utilization")
 	processDims := newDims("process.runtime.go.goroutines")
