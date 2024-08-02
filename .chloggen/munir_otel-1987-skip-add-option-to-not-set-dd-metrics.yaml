@@ -5,7 +5,7 @@ change_type: enhancement
 component: pkg/otlp
 
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: "Add option rename OTEL metrics and not compute DD metrics from OTEL metrics"
+note: "Add option that adds prefix to OTEL host metrics"
 
 # The PR related to this change
 issues: [367]
