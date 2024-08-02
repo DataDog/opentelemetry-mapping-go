@@ -802,14 +802,16 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 						}
 					}
 				}
-				if t.cfg.withRenaming {
-					// Adds `otel*` system and process metrics to avoid conflicts with the Datadog Agent metrics
-					if isSystemMetric(md.Name()) {
-						md.SetName("otel." + md.Name())
-					}
-				} else if t.cfg.withRemapping {
+
+				if t.cfg.withRemapping {
 					remapMetrics(newMetrics, md)
+					// to maintain backward compatibility with the old remapping logic
+					// we also need to rename some otel metrics
+					renameMetrics(md)
+				} else if t.cfg.withRenaming {
+					renameMetrics(md)
 				}
+
 				t.mapToDDFormat(ctx, md, consumer, additionalTags, host, scopeName, rattrs)
 			}
 

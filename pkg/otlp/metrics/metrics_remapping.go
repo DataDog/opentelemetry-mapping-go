@@ -37,6 +37,11 @@ func remapMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	remapJvmMetrics(all, m)
 }
 
+func renameMetrics(m pmetric.Metric) {
+	renameSystemMetrics(m)
+	renameKafkaMetrics(m)
+}
+
 // remapSystemMetrics extracts system metrics from m and appends them to all.
 func remapSystemMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	name := m.Name()
@@ -72,8 +77,6 @@ func remapSystemMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	case "system.filesystem.utilization":
 		copyMetricWithAttr(all, m, "system.disk.in_use", 1, emptyAttributesMapping)
 	}
-	// process.* and system.* metrics need to be prepended with the otel.* namespace
-	m.SetName("otel." + m.Name())
 }
 
 // remapContainerMetrics extracts system metrics from m and appends them to all.
@@ -225,4 +228,11 @@ func hasAny(point pmetric.NumberDataPoint, tags ...kv) bool {
 		}
 	}
 	return false
+}
+
+// renameSystemMetrics renames otel system metrics to avoid conflicts with DD agent metrics
+func renameSystemMetrics(m pmetric.Metric) {
+	if isSystemMetric(m.Name()) {
+		m.SetName("otel." + m.Name())
+	}
 }
