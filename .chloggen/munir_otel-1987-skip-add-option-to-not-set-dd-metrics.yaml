@@ -2,7 +2,7 @@
 change_type: enhancement
 
 # The name of the component (e.g. pkg/quantile)
-component: pkg/otlp
+component: pkg/otlp/metrics
 
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
 note: "Add option that adds prefix to OTEL host metrics"
