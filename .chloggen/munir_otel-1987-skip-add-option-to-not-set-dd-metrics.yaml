@@ -1,5 +1,5 @@
 # One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
-change_type: new_component
+change_type: enhancement
 
 # The name of the component (e.g. pkg/quantile)
 component: pkg/otlp
