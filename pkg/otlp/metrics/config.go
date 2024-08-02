@@ -34,14 +34,13 @@ type translatorConfig struct {
 
 	// withRemapping reports whether certain metrics that are only available when using
 	// the Datadog Agent should be obtained by remapping from OTEL counterparts (e.g.
-	// container.* and system.* metrics).
+	// container.* and system.* metrics). This configuration also enables withOTelPrefix.
 	withRemapping bool
 
-	// withRenaming reports whether OpenTelemetry system and process metrics should be
-	// renamed with the `otel.` prefix. Enabling this configuration disables computing
-	// Datadog metrics from OpenTelemetry metrics. This is useful when the translator is
-	// running as part of a Collector with the Datadog Agent.
-	withRenaming bool
+	// withOTelPrefix reports whether some OpenTelemetry metrics (ex: host metrics) should be
+	// renamed with the `otel.` prefix. This prevents the Collector and Datadog
+	// Agent from computing metrics with the same names.
+	withOTelPrefix bool
 
 	// cache configuration
 	sweepInterval int64
@@ -64,16 +63,18 @@ type TranslatorOption func(*translatorConfig) error
 func WithRemapping() TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.withRemapping = true
+		// to maintain backward compatibility with the old remapping logic
+		// withRemapping must rename some otel metrics
+		t.withOTelPrefix = true
 		return nil
 	}
 }
 
-// withRenaming appends the `otel.` prefix to otel system and process metrics.
-// Also disables the remapping of OpenTelemetry metrics to Datadog metrics. T
+// withOTelPrefix appends the `otel.` prefix to OpenTelemetry metrics.
 // This is useful when the translator is running as part of a Collector with the Datadog Agent.
-func WithRenaming() TranslatorOption {
+func WithOTelPrefix() TranslatorOption {
 	return func(t *translatorConfig) error {
-		t.withRenaming = true
+		t.withOTelPrefix = true
 		return nil
 	}
 }

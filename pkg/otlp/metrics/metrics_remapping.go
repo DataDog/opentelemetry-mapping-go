@@ -37,15 +37,16 @@ func remapMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	remapJvmMetrics(all, m)
 }
 
+// renameMetrics adds the `otel.` prefix to metrics.
 func renameMetrics(m pmetric.Metric) {
-	renameSystemMetrics(m)
+	renameHostMetrics(m)
 	renameKafkaMetrics(m)
 }
 
 // remapSystemMetrics extracts system metrics from m and appends them to all.
 func remapSystemMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	name := m.Name()
-	if !isSystemMetric(name) {
+	if !isHostMetric(name) {
 		return
 	}
 	switch name {
@@ -132,8 +133,8 @@ func remapContainerMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	}
 }
 
-// isSystemMetric determines whether a metric is a system metric.
-func isSystemMetric(name string) bool {
+// isHostMetric determines whether a metric is a system metric.
+func isHostMetric(name string) bool {
 	return strings.HasPrefix(name, "process.") || strings.HasPrefix(name, "system.")
 }
 
@@ -230,9 +231,9 @@ func hasAny(point pmetric.NumberDataPoint, tags ...kv) bool {
 	return false
 }
 
-// renameSystemMetrics renames otel system metrics to avoid conflicts with DD agent metrics
-func renameSystemMetrics(m pmetric.Metric) {
-	if isSystemMetric(m.Name()) {
+// renameHostMetrics renames otel host metrics to avoid conflicts with DD agent metrics.
+func renameHostMetrics(m pmetric.Metric) {
+	if isHostMetric(m.Name()) {
 		m.SetName("otel." + m.Name())
 	}
 }
