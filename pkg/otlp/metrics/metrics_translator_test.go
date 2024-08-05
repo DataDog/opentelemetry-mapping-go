@@ -1035,7 +1035,7 @@ func TestMapSystemMetricsRenamedWithOTelPrefix(t *testing.T) {
 	startTs := int(getProcessStartTime()) + 1
 	// Ensure datadog metrics are not created from system.cpu.utilization (ex: system.cpu.idle, system.cpu.system, etc)
 	// Ensure otel.* prefix is added to system and process metrics
-	// Ensure otel.* prefix is not added to jvm metrics
+	// Ensure otel.* prefix is not added to jvm or go runtime metrics
 	expectedSystemDims := newDims("otel.system.cpu.utilization")
 	expectedProcessDims := newDims("otel.process.runtime.go.goroutines")
 	expectedRuntimeDims := newDims("runtime.go.num_goroutine")
