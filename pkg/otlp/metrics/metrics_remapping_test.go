@@ -787,15 +787,15 @@ func TestRemapAndRenameMetrics(t *testing.T) {
 		remapMetrics(dest, tt.in)
 		// Ensure remapMetrics does not add the otel.* prefix to the metric name
 		if checkprefix {
-			require.False(t, strings.HasPrefix(tt.in.Name(), "otel."), "system.* and process.*  and a subset of kafka metrics need to be prepended with the otel.* namespace")
-		}
-		require.Equal(t, dest.Len()-lena, len(tt.out), "unexpected number of metrics added")
-		for i, out := range tt.out {
-			assert.NoError(t, pmetrictest.CompareMetric(out, dest.At(dest.Len()-len(tt.out)+i)))
+			require.False(t, strings.HasPrefix(tt.in.Name(), "otel."), "remapMetrics should not add the otel.* prefix to the metric name, it should only compute Datadog metrics")
 		}
 		renameMetrics(tt.in)
 		if checkprefix {
 			require.True(t, strings.HasPrefix(tt.in.Name(), "otel."), "system.* and process.*  and a subset of kafka metrics need to be prepended with the otel.* namespace")
+		}
+		require.Equal(t, dest.Len()-lena, len(tt.out), "unexpected number of metrics added")
+		for i, out := range tt.out {
+			assert.NoError(t, pmetrictest.CompareMetric(out, dest.At(dest.Len()-len(tt.out)+i)))
 		}
 	}
 
