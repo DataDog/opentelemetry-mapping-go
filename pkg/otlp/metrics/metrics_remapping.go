@@ -231,7 +231,7 @@ func hasAny(point pmetric.NumberDataPoint, tags ...kv) bool {
 	return false
 }
 
-// renameHostMetrics renames otel host metrics to avoid conflicts with DD agent metrics.
+// renameHostMetrics renames otel host metrics to avoid conflicts with Datadog metrics.
 func renameHostMetrics(m pmetric.Metric) {
 	if isHostMetric(m.Name()) {
 		m.SetName("otel." + m.Name())

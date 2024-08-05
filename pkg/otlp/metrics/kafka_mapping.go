@@ -428,7 +428,7 @@ func remapJvmMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 	}
 }
 
-// renameKafkaMetrics renames otel kafka metrics to avoid conflicts with DD agent metrics.
+// renameKafkaMetrics renames otel kafka metrics to avoid conflicts with DD metrics.
 func renameKafkaMetrics(m pmetric.Metric) {
 	switch m.Name() {
 	case "kafka.producer.request-rate", "kafka.producer.response-rate", "kafka.producer.request-latency-avg", "kafka.consumer.fetch-size-avg", "kafka.producer.compression-rate", "kafka.producer.record-retry-rate", "kafka.producer.record-send-rate", "kafka.producer.record-error-rate":

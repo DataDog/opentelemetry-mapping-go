@@ -71,7 +71,6 @@ func WithRemapping() TranslatorOption {
 }
 
 // withOTelPrefix appends the `otel.` prefix to OpenTelemetry metrics.
-// This is useful when the translator is running as part of a Collector with the Datadog Agent.
 func WithOTelPrefix() TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.withOTelPrefix = true
