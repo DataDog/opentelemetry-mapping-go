@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.18.0
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics`: Add option that adds prefix to OTEL host metrics (#367)
+
 ## v0.17.0
 
 ### 💡 Enhancements 💡
