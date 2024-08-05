@@ -70,7 +70,7 @@ func WithRemapping() TranslatorOption {
 	}
 }
 
-// withOTelPrefix appends the `otel.` prefix to OpenTelemetry metrics.
+// WithOTelPrefix appends the `otel.` prefix to OpenTelemetry system, process and a subset of Kafka metrics.
 func WithOTelPrefix() TranslatorOption {
 	return func(t *translatorConfig) error {
 		t.withOTelPrefix = true
