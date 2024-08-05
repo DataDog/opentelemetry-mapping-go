@@ -6,6 +6,18 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
+// kafkaMetricsToRename is a map of kafka metrics that should be renamed.
+var kafkaMetricsToRename = map[string]bool{
+	"kafka.producer.request-rate":        true,
+	"kafka.producer.response-rate":       true,
+	"kafka.producer.request-latency-avg": true,
+	"kafka.consumer.fetch-size-avg":      true,
+	"kafka.producer.compression-rate":    true,
+	"kafka.producer.record-retry-rate":   true,
+	"kafka.producer.record-send-rate":    true,
+	"kafka.producer.record-error-rate":   true,
+}
+
 // Note: `-` get converted into `_` which will result in some OTel and DD metric
 // having the same name. In order to prevent duplicate stats, prepend by `otel.`
 // in these cases.
@@ -430,8 +442,7 @@ func remapJvmMetrics(all pmetric.MetricSlice, m pmetric.Metric) {
 
 // renameKafkaMetrics renames otel kafka metrics to avoid conflicts with DD metrics.
 func renameKafkaMetrics(m pmetric.Metric) {
-	switch m.Name() {
-	case "kafka.producer.request-rate", "kafka.producer.response-rate", "kafka.producer.request-latency-avg", "kafka.consumer.fetch-size-avg", "kafka.producer.compression-rate", "kafka.producer.record-retry-rate", "kafka.producer.record-send-rate", "kafka.producer.record-error-rate":
+	if _, ok := kafkaMetricsToRename[m.Name()]; ok {
 		m.SetName("otel." + m.Name())
 	}
 }
