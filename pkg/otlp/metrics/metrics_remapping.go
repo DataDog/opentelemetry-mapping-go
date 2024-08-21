@@ -239,9 +239,9 @@ func renameHostMetrics(m pmetric.Metric) {
 	}
 }
 
-var agentHTTPMetrics = map[string]struct{} {
-	"http_server_duration": struct{}{},
-	"http_server_request_size": struct{}{},
+var agentHTTPMetrics = map[string]struct{}{
+	"http_server_duration":      struct{}{},
+	"http_server_request_size":  struct{}{},
 	"http_server_response_size": struct{}{},
 }
 
