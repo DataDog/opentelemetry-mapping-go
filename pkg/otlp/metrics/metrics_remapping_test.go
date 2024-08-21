@@ -25,33 +25,35 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
-func TestRemapAndRenameMetrics(t *testing.T) {
-	// point is a datapoint
-	type point struct {
-		// i defines a IntValue datapoint when non-zero
-		i int64
-		// f defines a DoubleValue datapoint when non-zero
-		f float64
-		// attrs specifies the raw attributes of the datapoint
-		attrs map[string]any
-	}
-	// metric is a convenience function to create a new metric with the given name
-	// and set of datapoints
-	metric := func(name string, dps ...point) pmetric.Metric {
-		out := pmetric.NewMetric()
-		out.SetName(name)
-		g := out.SetEmptyGauge()
-		for _, d := range dps {
-			p := g.DataPoints().AppendEmpty()
-			if d.i != 0 {
-				p.SetIntValue(d.i)
-			} else {
-				p.SetDoubleValue(d.f)
-			}
-			p.Attributes().FromRaw(d.attrs)
+// testPoint is a datapoint
+type testPoint struct {
+	// i defines a IntValue datapoint when non-zero
+	i int64
+	// f defines a DoubleValue datapoint when non-zero
+	f float64
+	// attrs specifies the raw attributes of the datapoint
+	attrs map[string]any
+}
+
+// testMetric is a convenience function to create a new metric with the given name
+// and set of datapoints
+func testMetric(name string, dps ...testPoint) pmetric.Metric {
+	out := pmetric.NewMetric()
+	out.SetName(name)
+	g := out.SetEmptyGauge()
+	for _, d := range dps {
+		p := g.DataPoints().AppendEmpty()
+		if d.i != 0 {
+			p.SetIntValue(d.i)
+		} else {
+			p.SetDoubleValue(d.f)
 		}
-		return out
+		p.Attributes().FromRaw(d.attrs)
 	}
+	return out
+}
+
+func TestRemapAndRenameMetrics(t *testing.T) {
 	chunit := func(m pmetric.Metric, typ string) pmetric.Metric {
 		m.SetUnit(typ)
 		return m
@@ -63,273 +65,273 @@ func TestRemapAndRenameMetrics(t *testing.T) {
 		out []pmetric.Metric
 	}{
 		{
-			in:  metric("system.cpu.load_average.1m", point{f: 1}),
-			out: []pmetric.Metric{metric("system.load.1", point{f: 1})},
+			in:  testMetric("system.cpu.load_average.1m", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("system.load.1", testPoint{f: 1})},
 		},
 		{
-			in:  metric("system.cpu.load_average.5m", point{f: 5}),
-			out: []pmetric.Metric{metric("system.load.5", point{f: 5})},
+			in:  testMetric("system.cpu.load_average.5m", testPoint{f: 5}),
+			out: []pmetric.Metric{testMetric("system.load.5", testPoint{f: 5})},
 		},
 		{
-			in:  metric("system.cpu.load_average.15m", point{f: 15}),
-			out: []pmetric.Metric{metric("system.load.15", point{f: 15})},
+			in:  testMetric("system.cpu.load_average.15m", testPoint{f: 15}),
+			out: []pmetric.Metric{testMetric("system.load.15", testPoint{f: 15})},
 		},
 		{
-			in: metric("system.cpu.utilization",
-				point{f: 1, attrs: map[string]any{"state": "idle"}},
-				point{f: 2, attrs: map[string]any{"state": "user"}},
-				point{f: 3, attrs: map[string]any{"state": "system"}},
-				point{f: 5, attrs: map[string]any{"state": "wait"}},
-				point{f: 8, attrs: map[string]any{"state": "steal"}},
-				point{f: 13, attrs: map[string]any{"state": "other"}},
+			in: testMetric("system.cpu.utilization",
+				testPoint{f: 1, attrs: map[string]any{"state": "idle"}},
+				testPoint{f: 2, attrs: map[string]any{"state": "user"}},
+				testPoint{f: 3, attrs: map[string]any{"state": "system"}},
+				testPoint{f: 5, attrs: map[string]any{"state": "wait"}},
+				testPoint{f: 8, attrs: map[string]any{"state": "steal"}},
+				testPoint{f: 13, attrs: map[string]any{"state": "other"}},
 			),
 			out: []pmetric.Metric{
-				metric("system.cpu.idle",
-					point{f: 100, attrs: map[string]any{"state": "idle"}}),
-				metric("system.cpu.user",
-					point{f: 200, attrs: map[string]any{"state": "user"}}),
-				metric("system.cpu.system",
-					point{f: 300, attrs: map[string]any{"state": "system"}}),
-				metric("system.cpu.iowait",
-					point{f: 500, attrs: map[string]any{"state": "wait"}}),
-				metric("system.cpu.stolen",
-					point{f: 800, attrs: map[string]any{"state": "steal"}}),
+				testMetric("system.cpu.idle",
+					testPoint{f: 100, attrs: map[string]any{"state": "idle"}}),
+				testMetric("system.cpu.user",
+					testPoint{f: 200, attrs: map[string]any{"state": "user"}}),
+				testMetric("system.cpu.system",
+					testPoint{f: 300, attrs: map[string]any{"state": "system"}}),
+				testMetric("system.cpu.iowait",
+					testPoint{f: 500, attrs: map[string]any{"state": "wait"}}),
+				testMetric("system.cpu.stolen",
+					testPoint{f: 800, attrs: map[string]any{"state": "steal"}}),
 			},
 		},
 		{
-			in:  metric("system.cpu.utilization", point{i: 5, attrs: map[string]any{"state": "idle"}}),
-			out: []pmetric.Metric{metric("system.cpu.idle", point{i: 5, attrs: map[string]any{"state": "idle"}})},
+			in:  testMetric("system.cpu.utilization", testPoint{i: 5, attrs: map[string]any{"state": "idle"}}),
+			out: []pmetric.Metric{testMetric("system.cpu.idle", testPoint{i: 5, attrs: map[string]any{"state": "idle"}})},
 		},
 		{
-			in: metric("system.memory.usage",
-				point{f: divMebibytes * 1, attrs: map[string]any{"state": "free"}},
-				point{f: divMebibytes * 2, attrs: map[string]any{"state": "cached"}},
-				point{f: divMebibytes * 3, attrs: map[string]any{"state": "buffered"}},
-				point{f: divMebibytes * 5, attrs: map[string]any{"state": "steal"}},
-				point{f: divMebibytes * 8, attrs: map[string]any{"state": "system"}},
-				point{f: divMebibytes * 13, attrs: map[string]any{"state": "user"}},
+			in: testMetric("system.memory.usage",
+				testPoint{f: divMebibytes * 1, attrs: map[string]any{"state": "free"}},
+				testPoint{f: divMebibytes * 2, attrs: map[string]any{"state": "cached"}},
+				testPoint{f: divMebibytes * 3, attrs: map[string]any{"state": "buffered"}},
+				testPoint{f: divMebibytes * 5, attrs: map[string]any{"state": "steal"}},
+				testPoint{f: divMebibytes * 8, attrs: map[string]any{"state": "system"}},
+				testPoint{f: divMebibytes * 13, attrs: map[string]any{"state": "user"}},
 			),
 			out: []pmetric.Metric{
-				metric("system.mem.total",
-					point{f: 1, attrs: map[string]any{"state": "free"}},
-					point{f: 2, attrs: map[string]any{"state": "cached"}},
-					point{f: 3, attrs: map[string]any{"state": "buffered"}},
-					point{f: 5, attrs: map[string]any{"state": "steal"}},
-					point{f: 8, attrs: map[string]any{"state": "system"}},
-					point{f: 13, attrs: map[string]any{"state": "user"}},
+				testMetric("system.mem.total",
+					testPoint{f: 1, attrs: map[string]any{"state": "free"}},
+					testPoint{f: 2, attrs: map[string]any{"state": "cached"}},
+					testPoint{f: 3, attrs: map[string]any{"state": "buffered"}},
+					testPoint{f: 5, attrs: map[string]any{"state": "steal"}},
+					testPoint{f: 8, attrs: map[string]any{"state": "system"}},
+					testPoint{f: 13, attrs: map[string]any{"state": "user"}},
 				),
-				metric("system.mem.usable",
-					point{f: 1, attrs: map[string]any{"state": "free"}},
-					point{f: 2, attrs: map[string]any{"state": "cached"}},
-					point{f: 3, attrs: map[string]any{"state": "buffered"}},
-				),
-			},
-		},
-		{
-			in:  metric("system.memory.usage", point{i: divMebibytes * 5}),
-			out: []pmetric.Metric{metric("system.mem.total", point{i: 5})},
-		},
-		{
-			in: metric("system.network.io",
-				point{f: 1, attrs: map[string]any{"direction": "receive"}},
-				point{f: 2, attrs: map[string]any{"direction": "transmit"}},
-				point{f: 3, attrs: map[string]any{"state": "buffered"}},
-			),
-			out: []pmetric.Metric{
-				metric("system.net.bytes_rcvd",
-					point{f: 1, attrs: map[string]any{"direction": "receive"}},
-				),
-				metric("system.net.bytes_sent",
-					point{f: 2, attrs: map[string]any{"direction": "transmit"}},
+				testMetric("system.mem.usable",
+					testPoint{f: 1, attrs: map[string]any{"state": "free"}},
+					testPoint{f: 2, attrs: map[string]any{"state": "cached"}},
+					testPoint{f: 3, attrs: map[string]any{"state": "buffered"}},
 				),
 			},
 		},
 		{
-			in: metric("system.paging.usage",
-				point{f: divMebibytes * 1, attrs: map[string]any{"state": "free"}},
-				point{f: divMebibytes * 2, attrs: map[string]any{"state": "used"}},
-				point{f: 3, attrs: map[string]any{"state": "buffered"}},
+			in:  testMetric("system.memory.usage", testPoint{i: divMebibytes * 5}),
+			out: []pmetric.Metric{testMetric("system.mem.total", testPoint{i: 5})},
+		},
+		{
+			in: testMetric("system.network.io",
+				testPoint{f: 1, attrs: map[string]any{"direction": "receive"}},
+				testPoint{f: 2, attrs: map[string]any{"direction": "transmit"}},
+				testPoint{f: 3, attrs: map[string]any{"state": "buffered"}},
 			),
 			out: []pmetric.Metric{
-				metric("system.swap.free",
-					point{f: 1, attrs: map[string]any{"state": "free"}},
+				testMetric("system.net.bytes_rcvd",
+					testPoint{f: 1, attrs: map[string]any{"direction": "receive"}},
 				),
-				metric("system.swap.used",
-					point{f: 2, attrs: map[string]any{"state": "used"}},
+				testMetric("system.net.bytes_sent",
+					testPoint{f: 2, attrs: map[string]any{"direction": "transmit"}},
 				),
 			},
 		},
 		{
-			in:  metric("system.filesystem.utilization", point{f: 15}),
-			out: []pmetric.Metric{metric("system.disk.in_use", point{f: 15})},
+			in: testMetric("system.paging.usage",
+				testPoint{f: divMebibytes * 1, attrs: map[string]any{"state": "free"}},
+				testPoint{f: divMebibytes * 2, attrs: map[string]any{"state": "used"}},
+				testPoint{f: 3, attrs: map[string]any{"state": "buffered"}},
+			),
+			out: []pmetric.Metric{
+				testMetric("system.swap.free",
+					testPoint{f: 1, attrs: map[string]any{"state": "free"}},
+				),
+				testMetric("system.swap.used",
+					testPoint{f: 2, attrs: map[string]any{"state": "used"}},
+				),
+			},
 		},
 		{
-			in:  metric("other.metric", point{f: 15}),
+			in:  testMetric("system.filesystem.utilization", testPoint{f: 15}),
+			out: []pmetric.Metric{testMetric("system.disk.in_use", testPoint{f: 15})},
+		},
+		{
+			in:  testMetric("other.metric", testPoint{f: 15}),
 			out: []pmetric.Metric{},
 		},
 		{
-			in: metric("container.cpu.usage.total", point{f: 15}),
+			in: testMetric("container.cpu.usage.total", testPoint{f: 15}),
 			out: []pmetric.Metric{
-				chunit(metric("container.cpu.usage", point{f: 15}), "nanocore"),
+				chunit(testMetric("container.cpu.usage", testPoint{f: 15}), "nanocore"),
 			},
 		},
 		{
-			in: metric("container.cpu.usage.usermode", point{f: 15}),
+			in: testMetric("container.cpu.usage.usermode", testPoint{f: 15}),
 			out: []pmetric.Metric{
-				chunit(metric("container.cpu.user", point{f: 15}), "nanocore"),
+				chunit(testMetric("container.cpu.user", testPoint{f: 15}), "nanocore"),
 			},
 		},
 		{
-			in: metric("container.cpu.usage.system", point{f: 15}),
+			in: testMetric("container.cpu.usage.system", testPoint{f: 15}),
 			out: []pmetric.Metric{
-				chunit(metric("container.cpu.system", point{f: 15}), "nanocore"),
+				chunit(testMetric("container.cpu.system", testPoint{f: 15}), "nanocore"),
 			},
 		},
 		{
-			in:  metric("container.cpu.throttling_data.throttled_time", point{f: 15}),
-			out: []pmetric.Metric{metric("container.cpu.throttled", point{f: 15})},
+			in:  testMetric("container.cpu.throttling_data.throttled_time", testPoint{f: 15}),
+			out: []pmetric.Metric{testMetric("container.cpu.throttled", testPoint{f: 15})},
 		},
 		{
-			in:  metric("container.cpu.throttling_data.throttled_periods", point{f: 15}),
-			out: []pmetric.Metric{metric("container.cpu.throttled.periods", point{f: 15})},
+			in:  testMetric("container.cpu.throttling_data.throttled_periods", testPoint{f: 15}),
+			out: []pmetric.Metric{testMetric("container.cpu.throttled.periods", testPoint{f: 15})},
 		},
 		{
-			in:  metric("container.memory.usage.total", point{f: 15}),
-			out: []pmetric.Metric{metric("container.memory.usage", point{f: 15})},
+			in:  testMetric("container.memory.usage.total", testPoint{f: 15}),
+			out: []pmetric.Metric{testMetric("container.memory.usage", testPoint{f: 15})},
 		},
 		{
-			in:  metric("container.memory.active_anon", point{f: 15}),
-			out: []pmetric.Metric{metric("container.memory.kernel", point{f: 15})},
+			in:  testMetric("container.memory.active_anon", testPoint{f: 15}),
+			out: []pmetric.Metric{testMetric("container.memory.kernel", testPoint{f: 15})},
 		},
 		{
-			in:  metric("container.memory.hierarchical_memory_limit", point{f: 15}),
-			out: []pmetric.Metric{metric("container.memory.limit", point{f: 15})},
+			in:  testMetric("container.memory.hierarchical_memory_limit", testPoint{f: 15}),
+			out: []pmetric.Metric{testMetric("container.memory.limit", testPoint{f: 15})},
 		},
 		{
-			in:  metric("container.memory.usage.limit", point{f: 15}),
-			out: []pmetric.Metric{metric("container.memory.soft_limit", point{f: 15})},
+			in:  testMetric("container.memory.usage.limit", testPoint{f: 15}),
+			out: []pmetric.Metric{testMetric("container.memory.soft_limit", testPoint{f: 15})},
 		},
 		{
-			in:  metric("container.memory.total_cache", point{f: 15}),
-			out: []pmetric.Metric{metric("container.memory.cache", point{f: 15})},
+			in:  testMetric("container.memory.total_cache", testPoint{f: 15}),
+			out: []pmetric.Metric{testMetric("container.memory.cache", testPoint{f: 15})},
 		},
 		{
-			in:  metric("container.memory.total_swap", point{f: 15}),
-			out: []pmetric.Metric{metric("container.memory.swap", point{f: 15})},
+			in:  testMetric("container.memory.total_swap", testPoint{f: 15}),
+			out: []pmetric.Metric{testMetric("container.memory.swap", testPoint{f: 15})},
 		},
 		{
-			in: metric("container.blockio.io_service_bytes_recursive",
-				point{f: 1, attrs: map[string]any{"operation": "write"}},
-				point{f: 2, attrs: map[string]any{"operation": "read"}},
-				point{f: 3, attrs: map[string]any{"state": "buffered"}},
+			in: testMetric("container.blockio.io_service_bytes_recursive",
+				testPoint{f: 1, attrs: map[string]any{"operation": "write"}},
+				testPoint{f: 2, attrs: map[string]any{"operation": "read"}},
+				testPoint{f: 3, attrs: map[string]any{"state": "buffered"}},
 			),
 			out: []pmetric.Metric{
-				metric("container.io.write",
-					point{f: 1, attrs: map[string]any{"operation": "write"}}),
-				metric("container.io.read",
-					point{f: 2, attrs: map[string]any{"operation": "read"}}),
+				testMetric("container.io.write",
+					testPoint{f: 1, attrs: map[string]any{"operation": "write"}}),
+				testMetric("container.io.read",
+					testPoint{f: 2, attrs: map[string]any{"operation": "read"}}),
 			},
 		},
 		{
-			in: metric("container.blockio.io_service_bytes_recursive",
-				point{f: 1, attrs: map[string]any{"operation": "write"}},
+			in: testMetric("container.blockio.io_service_bytes_recursive",
+				testPoint{f: 1, attrs: map[string]any{"operation": "write"}},
 			),
 			out: []pmetric.Metric{
-				metric("container.io.write",
-					point{f: 1, attrs: map[string]any{"operation": "write"}}),
+				testMetric("container.io.write",
+					testPoint{f: 1, attrs: map[string]any{"operation": "write"}}),
 			},
 		},
 		{
-			in: metric("container.blockio.io_serviced_recursive",
-				point{f: 1, attrs: map[string]any{"operation": "write"}},
-				point{f: 2, attrs: map[string]any{"operation": "read"}},
-				point{f: 3, attrs: map[string]any{"state": "buffered"}},
+			in: testMetric("container.blockio.io_serviced_recursive",
+				testPoint{f: 1, attrs: map[string]any{"operation": "write"}},
+				testPoint{f: 2, attrs: map[string]any{"operation": "read"}},
+				testPoint{f: 3, attrs: map[string]any{"state": "buffered"}},
 			),
 			out: []pmetric.Metric{
-				metric("container.io.write.operations",
-					point{f: 1, attrs: map[string]any{"operation": "write"}}),
-				metric("container.io.read.operations",
-					point{f: 2, attrs: map[string]any{"operation": "read"}}),
+				testMetric("container.io.write.operations",
+					testPoint{f: 1, attrs: map[string]any{"operation": "write"}}),
+				testMetric("container.io.read.operations",
+					testPoint{f: 2, attrs: map[string]any{"operation": "read"}}),
 			},
 		},
 		{
-			in: metric("container.blockio.io_serviced_recursive",
-				point{f: 1, attrs: map[string]any{"xoperation": "write"}},
-				point{f: 2, attrs: map[string]any{"xoperation": "read"}},
-				point{f: 3, attrs: map[string]any{"state": "buffered"}},
+			in: testMetric("container.blockio.io_serviced_recursive",
+				testPoint{f: 1, attrs: map[string]any{"xoperation": "write"}},
+				testPoint{f: 2, attrs: map[string]any{"xoperation": "read"}},
+				testPoint{f: 3, attrs: map[string]any{"state": "buffered"}},
 			),
 			out: nil, // no datapoints match filter
 		},
 		{
-			in:  metric("container.network.io.usage.tx_bytes", point{f: 15}),
-			out: []pmetric.Metric{metric("container.net.sent", point{f: 15})},
+			in:  testMetric("container.network.io.usage.tx_bytes", testPoint{f: 15}),
+			out: []pmetric.Metric{testMetric("container.net.sent", testPoint{f: 15})},
 		},
 		{
-			in:  metric("container.network.io.usage.tx_packets", point{f: 15}),
-			out: []pmetric.Metric{metric("container.net.sent.packets", point{f: 15})},
+			in:  testMetric("container.network.io.usage.tx_packets", testPoint{f: 15}),
+			out: []pmetric.Metric{testMetric("container.net.sent.packets", testPoint{f: 15})},
 		},
 		{
-			in:  metric("container.network.io.usage.rx_bytes", point{f: 15}),
-			out: []pmetric.Metric{metric("container.net.rcvd", point{f: 15})},
+			in:  testMetric("container.network.io.usage.rx_bytes", testPoint{f: 15}),
+			out: []pmetric.Metric{testMetric("container.net.rcvd", testPoint{f: 15})},
 		},
 		{
-			in:  metric("container.network.io.usage.rx_packets", point{f: 15}),
-			out: []pmetric.Metric{metric("container.net.rcvd.packets", point{f: 15})},
+			in:  testMetric("container.network.io.usage.rx_packets", testPoint{f: 15}),
+			out: []pmetric.Metric{testMetric("container.net.rcvd.packets", testPoint{f: 15})},
 		},
 
 		// kafka
 		{
-			in:  metric("kafka.producer.request-rate", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.producer.request_rate", point{f: 1, attrs: map[string]any{"type": "producer-metrics"}})},
+			in:  testMetric("kafka.producer.request-rate", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.producer.request_rate", testPoint{f: 1, attrs: map[string]any{"type": "producer-metrics"}})},
 		},
 		{
-			in:  metric("kafka.producer.response-rate", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.producer.response_rate", point{f: 1, attrs: map[string]any{"type": "producer-metrics"}})},
+			in:  testMetric("kafka.producer.response-rate", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.producer.response_rate", testPoint{f: 1, attrs: map[string]any{"type": "producer-metrics"}})},
 		},
 		{
-			in:  metric("kafka.producer.request-latency-avg", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.producer.request_latency_avg", point{f: 1, attrs: map[string]any{"type": "producer-metrics"}})},
+			in:  testMetric("kafka.producer.request-latency-avg", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.producer.request_latency_avg", testPoint{f: 1, attrs: map[string]any{"type": "producer-metrics"}})},
 		},
 		{
-			in:  metric("kafka.producer.outgoing-byte-rate", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.producer.bytes_out", point{f: 1, attrs: map[string]any{"type": "producer-metrics"}})},
+			in:  testMetric("kafka.producer.outgoing-byte-rate", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.producer.bytes_out", testPoint{f: 1, attrs: map[string]any{"type": "producer-metrics"}})},
 		},
 		{
-			in:  metric("kafka.producer.io-wait-time-ns-avg", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.producer.io_wait", point{f: 1, attrs: map[string]any{"type": "producer-metrics"}})},
+			in:  testMetric("kafka.producer.io-wait-time-ns-avg", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.producer.io_wait", testPoint{f: 1, attrs: map[string]any{"type": "producer-metrics"}})},
 		},
 		{
-			in: metric("kafka.producer.byte-rate", point{f: 1, attrs: map[string]any{"client-id": "client123"}}),
-			out: []pmetric.Metric{metric("kafka.producer.bytes_out", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.producer.byte-rate", testPoint{f: 1, attrs: map[string]any{"client-id": "client123"}}),
+			out: []pmetric.Metric{testMetric("kafka.producer.bytes_out", testPoint{f: 1, attrs: map[string]any{
 				"client-id": "client123",
 				"client":    "client123",
 				"type":      "producer-topic-metrics",
 			}})},
 		},
 		{
-			in:  metric("kafka.consumer.total.bytes-consumed-rate", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.consumer.bytes_in", point{f: 1, attrs: map[string]any{"type": "consumer-fetch-manager-metrics"}})},
+			in:  testMetric("kafka.consumer.total.bytes-consumed-rate", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.consumer.bytes_in", testPoint{f: 1, attrs: map[string]any{"type": "consumer-fetch-manager-metrics"}})},
 		},
 		{
-			in:  metric("kafka.consumer.total.records-consumed-rate", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.consumer.messages_in", point{f: 1, attrs: map[string]any{"type": "consumer-fetch-manager-metrics"}})},
+			in:  testMetric("kafka.consumer.total.records-consumed-rate", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.consumer.messages_in", testPoint{f: 1, attrs: map[string]any{"type": "consumer-fetch-manager-metrics"}})},
 		},
 		{
-			in: metric("kafka.network.io",
-				point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.network.io",
+				testPoint{f: 1, attrs: map[string]any{
 					"state": "out",
 				}},
-				point{f: 2, attrs: map[string]any{
+				testPoint{f: 2, attrs: map[string]any{
 					"state": "in",
 				}},
 			),
 			out: []pmetric.Metric{
-				metric("kafka.net.bytes_out.rate", point{f: 1, attrs: map[string]any{
+				testMetric("kafka.net.bytes_out.rate", testPoint{f: 1, attrs: map[string]any{
 					"type":  "BrokerTopicMetrics",
 					"name":  "BytesOutPerSec",
 					"state": "out",
 				}}),
-				metric("kafka.net.bytes_in.rate", point{f: 2, attrs: map[string]any{
+				testMetric("kafka.net.bytes_in.rate", testPoint{f: 2, attrs: map[string]any{
 					"type":  "BrokerTopicMetrics",
 					"name":  "BytesInPerSec",
 					"state": "in",
@@ -337,21 +339,21 @@ func TestRemapAndRenameMetrics(t *testing.T) {
 			},
 		},
 		{
-			in: metric("kafka.purgatory.size",
-				point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.purgatory.size",
+				testPoint{f: 1, attrs: map[string]any{
 					"type": "produce",
 				}},
-				point{f: 2, attrs: map[string]any{
+				testPoint{f: 2, attrs: map[string]any{
 					"type": "fetch",
 				}},
 			),
 			out: []pmetric.Metric{
-				metric("kafka.request.producer_request_purgatory.size", point{f: 1, attrs: map[string]any{
+				testMetric("kafka.request.producer_request_purgatory.size", testPoint{f: 1, attrs: map[string]any{
 					"type":             "DelayedOperationPurgatory",
 					"name":             "PurgatorySize",
 					"delayedOperation": "Produce",
 				}}),
-				metric("kafka.request.fetch_request_purgatory.size", point{f: 2, attrs: map[string]any{
+				testMetric("kafka.request.fetch_request_purgatory.size", testPoint{f: 2, attrs: map[string]any{
 					"type":             "DelayedOperationPurgatory",
 					"name":             "PurgatorySize",
 					"delayedOperation": "Fetch",
@@ -359,28 +361,28 @@ func TestRemapAndRenameMetrics(t *testing.T) {
 			},
 		},
 		{
-			in: metric("kafka.partition.under_replicated", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.replication.under_replicated_partitions", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.partition.under_replicated", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.replication.under_replicated_partitions", testPoint{f: 1, attrs: map[string]any{
 				"type": "ReplicaManager",
 				"name": "UnderReplicatedPartitions",
 			}})},
 		},
 		{
-			in: metric("kafka.isr.operation.count",
-				point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.isr.operation.count",
+				testPoint{f: 1, attrs: map[string]any{
 					"operation": "shrink",
 				}},
-				point{f: 2, attrs: map[string]any{
+				testPoint{f: 2, attrs: map[string]any{
 					"operation": "expand",
 				}},
 			),
 			out: []pmetric.Metric{
-				metric("kafka.replication.isr_shrinks.rate", point{f: 1, attrs: map[string]any{
+				testMetric("kafka.replication.isr_shrinks.rate", testPoint{f: 1, attrs: map[string]any{
 					"type":      "ReplicaManager",
 					"name":      "IsrShrinksPerSec",
 					"operation": "shrink",
 				}}),
-				metric("kafka.replication.isr_expands.rate", point{f: 2, attrs: map[string]any{
+				testMetric("kafka.replication.isr_expands.rate", testPoint{f: 2, attrs: map[string]any{
 					"type":      "ReplicaManager",
 					"name":      "IsrExpandsPerSec",
 					"operation": "expand",
@@ -388,43 +390,43 @@ func TestRemapAndRenameMetrics(t *testing.T) {
 			},
 		},
 		{
-			in: metric("kafka.leader.election.rate", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.replication.leader_elections.rate", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.leader.election.rate", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.replication.leader_elections.rate", testPoint{f: 1, attrs: map[string]any{
 				"type": "ControllerStats",
 				"name": "LeaderElectionRateAndTimeMs",
 			}})},
 		},
 		{
-			in: metric("kafka.partition.offline", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.replication.offline_partitions_count", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.partition.offline", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.replication.offline_partitions_count", testPoint{f: 1, attrs: map[string]any{
 				"type": "KafkaController",
 				"name": "OfflinePartitionsCount",
 			}})},
 		},
 		{
-			in: metric("kafka.request.time.avg",
-				point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.request.time.avg",
+				testPoint{f: 1, attrs: map[string]any{
 					"type": "produce",
 				}},
-				point{f: 2, attrs: map[string]any{
+				testPoint{f: 2, attrs: map[string]any{
 					"type": "fetchconsumer",
 				}},
-				point{f: 3, attrs: map[string]any{
+				testPoint{f: 3, attrs: map[string]any{
 					"type": "fetchfollower",
 				}},
 			),
 			out: []pmetric.Metric{
-				metric("kafka.request.produce.time.avg", point{f: 1, attrs: map[string]any{
+				testMetric("kafka.request.produce.time.avg", testPoint{f: 1, attrs: map[string]any{
 					"type":    "RequestMetrics",
 					"name":    "TotalTimeMs",
 					"request": "Produce",
 				}}),
-				metric("kafka.request.fetch_consumer.time.avg", point{f: 2, attrs: map[string]any{
+				testMetric("kafka.request.fetch_consumer.time.avg", testPoint{f: 2, attrs: map[string]any{
 					"type":    "RequestMetrics",
 					"name":    "TotalTimeMs",
 					"request": "FetchConsumer",
 				}}),
-				metric("kafka.request.fetch_follower.time.avg", point{f: 3, attrs: map[string]any{
+				testMetric("kafka.request.fetch_follower.time.avg", testPoint{f: 3, attrs: map[string]any{
 					"type":    "RequestMetrics",
 					"name":    "TotalTimeMs",
 					"request": "FetchFollower",
@@ -432,56 +434,56 @@ func TestRemapAndRenameMetrics(t *testing.T) {
 			},
 		},
 		{
-			in: metric("kafka.message.count", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.messages_in.rate", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.message.count", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.messages_in.rate", testPoint{f: 1, attrs: map[string]any{
 				"type": "BrokerTopicMetrics",
 				"name": "MessagesInPerSec",
 			}})},
 		},
 		{
-			in: metric("kafka.request.failed",
-				point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.request.failed",
+				testPoint{f: 1, attrs: map[string]any{
 					"type": "produce",
 				}},
-				point{f: 2, attrs: map[string]any{
+				testPoint{f: 2, attrs: map[string]any{
 					"type": "fetch",
 				}},
 			),
 			out: []pmetric.Metric{
-				metric("kafka.request.produce.failed.rate", point{f: 1, attrs: map[string]any{
+				testMetric("kafka.request.produce.failed.rate", testPoint{f: 1, attrs: map[string]any{
 					"type": "BrokerTopicMetrics",
 					"name": "FailedProduceRequestsPerSec",
 				}}),
-				metric("kafka.request.fetch.failed.rate", point{f: 2, attrs: map[string]any{
+				testMetric("kafka.request.fetch.failed.rate", testPoint{f: 2, attrs: map[string]any{
 					"type": "BrokerTopicMetrics",
 					"name": "FailedFetchRequestsPerSec",
 				}}),
 			},
 		},
 		{
-			in: metric("kafka.request.time.99p",
-				point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.request.time.99p",
+				testPoint{f: 1, attrs: map[string]any{
 					"type": "produce",
 				}},
-				point{f: 2, attrs: map[string]any{
+				testPoint{f: 2, attrs: map[string]any{
 					"type": "fetchconsumer",
 				}},
-				point{f: 3, attrs: map[string]any{
+				testPoint{f: 3, attrs: map[string]any{
 					"type": "fetchfollower",
 				}},
 			),
 			out: []pmetric.Metric{
-				metric("kafka.request.produce.time.99percentile", point{f: 1, attrs: map[string]any{
+				testMetric("kafka.request.produce.time.99percentile", testPoint{f: 1, attrs: map[string]any{
 					"type":    "RequestMetrics",
 					"name":    "TotalTimeMs",
 					"request": "Produce",
 				}}),
-				metric("kafka.request.fetch_consumer.time.99percentile", point{f: 2, attrs: map[string]any{
+				testMetric("kafka.request.fetch_consumer.time.99percentile", testPoint{f: 2, attrs: map[string]any{
 					"type":    "RequestMetrics",
 					"name":    "TotalTimeMs",
 					"request": "FetchConsumer",
 				}}),
-				metric("kafka.request.fetch_follower.time.99percentile", point{f: 3, attrs: map[string]any{
+				testMetric("kafka.request.fetch_follower.time.99percentile", testPoint{f: 3, attrs: map[string]any{
 					"type":    "RequestMetrics",
 					"name":    "TotalTimeMs",
 					"request": "FetchFollower",
@@ -489,113 +491,113 @@ func TestRemapAndRenameMetrics(t *testing.T) {
 			},
 		},
 		{
-			in: metric("kafka.partition.count", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.replication.partition_count", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.partition.count", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.replication.partition_count", testPoint{f: 1, attrs: map[string]any{
 				"type": "ReplicaManager",
 				"name": "PartitionCount",
 			}})},
 		},
 		{
-			in: metric("kafka.max.lag", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.replication.max_lag", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.max.lag", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.replication.max_lag", testPoint{f: 1, attrs: map[string]any{
 				"type":     "ReplicaFetcherManager",
 				"name":     "MaxLag",
 				"clientId": "replica",
 			}})},
 		},
 		{
-			in: metric("kafka.controller.active.count", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.replication.active_controller_count", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.controller.active.count", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.replication.active_controller_count", testPoint{f: 1, attrs: map[string]any{
 				"type": "KafkaController",
 				"name": "ActiveControllerCount",
 			}})},
 		},
 		{
-			in: metric("kafka.unclean.election.rate", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.replication.unclean_leader_elections.rate", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.unclean.election.rate", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.replication.unclean_leader_elections.rate", testPoint{f: 1, attrs: map[string]any{
 				"type": "ControllerStats",
 				"name": "UncleanLeaderElectionsPerSec",
 			}})},
 		},
 		{
-			in: metric("kafka.request.queue", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.request.channel.queue.size", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.request.queue", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.request.channel.queue.size", testPoint{f: 1, attrs: map[string]any{
 				"type": "RequestChannel",
 				"name": "RequestQueueSize",
 			}})},
 		},
 		{
-			in: metric("kafka.logs.flush.time.count", point{f: 1}),
-			out: []pmetric.Metric{metric("kafka.log.flush_rate.rate", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.logs.flush.time.count", testPoint{f: 1}),
+			out: []pmetric.Metric{testMetric("kafka.log.flush_rate.rate", testPoint{f: 1, attrs: map[string]any{
 				"type": "LogFlushStats",
 				"name": "LogFlushRateAndTimeMs",
 			}})},
 		},
 		{
-			in: metric("kafka.consumer.bytes-consumed-rate", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.consumer.bytes-consumed-rate", testPoint{f: 1, attrs: map[string]any{
 				"client-id": "client123",
 			}}),
-			out: []pmetric.Metric{metric("kafka.consumer.bytes_consumed", point{f: 1, attrs: map[string]any{
+			out: []pmetric.Metric{testMetric("kafka.consumer.bytes_consumed", testPoint{f: 1, attrs: map[string]any{
 				"type":      "consumer-fetch-manager-metrics",
 				"client-id": "client123",
 				"client":    "client123",
 			}})},
 		},
 		{
-			in: metric("kafka.consumer.records-consumed-rate", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.consumer.records-consumed-rate", testPoint{f: 1, attrs: map[string]any{
 				"client-id": "client123",
 			}}),
-			out: []pmetric.Metric{metric("kafka.consumer.records_consumed", point{f: 1, attrs: map[string]any{
+			out: []pmetric.Metric{testMetric("kafka.consumer.records_consumed", testPoint{f: 1, attrs: map[string]any{
 				"type":      "consumer-fetch-manager-metrics",
 				"client-id": "client123",
 				"client":    "client123",
 			}})},
 		},
 		{
-			in: metric("kafka.consumer.fetch-size-avg", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.consumer.fetch-size-avg", testPoint{f: 1, attrs: map[string]any{
 				"client-id": "client123",
 			}}),
-			out: []pmetric.Metric{metric("kafka.consumer.fetch_size_avg", point{f: 1, attrs: map[string]any{
+			out: []pmetric.Metric{testMetric("kafka.consumer.fetch_size_avg", testPoint{f: 1, attrs: map[string]any{
 				"type":      "consumer-fetch-manager-metrics",
 				"client-id": "client123",
 				"client":    "client123",
 			}})},
 		},
 		{
-			in: metric("kafka.producer.compression-rate", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.producer.compression-rate", testPoint{f: 1, attrs: map[string]any{
 				"client-id": "client123",
 			}}),
-			out: []pmetric.Metric{metric("kafka.producer.compression_rate", point{f: 1, attrs: map[string]any{
+			out: []pmetric.Metric{testMetric("kafka.producer.compression_rate", testPoint{f: 1, attrs: map[string]any{
 				"type":      "producer-topic-metrics",
 				"client-id": "client123",
 				"client":    "client123",
 			}})},
 		},
 		{
-			in: metric("kafka.producer.record-error-rate", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.producer.record-error-rate", testPoint{f: 1, attrs: map[string]any{
 				"client-id": "client123",
 			}}),
-			out: []pmetric.Metric{metric("kafka.producer.record_error_rate", point{f: 1, attrs: map[string]any{
+			out: []pmetric.Metric{testMetric("kafka.producer.record_error_rate", testPoint{f: 1, attrs: map[string]any{
 				"type":      "producer-topic-metrics",
 				"client-id": "client123",
 				"client":    "client123",
 			}})},
 		},
 		{
-			in: metric("kafka.producer.record-retry-rate", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.producer.record-retry-rate", testPoint{f: 1, attrs: map[string]any{
 				"client-id": "client123",
 			}}),
-			out: []pmetric.Metric{metric("kafka.producer.record_retry_rate", point{f: 1, attrs: map[string]any{
+			out: []pmetric.Metric{testMetric("kafka.producer.record_retry_rate", testPoint{f: 1, attrs: map[string]any{
 				"type":      "producer-topic-metrics",
 				"client-id": "client123",
 				"client":    "client123",
 			}})},
 		},
 		{
-			in: metric("kafka.producer.record-send-rate", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.producer.record-send-rate", testPoint{f: 1, attrs: map[string]any{
 				"client-id": "client123",
 			}}),
-			out: []pmetric.Metric{metric("kafka.producer.record_send_rate", point{f: 1, attrs: map[string]any{
+			out: []pmetric.Metric{testMetric("kafka.producer.record_send_rate", testPoint{f: 1, attrs: map[string]any{
 				"type":      "producer-topic-metrics",
 				"client-id": "client123",
 				"client":    "client123",
@@ -604,28 +606,28 @@ func TestRemapAndRenameMetrics(t *testing.T) {
 
 		// kafka metrics receiver
 		{
-			in: metric("kafka.partition.current_offset", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.partition.current_offset", testPoint{f: 1, attrs: map[string]any{
 				"group": "group123",
 			}}),
-			out: []pmetric.Metric{metric("kafka.broker_offset", point{f: 1, attrs: map[string]any{
+			out: []pmetric.Metric{testMetric("kafka.broker_offset", testPoint{f: 1, attrs: map[string]any{
 				"group":          "group123",
 				"consumer_group": "group123",
 			}})},
 		},
 		{
-			in: metric("kafka.consumer_group.lag", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.consumer_group.lag", testPoint{f: 1, attrs: map[string]any{
 				"group": "group123",
 			}}),
-			out: []pmetric.Metric{metric("kafka.consumer_lag", point{f: 1, attrs: map[string]any{
+			out: []pmetric.Metric{testMetric("kafka.consumer_lag", testPoint{f: 1, attrs: map[string]any{
 				"group":          "group123",
 				"consumer_group": "group123",
 			}})},
 		},
 		{
-			in: metric("kafka.consumer_group.offset", point{f: 1, attrs: map[string]any{
+			in: testMetric("kafka.consumer_group.offset", testPoint{f: 1, attrs: map[string]any{
 				"group": "group123",
 			}}),
-			out: []pmetric.Metric{metric("kafka.consumer_offset", point{f: 1, attrs: map[string]any{
+			out: []pmetric.Metric{testMetric("kafka.consumer_offset", testPoint{f: 1, attrs: map[string]any{
 				"group":          "group123",
 				"consumer_group": "group123",
 			}})},
@@ -633,138 +635,138 @@ func TestRemapAndRenameMetrics(t *testing.T) {
 
 		// jvm
 		{
-			in: metric("jvm.gc.collections.count",
-				point{f: 1, attrs: map[string]any{"name": "Copy"}},
-				point{f: 2, attrs: map[string]any{"name": "PS Scavenge"}},
-				point{f: 3, attrs: map[string]any{"name": "ParNew"}},
-				point{f: 4, attrs: map[string]any{"name": "G1 Young Generation"}},
+			in: testMetric("jvm.gc.collections.count",
+				testPoint{f: 1, attrs: map[string]any{"name": "Copy"}},
+				testPoint{f: 2, attrs: map[string]any{"name": "PS Scavenge"}},
+				testPoint{f: 3, attrs: map[string]any{"name": "ParNew"}},
+				testPoint{f: 4, attrs: map[string]any{"name": "G1 Young Generation"}},
 			),
 			out: []pmetric.Metric{
-				metric("jvm.gc.minor_collection_count",
-					point{f: 1, attrs: map[string]any{
+				testMetric("jvm.gc.minor_collection_count",
+					testPoint{f: 1, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "Copy",
 					}},
-					point{f: 2, attrs: map[string]any{
+					testPoint{f: 2, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "PS Scavenge",
 					}},
-					point{f: 3, attrs: map[string]any{
+					testPoint{f: 3, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "ParNew",
 					}},
-					point{f: 4, attrs: map[string]any{
+					testPoint{f: 4, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "G1 Young Generation",
 					}}),
 			},
 		},
 		{
-			in: metric("jvm.gc.collections.count",
-				point{f: 1, attrs: map[string]any{"name": "MarkSweepCompact"}},
-				point{f: 2, attrs: map[string]any{"name": "PS MarkSweep"}},
-				point{f: 3, attrs: map[string]any{"name": "ConcurrentMarkSweep"}},
-				point{f: 4, attrs: map[string]any{"name": "G1 Mixed Generation"}},
-				point{f: 5, attrs: map[string]any{"name": "G1 Old Generation"}},
-				point{f: 6, attrs: map[string]any{"name": "Shenandoah Cycles"}},
-				point{f: 7, attrs: map[string]any{"name": "ZGC"}},
+			in: testMetric("jvm.gc.collections.count",
+				testPoint{f: 1, attrs: map[string]any{"name": "MarkSweepCompact"}},
+				testPoint{f: 2, attrs: map[string]any{"name": "PS MarkSweep"}},
+				testPoint{f: 3, attrs: map[string]any{"name": "ConcurrentMarkSweep"}},
+				testPoint{f: 4, attrs: map[string]any{"name": "G1 Mixed Generation"}},
+				testPoint{f: 5, attrs: map[string]any{"name": "G1 Old Generation"}},
+				testPoint{f: 6, attrs: map[string]any{"name": "Shenandoah Cycles"}},
+				testPoint{f: 7, attrs: map[string]any{"name": "ZGC"}},
 			),
 			out: []pmetric.Metric{
-				metric("jvm.gc.major_collection_count",
-					point{f: 1, attrs: map[string]any{
+				testMetric("jvm.gc.major_collection_count",
+					testPoint{f: 1, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "MarkSweepCompact",
 					}},
-					point{f: 2, attrs: map[string]any{
+					testPoint{f: 2, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "PS MarkSweep",
 					}},
-					point{f: 3, attrs: map[string]any{
+					testPoint{f: 3, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "ConcurrentMarkSweep",
 					}},
-					point{f: 4, attrs: map[string]any{
+					testPoint{f: 4, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "G1 Mixed Generation",
 					}},
-					point{f: 5, attrs: map[string]any{
+					testPoint{f: 5, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "G1 Old Generation",
 					}},
-					point{f: 6, attrs: map[string]any{
+					testPoint{f: 6, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "Shenandoah Cycles",
 					}},
-					point{f: 7, attrs: map[string]any{
+					testPoint{f: 7, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "ZGC",
 					}}),
 			},
 		},
 		{
-			in: metric("jvm.gc.collections.elapsed",
-				point{f: 1, attrs: map[string]any{"name": "Copy"}},
-				point{f: 2, attrs: map[string]any{"name": "PS Scavenge"}},
-				point{f: 3, attrs: map[string]any{"name": "ParNew"}},
-				point{f: 4, attrs: map[string]any{"name": "G1 Young Generation"}},
+			in: testMetric("jvm.gc.collections.elapsed",
+				testPoint{f: 1, attrs: map[string]any{"name": "Copy"}},
+				testPoint{f: 2, attrs: map[string]any{"name": "PS Scavenge"}},
+				testPoint{f: 3, attrs: map[string]any{"name": "ParNew"}},
+				testPoint{f: 4, attrs: map[string]any{"name": "G1 Young Generation"}},
 			),
 			out: []pmetric.Metric{
-				metric("jvm.gc.minor_collection_time",
-					point{f: 1, attrs: map[string]any{
+				testMetric("jvm.gc.minor_collection_time",
+					testPoint{f: 1, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "Copy",
 					}},
-					point{f: 2, attrs: map[string]any{
+					testPoint{f: 2, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "PS Scavenge",
 					}},
-					point{f: 3, attrs: map[string]any{
+					testPoint{f: 3, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "ParNew",
 					}},
-					point{f: 4, attrs: map[string]any{
+					testPoint{f: 4, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "G1 Young Generation",
 					}}),
 			},
 		},
 		{
-			in: metric("jvm.gc.collections.elapsed",
-				point{f: 1, attrs: map[string]any{"name": "MarkSweepCompact"}},
-				point{f: 2, attrs: map[string]any{"name": "PS MarkSweep"}},
-				point{f: 3, attrs: map[string]any{"name": "ConcurrentMarkSweep"}},
-				point{f: 4, attrs: map[string]any{"name": "G1 Mixed Generation"}},
-				point{f: 5, attrs: map[string]any{"name": "G1 Old Generation"}},
-				point{f: 6, attrs: map[string]any{"name": "Shenandoah Cycles"}},
-				point{f: 7, attrs: map[string]any{"name": "ZGC"}},
+			in: testMetric("jvm.gc.collections.elapsed",
+				testPoint{f: 1, attrs: map[string]any{"name": "MarkSweepCompact"}},
+				testPoint{f: 2, attrs: map[string]any{"name": "PS MarkSweep"}},
+				testPoint{f: 3, attrs: map[string]any{"name": "ConcurrentMarkSweep"}},
+				testPoint{f: 4, attrs: map[string]any{"name": "G1 Mixed Generation"}},
+				testPoint{f: 5, attrs: map[string]any{"name": "G1 Old Generation"}},
+				testPoint{f: 6, attrs: map[string]any{"name": "Shenandoah Cycles"}},
+				testPoint{f: 7, attrs: map[string]any{"name": "ZGC"}},
 			),
 			out: []pmetric.Metric{
-				metric("jvm.gc.major_collection_time",
-					point{f: 1, attrs: map[string]any{
+				testMetric("jvm.gc.major_collection_time",
+					testPoint{f: 1, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "MarkSweepCompact",
 					}},
-					point{f: 2, attrs: map[string]any{
+					testPoint{f: 2, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "PS MarkSweep",
 					}},
-					point{f: 3, attrs: map[string]any{
+					testPoint{f: 3, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "ConcurrentMarkSweep",
 					}},
-					point{f: 4, attrs: map[string]any{
+					testPoint{f: 4, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "G1 Mixed Generation",
 					}},
-					point{f: 5, attrs: map[string]any{
+					testPoint{f: 5, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "G1 Old Generation",
 					}},
-					point{f: 6, attrs: map[string]any{
+					testPoint{f: 6, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "Shenandoah Cycles",
 					}},
-					point{f: 7, attrs: map[string]any{
+					testPoint{f: 7, attrs: map[string]any{
 						"type": "GarbageCollector",
 						"name": "ZGC",
 					}}),
@@ -799,6 +801,46 @@ func TestRemapAndRenameMetrics(t *testing.T) {
 		}
 	}
 
+}
+
+func TestRenameAgentMetrics(t *testing.T) {
+	for _, tt := range []struct {
+		in           pmetric.Metric
+		expectedName string
+	}{
+		{
+			in:           testMetric("datadog_trace_agent_stats_writer_bytes", testPoint{f: 1}),
+			expectedName: "otelcol_datadog_trace_agent_stats_writer_bytes",
+		},
+		{
+			in:           testMetric("datadog_otlp_translator_resources_missing_source", testPoint{f: 1}),
+			expectedName: "otelcol_datadog_otlp_translator_resources_missing_source",
+		},
+		{
+			in:           testMetric("http_server_duration", testPoint{f: 1}),
+			expectedName: "otelcol_http_server_duration",
+		},
+		{
+			in:           testMetric("http_server_request_size", testPoint{f: 1}),
+			expectedName: "otelcol_http_server_request_size",
+		},
+		{
+			in:           testMetric("http_server_response_size", testPoint{f: 1}),
+			expectedName: "otelcol_http_server_response_size",
+		},
+		// Verify no duplicated prefix is added (for metrics <= 0.105.0)
+		{
+			in:           testMetric("otelcol_datadog_trace_agent_stats_writer_bytes", testPoint{f: 1}),
+			expectedName: "otelcol_datadog_trace_agent_stats_writer_bytes",
+		},
+		{
+			in:           testMetric("otelcol_datadog_otlp_translator_resources_missing_source", testPoint{f: 1}),
+			expectedName: "otelcol_datadog_otlp_translator_resources_missing_source",
+		},
+	} {
+		renameMetrics(tt.in)
+		assert.Equal(t, tt.expectedName, tt.in.Name())
+	}
 }
 
 func TestCopyMetricWithAttr(t *testing.T) {
