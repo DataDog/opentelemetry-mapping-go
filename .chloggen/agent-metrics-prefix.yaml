@@ -8,7 +8,7 @@ component: pkg/otlp/metrics
 note: "Add `otelcol_` prefix to internal metrics from trace agent"
 
 # The PR related to this change
-issues: []
+issues: [387]
 
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
