@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.19.0
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics`: Add `otelcol_` prefix to internal metrics from trace agent (#387)
+
 ## v0.18.0
 
 ### 💡 Enhancements 💡
