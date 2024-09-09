@@ -8,7 +8,7 @@ component: pkg/otlp/attributes
 note: "Map the new OTel semantic convention `deployment.environment.name` to `env`"
 
 # The PR related to this change
-issues: []
+issues: [400]
 
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
