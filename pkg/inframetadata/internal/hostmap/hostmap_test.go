@@ -238,6 +238,7 @@ func TestUpdate(t *testing.T) {
 				conventions.AttributeHostID:        "host-2-hostid",
 				conventions.AttributeHostName:      "host-2-hostname",
 				conventions.AttributeHostArch:      conventions.AttributeHostArchARM64,
+				"deployment.environment.name":      "staging",
 			},
 		},
 	}
@@ -311,7 +312,7 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, md.Meta, &payload.Meta{
 			Hostname: "host-2-hostid",
 		})
-		assert.ElementsMatch(t, md.Tags.OTel, []string{"cloud_provider:azure"})
+		assert.ElementsMatch(t, md.Tags.OTel, []string{"cloud_provider:azure", "env:staging"})
 		assert.Equal(t, md.Platform(), map[string]string{
 			"hostname":                    "host-2-hostid",
 			fieldPlatformProcessor:        "arm64",
