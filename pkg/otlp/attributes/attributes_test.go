@@ -56,6 +56,13 @@ func TestTagsFromAttributes(t *testing.T) {
 	}, TagsFromAttributes(attrs))
 }
 
+func TestNewDeploymentEnvironmentNameConvention(t *testing.T) {
+	attrs := pcommon.NewMap()
+	attrs.PutStr("deployment.environment.name", "staging")
+
+	assert.Equal(t, []string{"env:staging"}, TagsFromAttributes(attrs))
+}
+
 func TestTagsFromAttributesEmpty(t *testing.T) {
 	attrs := pcommon.NewMap()
 
