@@ -4,6 +4,13 @@
 
 <!-- next version -->
 
+## v0.20.0
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/attributes`: Map the new OTel semantic convention `deployment.environment.name` to `env` (#400)
+  Mapping of the old convention `deployment.environment` stays the same
+
 ## v0.19.0
 
 ### 💡 Enhancements 💡
