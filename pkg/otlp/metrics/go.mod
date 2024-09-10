@@ -8,7 +8,7 @@ require (
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.20.0
 	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.20.0
 	github.com/DataDog/sketches-go v1.4.4
-	github.com/golang/protobuf v1.5.3
+	github.com/golang/protobuf v1.5.4
 	github.com/lightstep/go-expohisto v1.0.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.94.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
@@ -18,7 +18,7 @@ require (
 	go.opentelemetry.io/otel v1.24.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
-	google.golang.org/protobuf v1.32.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
