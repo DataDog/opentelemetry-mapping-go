@@ -60,6 +60,14 @@ const (
 	logLevelFatal = "fatal"
 )
 
+var (
+	msgAttribute     = map[string]bool{"msg": true, "message": true, "log": true}
+	statusAttribute  = map[string]bool{"status": true, "severity": true, "level": true, "syslog.severity": true}
+	traceIDAttribute = map[string]bool{"traceid": true, "trace_id": true, "contextmap.traceid": true, "oteltraceid": true}
+	spanIDAttribute  = map[string]bool{"spanid": true, "span_id": true, "contextmap.spanid": true, "otelspanid": true}
+	ddTagsAttribute  = map[string]bool{"ddtags": true}
+)
+
 // Transform converts the log record in lr, which came in with the resource in res to a Datadog log item.
 // the variable specifies if the log body should be sent as an attribute or as a plain message.
 // Deprecated: use Translator instead.
@@ -83,13 +91,14 @@ func transform(lr plog.LogRecord, host, service string, res pcommon.Resource, lo
 	// AdditionalProperties are treated as Datadog Log Attributes
 	var status string
 	lr.Attributes().Range(func(k string, v pcommon.Value) bool {
-		switch strings.ToLower(k) {
+		lowerK := strings.ToLower(k)
+		switch {
 		// set of remapping are taken from Datadog Backend
-		case "msg", "message", "log":
+		case msgAttribute[lowerK]:
 			l.Message = v.AsString()
-		case "status", "severity", "level", "syslog.severity":
+		case statusAttribute[lowerK]:
 			status = v.AsString()
-		case "traceid", "trace_id", "contextmap.traceid", "oteltraceid":
+		case traceIDAttribute[lowerK]:
 			traceID, err := decodeTraceID(v.AsString())
 			if err != nil {
 				logger.Warn("failed to decode trace id",
@@ -101,7 +110,7 @@ func transform(lr plog.LogRecord, host, service string, res pcommon.Resource, lo
 				l.AdditionalProperties[ddTraceID] = strconv.FormatUint(traceIDToUint64(traceID), 10)
 				l.AdditionalProperties[otelTraceID] = v.AsString()
 			}
-		case "spanid", "span_id", "contextmap.spanid", "otelspanid":
+		case spanIDAttribute[lowerK]:
 			spanID, err := decodeSpanID(v.AsString())
 			if err != nil {
 				logger.Warn("failed to decode span id",
@@ -113,11 +122,13 @@ func transform(lr plog.LogRecord, host, service string, res pcommon.Resource, lo
 				l.AdditionalProperties[ddSpanID] = strconv.FormatUint(spanIDToUint64(spanID), 10)
 				l.AdditionalProperties[otelSpanID] = v.AsString()
 			}
-		case "ddtags":
+		case ddTagsAttribute[lowerK]:
 			var tags = append(attributes.TagsFromAttributes(res.Attributes()), v.AsString())
 			tagStr := strings.Join(tags, ",")
 			l.Ddtags = datadog.PtrString(tagStr)
 		default:
+			// TODO: add code to handle value types of Slice/Array and pass to message field as JSON
+			// instead of flattening list to string
 			m := flattenAttribute(k, v, 1)
 			for k, v := range m {
 				l.AdditionalProperties[k] = v
