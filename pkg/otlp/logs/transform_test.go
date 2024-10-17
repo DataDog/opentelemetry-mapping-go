@@ -16,6 +16,7 @@ package logs
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -30,6 +31,14 @@ import (
 	conventions "go.opentelemetry.io/collector/semconv/v1.6.1"
 	"go.uber.org/zap/zaptest"
 )
+
+func jsonString(v interface{}) string {
+	bytes, err := json.Marshal(v)
+	if err != nil {
+		panic(err) // Handle the error as appropriate for your use case
+	}
+	return string(bytes)
+}
 
 func TestTranslator(t *testing.T) {
 	traceID := [16]byte{0x08, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x0, 0x0, 0x0, 0x0, 0x0a}
@@ -608,6 +617,32 @@ func TestTranslator(t *testing.T) {
 					otelSeverityNumber: "5",
 					ddTimestamp:        "2023-11-20T16:55:03.397Z",
 					otelTimestamp:      "1700499303397000000",
+				},
+			},
+		},
+		{
+			// TODO: update test when we handle slice values appropriately
+			name: "Test SliceTypeValue",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					testArr := []any{"ab", "cd"}
+					l.Attributes().FromRaw(map[string]any{"arr": testArr})
+					output, _ := l.Attributes().Get("arr")
+					fmt.Println("arr attribute: ", output.AsString())
+					return l
+				}(),
+				res: func() pcommon.Resource {
+					r := pcommon.NewResource()
+					return r
+				}(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString("otel_source:test"),
+				Message: *datadog.PtrString(""),
+				AdditionalProperties: map[string]string{
+					"arr":    jsonString([]string{"ab", "cd"}),
+					"status": "",
 				},
 			},
 		},
