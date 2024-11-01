@@ -8,7 +8,7 @@ component: pkg/otlp/metrics
 note: Stop prefixing `http_server_duration`, `http_server_request_size` and `http_server_response_size` with `otelcol_`
 
 # The PR related to this change
-issues: []
+issues: [406]
 
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
