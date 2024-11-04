@@ -818,15 +818,15 @@ func TestRenameAgentMetrics(t *testing.T) {
 		},
 		{
 			in:           testMetric("http_server_duration", testPoint{f: 1}),
-			expectedName: "otelcol_http_server_duration",
+			expectedName: "http_server_duration",
 		},
 		{
 			in:           testMetric("http_server_request_size", testPoint{f: 1}),
-			expectedName: "otelcol_http_server_request_size",
+			expectedName: "http_server_request_size",
 		},
 		{
 			in:           testMetric("http_server_response_size", testPoint{f: 1}),
-			expectedName: "otelcol_http_server_response_size",
+			expectedName: "http_server_response_size",
 		},
 		// Verify no duplicated prefix is added (for metrics <= 0.105.0)
 		{
