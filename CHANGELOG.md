@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.21.0
+
+### 🛑 Breaking changes 🛑
+
+- `pkg/otlp/metrics`: Stop prefixing `http_server_duration`, `http_server_request_size` and `http_server_response_size` with `otelcol_` (#406)
+
 ## v0.20.0
 
 ### 💡 Enhancements 💡
