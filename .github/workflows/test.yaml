@@ -72,10 +72,11 @@ jobs:
           files: testresults/
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
+        if: always() && startsWith( matrix.go-version, '1.21' )
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: cleanup
-        run: rm -rf testresults/
+        run: rm -rf testresults/ && find . -type f -name "*.cover" -exec rm -f {} +
 
   lint:
     runs-on: ubuntu-latest
