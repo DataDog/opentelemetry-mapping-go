@@ -70,6 +70,10 @@ jobs:
           api-key: ${{ secrets.DD_CI_API_KEY }}
           service: opentelemetry-mapping-go
           files: testresults/
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
       - name: cleanup
         run: rm -rf testresults/
 

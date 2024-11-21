@@ -57,7 +57,7 @@ test-junit:
 	COUNT=0
 	set -e; for mod in $(GOMODULES); do \
   		COUNT=$$((COUNT+1)); \
-		cd $$mod && gotestsum --junitfile $(CURDIR)/testresults/$$COUNT-junit.xml -- $(GOTEST_OPT) ./... && cd -; \
+		cd $$mod && gotestsum --junitfile $(CURDIR)/testresults/$$COUNT-junit.xml -- $(GOTEST_OPT) -coverprofile=coverage.txt -covermode=atomic ./... && cd -; \
 	done
 
 # Run linters for all modules
