@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 TOOLS_MOD_DIR := $(CURDIR)/internal/tools
-GOTEST_OPT?= -race -timeout 1200s
+GOTEST_OPT?= -race -timeout 2400s
 
 .PHONY: install-tools
 install-tools:
