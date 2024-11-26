@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 TOOLS_MOD_DIR := $(CURDIR)/internal/tools
-GOTEST_OPT?= -race -timeout 600s
+GOTEST_OPT?= -race -timeout 2400s
 
 .PHONY: install-tools
 install-tools:
@@ -57,7 +57,7 @@ test-junit:
 	COUNT=0
 	set -e; for mod in $(GOMODULES); do \
   		COUNT=$$((COUNT+1)); \
-		cd $$mod && gotestsum --junitfile $(CURDIR)/testresults/$$COUNT-junit.xml -- $(GOTEST_OPT) ./... && cd -; \
+		cd $$mod && gotestsum --junitfile $(CURDIR)/testresults/$$COUNT-junit.xml -- $(GOTEST_OPT) -coverprofile=coverage.cover -covermode=atomic ./... && cd -; \
 	done
 
 # Run linters for all modules
