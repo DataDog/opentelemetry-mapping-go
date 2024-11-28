@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 
@@ -45,15 +44,13 @@ var inputTable = []struct {
 	{input: 10000000},
 }
 
-func newBenchmarkTranslator(b *testing.B, logger *zap.Logger, opts ...TranslatorOption) *Translator {
+func newBenchmarkTranslator(b *testing.B, _ *zap.Logger, opts ...TranslatorOption) *Translator {
 	options := append([]TranslatorOption{
 		WithFallbackSourceProvider(testProvider("fallbackHostname")),
 		WithHistogramMode(HistogramModeDistributions),
 		WithNumberMode(NumberModeCumulativeToDelta),
 	}, opts...)
 
-	set := componenttest.NewNopTelemetrySettings()
-	set.Logger = logger
 	return NewTestTranslator(b, options...)
 }
 
