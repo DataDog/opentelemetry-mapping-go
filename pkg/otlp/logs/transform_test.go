@@ -62,7 +62,7 @@ func TestTranslator(t *testing.T) {
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"app":              "test",
 					"status":           "debug",
 					otelSeverityNumber: "5",
@@ -89,7 +89,7 @@ func TestTranslator(t *testing.T) {
 				Ddtags:  datadog.PtrString("service:otlp_col,otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"app":              "test",
 					"status":           "debug",
 					otelSeverityNumber: "5",
@@ -118,7 +118,7 @@ func TestTranslator(t *testing.T) {
 				Ddtags:  datadog.PtrString("service:otlp_col,foo:bar,otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"app":              "test",
 					"status":           "debug",
 					otelSeverityNumber: "5",
@@ -146,7 +146,7 @@ func TestTranslator(t *testing.T) {
 				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"app":              "test",
 					"status":           "debug",
 					otelSeverityNumber: "5",
@@ -175,7 +175,7 @@ func TestTranslator(t *testing.T) {
 				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"app":              "test",
 					"status":           "debug",
 					otelSeverityNumber: "5",
@@ -208,7 +208,7 @@ func TestTranslator(t *testing.T) {
 				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"app":              "test",
 					"status":           "debug",
 					otelSeverityNumber: "5",
@@ -241,7 +241,7 @@ func TestTranslator(t *testing.T) {
 				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"app":              "test",
 					"status":           "debug",
 					otelSeverityNumber: "5",
@@ -274,7 +274,7 @@ func TestTranslator(t *testing.T) {
 				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"app":              "test",
 					"status":           "debug",
 					otelSeverityNumber: "5",
@@ -305,7 +305,7 @@ func TestTranslator(t *testing.T) {
 				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"app":              "test",
 					"status":           "debug",
 					otelSeverityNumber: "5",
@@ -336,7 +336,7 @@ func TestTranslator(t *testing.T) {
 				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"app":              "test",
 					"status":           "alert",
 					otelSeverityText:   "alert",
@@ -371,7 +371,7 @@ func TestTranslator(t *testing.T) {
 				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"message":          "This is log",
 					"app":              "test",
 					"status":           "warn",
@@ -406,7 +406,7 @@ func TestTranslator(t *testing.T) {
 				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"message":      "This is log",
 					"app":          "test",
 					"status":       "error",
@@ -438,7 +438,7 @@ func TestTranslator(t *testing.T) {
 				Ddtags:  datadog.PtrString("service:otlp_col,otel_source:test"),
 				Message: *datadog.PtrString(""),
 				Service: datadog.PtrString("otlp_col"),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"app":              "test",
 					"status":           "debug",
 					otelSeverityNumber: "5",
@@ -466,7 +466,7 @@ func TestTranslator(t *testing.T) {
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("service:otlp_col,otel_source:test"),
 				Message: *datadog.PtrString(""),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"app":              "test",
 					"status":           "debug",
 					otelSeverityNumber: "5",
@@ -505,7 +505,7 @@ func TestTranslator(t *testing.T) {
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"root.nest1.nest2":         "val",
 					"root.nest12.nest22.nest3": "val2",
 					"root.nest13":              "val3",
@@ -529,7 +529,7 @@ func TestTranslator(t *testing.T) {
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"status": "",
 				},
 			},
@@ -579,7 +579,7 @@ func TestTranslator(t *testing.T) {
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"nest1.nest2.nest3.nest4.nest5.nest6.nest7.nest8.nest9.nest10": "{\"nest11\":{\"nest12\":\"ok\"}}",
 					"nest1.nest2.nest3.nest4.nest5.nest14.nest15":                  "ok2",
 					"status": "",
@@ -603,7 +603,7 @@ func TestTranslator(t *testing.T) {
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
 				Message: *datadog.PtrString(""),
-				AdditionalProperties: map[string]string{
+				AdditionalProperties: map[string]interface{}{
 					"status":           "debug",
 					otelSeverityNumber: "5",
 					ddTimestamp:        "2023-11-20T16:55:03.397Z",
