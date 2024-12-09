@@ -1,6 +1,6 @@
 module github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes
 
-go 1.20
+go 1.22
 
 require (
 	github.com/stretchr/testify v1.9.0
