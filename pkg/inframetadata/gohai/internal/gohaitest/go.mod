@@ -1,6 +1,6 @@
 module github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/gohai/internal/gohaitest
 
-go 1.20
+go 1.22
 
 require (
 	github.com/DataDog/gohai v0.0.0-20230524154621-4316413895ee
