@@ -70,7 +70,7 @@ func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) data
 
 func transform(lr plog.LogRecord, host, service string, res pcommon.Resource, logger *zap.Logger) datadogV2.HTTPLogItem {
 	l := datadogV2.HTTPLogItem{
-		AdditionalProperties: make(map[string]string),
+		AdditionalProperties: make(map[string]interface{}),
 	}
 	if host != "" {
 		l.Hostname = datadog.PtrString(host)
