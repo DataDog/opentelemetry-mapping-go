@@ -39,7 +39,7 @@ for-all: $(GOMODULES)
 # Tidy go.mod/go.sum for all modules
 .PHONY: tidy
 tidy:
-	@$(MAKE) for-all CMD="go mod tidy -compat=1.20"
+	@$(MAKE) for-all CMD="go mod tidy -compat=1.22"
 
 # Format code for all modules
 .PHONY: fmt
