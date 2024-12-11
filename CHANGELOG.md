@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.22.0
+
+### 💡 Enhancements 💡
+
+- `all`: Bump required minimum Go version to 1.22 (#413)
+
 ## v0.21.0
 
 ### 🛑 Breaking changes 🛑
