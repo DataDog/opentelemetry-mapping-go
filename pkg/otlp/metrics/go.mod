@@ -3,12 +3,12 @@ module github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics
 go 1.22.0
 
 require (
-	github.com/DataDog/datadog-agent/pkg/proto v0.52.0-devel
+	github.com/DataDog/datadog-agent/pkg/proto v0.62.0-devel
 	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.22.0
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.22.0
 	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.22.0
 	github.com/DataDog/sketches-go v1.4.4
-	github.com/golang/protobuf v1.5.3
+	github.com/golang/protobuf v1.5.4
 	github.com/lightstep/go-expohisto v1.0.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.115.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
@@ -44,9 +44,9 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.32.0 // indirect
 	go.opentelemetry.io/otel/trace v1.32.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/net v0.28.0 // indirect
+	golang.org/x/net v0.31.0 // indirect
 	golang.org/x/sys v0.27.0 // indirect
-	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/text v0.20.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240814211410-ddb44dafa142 // indirect
 	google.golang.org/grpc v1.67.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
