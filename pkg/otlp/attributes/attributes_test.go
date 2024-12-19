@@ -16,7 +16,7 @@ package attributes
 
 import (
 	"fmt"
-	latestSemconv "go.opentelemetry.io/collector/semconv/v1.27.0"
+	semconv127 "go.opentelemetry.io/collector/semconv/v1.27.0"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,39 +26,40 @@ import (
 
 func TestTagsFromAttributes(t *testing.T) {
 	attributeMap := map[string]interface{}{
-		conventions.AttributeProcessExecutableName:    "otelcol",
-		conventions.AttributeProcessExecutablePath:    "/usr/bin/cmd/otelcol",
-		conventions.AttributeProcessCommand:           "cmd/otelcol",
-		conventions.AttributeProcessCommandLine:       "cmd/otelcol --config=\"/path/to/config.yaml\"",
-		conventions.AttributeProcessPID:               1,
-		conventions.AttributeProcessOwner:             "root",
-		conventions.AttributeOSType:                   "linux",
-		conventions.AttributeK8SDaemonSetName:         "daemon_set_name",
-		conventions.AttributeAWSECSClusterARN:         "cluster_arn",
-		conventions.AttributeContainerRuntime:         "cro",
-		"tags.datadoghq.com/service":                  "service_name",
-		conventions.AttributeDeploymentEnvironment:    "prod",
-		conventions.AttributeContainerName:            "custom",
-		"datadog.container.tag.custom.team":           "otel",
-		"kube_cronjob":                                "cron",
-		latestSemconv.AttributeClientAddress:          "sample_client_address",
-		latestSemconv.AttributeHTTPResponseBodySize:   "sample_content_length",
-		latestSemconv.AttributeHTTPResponseStatusCode: "sample_status_code",
-		latestSemconv.AttributeHTTPRequestBodySize:    "sample_content_length",
-		"http.request.header.referrer":                "sample_referrer",
-		latestSemconv.AttributeHTTPRequestMethod:      "sample_method",
-		latestSemconv.AttributeHTTPRoute:              "sample_route",
-		latestSemconv.AttributeNetworkProtocolVersion: "sample_version",
-		latestSemconv.AttributeServerAddress:          "sample_server_name",
-		latestSemconv.AttributeURLFull:                "sample_url",
-		latestSemconv.AttributeUserAgentOriginal:      "sample_useragent",
+		semconv127.AttributeProcessExecutableName:  "otelcol",
+		semconv127.AttributeProcessExecutablePath:  "/usr/bin/cmd/otelcol",
+		semconv127.AttributeProcessCommand:         "cmd/otelcol",
+		semconv127.AttributeProcessCommandLine:     "cmd/otelcol --config=\"/path/to/config.yaml\"",
+		semconv127.AttributeProcessPID:             1,
+		semconv127.AttributeProcessOwner:           "root",
+		semconv127.AttributeOSType:                 "linux",
+		semconv127.AttributeK8SDaemonSetName:       "daemon_set_name",
+		semconv127.AttributeAWSECSClusterARN:       "cluster_arn",
+		semconv127.AttributeContainerRuntime:       "cro",
+		"tags.datadoghq.com/service":               "service_name",
+		conventions.AttributeDeploymentEnvironment: "prod",
+		semconv127.AttributeContainerName:          "custom",
+		"datadog.container.tag.custom.team":        "otel",
+		"kube_cronjob":                             "cron",
+		semconv127.AttributeClientAddress:          "sample_client_address",
+		semconv127.AttributeHTTPResponseBodySize:   "sample_content_length",
+		semconv127.AttributeHTTPResponseStatusCode: "sample_status_code",
+		semconv127.AttributeHTTPRequestBodySize:    "sample_content_length",
+		"http.request.header.referrer":             "sample_referrer",
+		semconv127.AttributeHTTPRequestMethod:      "sample_method",
+		semconv127.AttributeHTTPRoute:              "sample_route",
+		semconv127.AttributeNetworkProtocolVersion: "sample_version",
+		semconv127.AttributeServerAddress:          "sample_server_name",
+		semconv127.AttributeURLFull:                "sample_url",
+		semconv127.AttributeUserAgentOriginal:      "sample_useragent",
+		"http.request.header.example":              "test",
 	}
 	attrs := pcommon.NewMap()
 	attrs.FromRaw(attributeMap)
 
 	assert.ElementsMatch(t, []string{
-		fmt.Sprintf("%s:%s", conventions.AttributeProcessExecutableName, "otelcol"),
-		fmt.Sprintf("%s:%s", conventions.AttributeOSType, "linux"),
+		fmt.Sprintf("%s:%s", semconv127.AttributeProcessExecutableName, "otelcol"),
+		fmt.Sprintf("%s:%s", semconv127.AttributeOSType, "linux"),
 		fmt.Sprintf("%s:%s", "kube_daemon_set", "daemon_set_name"),
 		fmt.Sprintf("%s:%s", "ecs_cluster_name", "cluster_arn"),
 		fmt.Sprintf("%s:%s", "service", "service_name"),
@@ -78,6 +79,7 @@ func TestTagsFromAttributes(t *testing.T) {
 		fmt.Sprintf("%s:%s", "http.server_name", "sample_server_name"),
 		fmt.Sprintf("%s:%s", "http.url", "sample_url"),
 		fmt.Sprintf("%s:%s", "http.useragent", "sample_useragent"),
+		fmt.Sprintf("%s:%s", "http.request.headers.example", "test"),
 	}, TagsFromAttributes(attrs))
 }
 
@@ -98,20 +100,20 @@ func TestContainerTagFromResourceAttributes(t *testing.T) {
 	t.Run("valid", func(t *testing.T) {
 		attributes := pcommon.NewMap()
 		err := attributes.FromRaw(map[string]interface{}{
-			conventions.AttributeContainerName:         "sample_app",
-			conventions.AttributeContainerImageTag:     "sample_app_image_tag",
-			conventions.AttributeContainerRuntime:      "cro",
-			conventions.AttributeK8SContainerName:      "kube_sample_app",
-			conventions.AttributeK8SReplicaSetName:     "sample_replica_set",
-			conventions.AttributeK8SDaemonSetName:      "sample_daemonset_name",
-			conventions.AttributeK8SPodName:            "sample_pod_name",
-			conventions.AttributeCloudProvider:         "sample_cloud_provider",
-			conventions.AttributeCloudRegion:           "sample_region",
-			conventions.AttributeCloudAvailabilityZone: "sample_zone",
-			conventions.AttributeAWSECSTaskFamily:      "sample_task_family",
-			conventions.AttributeAWSECSClusterARN:      "sample_ecs_cluster_name",
-			conventions.AttributeAWSECSContainerARN:    "sample_ecs_container_name",
-			"datadog.container.tag.custom.team":        "otel",
+			semconv127.AttributeContainerName:         "sample_app",
+			conventions.AttributeContainerImageTag:    "sample_app_image_tag",
+			semconv127.AttributeContainerRuntime:      "cro",
+			semconv127.AttributeK8SContainerName:      "kube_sample_app",
+			semconv127.AttributeK8SReplicaSetName:     "sample_replica_set",
+			semconv127.AttributeK8SDaemonSetName:      "sample_daemonset_name",
+			semconv127.AttributeK8SPodName:            "sample_pod_name",
+			semconv127.AttributeCloudProvider:         "sample_cloud_provider",
+			semconv127.AttributeCloudRegion:           "sample_region",
+			semconv127.AttributeCloudAvailabilityZone: "sample_zone",
+			semconv127.AttributeAWSECSTaskFamily:      "sample_task_family",
+			semconv127.AttributeAWSECSClusterARN:      "sample_ecs_cluster_name",
+			semconv127.AttributeAWSECSContainerARN:    "sample_ecs_container_name",
+			"datadog.container.tag.custom.team":       "otel",
 		})
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
@@ -133,10 +135,10 @@ func TestContainerTagFromResourceAttributes(t *testing.T) {
 		fmt.Println(ContainerTagsFromResourceAttributes(attributes))
 	})
 
-	t.Run("conventions vs custom", func(t *testing.T) {
+	t.Run("semconv127 vs custom", func(t *testing.T) {
 		attributes := pcommon.NewMap()
 		err := attributes.FromRaw(map[string]interface{}{
-			conventions.AttributeContainerName:     "ok",
+			semconv127.AttributeContainerName:      "ok",
 			"datadog.container.tag.container_name": "nok",
 		})
 		assert.NoError(t, err)
@@ -166,22 +168,22 @@ func TestContainerTagFromResourceAttributes(t *testing.T) {
 
 func TestContainerTagFromAttributes(t *testing.T) {
 	attributeMap := map[string]string{
-		conventions.AttributeContainerName:         "sample_app",
-		conventions.AttributeContainerImageTag:     "sample_app_image_tag",
-		conventions.AttributeContainerRuntime:      "cro",
-		conventions.AttributeK8SContainerName:      "kube_sample_app",
-		conventions.AttributeK8SReplicaSetName:     "sample_replica_set",
-		conventions.AttributeK8SDaemonSetName:      "sample_daemonset_name",
-		conventions.AttributeK8SPodName:            "sample_pod_name",
-		conventions.AttributeCloudProvider:         "sample_cloud_provider",
-		conventions.AttributeCloudRegion:           "sample_region",
-		conventions.AttributeCloudAvailabilityZone: "sample_zone",
-		conventions.AttributeAWSECSTaskFamily:      "sample_task_family",
-		conventions.AttributeAWSECSClusterARN:      "sample_ecs_cluster_name",
-		conventions.AttributeAWSECSContainerARN:    "sample_ecs_container_name",
-		"custom_tag":                               "example_custom_tag",
-		"":                                         "empty_string_key",
-		"empty_string_val":                         "",
+		semconv127.AttributeContainerName:         "sample_app",
+		conventions.AttributeContainerImageTag:    "sample_app_image_tag",
+		semconv127.AttributeContainerRuntime:      "cro",
+		semconv127.AttributeK8SContainerName:      "kube_sample_app",
+		semconv127.AttributeK8SReplicaSetName:     "sample_replica_set",
+		semconv127.AttributeK8SDaemonSetName:      "sample_daemonset_name",
+		semconv127.AttributeK8SPodName:            "sample_pod_name",
+		semconv127.AttributeCloudProvider:         "sample_cloud_provider",
+		semconv127.AttributeCloudRegion:           "sample_region",
+		semconv127.AttributeCloudAvailabilityZone: "sample_zone",
+		semconv127.AttributeAWSECSTaskFamily:      "sample_task_family",
+		semconv127.AttributeAWSECSClusterARN:      "sample_ecs_cluster_name",
+		semconv127.AttributeAWSECSContainerARN:    "sample_ecs_container_name",
+		"custom_tag":                              "example_custom_tag",
+		"":                                        "empty_string_key",
+		"empty_string_val":                        "",
 	}
 
 	assert.Equal(t, map[string]string{
@@ -216,8 +218,8 @@ func TestOriginIDFromAttributes(t *testing.T) {
 			attrs: func() pcommon.Map {
 				attributes := pcommon.NewMap()
 				attributes.FromRaw(map[string]interface{}{
-					conventions.AttributeContainerID: "container_id_goes_here",
-					conventions.AttributeK8SPodUID:   "k8s_pod_uid_goes_here",
+					semconv127.AttributeContainerID: "container_id_goes_here",
+					semconv127.AttributeK8SPodUID:   "k8s_pod_uid_goes_here",
 				})
 				return attributes
 			}(),
@@ -228,7 +230,7 @@ func TestOriginIDFromAttributes(t *testing.T) {
 			attrs: func() pcommon.Map {
 				attributes := pcommon.NewMap()
 				attributes.FromRaw(map[string]interface{}{
-					conventions.AttributeContainerID: "container_id_goes_here",
+					semconv127.AttributeContainerID: "container_id_goes_here",
 				})
 				return attributes
 			}(),
@@ -239,7 +241,7 @@ func TestOriginIDFromAttributes(t *testing.T) {
 			attrs: func() pcommon.Map {
 				attributes := pcommon.NewMap()
 				attributes.FromRaw(map[string]interface{}{
-					conventions.AttributeK8SPodUID: "k8s_pod_uid_goes_here",
+					semconv127.AttributeK8SPodUID: "k8s_pod_uid_goes_here",
 				})
 				return attributes
 			}(),
