@@ -16,6 +16,7 @@ package attributes
 
 import (
 	"fmt"
+	latestSemconv "go.opentelemetry.io/collector/semconv/v1.27.0"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,21 +26,32 @@ import (
 
 func TestTagsFromAttributes(t *testing.T) {
 	attributeMap := map[string]interface{}{
-		conventions.AttributeProcessExecutableName: "otelcol",
-		conventions.AttributeProcessExecutablePath: "/usr/bin/cmd/otelcol",
-		conventions.AttributeProcessCommand:        "cmd/otelcol",
-		conventions.AttributeProcessCommandLine:    "cmd/otelcol --config=\"/path/to/config.yaml\"",
-		conventions.AttributeProcessPID:            1,
-		conventions.AttributeProcessOwner:          "root",
-		conventions.AttributeOSType:                "linux",
-		conventions.AttributeK8SDaemonSetName:      "daemon_set_name",
-		conventions.AttributeAWSECSClusterARN:      "cluster_arn",
-		conventions.AttributeContainerRuntime:      "cro",
-		"tags.datadoghq.com/service":               "service_name",
-		conventions.AttributeDeploymentEnvironment: "prod",
-		conventions.AttributeContainerName:         "custom",
-		"datadog.container.tag.custom.team":        "otel",
-		"kube_cronjob":                             "cron",
+		conventions.AttributeProcessExecutableName:    "otelcol",
+		conventions.AttributeProcessExecutablePath:    "/usr/bin/cmd/otelcol",
+		conventions.AttributeProcessCommand:           "cmd/otelcol",
+		conventions.AttributeProcessCommandLine:       "cmd/otelcol --config=\"/path/to/config.yaml\"",
+		conventions.AttributeProcessPID:               1,
+		conventions.AttributeProcessOwner:             "root",
+		conventions.AttributeOSType:                   "linux",
+		conventions.AttributeK8SDaemonSetName:         "daemon_set_name",
+		conventions.AttributeAWSECSClusterARN:         "cluster_arn",
+		conventions.AttributeContainerRuntime:         "cro",
+		"tags.datadoghq.com/service":                  "service_name",
+		conventions.AttributeDeploymentEnvironment:    "prod",
+		conventions.AttributeContainerName:            "custom",
+		"datadog.container.tag.custom.team":           "otel",
+		"kube_cronjob":                                "cron",
+		latestSemconv.AttributeClientAddress:          "sample_client_address",
+		latestSemconv.AttributeHTTPResponseBodySize:   "sample_content_length",
+		latestSemconv.AttributeHTTPResponseStatusCode: "sample_status_code",
+		latestSemconv.AttributeHTTPRequestBodySize:    "sample_content_length",
+		"http.request.header.referrer":                "sample_referrer",
+		latestSemconv.AttributeHTTPRequestMethod:      "sample_method",
+		latestSemconv.AttributeHTTPRoute:              "sample_route",
+		latestSemconv.AttributeNetworkProtocolVersion: "sample_version",
+		latestSemconv.AttributeServerAddress:          "sample_server_name",
+		latestSemconv.AttributeURLFull:                "sample_url",
+		latestSemconv.AttributeUserAgentOriginal:      "sample_useragent",
 	}
 	attrs := pcommon.NewMap()
 	attrs.FromRaw(attributeMap)
@@ -55,6 +67,17 @@ func TestTagsFromAttributes(t *testing.T) {
 		fmt.Sprintf("%s:%s", "container_name", "custom"),
 		fmt.Sprintf("%s:%s", "custom.team", "otel"),
 		fmt.Sprintf("%s:%s", "kube_cronjob", "cron"),
+		fmt.Sprintf("%s:%s", "http.client_ip", "sample_client_address"),
+		fmt.Sprintf("%s:%s", "http.response.content_length", "sample_content_length"),
+		fmt.Sprintf("%s:%s", "http.status_code", "sample_status_code"),
+		fmt.Sprintf("%s:%s", "http.request.content_length", "sample_content_length"),
+		fmt.Sprintf("%s:%s", "http.referrer", "sample_referrer"),
+		fmt.Sprintf("%s:%s", "http.method", "sample_method"),
+		fmt.Sprintf("%s:%s", "http.route", "sample_route"),
+		fmt.Sprintf("%s:%s", "http.version", "sample_version"),
+		fmt.Sprintf("%s:%s", "http.server_name", "sample_server_name"),
+		fmt.Sprintf("%s:%s", "http.url", "sample_url"),
+		fmt.Sprintf("%s:%s", "http.useragent", "sample_useragent"),
 	}, TagsFromAttributes(attrs))
 }
 
