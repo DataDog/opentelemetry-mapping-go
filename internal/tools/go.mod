@@ -2,8 +2,6 @@ module github.com/DataDog/opentelemetry-mapping-go/internal/tools
 
 go 1.22.1
 
-toolchain go1.23.4
-
 require (
 	github.com/frapposelli/wwhrd v0.4.0
 	github.com/golangci/golangci-lint v1.60.1
