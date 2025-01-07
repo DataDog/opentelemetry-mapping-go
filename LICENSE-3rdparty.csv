@@ -11,6 +11,7 @@ pkg/quantile,google.golang.org/protobuf/encoding/protowire,BSD-3-Clause,Copyrigh
 pkg/quantile,google.golang.org/protobuf/internal/descfmt,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/internal/descopts,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/internal/detrand,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/quantile,google.golang.org/protobuf/internal/editiondefaults,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/internal/encoding/defval,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/internal/encoding/messageset,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/internal/encoding/tag,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
@@ -23,6 +24,7 @@ pkg/quantile,google.golang.org/protobuf/internal/genid,BSD-3-Clause,Copyright (c
 pkg/quantile,google.golang.org/protobuf/internal/impl,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/internal/order,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/internal/pragma,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/quantile,google.golang.org/protobuf/internal/protolazy,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/internal/set,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/internal/strs,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/internal/version,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
@@ -117,6 +119,8 @@ pkg/otlp/attributes,google.golang.org/grpc/balancer,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/balancer/base,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/balancer/grpclb/state,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/balancer/pickfirst,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/balancer/pickfirst/internal,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/balancer/pickfirst/pickfirstleaf,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/balancer/roundrobin,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/binarylog/grpc_binarylog_v1,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/channelz,Apache-2.0,Google Inc.
@@ -185,6 +189,7 @@ pkg/otlp/attributes,google.golang.org/protobuf/internal/genid,BSD-3-Clause,Copyr
 pkg/otlp/attributes,google.golang.org/protobuf/internal/impl,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/otlp/attributes,google.golang.org/protobuf/internal/order,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/otlp/attributes,google.golang.org/protobuf/internal/pragma,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,google.golang.org/protobuf/internal/protolazy,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/otlp/attributes,google.golang.org/protobuf/internal/set,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/otlp/attributes,google.golang.org/protobuf/internal/strs,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/otlp/attributes,google.golang.org/protobuf/internal/version,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
@@ -228,6 +233,7 @@ pkg/otlp/metrics,github.com/modern-go/concurrent,Apache-2.0,Copyright (c) 2018 T
 pkg/otlp/metrics,github.com/modern-go/reflect2,Apache-2.0,Copyright (c) 2018 Tao Wen
 pkg/otlp/metrics,github.com/patrickmn/go-cache,MIT,"Copyright (c) 2012-2017 Patrick Mylund Nielsen and the go-cache contributors | This is a list of people who have contributed code to go-cache. They, or their | employers, are the copyright holders of the contributed code. Contributed code | is subject to the license restrictions listed in LICENSE (as they were when the | code was contributed.) | Dustin Sallings <dustin@spy.net> | Jason Mooberry <jasonmoo@me.com> | Sergey Shepelev <temotor@gmail.com> | Alex Edwards <ajmedwards@gmail.com>"
 pkg/otlp/metrics,github.com/philhofer/fwd,MIT,"Copyright (c) 2014-2015, Philip Hofer | Copyright (c) 2014-2015, Philip Hofer"
+pkg/otlp/metrics,github.com/planetscale/vtprotobuf/protohelpers,BSD-3-Clause,"Copyright (c) 2021, PlanetScale Inc. All rights reserved | Copyright (c) 2013, The GoGo Authors. All rights reserved | Copyright (c) 2018 The Go Authors. All rights reserved"
 pkg/otlp/metrics,github.com/tinylib/msgp/msgp,MIT,Copyright (c) 2014 Philip Hofer | Copyright (c) 2009 The Go Authors (license at http://golang.org) where indicated
 pkg/otlp/metrics,go.opentelemetry.io/auto/sdk,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/auto/sdk/internal/telemetry,Apache-2.0,Copyright The OpenTelemetry Authors
@@ -290,8 +296,7 @@ pkg/otlp/metrics,go.uber.org/zap/internal/exit,MIT,"Copyright (c) 2016-2017 Uber
 pkg/otlp/metrics,go.uber.org/zap/internal/pool,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/otlp/metrics,go.uber.org/zap/internal/stacktrace,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/otlp/metrics,go.uber.org/zap/zapcore,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
-pkg/otlp/metrics,golang.org/x/exp/constraints,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
-pkg/otlp/metrics,golang.org/x/exp/slices,BSD-3-Clause,Copyright (c) 2009 The Go Authors. All rights reserved
+pkg/otlp/metrics,golang.org/x/exp/slices,BSD-3-Clause,Copyright 2009 The Go Authors
 pkg/otlp/metrics,golang.org/x/net/http/httpguts,BSD-3-Clause,Copyright 2009 The Go Authors
 pkg/otlp/metrics,golang.org/x/net/http2,BSD-3-Clause,Copyright 2009 The Go Authors
 pkg/otlp/metrics,golang.org/x/net/http2/hpack,BSD-3-Clause,Copyright 2009 The Go Authors
@@ -313,6 +318,8 @@ pkg/otlp/metrics,google.golang.org/grpc/balancer,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/balancer/base,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/balancer/grpclb/state,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/balancer/pickfirst,Apache-2.0,Google Inc.
+pkg/otlp/metrics,google.golang.org/grpc/balancer/pickfirst/internal,Apache-2.0,Google Inc.
+pkg/otlp/metrics,google.golang.org/grpc/balancer/pickfirst/pickfirstleaf,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/balancer/roundrobin,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/binarylog/grpc_binarylog_v1,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/channelz,Apache-2.0,Google Inc.
@@ -477,6 +484,8 @@ pkg/inframetadata,google.golang.org/grpc/balancer,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/balancer/base,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/balancer/grpclb/state,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/balancer/pickfirst,Apache-2.0,Google Inc.
+pkg/inframetadata,google.golang.org/grpc/balancer/pickfirst/internal,Apache-2.0,Google Inc.
+pkg/inframetadata,google.golang.org/grpc/balancer/pickfirst/pickfirstleaf,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/balancer/roundrobin,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/binarylog/grpc_binarylog_v1,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/channelz,Apache-2.0,Google Inc.
@@ -545,6 +554,22 @@ pkg/inframetadata,google.golang.org/protobuf/internal/genid,BSD-3-Clause,Copyrig
 pkg/inframetadata,google.golang.org/protobuf/internal/impl,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/inframetadata,google.golang.org/protobuf/internal/order,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/inframetadata,google.golang.org/protobuf/internal/pragma,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/inframetadata,google.golang.org/protobuf/internal/protolazy,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,go.opentelemetry.io/collector/semconv/v1.27.0,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/otlp/attributes,go.uber.org/multierr,MIT,"Copyright (c) 2017-2021 Uber Technologies, Inc | Copyright (c) 2017-2021 Uber Technologies, Inc"
+pkg/otlp/attributes,google.golang.org/grpc/balancer/pickfirst/internal,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/balancer/pickfirst/pickfirstleaf,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/protobuf/internal/protolazy,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/metrics,github.com/philhofer/fwd,MIT,"Copyright (c) 2014-2015, Philip Hofer"
+pkg/otlp/metrics,github.com/planetscale/vtprotobuf/protohelpers,BSD-3-Clause,"Copyright (c) 2021, PlanetScale Inc. All rights reserved | Copyright (c) 2013, The GoGo Authors. All rights reserved | Copyright (c) 2018 The Go Authors. All rights reserved"
+pkg/otlp/metrics,github.com/philhofer/fwd,MIT,"Copyright (c) 2014-2015, Philip Hofer | Copyright (c) 2014-2015, Philip Hofer"
+pkg/otlp/metrics,go.opentelemetry.io/collector/semconv/v1.27.0,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/otlp/metrics,google.golang.org/grpc/balancer/pickfirst/internal,Apache-2.0,Google Inc.
+pkg/otlp/metrics,google.golang.org/grpc/balancer/pickfirst/pickfirstleaf,Apache-2.0,Google Inc.
+pkg/inframetadata,go.opentelemetry.io/collector/semconv/v1.27.0,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/inframetadata,google.golang.org/grpc/balancer/pickfirst/internal,Apache-2.0,Google Inc.
+pkg/inframetadata,google.golang.org/grpc/balancer/pickfirst/pickfirstleaf,Apache-2.0,Google Inc.
+pkg/inframetadata,google.golang.org/protobuf/internal/protolazy,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/inframetadata,google.golang.org/protobuf/internal/set,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/inframetadata,google.golang.org/protobuf/internal/strs,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/inframetadata,google.golang.org/protobuf/internal/version,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
