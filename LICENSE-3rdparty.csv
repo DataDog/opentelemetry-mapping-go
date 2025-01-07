@@ -555,21 +555,6 @@ pkg/inframetadata,google.golang.org/protobuf/internal/impl,BSD-3-Clause,Copyrigh
 pkg/inframetadata,google.golang.org/protobuf/internal/order,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/inframetadata,google.golang.org/protobuf/internal/pragma,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/inframetadata,google.golang.org/protobuf/internal/protolazy,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
-pkg/otlp/attributes,go.opentelemetry.io/collector/semconv/v1.27.0,Apache-2.0,Copyright The OpenTelemetry Authors
-pkg/otlp/attributes,go.uber.org/multierr,MIT,"Copyright (c) 2017-2021 Uber Technologies, Inc | Copyright (c) 2017-2021 Uber Technologies, Inc"
-pkg/otlp/attributes,google.golang.org/grpc/balancer/pickfirst/internal,Apache-2.0,Google Inc.
-pkg/otlp/attributes,google.golang.org/grpc/balancer/pickfirst/pickfirstleaf,Apache-2.0,Google Inc.
-pkg/otlp/attributes,google.golang.org/protobuf/internal/protolazy,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
-pkg/otlp/metrics,github.com/philhofer/fwd,MIT,"Copyright (c) 2014-2015, Philip Hofer"
-pkg/otlp/metrics,github.com/planetscale/vtprotobuf/protohelpers,BSD-3-Clause,"Copyright (c) 2021, PlanetScale Inc. All rights reserved | Copyright (c) 2013, The GoGo Authors. All rights reserved | Copyright (c) 2018 The Go Authors. All rights reserved"
-pkg/otlp/metrics,github.com/philhofer/fwd,MIT,"Copyright (c) 2014-2015, Philip Hofer | Copyright (c) 2014-2015, Philip Hofer"
-pkg/otlp/metrics,go.opentelemetry.io/collector/semconv/v1.27.0,Apache-2.0,Copyright The OpenTelemetry Authors
-pkg/otlp/metrics,google.golang.org/grpc/balancer/pickfirst/internal,Apache-2.0,Google Inc.
-pkg/otlp/metrics,google.golang.org/grpc/balancer/pickfirst/pickfirstleaf,Apache-2.0,Google Inc.
-pkg/inframetadata,go.opentelemetry.io/collector/semconv/v1.27.0,Apache-2.0,Copyright The OpenTelemetry Authors
-pkg/inframetadata,google.golang.org/grpc/balancer/pickfirst/internal,Apache-2.0,Google Inc.
-pkg/inframetadata,google.golang.org/grpc/balancer/pickfirst/pickfirstleaf,Apache-2.0,Google Inc.
-pkg/inframetadata,google.golang.org/protobuf/internal/protolazy,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/inframetadata,google.golang.org/protobuf/internal/set,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/inframetadata,google.golang.org/protobuf/internal/strs,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/inframetadata,google.golang.org/protobuf/internal/version,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
