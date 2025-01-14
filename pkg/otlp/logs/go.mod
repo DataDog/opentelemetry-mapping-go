@@ -9,7 +9,7 @@ require (
 	go.opentelemetry.io/collector/component v0.117.0
 	go.opentelemetry.io/collector/component/componenttest v0.117.0
 	go.opentelemetry.io/collector/pdata v1.23.0
-	go.opentelemetry.io/collector/semconv v0.116.0
+	go.opentelemetry.io/collector/semconv v0.117.0
 	go.opentelemetry.io/otel v1.33.0
 	go.uber.org/zap v1.27.0
 )
