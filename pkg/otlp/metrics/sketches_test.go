@@ -506,7 +506,7 @@ func TestKnownDistributionsQuantile(t *testing.T) {
 	startTime := timeNow.Add(-10 * time.Second)
 	name := "example.histo"
 	const (
-		N uint64 = 1_000
+		N uint64 = 2_000
 		M uint64 = 100
 	)
 
@@ -545,10 +545,6 @@ func TestKnownDistributionsQuantile(t *testing.T) {
 		{
 			name:     "U-quadratic distribution (a=-N,b=0)",
 			quantile: sketchtest.UQuadraticQ(-fN, 0),
-			// Similar to the pkg/quantile tests, the p99 for this test fails, likely due to the shift of leftover bucket counts the right that is performed
-			// during the DDSketch -> quantile.Sketch conversion, causing the p99 of the output sketch to fall on 0
-			// (which means the InEpsilon check returns 1).
-			excludedQuantiles: map[int]struct{}{99: {}},
 		},
 		{
 			name:     "U-quadratic distribution (a=-N,b=N)",
