@@ -8,7 +8,7 @@ component: pkg/otlp/metrics
 note: "Fix metric origin mappings from OTel collector receiver instrumentation scope"
 
 # The PR related to this change
-issues: []
+issues: [466]
 
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
