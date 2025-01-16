@@ -196,13 +196,9 @@ func TestConvertDDSketchIntoSketch(t *testing.T) {
 			name:     "Uniform distribution (a=0,b=N)",
 			quantile: sketchtest.UniformQ(0, N),
 		},
-		// The p99 for this test fails, likely due to the shift of leftover bucket counts the right that is performed
-		// during the DDSketch -> Sketch conversion, causing the p99 of the output sketch to fall on 0
-		// (which means the InEpsilon check returns 1).
 		{
-			name:              "Uniform distribution (a=-N,b=0)",
-			quantile:          sketchtest.UniformQ(-N, 0),
-			excludedQuantiles: map[int]bool{99: true},
+			name:     "Uniform distribution (a=-N,b=0)",
+			quantile: sketchtest.UniformQ(-N, 0),
 		},
 		{
 			name:     "Uniform distribution (a=-N,b=N)",
@@ -213,18 +209,16 @@ func TestConvertDDSketchIntoSketch(t *testing.T) {
 			quantile: sketchtest.UQuadraticQ(0, N),
 		},
 		{
-			name:     "U-quadratic distribution (a=-N,b=N)",
+			name:     "U-quadratic distribution (a=-N/2,b=N/2)",
 			quantile: sketchtest.UQuadraticQ(-N/2, N/2),
 		},
 		{
-			name:     "U-quadratic distribution (a=-N,b=N)",
+			name:     "U-quadratic distribution (a=-N,b=0)",
 			quantile: sketchtest.UQuadraticQ(-N, 0),
 		},
-		// Same as above, p99 fails.
 		{
-			name:              "Truncated Exponential distribution (a=0,b=N,lambda=1/100)",
-			quantile:          sketchtest.TruncateQ(0, N, sketchtest.ExponentialQ(1.0/100), sketchtest.ExponentialCDF(1.0/100)),
-			excludedQuantiles: map[int]bool{99: true},
+			name:     "Truncated Exponential distribution (a=0,b=N,lambda=1/100)",
+			quantile: sketchtest.TruncateQ(0, N, sketchtest.ExponentialQ(1.0/100), sketchtest.ExponentialCDF(1.0/100)),
 		},
 		{
 			name:     "Truncated Normal distribution (a=0,b=8,mu=0, sigma=1e-3)",
@@ -280,12 +274,39 @@ func TestConvertDDSketchIntoSketch(t *testing.T) {
 			outputSketch, err := convertDDSketchIntoSketch(sketchConfig, convertedSketch)
 			require.NoError(t, err)
 
-			// Conversion accuracy formula taken from:
-			// https://github.com/DataDog/logs-backend/blob/895e56c9eefa1c28a3affbdd0027f58a4c6f4322/domains/event-store/libs/event-store-aggregate/src/test/java/com/dd/event/store/api/query/sketch/SketchTest.java#L409-L422
-			inputGamma := (1.0 + convertedSketch.RelativeAccuracy()) / (1.0 - convertedSketch.RelativeAccuracy())
-			outputGamma := sketchConfig.gamma.v
-			conversionGamma := inputGamma * outputGamma * outputGamma
-			conversionRelativeAccuracy := (conversionGamma - 1) / (conversionGamma + 1)
+			/* We compute the expected bound on the relative error between percentile values before
+			 * and after the conversion.
+			 *
+			 * The error on accumulated bin counts caused by the rounding process is bounded by 0.5
+			 * by design. This means that the quantiles should shift by one bin at most in most
+			 * circumstances, including the scenarios under test.
+			 *
+			 * Note that there are some rare edge cases:
+			 *
+			 * - If the input DDSketch has a mapping much coarser than the default sketchConfig,
+			 *   and it contains a bin with a low count (say, 1), that bin could get remapped to
+			 *   multiple output bins with a count < 0.5. In that case, a 0.5 error on the
+			 *   accumulated count could translate to quantiles shifting by multiple bins.
+			 *
+			 * - Bins with zero counts are ignored during the conversion, so a "shift by one bin"
+			 *   can actually greatly affect the result.
+			 *   For instance, a DDSketch with bins like:
+			 *     [1.2  1.2  0.0 ...  0.0  1.2]
+			 *   will be rounded as:
+			 *     [1    1    0   ...  0    2  ]
+			 *   with a fractional count of 0.4 being shifted by arbitrarily many bins.
+			 *   However, this should not happen for DDSketches with integer counts, or those
+			 *   remapped from one: the accumulated count up to the zero bins would have to be an
+			 *   integer, preventing "long-distance" carry over like this.
+			 *
+			 * An additional source of error is that while `DDSketch.GetValueAtQuantile` returns the
+			 * result bin's center value, `Sketch.Quantile` interpolates linearly between its two
+			 * bounds.
+			 *
+			 * This means the expected worst case is a comparison between the upper bound of bin N+1
+			 * and the center of bin N, giving the following accuracy formula:
+			 */
+			conversionRelativeAccuracy := (sketchConfig.gamma.v*sketchConfig.gamma.v)/(1+convertedSketch.RelativeAccuracy()) - 1
 
 			// Check the count of the output sketch
 			assert.InDelta(

@@ -114,6 +114,9 @@ func (s *Sketch) Quantile(c *Config, q float64) float64 {
 
 		vLow := c.f64(b.k)
 		vHigh := vLow * c.gamma.v
+		if b.k < 0 { // bounds need to be swapped for negative bins
+			vLow, vHigh = vHigh, vLow
+		}
 
 		switch i {
 		case s.bins.Len():
