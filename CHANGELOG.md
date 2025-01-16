@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## 0.23.0
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/attributes`: Add support for mapping OTLP -> DD semantic conventions for HTTP attributes. These mappings are outlined in DD documentation - https://docs.datadoghq.com/opentelemetry/schema_semantics/semantic_mapping/?tab=datadogexporter#http (#426)
+
 ## v0.22.0
 
 ### 💡 Enhancements 💡
