@@ -26,15 +26,19 @@ func TestOriginProductDetailFromScopeName(t *testing.T) {
 		expected  OriginProductDetail
 	}{
 		{
-			scopeName: "otelcol/notsupportedreceiver",
+			scopeName: "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/notsupportedreceiver",
 			expected:  OriginProductDetailUnknown,
 		},
 		{
 			scopeName: "otelcol/kubeletstatsreceiver",
+			expected:  OriginProductDetailUnknown,
+		},
+		{
+			scopeName: "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kubeletstatsreceiver",
 			expected:  OriginProductDetailKubeletStatsReceiver,
 		},
 		{
-			scopeName: "otelcol/hostmetricsreceiver/memory",
+			scopeName: "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/memory",
 			expected:  OriginProductDetailHostMetricsReceiver,
 		},
 		{
