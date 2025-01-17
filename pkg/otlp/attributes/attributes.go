@@ -170,9 +170,9 @@ var (
 		"version":                     {},
 	}
 
-	// httpMapping defines the mapping between OpenTelemetry semantic conventions
+	// HTTPMappings defines the mapping between OpenTelemetry semantic conventions
 	// and Datadog Agent conventions for HTTP attributes.
-	httpMapping = map[string]string{
+	HTTPMappings = map[string]string{
 		semconv127.AttributeClientAddress:          "http.client_ip",
 		semconv127.AttributeHTTPResponseBodySize:   "http.response.content_length",
 		semconv127.AttributeHTTPResponseStatusCode: "http.status_code",
@@ -224,13 +224,6 @@ func TagsFromAttributes(attrs pcommon.Map) []string {
 		// Kubernetes labels mapping
 		if datadogKey, found := kubernetesMapping[key]; found && value.Str() != "" {
 			tags = append(tags, fmt.Sprintf("%s:%s", datadogKey, value.Str()))
-		}
-
-		// HTTP attributes mapping
-		if datadogKey, found := httpMapping[key]; found && value.Str() != "" {
-			tags = append(tags, fmt.Sprintf("%s:%s", datadogKey, value.Str()))
-		} else if strings.HasPrefix(key, "http.request.header.") {
-			tags = append(tags, fmt.Sprintf("http.request.headers.%s:%s", strings.TrimPrefix(key, "http.request.header."), value.Str()))
 		}
 
 		// Kubernetes DD tags
