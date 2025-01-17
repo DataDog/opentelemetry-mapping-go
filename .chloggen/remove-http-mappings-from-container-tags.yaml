@@ -8,4 +8,4 @@ component: pkg/otlp/attributes
 note: Remove HTTP attributes from container tags in OTLP span -> Datadog span mapping
 
 # The PR related to this change
-issues: [467]
+issues: [470]
