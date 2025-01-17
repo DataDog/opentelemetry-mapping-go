@@ -4,6 +4,13 @@
 
 <!-- next version -->
 
+## 0.24.0
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/otlp/metrics`: Fix metric origin mappings from OTel collector receiver instrumentation scope (#466)
+- `pkg/otlp/attributes`: Remove HTTP attributes from container tags in OTLP span -> Datadog span mapping (#470)
+
 ## 0.23.0
 
 ### 💡 Enhancements 💡
