@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.24.0
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/otlp/metrics`: Fix metric origin mappings from OTel collector receiver instrumentation scope (#466)
+
 ## 0.23.0
 
 ### 💡 Enhancements 💡
