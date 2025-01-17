@@ -506,7 +506,7 @@ func TestKnownDistributionsQuantile(t *testing.T) {
 	startTime := timeNow.Add(-10 * time.Second)
 	name := "example.histo"
 	const (
-		N uint64 = 1_000
+		N uint64 = 2_000
 		M uint64 = 100
 	)
 
