@@ -14,7 +14,7 @@
         "scopeMetrics": [
           {
             "scope": {
-              "name": "otelcol/unknownreceiver",
+              "name": "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/unknownreceiver",
               "version": "0.91.0"
             },
             "metrics": [
@@ -34,7 +34,7 @@
           },
           {
             "scope": {
-              "name": "otelcol/hostmetricsreceiver/memory",
+              "name": "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/memory",
               "version": "1.0.0"
             },
             "metrics": [
@@ -54,7 +54,7 @@
           },
           {
             "scope": {
-              "name": "otelcol/prometheusreceiver",
+              "name": "github.com/open-telemetry/opentelemetry-collector-contrib/receiver/prometheusreceiver",
               "version": "0.91.0"
             },
             "metrics": [
