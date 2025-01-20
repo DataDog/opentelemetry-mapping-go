@@ -47,8 +47,8 @@ func NewTranslator(set component.TelemetrySettings, attributesTranslator *attrib
 	}, nil
 }
 
-func (t *Translator) hostNameAndServiceNameFromResource(ctx context.Context, res pcommon.Resource) (host string, service string) {
-	if src, ok := t.attributesTranslator.ResourceToSource(ctx, res, signalTypeSet); ok && src.Kind == source.HostnameKind {
+func (t *Translator) hostNameAndServiceNameFromResource(ctx context.Context, res pcommon.Resource, hostFromAttributesHandler attributes.HostFromAttributesHandler) (host string, service string) {
+	if src, ok := t.attributesTranslator.ResourceToSource(ctx, res, signalTypeSet, hostFromAttributesHandler); ok && src.Kind == source.HostnameKind {
 		host = src.Identifier
 	}
 	if s, ok := res.Attributes().Get(conventions.AttributeServiceName); ok {
@@ -57,22 +57,22 @@ func (t *Translator) hostNameAndServiceNameFromResource(ctx context.Context, res
 	return host, service
 }
 
-func (t *Translator) hostFromAttributes(ctx context.Context, attrs pcommon.Map) string {
-	if src, ok := t.attributesTranslator.AttributesToSource(ctx, attrs); ok && src.Kind == source.HostnameKind {
+func (t *Translator) hostFromAttributes(ctx context.Context, attrs pcommon.Map, hostFromAttributesHandler attributes.HostFromAttributesHandler) string {
+	if src, ok := t.attributesTranslator.AttributesToSource(ctx, attrs, hostFromAttributesHandler); ok && src.Kind == source.HostnameKind {
 		return src.Identifier
 	}
 	return ""
 }
 
 // MapLogs from OTLP format to Datadog format.
-func (t *Translator) MapLogs(ctx context.Context, ld plog.Logs) []datadogV2.HTTPLogItem {
+func (t *Translator) MapLogs(ctx context.Context, ld plog.Logs, hostFromAttributesHandler attributes.HostFromAttributesHandler) []datadogV2.HTTPLogItem {
 	rsl := ld.ResourceLogs()
 	var payloads []datadogV2.HTTPLogItem
 	for i := 0; i < rsl.Len(); i++ {
 		rl := rsl.At(i)
 		sls := rl.ScopeLogs()
 		res := rl.Resource()
-		host, service := t.hostNameAndServiceNameFromResource(ctx, res)
+		host, service := t.hostNameAndServiceNameFromResource(ctx, res, hostFromAttributesHandler)
 		for j := 0; j < sls.Len(); j++ {
 			sl := sls.At(j)
 			lsl := sl.LogRecords()
@@ -82,7 +82,7 @@ func (t *Translator) MapLogs(ctx context.Context, ld plog.Logs) []datadogV2.HTTP
 				// HACK: Check for host and service in log record attributes
 				// This is not aligned with the specification and will be removed in the future.
 				if host == "" {
-					host = t.hostFromAttributes(ctx, log.Attributes())
+					host = t.hostFromAttributes(ctx, log.Attributes(), hostFromAttributesHandler)
 				}
 				if service == "" {
 					if s, ok := log.Attributes().Get(conventions.AttributeServiceName); ok {

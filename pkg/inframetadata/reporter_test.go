@@ -103,10 +103,10 @@ func TestRun(t *testing.T) {
 		conventions.AttributeHostName:      "host-1-hostname",
 		conventions.AttributeOSDescription: true,
 		conventions.AttributeHostArch:      conventions.AttributeHostArchAMD64,
-	}))
+	}), nil)
 	assert.EqualError(t, err, "\"os.description\" has type \"Bool\", expected type \"Str\" instead")
 
-	err = r.ConsumeResource(testutils.NewResourceFromMap(t, map[string]any{}))
+	err = r.ConsumeResource(testutils.NewResourceFromMap(t, map[string]any{}), nil)
 	assert.NoError(t, err)
 
 	// wait until Push has been called once before stopping
