@@ -41,18 +41,6 @@ func TestTagsFromAttributes(t *testing.T) {
 		semconv127.AttributeContainerName:          "custom",
 		"datadog.container.tag.custom.team":        "otel",
 		"kube_cronjob":                             "cron",
-		semconv127.AttributeClientAddress:          "sample_client_address",
-		semconv127.AttributeHTTPResponseBodySize:   "sample_content_length",
-		semconv127.AttributeHTTPResponseStatusCode: "sample_status_code",
-		semconv127.AttributeHTTPRequestBodySize:    "sample_content_length",
-		"http.request.header.referrer":             "sample_referrer",
-		semconv127.AttributeHTTPRequestMethod:      "sample_method",
-		semconv127.AttributeHTTPRoute:              "sample_route",
-		semconv127.AttributeNetworkProtocolVersion: "sample_version",
-		semconv127.AttributeServerAddress:          "sample_server_name",
-		semconv127.AttributeURLFull:                "sample_url",
-		semconv127.AttributeUserAgentOriginal:      "sample_useragent",
-		"http.request.header.example":              "test",
 	}
 	attrs := pcommon.NewMap()
 	attrs.FromRaw(attributeMap)
@@ -68,18 +56,6 @@ func TestTagsFromAttributes(t *testing.T) {
 		fmt.Sprintf("%s:%s", "container_name", "custom"),
 		fmt.Sprintf("%s:%s", "custom.team", "otel"),
 		fmt.Sprintf("%s:%s", "kube_cronjob", "cron"),
-		fmt.Sprintf("%s:%s", "http.client_ip", "sample_client_address"),
-		fmt.Sprintf("%s:%s", "http.response.content_length", "sample_content_length"),
-		fmt.Sprintf("%s:%s", "http.status_code", "sample_status_code"),
-		fmt.Sprintf("%s:%s", "http.request.content_length", "sample_content_length"),
-		fmt.Sprintf("%s:%s", "http.referrer", "sample_referrer"),
-		fmt.Sprintf("%s:%s", "http.method", "sample_method"),
-		fmt.Sprintf("%s:%s", "http.route", "sample_route"),
-		fmt.Sprintf("%s:%s", "http.version", "sample_version"),
-		fmt.Sprintf("%s:%s", "http.server_name", "sample_server_name"),
-		fmt.Sprintf("%s:%s", "http.url", "sample_url"),
-		fmt.Sprintf("%s:%s", "http.useragent", "sample_useragent"),
-		fmt.Sprintf("%s:%s", "http.request.headers.example", "test"),
 	}, TagsFromAttributes(attrs))
 }
 
@@ -135,7 +111,7 @@ func TestContainerTagFromResourceAttributes(t *testing.T) {
 		fmt.Println(ContainerTagsFromResourceAttributes(attributes))
 	})
 
-	t.Run("semconv127 vs custom", func(t *testing.T) {
+	t.Run("conventions vs custom", func(t *testing.T) {
 		attributes := pcommon.NewMap()
 		err := attributes.FromRaw(map[string]interface{}{
 			semconv127.AttributeContainerName:      "ok",
