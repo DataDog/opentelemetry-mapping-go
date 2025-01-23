@@ -3,7 +3,7 @@ module github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics
 go 1.22.0
 
 require (
-	github.com/DataDog/datadog-agent/pkg/proto v0.63.0-devel
+	github.com/DataDog/datadog-agent/pkg/proto v0.0.0-20250123183219-65761965def3
 	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.0.0-20250120160705-f24117c32df1
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.0.0-20250120160705-f24117c32df1
 	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.0.0-20250120160705-f24117c32df1
