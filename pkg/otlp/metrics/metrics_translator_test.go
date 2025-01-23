@@ -487,7 +487,7 @@ func TestMapIntMonotonicWithRebootBeginningOfSlice(t *testing.T) {
 		ctx := context.Background()
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -528,7 +528,7 @@ func TestMapIntMonotonicWithRebootBeginningOfSlice(t *testing.T) {
 		ctx := context.Background()
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -573,7 +573,7 @@ func TestMapIntMonotonicDropPointPointWithinSlice(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -616,7 +616,7 @@ func TestMapIntMonotonicDropPointPointWithinSlice(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -657,7 +657,7 @@ func TestMapIntMonotonicDropPointPointWithinSlice(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -700,7 +700,7 @@ func TestMapIntMonotonicDropPointPointWithinSlice(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -744,7 +744,7 @@ func TestMapIntMonotonicDropPointPointBeginningOfSlice(t *testing.T) {
 		ctx := context.Background()
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -784,7 +784,7 @@ func TestMapIntMonotonicDropPointPointBeginningOfSlice(t *testing.T) {
 		ctx := context.Background()
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -824,7 +824,7 @@ func TestMapIntMonotonicDropPointPointBeginningOfSlice(t *testing.T) {
 		ctx := context.Background()
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -864,7 +864,7 @@ func TestMapIntMonotonicDropPointPointBeginningOfSlice(t *testing.T) {
 		ctx := context.Background()
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -880,7 +880,7 @@ func TestMapIntMonotonicReportFirstValue(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, exampleDims), consumer)
+	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, exampleDims), consumer, nil)
 	startTs := int(getProcessStartTime()) + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -897,7 +897,7 @@ func TestMapIntMonotonicRateDontReportFirstValue(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, rateAsGaugeDims), consumer)
+	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, rateAsGaugeDims), consumer, nil)
 	startTs := int(getProcessStartTime()) + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -913,7 +913,7 @@ func TestMapIntMonotonicNotReportFirstValueIfStartTSMatchTS(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(true, exampleDims), consumer)
+	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(true, exampleDims), consumer, nil)
 	assert.Empty(t, consumer.metrics)
 	assert.Empty(t, rmt.Languages)
 }
@@ -922,7 +922,7 @@ func TestMapIntMonotonicRateNotReportFirstValueIfStartTSMatchTS(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(true, rateAsGaugeDims), consumer)
+	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(true, rateAsGaugeDims), consumer, nil)
 	assert.Empty(t, consumer.metrics)
 	assert.Empty(t, rmt.Languages)
 }
@@ -935,7 +935,7 @@ func TestMapIntMonotonicReportDiffForFirstValue(t *testing.T) {
 	startTs := int(getProcessStartTime()) + 1
 	// Add an entry to the cache about the timeseries, in this case we send the diff (9) rather than the first value (10).
 	tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+1)), 1)
-	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, exampleDims), consumer)
+	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, exampleDims), consumer, nil)
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -955,7 +955,7 @@ func TestMapIntMonotonicReportRateForFirstValue(t *testing.T) {
 	startTs := int(getProcessStartTime()) + 1
 	// Add an entry to the cache about the timeseries, in this case we send the rate (10-1)/(startTs+2-startTs+1) rather than the first value (10).
 	tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+1)), 1)
-	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, rateAsGaugeDims), consumer)
+	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, rateAsGaugeDims), consumer, nil)
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -973,7 +973,7 @@ func TestMapRuntimeMetricsHasMapping(t *testing.T) {
 	consumer := &mockFullConsumer{}
 	exampleDims = newDims("process.runtime.go.goroutines")
 	mappedDims := newDims("runtime.go.num_goroutine")
-	rmt, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, exampleDims), consumer)
+	rmt, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, exampleDims), consumer, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -999,7 +999,7 @@ func TestMapRuntimeMetricsHasMappingCollector(t *testing.T) {
 	exampleDims = newDims("process.runtime.go.goroutines")
 	exampleOtelDims := newDims("otel.process.runtime.go.goroutines")
 	mappedDims := newDims("runtime.go.num_goroutine")
-	rmt, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, exampleDims), consumer)
+	rmt, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, exampleDims), consumer, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1027,7 +1027,7 @@ func TestMapSystemMetricsRenamedWithOTelPrefix(t *testing.T) {
 	processDims := newDims("process.runtime.go.goroutines")
 	jvmDims := newDims("jvm.memory.used")
 	for _, dims := range []*Dimensions{systemDims, processDims, jvmDims} {
-		_, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, dims), consumer)
+		_, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, dims), consumer, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1066,7 +1066,7 @@ func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen0"},
 	}}
-	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes, 1), consumer)
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes, 1), consumer, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1089,7 +1089,7 @@ func TestMapSumRuntimeMetricWithAttributesHasMappingCollector(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen0"},
 	}}
-	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes, 1), consumer)
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.collections.count", pmetric.MetricTypeSum, attributes, 1), consumer, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1112,7 +1112,7 @@ func TestMapGaugeRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen1"},
 	}}
-	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeGauge, attributes, 1), consumer)
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeGauge, attributes, 1), consumer, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1132,7 +1132,7 @@ func TestMapHistogramRuntimeMetricHasMapping(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
 
-	rmt, err := tr.MapMetrics(ctx, createTestHistogramMetric("process.runtime.jvm.threads.count"), consumer)
+	rmt, err := tr.MapMetrics(ctx, createTestHistogramMetric("process.runtime.jvm.threads.count"), consumer, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1161,7 +1161,7 @@ func TestMapHistogramRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 		key:    "generation",
 		values: []string{"gen1"},
 	}}
-	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeHistogram, attributes, 1), consumer)
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.dotnet.gc.heap.size", pmetric.MetricTypeHistogram, attributes, 1), consumer, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1193,7 +1193,7 @@ func TestMapRuntimeMetricWithTwoAttributesHasMapping(t *testing.T) {
 		key:    "type",
 		values: []string{"heap"},
 	}}
-	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 1), consumer)
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 1), consumer, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1220,7 +1220,7 @@ func TestMapRuntimeMetricWithTwoAttributesMultipleDataPointsHasMapping(t *testin
 		key:    "type",
 		values: []string{"heap", "heap", "heap"},
 	}}
-	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 3), consumer)
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 3), consumer, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1248,7 +1248,7 @@ func TestMapRuntimeMetricsMultipleLanguageTags(t *testing.T) {
 	consumer := &mockFullConsumer{}
 	exampleDims = newDims("process.runtime.go.goroutines")
 	md1 := createTestIntCumulativeMonotonicMetrics(false, exampleDims)
-	rmt, err := tr.MapMetrics(ctx, md1, consumer)
+	rmt, err := tr.MapMetrics(ctx, md1, consumer, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1257,7 +1257,7 @@ func TestMapRuntimeMetricsMultipleLanguageTags(t *testing.T) {
 	exampleDims = newDims("process.runtime.go.lookups")
 	md2 := createTestIntCumulativeMonotonicMetrics(false, exampleDims)
 	md1.ResourceMetrics().MoveAndAppendTo(md2.ResourceMetrics())
-	rmt, err = tr.MapMetrics(ctx, md2, consumer)
+	rmt, err = tr.MapMetrics(ctx, md2, consumer, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1266,7 +1266,7 @@ func TestMapRuntimeMetricsMultipleLanguageTags(t *testing.T) {
 	exampleDims = newDims("process.runtime.dotnet.exceptions.count")
 	md3 := createTestIntCumulativeMonotonicMetrics(false, exampleDims)
 	md2.ResourceMetrics().MoveAndAppendTo(md3.ResourceMetrics())
-	rmt, err = tr.MapMetrics(ctx, md3, consumer)
+	rmt, err = tr.MapMetrics(ctx, md3, consumer, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1275,7 +1275,7 @@ func TestMapRuntimeMetricsMultipleLanguageTags(t *testing.T) {
 	exampleDims = newDims("process.runtime.jvm.classes.current_loaded")
 	md4 := createTestIntCumulativeMonotonicMetrics(false, exampleDims)
 	md3.ResourceMetrics().MoveAndAppendTo(md4.ResourceMetrics())
-	rmt, err = tr.MapMetrics(ctx, md4, consumer)
+	rmt, err = tr.MapMetrics(ctx, md4, consumer, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1290,7 +1290,7 @@ func TestMapGaugeRuntimeMetricWithInvalidAttributes(t *testing.T) {
 		key:    "type",
 		values: []string{"heap2"},
 	}}
-	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 1), consumer)
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("process.runtime.jvm.memory.usage", pmetric.MetricTypeGauge, attributes, 1), consumer, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1309,7 +1309,7 @@ func TestMapRuntimeMetricsNoMapping(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
 	exampleDims = newDims("runtime.go.mem.live_objects")
-	rmt, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, exampleDims), consumer)
+	rmt, err := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, exampleDims), consumer, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1329,7 +1329,7 @@ func TestMapSystemMetrics(t *testing.T) {
 	ctx := context.Background()
 	tr := NewTestTranslator(t, WithRemapping())
 	consumer := &mockFullConsumer{}
-	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("system.filesystem.utilization", pmetric.MetricTypeGauge, nil, 1), consumer)
+	rmt, err := tr.MapMetrics(ctx, createTestMetricWithAttributes("system.filesystem.utilization", pmetric.MetricTypeGauge, nil, 1), consumer, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1555,7 +1555,7 @@ func TestMapDoubleMonotonicWithRebootBeginningOfSlice(t *testing.T) {
 		ctx := context.Background()
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -1596,7 +1596,7 @@ func TestMapDoubleMonotonicWithRebootBeginningOfSlice(t *testing.T) {
 		ctx := context.Background()
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -1642,7 +1642,7 @@ func TestMapDoubleMonotonicDropPointPointWithinSlice(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -1685,7 +1685,7 @@ func TestMapDoubleMonotonicDropPointPointWithinSlice(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -1726,7 +1726,7 @@ func TestMapDoubleMonotonicDropPointPointWithinSlice(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -1769,7 +1769,7 @@ func TestMapDoubleMonotonicDropPointPointWithinSlice(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -1813,7 +1813,7 @@ func TestMapDoubleMonotonicDropPointPointBeginningOfSlice(t *testing.T) {
 		ctx := context.Background()
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -1853,7 +1853,7 @@ func TestMapDoubleMonotonicDropPointPointBeginningOfSlice(t *testing.T) {
 		ctx := context.Background()
 		consumer := &mockFullConsumer{}
 
-		rmt, _ := tr.MapMetrics(ctx, md, consumer)
+		rmt, _ := tr.MapMetrics(ctx, md, consumer, nil)
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
@@ -1868,7 +1868,7 @@ func TestMapDoubleMonotonicReportFirstValue(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(false, exampleDims), consumer)
+	tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(false, exampleDims), consumer, nil)
 	startTs := int(getProcessStartTime()) + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -1884,7 +1884,7 @@ func TestMapDoubleMonotonicRateDontReportFirstValue(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	rmt, _ := tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(false, rateAsGaugeDims), consumer)
+	rmt, _ := tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(false, rateAsGaugeDims), consumer, nil)
 	startTs := int(getProcessStartTime()) + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -1900,7 +1900,7 @@ func TestMapDoubleMonotonicNotReportFirstValueIfStartTSMatchTS(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(true, exampleDims), consumer)
+	tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(true, exampleDims), consumer, nil)
 	assert.Empty(t, consumer.metrics)
 }
 
@@ -1917,7 +1917,7 @@ func TestMapAPMStatsWithBytes(t *testing.T) {
 	assert.NoError(t, err)
 
 	ctx := context.Background()
-	tr.MapMetrics(ctx, md, consumer)
+	tr.MapMetrics(ctx, md, consumer, nil)
 	got := &pb.StatsPayload{}
 
 	payload := <-ch
@@ -1934,7 +1934,7 @@ func TestMapDoubleMonotonicReportDiffForFirstValue(t *testing.T) {
 	startTs := int(getProcessStartTime()) + 1
 	// Add an entry to the cache about the timeseries, in this case we send the diff (9) rather than the first value (10).
 	tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+1)), 1)
-	tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(false, exampleDims), consumer)
+	tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(false, exampleDims), consumer, nil)
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -1953,7 +1953,7 @@ func TestMapDoubleMonotonicReportRateForFirstValue(t *testing.T) {
 	startTs := int(getProcessStartTime()) + 1
 	// Add an entry to the cache about the timeseries, in this case we send the rate (10-1)/(startTs+2-startTs+1) rather than the first value (10).
 	tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+1)), 1)
-	rmt, _ := tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(false, rateAsGaugeDims), consumer)
+	rmt, _ := tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(false, rateAsGaugeDims), consumer, nil)
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{

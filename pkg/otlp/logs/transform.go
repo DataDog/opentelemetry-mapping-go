@@ -63,8 +63,8 @@ const (
 // Transform converts the log record in lr, which came in with the resource in res to a Datadog log item.
 // the variable specifies if the log body should be sent as an attribute or as a plain message.
 // Deprecated: use Translator instead.
-func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger) datadogV2.HTTPLogItem {
-	host, service := extractHostNameAndServiceName(res.Attributes(), lr.Attributes())
+func Transform(lr plog.LogRecord, res pcommon.Resource, logger *zap.Logger, hostFromAttributesHandler attributes.HostFromAttributesHandler) datadogV2.HTTPLogItem {
+	host, service := extractHostNameAndServiceName(res.Attributes(), lr.Attributes(), hostFromAttributesHandler)
 	return transform(lr, host, service, res, logger)
 }
 
@@ -199,14 +199,14 @@ func flattenAttribute(key string, val pcommon.Value, depth int) map[string]strin
 	return result
 }
 
-func extractHostNameAndServiceName(resourceAttrs pcommon.Map, logAttrs pcommon.Map) (host string, service string) {
-	if src, ok := attributes.SourceFromAttrs(resourceAttrs); ok && src.Kind == source.HostnameKind {
+func extractHostNameAndServiceName(resourceAttrs pcommon.Map, logAttrs pcommon.Map, hostFromAttributesHandler attributes.HostFromAttributesHandler) (host string, service string) {
+	if src, ok := attributes.SourceFromAttrs(resourceAttrs, hostFromAttributesHandler); ok && src.Kind == source.HostnameKind {
 		host = src.Identifier
 	}
 	// HACK: Check for host in log record attributes if not present in resource attributes.
 	// This is not aligned with the specification and will be removed in the future.
 	if host == "" {
-		if src, ok := attributes.SourceFromAttrs(logAttrs); ok && src.Kind == source.HostnameKind {
+		if src, ok := attributes.SourceFromAttrs(logAttrs, hostFromAttributesHandler); ok && src.Kind == source.HostnameKind {
 			host = src.Identifier
 		}
 	}

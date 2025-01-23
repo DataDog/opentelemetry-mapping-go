@@ -106,8 +106,8 @@ func (r *Reporter) pushAndLog(ctx context.Context, hm payload.HostMetadata) {
 	}
 }
 
-func (r *Reporter) hostname(res pcommon.Resource) (string, bool) {
-	src, ok := attributes.SourceFromAttrs(res.Attributes())
+func (r *Reporter) hostname(res pcommon.Resource, hostFromAttributesHandler attributes.HostFromAttributesHandler) (string, bool) {
+	src, ok := attributes.SourceFromAttrs(res.Attributes(), hostFromAttributesHandler)
 	if !ok {
 		r.logger.Warn("resource does not have host-identifying attributes",
 			zap.Any("attributes", res.Attributes().AsRaw()),
@@ -124,7 +124,7 @@ func (r *Reporter) hostname(res pcommon.Resource) (string, bool) {
 
 // ConsumeResource for host metadata reporting purposes.
 // The resource will be used only if it is usable (see 'hasHostMetadata') and it has a host attribute.
-func (r *Reporter) ConsumeResource(res pcommon.Resource) error {
+func (r *Reporter) ConsumeResource(res pcommon.Resource, hostFromAttributesHandler attributes.HostFromAttributesHandler) error {
 	if ok, err := hasHostMetadata(res); err != nil {
 		return fmt.Errorf("failed to check resource: %w", err)
 	} else if !ok {
@@ -132,7 +132,7 @@ func (r *Reporter) ConsumeResource(res pcommon.Resource) error {
 		return nil
 	}
 
-	hostname, ok := r.hostname(res)
+	hostname, ok := r.hostname(res, hostFromAttributesHandler)
 	if !ok {
 		return nil
 	}
@@ -152,7 +152,7 @@ func (r *Reporter) ConsumeResource(res pcommon.Resource) error {
 
 // ConsumeMetrics checks if a metric is tracked by the reporter
 // and if so updates the host metadata accordingly.
-func (r *Reporter) ConsumeMetrics(md pmetric.Metrics) error {
+func (r *Reporter) ConsumeMetrics(md pmetric.Metrics, hostFromAttributesHandler attributes.HostFromAttributesHandler) error {
 	rms := md.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
@@ -165,7 +165,7 @@ func (r *Reporter) ConsumeMetrics(md pmetric.Metrics) error {
 			continue
 		}
 
-		host, ok := r.hostname(res)
+		host, ok := r.hostname(res, hostFromAttributesHandler)
 		if !ok {
 			continue
 		}

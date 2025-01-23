@@ -70,9 +70,9 @@ func TestInternalTelemetryMetrics(t *testing.T) {
 
 	attributeSet := attribute.NewSet(attribute.String("signal", "test"))
 
-	_, _ = translator.ResourceToSource(context.Background(), resWithHostname, attributeSet)
-	_, _ = translator.ResourceToSource(context.Background(), resWithoutHostname, attributeSet)
-	_, _ = translator.ResourceToSource(context.Background(), resWithoutHostname, attributeSet)
+	_, _ = translator.ResourceToSource(context.Background(), resWithHostname, attributeSet, nil)
+	_, _ = translator.ResourceToSource(context.Background(), resWithoutHostname, attributeSet, nil)
+	_, _ = translator.ResourceToSource(context.Background(), resWithoutHostname, attributeSet, nil)
 
 	rm := &metricdata.ResourceMetrics{}
 	assert.NoError(t, reader.Collect(context.Background(), rm))

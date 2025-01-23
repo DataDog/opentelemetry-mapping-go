@@ -3,7 +3,7 @@ module github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata
 go 1.22.0
 
 require (
-	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.24.0
+	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.0.0-20250120160705-f24117c32df1
 	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/collector/pdata v1.23.0
 	go.opentelemetry.io/collector/semconv v0.117.0

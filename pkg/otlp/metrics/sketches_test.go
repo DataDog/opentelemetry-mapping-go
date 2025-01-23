@@ -143,7 +143,7 @@ func TestHistogramSketches(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			md := fromCDF(test.cdf)
 			consumer := &sketchConsumer{}
-			_, err := tr.MapMetrics(ctx, md, consumer)
+			_, err := tr.MapMetrics(ctx, md, consumer, nil)
 			assert.NoError(t, err)
 			sk := consumer.sk
 
@@ -340,7 +340,7 @@ func TestExactHistogramStats(t *testing.T) {
 		t.Run(testInstance.name, func(t *testing.T) {
 			md := testInstance.getHist()
 			consumer := &sketchConsumer{}
-			_, err := tr.MapMetrics(ctx, md, consumer)
+			_, err := tr.MapMetrics(ctx, md, consumer, nil)
 			assert.NoError(t, err)
 			sk := consumer.sk
 
@@ -424,7 +424,7 @@ func TestInfiniteBounds(t *testing.T) {
 		t.Run(testInstance.name, func(t *testing.T) {
 			md := testInstance.getHist()
 			consumer := &sketchConsumer{}
-			_, err := tr.MapMetrics(ctx, md, consumer)
+			_, err := tr.MapMetrics(ctx, md, consumer, nil)
 			assert.NoError(t, err)
 			sk := consumer.sk
 
@@ -566,7 +566,7 @@ func TestKnownDistributionsQuantile(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			md := fromQuantile(name, startTime, timeNow, tt.quantile, N, M)
 			consumer := &sketchConsumer{}
-			_, err := tr.MapMetrics(ctx, md, consumer)
+			_, err := tr.MapMetrics(ctx, md, consumer, nil)
 			require.NoError(t, err)
 			require.NotNil(t, consumer.sk)
 
