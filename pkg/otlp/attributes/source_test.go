@@ -155,7 +155,7 @@ func TestSourceFromAttrs(t *testing.T) {
 
 	for _, testInstance := range tests {
 		t.Run(testInstance.name, func(t *testing.T) {
-			source, ok := SourceFromAttrs(testInstance.attrs)
+			source, ok := SourceFromAttrs(testInstance.attrs, nil)
 			assert.Equal(t, testInstance.ok, ok)
 			assert.Equal(t, testInstance.src, source)
 		})
@@ -166,7 +166,7 @@ func TestSourceFromAttrs(t *testing.T) {
 func TestLiteralHostNonString(t *testing.T) {
 	attrs := pcommon.NewMap()
 	attrs.PutInt(AttributeHost, 1000)
-	src, ok := SourceFromAttrs(attrs)
+	src, ok := SourceFromAttrs(attrs, nil)
 	assert.True(t, ok)
 	assert.Equal(t, source.Source{Kind: source.HostnameKind, Identifier: "1000"}, src)
 }
