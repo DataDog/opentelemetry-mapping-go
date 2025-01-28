@@ -16,10 +16,12 @@ package attributes
 
 import "sync"
 
+// GatewayUsage is a HostFromAttributesHandler that detects if the setup is a gateway.
+// If two attributes have different hostnames, then we consider the setup is a gateway.
 type GatewayUsage struct {
-	fistHostname string
-	gatewayUsage bool
-	m            sync.Mutex
+	firstHostname string
+	gatewayUsage  bool
+	m             sync.Mutex
 }
 
 var _ HostFromAttributesHandler = (*GatewayUsage)(nil)
@@ -34,9 +36,9 @@ func NewGatewayUsage() *GatewayUsage {
 func (g *GatewayUsage) OnHost(host string) {
 	g.m.Lock()
 	defer g.m.Unlock()
-	if g.fistHostname == "" {
-		g.fistHostname = host
-	} else if g.fistHostname != host {
+	if g.firstHostname == "" {
+		g.firstHostname = host
+	} else if g.firstHostname != host {
 		g.gatewayUsage = true
 	}
 }
