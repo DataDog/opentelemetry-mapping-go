@@ -48,7 +48,7 @@ func NewTranslator(set component.TelemetrySettings, attributesTranslator *attrib
 }
 
 func (t *Translator) hostNameAndServiceNameFromResource(ctx context.Context, res pcommon.Resource) (host string, service string) {
-	if src, ok := t.attributesTranslator.ResourceToSource(ctx, res, signalTypeSet); ok && src.Kind == source.HostnameKind {
+	if src, ok := t.attributesTranslator.ResourceToSource(ctx, res, signalTypeSet, nil); ok && src.Kind == source.HostnameKind {
 		host = src.Identifier
 	}
 	if s, ok := res.Attributes().Get(conventions.AttributeServiceName); ok {

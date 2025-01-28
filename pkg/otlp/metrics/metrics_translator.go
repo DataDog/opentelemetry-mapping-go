@@ -612,8 +612,8 @@ func (t *Translator) mapSummaryMetrics(
 	}
 }
 
-func (t *Translator) source(ctx context.Context, res pcommon.Resource) (source.Source, error) {
-	src, hasSource := t.attributesTranslator.ResourceToSource(ctx, res, signalTypeSet)
+func (t *Translator) source(ctx context.Context, res pcommon.Resource, hostFromAttributesHandler attributes.HostFromAttributesHandler) (source.Source, error) {
+	src, hasSource := t.attributesTranslator.ResourceToSource(ctx, res, signalTypeSet, hostFromAttributesHandler)
 	if !hasSource {
 		var err error
 		src, err = t.cfg.fallbackSourceProvider.Source(ctx)
@@ -726,14 +726,14 @@ func mapHistogramRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pme
 }
 
 // MapMetrics maps OTLP metrics into the Datadog format
-func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consumer Consumer) (Metadata, error) {
+func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consumer Consumer, hostFromAttributesHandler attributes.HostFromAttributesHandler) (Metadata, error) {
 	metadata := Metadata{
 		Languages: []string{},
 	}
 	rms := md.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
-		src, err := t.source(ctx, rm.Resource())
+		src, err := t.source(ctx, rm.Resource(), hostFromAttributesHandler)
 		if err != nil {
 			return metadata, err
 		}
