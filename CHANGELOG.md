@@ -4,6 +4,17 @@
 
 <!-- next version -->
 
+## v0.25.0
+
+### 🛑 Breaking changes 🛑
+
+- `pkg/otlp/attributes`: Add a new parameter which has a method called when the hostname is resolved (#479)
+  Impacted functions:|(*Translator).ResourceToSource|SourceFromAttrs
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/quantile`: Improve stability of OTel histogram conversion (#468)
+
 ## 0.24.0
 
 ### 🧰 Bug fixes 🧰
