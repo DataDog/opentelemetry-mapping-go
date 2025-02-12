@@ -627,7 +627,7 @@ func TestTranslator(t *testing.T) {
 			tt.args.res.MoveTo(rl.Resource())
 			tt.args.lr.CopyTo(rl.ScopeLogs().AppendEmpty().LogRecords().AppendEmpty())
 
-			payloads := translator.MapLogs(context.Background(), logs)
+			payloads := translator.MapLogs(context.Background(), logs, nil)
 			require.Len(t, payloads, 1)
 			got := payloads[0]
 
