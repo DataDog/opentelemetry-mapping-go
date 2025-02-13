@@ -8,7 +8,7 @@ install-tools:
 	cd $(TOOLS_MOD_DIR) && go install go.opentelemetry.io/build-tools/multimod
 	cd $(TOOLS_MOD_DIR) && go install github.com/frapposelli/wwhrd
 	cd $(TOOLS_MOD_DIR) && go install github.com/golangci/golangci-lint/cmd/golangci-lint
-	cd $(TOOLS_MOD_DIR) && go install golang.org/x/exp/cmd/apidiff
+	cd $(TOOLS_MOD_DIR) && go install golang.org/x/exp/cmd/apidiff@v0.0.0-20250106191152-7588d65b2ba8
 	cd $(TOOLS_MOD_DIR) && go install gotest.tools/gotestsum
 	cd $(TOOLS_MOD_DIR)/generate-license-file && go install .
 
