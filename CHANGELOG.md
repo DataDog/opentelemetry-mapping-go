@@ -4,6 +4,14 @@
 
 <!-- next version -->
 
+## 0.26.0
+
+### 🛑 Breaking changes 🛑
+
+- `all`: Bump required minimum Go version to 1.23 (#517)
+- `pkg/otlp/logs`: Add attributes.HostFromAttributesHandler to Translator.MapLogs (#516)
+  Impacted functions:|(*Translator).MapLogs
+
 ## v0.25.0
 
 ### 🛑 Breaking changes 🛑
