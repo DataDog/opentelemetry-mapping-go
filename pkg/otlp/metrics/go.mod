@@ -7,7 +7,7 @@ require (
 	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.26.0
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.26.0
 	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.26.0
-	github.com/DataDog/sketches-go v1.4.6
+	github.com/DataDog/sketches-go v1.4.7
 	github.com/golang/protobuf v1.5.4
 	github.com/lightstep/go-expohisto v1.0.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/pdatatest v0.119.0
