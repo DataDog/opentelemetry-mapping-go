@@ -43,7 +43,6 @@ pkg/otlp/attributes,github.com/google/uuid,BSD-3-Clause,"Copyright (c) 2009,2014
 pkg/otlp/attributes,go.opentelemetry.io/auto/sdk,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/auto/sdk/internal/telemetry,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/collector/component,Apache-2.0,Copyright The OpenTelemetry Authors
-pkg/otlp/attributes,go.opentelemetry.io/collector/config/configtelemetry,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal/data,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/collector/pdata/internal/data/protogen/collector/logs/v1,Apache-2.0,Copyright The OpenTelemetry Authors
@@ -238,7 +237,6 @@ pkg/otlp/metrics,github.com/tinylib/msgp/msgp,MIT,Copyright (c) 2014 Philip Hofe
 pkg/otlp/metrics,go.opentelemetry.io/auto/sdk,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/auto/sdk/internal/telemetry,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/collector/component,Apache-2.0,Copyright The OpenTelemetry Authors
-pkg/otlp/metrics,go.opentelemetry.io/collector/config/configtelemetry,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/collector/pdata/internal,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/collector/pdata/internal/data,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/collector/pdata/internal/data/protogen/collector/logs/v1,Apache-2.0,Copyright The OpenTelemetry Authors
@@ -425,7 +423,6 @@ pkg/inframetadata,github.com/stretchr/testify/assert,MIT,"Copyright (c) 2012-202
 pkg/inframetadata,github.com/stretchr/testify/assert/yaml,MIT,"Copyright (c) 2012-2020 Mat Ryer, Tyler Bunnell and contributors"
 pkg/inframetadata,github.com/stretchr/testify/require,MIT,"Copyright (c) 2012-2020 Mat Ryer, Tyler Bunnell and contributors"
 pkg/inframetadata,go.opentelemetry.io/collector/component,Apache-2.0,Copyright The OpenTelemetry Authors
-pkg/inframetadata,go.opentelemetry.io/collector/config/configtelemetry,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/inframetadata,go.opentelemetry.io/collector/pdata/internal,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/inframetadata,go.opentelemetry.io/collector/pdata/internal/data,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/inframetadata,go.opentelemetry.io/collector/pdata/internal/data/protogen/collector/logs/v1,Apache-2.0,Copyright The OpenTelemetry Authors
