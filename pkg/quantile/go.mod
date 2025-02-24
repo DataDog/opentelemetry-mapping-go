@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.26.0
-	github.com/DataDog/sketches-go v1.4.6
+	github.com/DataDog/sketches-go v1.4.7
 	github.com/dustin/go-humanize v1.0.1
 	github.com/stretchr/testify v1.10.0
 )

@@ -1,10 +1,10 @@
 Component,Origin,License,Copyright
-pkg/quantile,github.com/DataDog/sketches-go/ddsketch,Apache-2.0,"Copyright 2021 DataDog, Inc | Copyright 2021 Datadog, Inc"
-pkg/quantile,github.com/DataDog/sketches-go/ddsketch/encoding,Apache-2.0,"Copyright 2021 DataDog, Inc | Copyright 2021 Datadog, Inc"
-pkg/quantile,github.com/DataDog/sketches-go/ddsketch/mapping,Apache-2.0,"Copyright 2021 DataDog, Inc | Copyright 2021 Datadog, Inc"
-pkg/quantile,github.com/DataDog/sketches-go/ddsketch/pb/sketchpb,Apache-2.0,"Copyright 2021 DataDog, Inc | Copyright 2021 Datadog, Inc"
-pkg/quantile,github.com/DataDog/sketches-go/ddsketch/stat,Apache-2.0,"Copyright 2021 DataDog, Inc | Copyright 2021 Datadog, Inc"
-pkg/quantile,github.com/DataDog/sketches-go/ddsketch/store,Apache-2.0,"Copyright 2021 DataDog, Inc | Copyright 2021 Datadog, Inc"
+pkg/quantile,github.com/DataDog/sketches-go/ddsketch,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
+pkg/quantile,github.com/DataDog/sketches-go/ddsketch/encoding,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
+pkg/quantile,github.com/DataDog/sketches-go/ddsketch/mapping,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
+pkg/quantile,github.com/DataDog/sketches-go/ddsketch/pb/sketchpb,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
+pkg/quantile,github.com/DataDog/sketches-go/ddsketch/stat,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
+pkg/quantile,github.com/DataDog/sketches-go/ddsketch/store,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
 pkg/quantile,github.com/dustin/go-humanize,MIT,Copyright (c) 2005-2008  Dustin Sallings <dustin@spy.net>
 pkg/quantile,google.golang.org/protobuf/encoding/prototext,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/encoding/protowire,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
@@ -210,12 +210,12 @@ pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes
 pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
 pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/quantile,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
 pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
-pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch,Apache-2.0,"Copyright 2021 DataDog, Inc | Copyright 2021 Datadog, Inc"
-pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch/encoding,Apache-2.0,"Copyright 2021 DataDog, Inc | Copyright 2021 Datadog, Inc"
-pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch/mapping,Apache-2.0,"Copyright 2021 DataDog, Inc | Copyright 2021 Datadog, Inc"
-pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch/pb/sketchpb,Apache-2.0,"Copyright 2021 DataDog, Inc | Copyright 2021 Datadog, Inc"
-pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch/stat,Apache-2.0,"Copyright 2021 DataDog, Inc | Copyright 2021 Datadog, Inc"
-pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch/store,Apache-2.0,"Copyright 2021 DataDog, Inc | Copyright 2021 Datadog, Inc"
+pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
+pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch/encoding,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
+pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch/mapping,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
+pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch/pb/sketchpb,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
+pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch/stat,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
+pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch/store,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
 pkg/otlp/metrics,github.com/dustin/go-humanize,MIT,Copyright (c) 2005-2008  Dustin Sallings <dustin@spy.net>
 pkg/otlp/metrics,github.com/go-logr/logr,Apache-2.0,Copyright 2019 The logr Authors.
 pkg/otlp/metrics,github.com/go-logr/logr/funcr,Apache-2.0,Copyright 2019 The logr Authors.
