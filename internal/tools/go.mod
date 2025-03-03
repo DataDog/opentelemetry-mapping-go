@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	github.com/frapposelli/wwhrd v0.4.0
 	github.com/golangci/golangci-lint v1.63.4
-	go.opentelemetry.io/build-tools/chloggen v0.17.0
+	go.opentelemetry.io/build-tools/chloggen v0.19.0
 	go.opentelemetry.io/build-tools/multimod v0.19.0
 	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0 // No tagged version available
 	gotest.tools/gotestsum v1.12.0
