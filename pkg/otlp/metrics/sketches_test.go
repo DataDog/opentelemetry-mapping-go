@@ -288,8 +288,6 @@ func TestExactHistogramStats(t *testing.T) {
 
 	// Add tests for issue 7065: https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/7065
 	for pos, val := range []float64{500, 5_000, 50_000} {
-		pos := pos
-		val := val
 		tests = append(tests, struct {
 			name        string
 			getHist     func() pmetric.Metrics
