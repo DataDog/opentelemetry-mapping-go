@@ -8,8 +8,6 @@ import (
 	"path"
 	"regexp"
 	"strings"
-
-	"go.uber.org/multierr"
 )
 
 var (
@@ -93,7 +91,7 @@ func mapLines(fullPath string, fn func(line string) (string, bool)) ([]string, e
 	if err != nil {
 		return nil, fmt.Errorf("failed to open %q: %w", fullPath, err)
 	}
-	defer func() { err = multierr.Append(err, file.Close()) }()
+	defer func() { err = errors.Join(err, file.Close()) }()
 
 	var notices []string
 

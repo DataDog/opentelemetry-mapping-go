@@ -4,14 +4,13 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"sort"
 	"strings"
-
-	"go.uber.org/multierr"
 )
 
 const licensesCSV = "LICENSE-3rdparty.csv"
@@ -88,7 +87,7 @@ func findDependenciesOf(module string) (packages []Package, err error) {
 		return nil, fmt.Errorf("failed to changed directory to %q: %w", module, err)
 	}
 	// restore directory after exit
-	defer func() { err = multierr.Append(err, os.Chdir(cwd)) }()
+	defer func() { err = errors.Join(err, os.Chdir(cwd)) }()
 
 	// wwhrd needs vendored dependencies.
 	cmd := exec.Command("go", "mod", "vendor")
@@ -96,7 +95,7 @@ func findDependenciesOf(module string) (packages []Package, err error) {
 		return nil, fmt.Errorf("failed to run 'go mod vendor': %w", err)
 	}
 	// remove vendored dependencies after exit
-	defer func() { err = multierr.Append(err, os.RemoveAll("vendor/")) }()
+	defer func() { err = errors.Join(err, os.RemoveAll("vendor/")) }()
 
 	cmd = exec.Command("wwhrd", "list", "--no-color")
 	var out bytes.Buffer

@@ -6,12 +6,12 @@
 package hostmap
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	conventions "go.opentelemetry.io/collector/semconv/v1.18.0"
-	"go.uber.org/multierr"
 
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/internal/testutils"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/payload"
@@ -248,10 +248,7 @@ func TestUpdate(t *testing.T) {
 		changed, _, err := hostMap.Update(info.hostname, testutils.NewResourceFromMap(t, info.attributes))
 		assert.Equal(t, info.expectedChanged, changed)
 		if len(info.expectedErrs) > 0 {
-			var errStrings []string
-			for _, err := range multierr.Errors(err) {
-				errStrings = append(errStrings, err.Error())
-			}
+			errStrings := strings.Split(err.Error(), "\n")
 			assert.ElementsMatch(t, info.expectedErrs, errStrings)
 		} else {
 			assert.NoError(t, err)
