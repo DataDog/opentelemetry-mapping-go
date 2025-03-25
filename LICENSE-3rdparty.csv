@@ -102,6 +102,7 @@ pkg/otlp/attributes,golang.org/x/net/http/httpguts,BSD-3-Clause,Copyright 2009 T
 pkg/otlp/attributes,golang.org/x/net/http2,BSD-3-Clause,Copyright 2009 The Go Authors
 pkg/otlp/attributes,golang.org/x/net/http2/hpack,BSD-3-Clause,Copyright 2009 The Go Authors
 pkg/otlp/attributes,golang.org/x/net/idna,BSD-3-Clause,Copyright 2009 The Go Authors
+pkg/otlp/attributes,golang.org/x/net/internal/httpcommon,BSD-3-Clause,Copyright 2009 The Go Authors
 pkg/otlp/attributes,golang.org/x/net/internal/timeseries,BSD-3-Clause,Copyright 2009 The Go Authors
 pkg/otlp/attributes,golang.org/x/net/trace,BSD-3-Clause,Copyright 2009 The Go Authors
 pkg/otlp/attributes,golang.org/x/sys/unix,BSD-3-Clause,Copyright 2009 The Go Authors
@@ -117,6 +118,7 @@ pkg/otlp/attributes,google.golang.org/grpc/attributes,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/backoff,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/balancer,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/balancer/base,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/balancer/endpointsharding,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/balancer/grpclb/state,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/balancer/pickfirst,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/balancer/pickfirst/internal,Apache-2.0,Google Inc.
@@ -148,7 +150,9 @@ pkg/otlp/attributes,google.golang.org/grpc/internal/grpcutil,Apache-2.0,Google I
 pkg/otlp/attributes,google.golang.org/grpc/internal/idle,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/metadata,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/pretty,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/proxyattributes,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/resolver,Apache-2.0,Google Inc.
+pkg/otlp/attributes,google.golang.org/grpc/internal/resolver/delegatingresolver,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/resolver/dns,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/resolver/dns/internal,Apache-2.0,Google Inc.
 pkg/otlp/attributes,google.golang.org/grpc/internal/resolver/passthrough,Apache-2.0,Google Inc.
@@ -317,6 +321,7 @@ pkg/otlp/metrics,google.golang.org/grpc/attributes,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/backoff,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/balancer,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/balancer/base,Apache-2.0,Google Inc.
+pkg/otlp/metrics,google.golang.org/grpc/balancer/endpointsharding,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/balancer/grpclb/state,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/balancer/pickfirst,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/balancer/pickfirst/internal,Apache-2.0,Google Inc.
@@ -348,7 +353,9 @@ pkg/otlp/metrics,google.golang.org/grpc/internal/grpcutil,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/idle,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/metadata,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/pretty,Apache-2.0,Google Inc.
+pkg/otlp/metrics,google.golang.org/grpc/internal/proxyattributes,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/resolver,Apache-2.0,Google Inc.
+pkg/otlp/metrics,google.golang.org/grpc/internal/resolver/delegatingresolver,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/resolver/dns,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/resolver/dns/internal,Apache-2.0,Google Inc.
 pkg/otlp/metrics,google.golang.org/grpc/internal/resolver/passthrough,Apache-2.0,Google Inc.
@@ -470,6 +477,7 @@ pkg/inframetadata,golang.org/x/net/http/httpguts,BSD-3-Clause,Copyright 2009 The
 pkg/inframetadata,golang.org/x/net/http2,BSD-3-Clause,Copyright 2009 The Go Authors
 pkg/inframetadata,golang.org/x/net/http2/hpack,BSD-3-Clause,Copyright 2009 The Go Authors
 pkg/inframetadata,golang.org/x/net/idna,BSD-3-Clause,Copyright 2009 The Go Authors
+pkg/inframetadata,golang.org/x/net/internal/httpcommon,BSD-3-Clause,Copyright 2009 The Go Authors
 pkg/inframetadata,golang.org/x/net/internal/timeseries,BSD-3-Clause,Copyright 2009 The Go Authors
 pkg/inframetadata,golang.org/x/net/trace,BSD-3-Clause,Copyright 2009 The Go Authors
 pkg/inframetadata,golang.org/x/sys/unix,BSD-3-Clause,Copyright 2009 The Go Authors
@@ -484,6 +492,7 @@ pkg/inframetadata,google.golang.org/grpc/attributes,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/backoff,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/balancer,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/balancer/base,Apache-2.0,Google Inc.
+pkg/inframetadata,google.golang.org/grpc/balancer/endpointsharding,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/balancer/grpclb/state,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/balancer/pickfirst,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/balancer/pickfirst/internal,Apache-2.0,Google Inc.
@@ -515,7 +524,9 @@ pkg/inframetadata,google.golang.org/grpc/internal/grpcutil,Apache-2.0,Google Inc
 pkg/inframetadata,google.golang.org/grpc/internal/idle,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/metadata,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/pretty,Apache-2.0,Google Inc.
+pkg/inframetadata,google.golang.org/grpc/internal/proxyattributes,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/resolver,Apache-2.0,Google Inc.
+pkg/inframetadata,google.golang.org/grpc/internal/resolver/delegatingresolver,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/resolver/dns,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/resolver/dns/internal,Apache-2.0,Google Inc.
 pkg/inframetadata,google.golang.org/grpc/internal/resolver/passthrough,Apache-2.0,Google Inc.
