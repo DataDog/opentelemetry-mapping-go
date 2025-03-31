@@ -2,6 +2,8 @@ module github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics
 
 go 1.23.0
 
+toolchain go1.24.1
+
 require (
 	github.com/DataDog/datadog-agent/pkg/proto v0.66.0-devel
 	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.26.0
@@ -15,7 +17,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/collector/component v1.28.1
 	go.opentelemetry.io/collector/component/componenttest v0.122.1
-	go.opentelemetry.io/collector/pdata v1.28.1
+	go.opentelemetry.io/collector/pdata v1.29.0
 	go.opentelemetry.io/otel v1.35.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
