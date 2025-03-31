@@ -2,12 +2,14 @@ module github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes
 
 go 1.23.0
 
+toolchain go1.24.1
+
 require (
 	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/collector/component v1.28.1
 	go.opentelemetry.io/collector/component/componenttest v0.122.1
 	go.opentelemetry.io/collector/pdata v1.28.1
-	go.opentelemetry.io/collector/semconv v0.122.1
+	go.opentelemetry.io/collector/semconv v0.123.0
 	go.opentelemetry.io/otel v1.35.0
 	go.opentelemetry.io/otel/metric v1.35.0
 	go.opentelemetry.io/otel/sdk/metric v1.35.0
