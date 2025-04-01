@@ -2,13 +2,15 @@ module github.com/DataDog/opentelemetry-mapping-go/internal/tools
 
 go 1.23.0
 
+toolchain go1.24.1
+
 require (
 	github.com/frapposelli/wwhrd v0.4.0
 	github.com/golangci/golangci-lint v1.64.6
 	go.opentelemetry.io/build-tools/chloggen v0.19.0
 	go.opentelemetry.io/build-tools/multimod v0.19.0
 	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0 // No tagged version available
-	gotest.tools/gotestsum v1.12.0
+	gotest.tools/gotestsum v1.12.1
 )
 
 require (
@@ -63,7 +65,7 @@ require (
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/firefart/nonamedreturns v1.0.5 // indirect
-	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/fzipp/gocyclo v0.6.0 // indirect
 	github.com/ghostiam/protogetter v0.3.9 // indirect
 	github.com/go-critic/go-critic v0.12.0 // indirect
