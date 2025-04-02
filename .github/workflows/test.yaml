@@ -64,7 +64,7 @@ jobs:
           key: unittest-${{ runner.os }}-go-build-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
       - name: Run Unit Tests
         run: make test-junit
-      - uses: datadog/junit-upload-github-action@v1
+      - uses: datadog/junit-upload-github-action@v2
         if: always()
         with:
           api-key: ${{ secrets.DD_CI_API_KEY }}
