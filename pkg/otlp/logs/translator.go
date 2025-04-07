@@ -76,6 +76,7 @@ func (t *Translator) MapLogs(ctx context.Context, ld plog.Logs, hostFromAttribut
 		for j := 0; j < sls.Len(); j++ {
 			sl := sls.At(j)
 			lsl := sl.LogRecords()
+			scope := sl.Scope()
 			// iterate over Logs
 			for k := 0; k < lsl.Len(); k++ {
 				log := lsl.At(k)
@@ -90,7 +91,7 @@ func (t *Translator) MapLogs(ctx context.Context, ld plog.Logs, hostFromAttribut
 					}
 				}
 
-				payload := transform(log, host, service, res, t.set.Logger)
+				payload := transform(log, host, service, res, scope, t.set.Logger)
 				ddtags := payload.GetDdtags()
 				if ddtags != "" {
 					payload.SetDdtags(ddtags + "," + t.otelTag)
