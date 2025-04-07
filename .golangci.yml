@@ -42,6 +42,8 @@ linters-settings:
           - $all
         allow:
           - $gostd
+          - go.opentelemetry.io/otel
+          - go.opentelemetry.io/collector
           - github.com/open-telemetry/opentelemetry-collector-contrib
           - github.com/DataDog/datadog-agent
           - github.com/DataDog/datadog-api-client-go
