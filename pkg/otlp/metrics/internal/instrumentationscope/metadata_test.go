@@ -26,18 +26,51 @@ func TestTagsFromInstrumentationScopeMetadata(t *testing.T) {
 	tests := []struct {
 		name         string
 		version      string
+		attrs        map[string]string
 		expectedTags []string
 	}{
-		{"test-il", "1.0.0", []string{fmt.Sprintf("%s:%s", instrumentationScopeTag, "test-il"), fmt.Sprintf("%s:%s", instrumentationScopeVersionTag, "1.0.0")}},
-		{"test-il", "", []string{fmt.Sprintf("%s:%s", instrumentationScopeTag, "test-il"), fmt.Sprintf("%s:%s", instrumentationScopeVersionTag, "n/a")}},
-		{"", "1.0.0", []string{fmt.Sprintf("%s:%s", instrumentationScopeTag, "n/a"), fmt.Sprintf("%s:%s", instrumentationScopeVersionTag, "1.0.0")}},
-		{"", "", []string{fmt.Sprintf("%s:%s", instrumentationScopeTag, "n/a"), fmt.Sprintf("%s:%s", instrumentationScopeVersionTag, "n/a")}},
+		{
+			"test-il", "1.0.0",
+			nil,
+			[]string{fmt.Sprintf("%s:%s", instrumentationScopeTag, "test-il"), fmt.Sprintf("%s:%s", instrumentationScopeVersionTag, "1.0.0")},
+		},
+		{
+			"test-il", "",
+			nil,
+			[]string{fmt.Sprintf("%s:%s", instrumentationScopeTag, "test-il"), fmt.Sprintf("%s:%s", instrumentationScopeVersionTag, "n/a")},
+		},
+		{
+			"", "1.0.0",
+			nil,
+			[]string{fmt.Sprintf("%s:%s", instrumentationScopeTag, "n/a"), fmt.Sprintf("%s:%s", instrumentationScopeVersionTag, "1.0.0")},
+		},
+		{
+			"", "",
+			nil,
+			[]string{fmt.Sprintf("%s:%s", instrumentationScopeTag, "n/a"), fmt.Sprintf("%s:%s", instrumentationScopeVersionTag, "n/a")},
+		},
+		{
+			"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc", "0.60.0",
+			map[string]string{
+				"otelcol.component.id":   "otlp",
+				"otelcol.component.kind": "Receiver",
+			},
+			[]string{
+				fmt.Sprintf("%s:%s", instrumentationScopeTag, "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"),
+				fmt.Sprintf("%s:%s", instrumentationScopeVersionTag, "0.60.0"),
+				"otelcol.component.id:otlp",
+				"otelcol.component.kind:Receiver",
+			},
+		},
 	}
 
 	for _, testInstance := range tests {
 		il := pcommon.NewInstrumentationScope()
 		il.SetName(testInstance.name)
 		il.SetVersion(testInstance.version)
+		for k, v := range testInstance.attrs {
+			il.Attributes().PutStr(k, v)
+		}
 		tags := TagsFromInstrumentationScopeMetadata(il)
 
 		assert.ElementsMatch(t, testInstance.expectedTags, tags)
