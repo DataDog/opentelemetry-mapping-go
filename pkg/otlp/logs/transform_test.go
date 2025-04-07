@@ -39,8 +39,9 @@ func TestTranslator(t *testing.T) {
 	ddSp := spanIDToUint64(spanID)
 
 	type args struct {
-		lr  plog.LogRecord
-		res pcommon.Resource
+		lr    plog.LogRecord
+		res   pcommon.Resource
+		scope pcommon.InstrumentationScope
 	}
 	tests := []struct {
 		name string
@@ -57,7 +58,8 @@ func TestTranslator(t *testing.T) {
 					l.SetSeverityNumber(5)
 					return l
 				}(),
-				res: pcommon.NewResource(),
+				res:   pcommon.NewResource(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
@@ -84,6 +86,7 @@ func TestTranslator(t *testing.T) {
 					r.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					return r
 				}(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("service:otlp_col,otel_source:test"),
@@ -113,6 +116,7 @@ func TestTranslator(t *testing.T) {
 					r.Attributes().PutStr(conventions.AttributeServiceName, "otlp_col")
 					return r
 				}(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("service:otlp_col,foo:bar,otel_source:test"),
@@ -137,10 +141,8 @@ func TestTranslator(t *testing.T) {
 					l.SetSeverityNumber(5)
 					return l
 				}(),
-				res: func() pcommon.Resource {
-					r := pcommon.NewResource()
-					return r
-				}(),
+				res:   pcommon.NewResource(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
@@ -166,10 +168,8 @@ func TestTranslator(t *testing.T) {
 					l.SetSeverityNumber(5)
 					return l
 				}(),
-				res: func() pcommon.Resource {
-					r := pcommon.NewResource()
-					return r
-				}(),
+				res:   pcommon.NewResource(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
@@ -199,10 +199,8 @@ func TestTranslator(t *testing.T) {
 					l.SetSeverityNumber(5)
 					return l
 				}(),
-				res: func() pcommon.Resource {
-					r := pcommon.NewResource()
-					return r
-				}(),
+				res:   pcommon.NewResource(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
@@ -232,10 +230,8 @@ func TestTranslator(t *testing.T) {
 					l.SetSeverityNumber(5)
 					return l
 				}(),
-				res: func() pcommon.Resource {
-					r := pcommon.NewResource()
-					return r
-				}(),
+				res:   pcommon.NewResource(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
@@ -265,10 +261,8 @@ func TestTranslator(t *testing.T) {
 					l.SetSeverityNumber(5)
 					return l
 				}(),
-				res: func() pcommon.Resource {
-					r := pcommon.NewResource()
-					return r
-				}(),
+				res:   pcommon.NewResource(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
@@ -296,10 +290,8 @@ func TestTranslator(t *testing.T) {
 					l.SetSeverityNumber(5)
 					return l
 				}(),
-				res: func() pcommon.Resource {
-					r := pcommon.NewResource()
-					return r
-				}(),
+				res:   pcommon.NewResource(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
@@ -327,10 +319,8 @@ func TestTranslator(t *testing.T) {
 					l.SetSeverityNumber(5)
 					return l
 				}(),
-				res: func() pcommon.Resource {
-					r := pcommon.NewResource()
-					return r
-				}(),
+				res:   pcommon.NewResource(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
@@ -362,10 +352,8 @@ func TestTranslator(t *testing.T) {
 					l.Body().SetStr("This is log")
 					return l
 				}(),
-				res: func() pcommon.Resource {
-					r := pcommon.NewResource()
-					return r
-				}(),
+				res:   pcommon.NewResource(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
@@ -397,10 +385,8 @@ func TestTranslator(t *testing.T) {
 					l.Body().SetStr("This is log")
 					return l
 				}(),
-				res: func() pcommon.Resource {
-					r := pcommon.NewResource()
-					return r
-				}(),
+				res:   pcommon.NewResource(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
@@ -433,6 +419,7 @@ func TestTranslator(t *testing.T) {
 					r.Attributes().PutStr("key", "val")
 					return r
 				}(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("service:otlp_col,otel_source:test"),
@@ -462,6 +449,7 @@ func TestTranslator(t *testing.T) {
 					r.Attributes().PutStr("service", "otlp_col")
 					return r
 				}(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("service:otlp_col,otel_source:test"),
@@ -497,10 +485,8 @@ func TestTranslator(t *testing.T) {
 					)
 					return l
 				}(),
-				res: func() pcommon.Resource {
-					r := pcommon.NewResource()
-					return r
-				}(),
+				res:   pcommon.NewResource(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
@@ -521,10 +507,8 @@ func TestTranslator(t *testing.T) {
 					l.Attributes().FromRaw(nil)
 					return l
 				}(),
-				res: func() pcommon.Resource {
-					r := pcommon.NewResource()
-					return r
-				}(),
+				res:   pcommon.NewResource(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
@@ -571,10 +555,8 @@ func TestTranslator(t *testing.T) {
 					)
 					return l
 				}(),
-				res: func() pcommon.Resource {
-					r := pcommon.NewResource()
-					return r
-				}(),
+				res:   pcommon.NewResource(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
@@ -595,10 +577,8 @@ func TestTranslator(t *testing.T) {
 					l.SetSeverityNumber(5)
 					return l
 				}(),
-				res: func() pcommon.Resource {
-					r := pcommon.NewResource()
-					return r
-				}(),
+				res:   pcommon.NewResource(),
+				scope: pcommon.NewInstrumentationScope(),
 			},
 			want: datadogV2.HTTPLogItem{
 				Ddtags:  datadog.PtrString("otel_source:test"),
@@ -608,6 +588,35 @@ func TestTranslator(t *testing.T) {
 					otelSeverityNumber: "5",
 					ddTimestamp:        "2023-11-20T16:55:03.397Z",
 					otelTimestamp:      "1700499303397000000",
+				},
+			},
+		},
+		{
+			name: "scope attributes",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					l.Body().SetStr("hello world")
+					l.SetSeverityNumber(5)
+					return l
+				}(),
+				res: pcommon.NewResource(),
+				scope: func() pcommon.InstrumentationScope {
+					s := pcommon.NewInstrumentationScope()
+					sa := s.Attributes()
+					sa.PutStr("otelcol.component.id", "otlp")
+					sa.PutStr("otelcol.component.kind", "Receiver")
+					return s
+				}(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString("otel_source:test"),
+				Message: *datadog.PtrString("hello world"),
+				AdditionalProperties: map[string]interface{}{
+					"status":                 "debug",
+					otelSeverityNumber:       "5",
+					"otelcol.component.id":   "otlp",
+					"otelcol.component.kind": "Receiver",
 				},
 			},
 		},
@@ -625,7 +634,9 @@ func TestTranslator(t *testing.T) {
 			logs := plog.NewLogs()
 			rl := logs.ResourceLogs().AppendEmpty()
 			tt.args.res.MoveTo(rl.Resource())
-			tt.args.lr.CopyTo(rl.ScopeLogs().AppendEmpty().LogRecords().AppendEmpty())
+			sl := rl.ScopeLogs().AppendEmpty()
+			tt.args.scope.MoveTo(sl.Scope())
+			tt.args.lr.CopyTo(sl.LogRecords().AppendEmpty())
 
 			payloads := translator.MapLogs(context.Background(), logs, nil)
 			require.Len(t, payloads, 1)
