@@ -4,7 +4,15 @@
 
 <!-- next version -->
 
-## 0.26.0
+## v0.27.0
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp`: Convert OTel instrumentation scope attributes to log attributes / metric tags (#598)
+  For metrics, the conversion is enabled by the WithInstrumentationScopeMetadataAsTags option.
+  
+
+## v0.26.0
 
 ### 🛑 Breaking changes 🛑
 
@@ -23,14 +31,14 @@
 
 - `pkg/quantile`: Improve stability of OTel histogram conversion (#468)
 
-## 0.24.0
+## v0.24.0
 
 ### 🧰 Bug fixes 🧰
 
 - `pkg/otlp/metrics`: Fix metric origin mappings from OTel collector receiver instrumentation scope (#466)
 - `pkg/otlp/attributes`: Remove HTTP attributes from container tags in OTLP span -> Datadog span mapping (#470)
 
-## 0.23.0
+## v0.23.0
 
 ### 💡 Enhancements 💡
 

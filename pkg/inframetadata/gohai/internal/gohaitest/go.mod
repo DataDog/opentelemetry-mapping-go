@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	github.com/DataDog/gohai v0.0.0-20230524154621-4316413895ee
-	github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata v0.12.0
+	github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata v0.27.0
 	github.com/stretchr/testify v1.10.0
 )
 
