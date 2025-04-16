@@ -12,6 +12,10 @@ install-tools:
 	cd $(TOOLS_MOD_DIR) && go install gotest.tools/gotestsum
 	cd $(TOOLS_MOD_DIR)/generate-license-file && go install .
 
+GOPATH?=$(shell go env GOPATH)
+GOBIN?=$(GOPATH)/bin
+GOLANGCI_LINT_BIN?=$(GOBIN)/golangci-lint
+
 FILENAME?=$(shell git branch --show-current).yaml
 .PHONY: chlog-new
 chlog-new:
@@ -64,7 +68,7 @@ test-junit:
 # Use 'make lint OPTS="--fix"' to autofix issues.
 .PHONY: lint
 lint:
-	@$(MAKE) for-all CMD="golangci-lint run ./... $(OPTS)"
+	@$(MAKE) for-all CMD="$(GOLANGCI_LINT_BIN) run ./... $(OPTS)"
 
 # Generate licenses file for compliance. 
 .PHONY: gen-licenses
