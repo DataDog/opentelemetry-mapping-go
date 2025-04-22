@@ -1,0 +1,10 @@
+change_type: 'enhancement'
+
+component: "pkg/quantile"
+
+note: "Improve performance of conversion from DDSketch to Sketch for both allocations and CPU usage."
+
+issues: [602]
+
+subtext: |
+  This optimization reduces memory allocations and garbage collection pressure during DDSketch to Sketch conversions by introducing object pooling for KeyCount slices, DenseStore objects, and bin lists. These changes significantly improve performance in high-throughput scenarios, achieving up to 92% reduction in memory usage and 16% faster conversions, as demonstrated by benchmark results.
