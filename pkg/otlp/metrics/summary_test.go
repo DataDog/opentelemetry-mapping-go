@@ -15,13 +15,21 @@ func TestSummaryMetrics(t *testing.T) {
 		otlpfile string
 		ddogfile string
 		options  []TranslatorOption
-		tags     []string
 	}{
 		{
 			name:     "summary",
 			otlpfile: "testdata/otlpdata/summary/simple.json",
 			ddogfile: "testdata/datadogdata/summary/simple_summary.json",
 			options:  []TranslatorOption{WithFallbackSourceProvider(testProvider("fallbackHostname"))},
+		},
+		{
+			name:     "summary-cumsum-keep",
+			otlpfile: "testdata/otlpdata/summary/simple.json",
+			ddogfile: "testdata/datadogdata/summary/simple_summary_cumsum-keep.json",
+			options: []TranslatorOption{
+				WithFallbackSourceProvider(testProvider("fallbackHostname")),
+				WithInitialCumulMonoValueMode(InitialCumulMonoValueModeKeep),
+			},
 		},
 		{
 			name:     "summary-with-quantiles",
@@ -37,7 +45,6 @@ func TestSummaryMetrics(t *testing.T) {
 			otlpfile: "testdata/otlpdata/summary/with-attributes.json",
 			ddogfile: "testdata/datadogdata/summary/with-attributes_summary.json",
 			options:  []TranslatorOption{WithFallbackSourceProvider(testProvider("fallbackHostname"))},
-			tags:     []string{"attribute_tag:attribute_value"},
 		},
 		{
 			name:     "summary-with-attributes-quantiles",
@@ -47,7 +54,6 @@ func TestSummaryMetrics(t *testing.T) {
 				WithFallbackSourceProvider(testProvider("fallbackHostname")),
 				WithQuantiles(),
 			},
-			tags: []string{"attribute_tag:attribute_value"},
 		},
 	}
 
