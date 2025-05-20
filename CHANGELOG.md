@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.27.1
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/otlp/metrics`: Correctly treat summary counts as cumulative monotonic sums instead of cumulative non-monotonic sums (#617)
+
 ## v0.27.0
 
 ### 💡 Enhancements 💡
