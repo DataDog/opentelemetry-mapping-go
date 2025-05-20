@@ -5,7 +5,7 @@
 
 module-sets:
   pkgs:
-    version: v0.27.0
+    version: v0.27.1
     modules:
       - github.com/DataDog/opentelemetry-mapping-go/pkg/quantile
       - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes
