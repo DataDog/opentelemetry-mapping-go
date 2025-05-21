@@ -170,7 +170,7 @@ func TestUpdate(t *testing.T) {
 				conventions.AttributeDeploymentEnvironment: "prod",
 			},
 			metric:          BuildMetric[int64](metricSystemCPUPhysicalCount, 32),
-			expectedChanged: false,
+			expectedChanged: true,
 		},
 		{
 			// Same as #1, but missing some attributes
@@ -205,7 +205,7 @@ func TestUpdate(t *testing.T) {
 				"datadog.host.tag.foo":                     "baz",                                                 // changed
 				conventions.AttributeDeploymentEnvironment: "prod",
 			},
-			expectedChanged: true,
+			expectedChanged: false,
 			expectedErrs:    []string{"\"os.description\" has type \"Bool\", expected type \"Str\" instead"},
 		},
 		{
@@ -240,6 +240,7 @@ func TestUpdate(t *testing.T) {
 				conventions.AttributeHostArch:      conventions.AttributeHostArchARM64,
 				"deployment.environment.name":      "staging",
 			},
+			expectedChanged: true,
 		},
 	}
 
