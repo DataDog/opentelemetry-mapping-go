@@ -984,10 +984,10 @@ func buildIntPoints(startTs int, deltas []int64) pmetric.NumberDataPointSlice {
 	return slice
 }
 
-// Regression Test: Check that initial point drop behavior based on the value of
+// Regression Test: Check initial point drop behavior based on the value of
 // InitialCumulMonoValueMode and whether the metric series started before or after the Agent.
 // Notably, we want to make sure that the "auto" value drops the initial point iff the series
-// started before the Agent.
+// started before the metrics translator.
 func TestInitialCumulMonoValueMode(t *testing.T) {
 	ctx := context.Background()
 
