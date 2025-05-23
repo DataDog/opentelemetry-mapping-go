@@ -182,7 +182,7 @@ func getProcessStartTime() int {
 	return int(startTime / 1_000_000_000)
 }
 
-// getProcessStartTime returns the start time of the Agent process in nanoseconds since epoch
+// getProcessStartTimeNano returns the start time of the Agent process in nanoseconds since epoch
 func getProcessStartTimeNano() uint64 {
 	return startTime
 }
