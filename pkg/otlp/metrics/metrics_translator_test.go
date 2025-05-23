@@ -464,7 +464,7 @@ func TestMapIntMonotonicWithRebootBeginningOfSlice(t *testing.T) {
 	t.Run("diff", func(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(dims.name)
@@ -505,7 +505,7 @@ func TestMapIntMonotonicWithRebootBeginningOfSlice(t *testing.T) {
 	t.Run("rate", func(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		dims := &Dimensions{name: rateAsGaugeDims.name, host: fallbackHostname}
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(dims.name)
@@ -547,7 +547,7 @@ func TestMapIntMonotonicWithRebootBeginningOfSlice(t *testing.T) {
 // to the timestamp of previous point received is dropped.
 func TestMapIntMonotonicDropPointPointWithinSlice(t *testing.T) {
 	t.Run("equal", func(t *testing.T) {
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(exampleDims.name)
@@ -589,7 +589,7 @@ func TestMapIntMonotonicDropPointPointWithinSlice(t *testing.T) {
 	})
 
 	t.Run("equal-rate", func(t *testing.T) {
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(rateAsGaugeDims.name)
@@ -631,7 +631,7 @@ func TestMapIntMonotonicDropPointPointWithinSlice(t *testing.T) {
 	})
 
 	t.Run("older", func(t *testing.T) {
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(exampleDims.name)
@@ -673,7 +673,7 @@ func TestMapIntMonotonicDropPointPointWithinSlice(t *testing.T) {
 	})
 
 	t.Run("older-rate", func(t *testing.T) {
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(rateAsGaugeDims.name)
@@ -721,7 +721,7 @@ func TestMapIntMonotonicDropPointPointBeginningOfSlice(t *testing.T) {
 	t.Run("equal", func(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(dims.name)
@@ -761,7 +761,7 @@ func TestMapIntMonotonicDropPointPointBeginningOfSlice(t *testing.T) {
 	t.Run("equal-rate", func(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		dims := &Dimensions{name: rateAsGaugeDims.name, host: fallbackHostname}
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(dims.name)
@@ -801,7 +801,7 @@ func TestMapIntMonotonicDropPointPointBeginningOfSlice(t *testing.T) {
 	t.Run("older", func(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(dims.name)
@@ -841,7 +841,7 @@ func TestMapIntMonotonicDropPointPointBeginningOfSlice(t *testing.T) {
 	t.Run("older-rate", func(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		dims := &Dimensions{name: rateAsGaugeDims.name, host: fallbackHostname}
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(dims.name)
@@ -885,7 +885,7 @@ func TestMapIntMonotonicReportFirstValue(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
 	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, exampleDims), consumer, nil)
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -902,7 +902,7 @@ func TestMapIntMonotonicRateDontReportFirstValue(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
 	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, rateAsGaugeDims), consumer, nil)
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -936,7 +936,7 @@ func TestMapIntMonotonicReportDiffForFirstValue(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
 	dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	// Add an entry to the cache about the timeseries, in this case we send the diff (9) rather than the first value (10).
 	tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+1)), 1)
 	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, exampleDims), consumer, nil)
@@ -956,7 +956,7 @@ func TestMapIntMonotonicReportRateForFirstValue(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
 	dims := &Dimensions{name: rateAsGaugeDims.name, host: fallbackHostname}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	// Add an entry to the cache about the timeseries, in this case we send the rate (10-1)/(startTs+2-startTs+1) rather than the first value (10).
 	tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+1)), 1)
 	rmt, _ := tr.MapMetrics(ctx, createTestIntCumulativeMonotonicMetrics(false, rateAsGaugeDims), consumer, nil)
@@ -1037,7 +1037,7 @@ func TestMapRuntimeMetricsHasMapping(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -1063,7 +1063,7 @@ func TestMapRuntimeMetricsHasMappingCollector(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -1092,7 +1092,7 @@ func TestMapSystemMetricsRenamedWithOTelPrefix(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	// Ensure datadog metrics are not created from system.cpu.utilization (ex: system.cpu.idle, system.cpu.system, etc)
 	// Ensure otel.* prefix is added to system and process metrics
 	// Ensure otel.* prefix is not added to jvm or go runtime metrics
@@ -1130,7 +1130,7 @@ func TestMapSumRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -1153,7 +1153,7 @@ func TestMapSumRuntimeMetricWithAttributesHasMappingCollector(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -1176,7 +1176,7 @@ func TestMapGaugeRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -1196,7 +1196,7 @@ func TestMapHistogramRuntimeMetricHasMapping(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -1225,7 +1225,7 @@ func TestMapHistogramRuntimeMetricWithAttributesHasMapping(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -1257,7 +1257,7 @@ func TestMapRuntimeMetricWithTwoAttributesHasMapping(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -1284,7 +1284,7 @@ func TestMapRuntimeMetricWithTwoAttributesMultipleDataPointsHasMapping(t *testin
 	if err != nil {
 		t.Fatal(err)
 	}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -1354,7 +1354,7 @@ func TestMapGaugeRuntimeMetricWithInvalidAttributes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -1373,7 +1373,7 @@ func TestMapRuntimeMetricsNoMapping(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -1393,7 +1393,7 @@ func TestMapSystemMetrics(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -1588,7 +1588,7 @@ func TestMapDoubleMonotonicWithRebootBeginningOfSlice(t *testing.T) {
 	t.Run("diff", func(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(dims.name)
@@ -1629,7 +1629,7 @@ func TestMapDoubleMonotonicWithRebootBeginningOfSlice(t *testing.T) {
 	t.Run("rate", func(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		dims := &Dimensions{name: rateAsGaugeDims.name, host: fallbackHostname}
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(dims.name)
@@ -1672,7 +1672,7 @@ func TestMapDoubleMonotonicWithRebootBeginningOfSlice(t *testing.T) {
 // to the timestamp of previous point received is dropped.
 func TestMapDoubleMonotonicDropPointPointWithinSlice(t *testing.T) {
 	t.Run("equal", func(t *testing.T) {
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(exampleDims.name)
@@ -1714,7 +1714,7 @@ func TestMapDoubleMonotonicDropPointPointWithinSlice(t *testing.T) {
 	})
 
 	t.Run("equal-rate", func(t *testing.T) {
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(rateAsGaugeDims.name)
@@ -1756,7 +1756,7 @@ func TestMapDoubleMonotonicDropPointPointWithinSlice(t *testing.T) {
 	})
 
 	t.Run("older", func(t *testing.T) {
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(exampleDims.name)
@@ -1798,7 +1798,7 @@ func TestMapDoubleMonotonicDropPointPointWithinSlice(t *testing.T) {
 	})
 
 	t.Run("older-rate", func(t *testing.T) {
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(rateAsGaugeDims.name)
@@ -1846,7 +1846,7 @@ func TestMapDoubleMonotonicDropPointPointBeginningOfSlice(t *testing.T) {
 	t.Run("equal", func(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(dims.name)
@@ -1886,7 +1886,7 @@ func TestMapDoubleMonotonicDropPointPointBeginningOfSlice(t *testing.T) {
 	t.Run("older", func(t *testing.T) {
 		tr := newTranslator(t, zap.NewNop())
 		dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		md := pmetric.NewMetrics()
 		met := md.ResourceMetrics().AppendEmpty().ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		met.SetName(dims.name)
@@ -1929,7 +1929,7 @@ func TestMapDoubleMonotonicReportFirstValue(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
 	tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(false, exampleDims), consumer, nil)
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -1945,7 +1945,7 @@ func TestMapDoubleMonotonicRateDontReportFirstValue(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
 	rmt, _ := tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(false, rateAsGaugeDims), consumer, nil)
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
@@ -1991,7 +1991,7 @@ func TestMapDoubleMonotonicReportDiffForFirstValue(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
 	dims := &Dimensions{name: exampleDims.name, host: fallbackHostname}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	// Add an entry to the cache about the timeseries, in this case we send the diff (9) rather than the first value (10).
 	tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+1)), 1)
 	tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(false, exampleDims), consumer, nil)
@@ -2010,7 +2010,7 @@ func TestMapDoubleMonotonicReportRateForFirstValue(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
 	dims := &Dimensions{name: rateAsGaugeDims.name, host: fallbackHostname}
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	// Add an entry to the cache about the timeseries, in this case we send the rate (10-1)/(startTs+2-startTs+1) rather than the first value (10).
 	tr.prevPts.MonotonicDiff(dims, uint64(seconds(startTs)), uint64(seconds(startTs+1)), 1)
 	rmt, _ := tr.MapMetrics(ctx, createTestDoubleCumulativeMonotonicMetrics(false, rateAsGaugeDims), consumer, nil)
@@ -2140,7 +2140,7 @@ func createTestIntCumulativeMonotonicMetrics(tsmatch bool, dims *Dimensions) pme
 	dpsInt := met.Sum().DataPoints()
 	dpsInt.EnsureCapacity(len(values))
 
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	for i, val := range values {
 		dpInt := dpsInt.AppendEmpty()
 		dpInt.SetStartTimestamp(seconds(startTs))
@@ -2166,7 +2166,7 @@ func createTestDoubleCumulativeMonotonicMetrics(tsmatch bool, dims *Dimensions) 
 	dpsInt := met.Sum().DataPoints()
 	dpsInt.EnsureCapacity(len(values))
 
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	for i, val := range values {
 		dpInt := dpsInt.AppendEmpty()
 		dpInt.SetStartTimestamp(seconds(startTs))
@@ -2189,7 +2189,7 @@ func createTestHistogramMetric(metricName string) pmetric.Metrics {
 	met.Histogram().SetAggregationTemporality(pmetric.AggregationTemporalityDelta)
 	hpsCount = met.Histogram().DataPoints()
 	hpsCount.EnsureCapacity(1)
-	startTs := int(getProcessStartTime()) + 1
+	startTs := getProcessStartTime() + 1
 	hpCount := hpsCount.AppendEmpty()
 	hpCount.SetStartTimestamp(seconds(startTs))
 	hpCount.SetTimestamp(seconds(startTs + 1))
@@ -2225,7 +2225,7 @@ func createTestMetricWithAttributes(metricName string, metricType pmetric.Metric
 	if metricType != pmetric.MetricTypeHistogram {
 		dpsInt.EnsureCapacity(dataPoints)
 		for i := 0; i < dataPoints; i++ {
-			startTs := int(getProcessStartTime()) + 1
+			startTs := getProcessStartTime() + 1
 			dpInt := dpsInt.AppendEmpty()
 			for _, attr := range attributes {
 				dpInt.Attributes().PutStr(attr.key, attr.values[i])
@@ -2239,7 +2239,7 @@ func createTestMetricWithAttributes(metricName string, metricType pmetric.Metric
 
 	hpsCount.EnsureCapacity(dataPoints)
 	for i := 0; i < dataPoints; i++ {
-		startTs := int(getProcessStartTime()) + 1
+		startTs := getProcessStartTime() + 1
 		hpCount := hpsCount.AppendEmpty()
 		for _, attr := range attributes {
 			hpCount.Attributes().PutStr(attr.key, attr.values[i])
