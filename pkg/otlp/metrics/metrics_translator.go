@@ -178,8 +178,8 @@ func (t *Translator) mapNumberMetrics(
 var startTime = uint64(time.Now().UnixNano())
 
 // getProcessStartTime returns the start time of the Agent process in seconds since epoch
-func getProcessStartTime() int {
-	return int(startTime / 1_000_000_000)
+func getProcessStartTime() uint64 {
+	return startTime / 1_000_000_000
 }
 
 // getProcessStartTimeNano returns the start time of the Agent process in nanoseconds since epoch
