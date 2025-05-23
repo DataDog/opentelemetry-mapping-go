@@ -267,6 +267,10 @@ func seconds(i int) pcommon.Timestamp {
 	return pcommon.NewTimestampFromTime(time.Unix(int64(i), 0))
 }
 
+func secondsAfterStart(i int) pcommon.Timestamp {
+	return seconds(getProcessStartTime() + 1 + i)
+}
+
 var exampleDims = newDims("metric.example")
 var rateAsGaugeDims = newDims("kafka.net.bytes_out.rate")
 
@@ -282,7 +286,7 @@ func buildMonotonicIntPoints(deltas []int64) (slice pmetric.NumberDataPointSlice
 	for i, val := range cumulative {
 		point := slice.AppendEmpty()
 		point.SetIntValue(val)
-		point.SetTimestamp(seconds(i * 10))
+		point.SetTimestamp(secondsAfterStart(i * 10))
 	}
 
 	return
@@ -296,7 +300,7 @@ func TestMapIntMonotonicMetrics(t *testing.T) {
 
 		expected := make([]metric, len(deltas))
 		for i, val := range deltas {
-			expected[i] = newCount(exampleDims, uint64(seconds((i+1)*10)), float64(val))
+			expected[i] = newCount(exampleDims, uint64(secondsAfterStart((i+1)*10)), float64(val))
 		}
 
 		ctx := context.Background()
@@ -313,7 +317,7 @@ func TestMapIntMonotonicMetrics(t *testing.T) {
 		expected := make([]metric, len(deltas))
 		for i, val := range deltas {
 			// divide val by submission interval (10s)
-			expected[i] = newGauge(rateAsGaugeDims, uint64(seconds((i+1)*10)), float64(val)/10.0)
+			expected[i] = newGauge(rateAsGaugeDims, uint64(secondsAfterStart((i+1)*10)), float64(val)/10.0)
 		}
 
 		ctx := context.Background()
@@ -330,30 +334,30 @@ func TestMapIntMonotonicDifferentDimensions(t *testing.T) {
 
 	// No tags
 	point := slice.AppendEmpty()
-	point.SetTimestamp(seconds(0))
+	point.SetTimestamp(secondsAfterStart(0))
 
 	point = slice.AppendEmpty()
 	point.SetIntValue(20)
-	point.SetTimestamp(seconds(1))
+	point.SetTimestamp(secondsAfterStart(1))
 
 	// One tag: valA
 	point = slice.AppendEmpty()
-	point.SetTimestamp(seconds(0))
+	point.SetTimestamp(secondsAfterStart(0))
 	point.Attributes().PutStr("key1", "valA")
 
 	point = slice.AppendEmpty()
 	point.SetIntValue(30)
-	point.SetTimestamp(seconds(1))
+	point.SetTimestamp(secondsAfterStart(1))
 	point.Attributes().PutStr("key1", "valA")
 
 	// same tag: valB
 	point = slice.AppendEmpty()
-	point.SetTimestamp(seconds(0))
+	point.SetTimestamp(secondsAfterStart(0))
 	point.Attributes().PutStr("key1", "valB")
 
 	point = slice.AppendEmpty()
 	point.SetIntValue(40)
-	point.SetTimestamp(seconds(1))
+	point.SetTimestamp(secondsAfterStart(1))
 	point.Attributes().PutStr("key1", "valB")
 
 	ctx := context.Background()
@@ -364,9 +368,9 @@ func TestMapIntMonotonicDifferentDimensions(t *testing.T) {
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
-			newCount(exampleDims, uint64(seconds(1)), 20),
-			newCount(exampleDims.AddTags("key1:valA"), uint64(seconds(1)), 30),
-			newCount(exampleDims.AddTags("key1:valB"), uint64(seconds(1)), 40),
+			newCount(exampleDims, uint64(secondsAfterStart(1)), 20),
+			newCount(exampleDims.AddTags("key1:valA"), uint64(secondsAfterStart(1)), 30),
+			newCount(exampleDims.AddTags("key1:valB"), uint64(secondsAfterStart(1)), 40),
 		},
 	)
 }
@@ -378,7 +382,7 @@ func buildMonotonicIntRebootPoints() (slice pmetric.NumberDataPointSlice) {
 
 	for i, val := range values {
 		point := slice.AppendEmpty()
-		point.SetTimestamp(seconds(i * 10))
+		point.SetTimestamp(secondsAfterStart(i * 10))
 		point.SetIntValue(val)
 	}
 
@@ -397,8 +401,8 @@ func TestMapIntMonotonicWithRebootWithinSlice(t *testing.T) {
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
-				newCount(exampleDims, uint64(seconds(10)), 30),
-				newCount(exampleDims, uint64(seconds(30)), 20),
+				newCount(exampleDims, uint64(secondsAfterStart(10)), 30),
+				newCount(exampleDims, uint64(secondsAfterStart(30)), 20),
 			},
 		)
 	})
@@ -412,8 +416,8 @@ func TestMapIntMonotonicWithRebootWithinSlice(t *testing.T) {
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
-				newGauge(rateAsGaugeDims, uint64(seconds(10)), 3),
-				newGauge(rateAsGaugeDims, uint64(seconds(30)), 2),
+				newGauge(rateAsGaugeDims, uint64(secondsAfterStart(10)), 3),
+				newGauge(rateAsGaugeDims, uint64(secondsAfterStart(30)), 2),
 			},
 		)
 	})
@@ -430,7 +434,7 @@ func TestMapIntMonotonicWithNoRecordedValueWithinSlice(t *testing.T) {
 
 		for i, val := range values {
 			point := slice.AppendEmpty()
-			point.SetTimestamp(seconds(i * 10))
+			point.SetTimestamp(secondsAfterStart(i * 10))
 			point.SetIntValue(val)
 		}
 
@@ -447,8 +451,8 @@ func TestMapIntMonotonicWithNoRecordedValueWithinSlice(t *testing.T) {
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
-			newCount(exampleDims, uint64(seconds(10)), 30),
-			newCount(exampleDims, uint64(seconds(30)), 10),
+			newCount(exampleDims, uint64(secondsAfterStart(10)), 30),
+			newCount(exampleDims, uint64(secondsAfterStart(30)), 10),
 		},
 	)
 }
@@ -967,6 +971,62 @@ func TestMapIntMonotonicReportRateForFirstValue(t *testing.T) {
 	assert.Empty(t, rmt.Languages)
 }
 
+func buildIntPoints(startTs int, deltas []int64) pmetric.NumberDataPointSlice {
+	slice := pmetric.NewNumberDataPointSlice()
+	val := int64(0)
+	for i, delta := range deltas {
+		val += delta
+		point := slice.AppendEmpty()
+		point.SetStartTimestamp(secondsAfterStart(startTs))
+		point.SetTimestamp(secondsAfterStart(i + 1))
+		point.SetIntValue(val)
+	}
+	return slice
+}
+
+// Regression Test: Check that initial point drop behavior based on the value of
+// InitialCumulMonoValueMode and whether the metric series started before or after the Agent.
+// Notably, we want to make sure that the "auto" value drops the initial point iff the series
+// started before the Agent.
+func TestInitialCumulMonoValueMode(t *testing.T) {
+	ctx := context.Background()
+
+	deltas := []int64{1, 2, 3}
+
+	agentRestartInput := buildIntPoints(-20, deltas)
+	appRestartInput := buildIntPoints(0, deltas)
+
+	var keepOutput []metric
+	for i, delta := range deltas {
+		keepOutput = append(keepOutput, newCount(exampleDims, uint64(secondsAfterStart(i+1)), float64(delta)))
+	}
+	dropOutput := keepOutput[1:]
+
+	type testCase struct {
+		name   string
+		mode   InitialCumulMonoValueMode
+		input  pmetric.NumberDataPointSlice
+		output []metric
+	}
+	testCases := []testCase{
+		{"auto/agent-restart", InitialCumulMonoValueModeAuto, agentRestartInput, dropOutput},
+		{"auto/app-restart", InitialCumulMonoValueModeAuto, appRestartInput, keepOutput},
+		{"drop/agent-restart", InitialCumulMonoValueModeDrop, agentRestartInput, dropOutput},
+		{"drop/app-restart", InitialCumulMonoValueModeDrop, appRestartInput, dropOutput},
+		{"keep/agent-restart", InitialCumulMonoValueModeKeep, agentRestartInput, keepOutput},
+		{"keep/app-restart", InitialCumulMonoValueModeKeep, appRestartInput, keepOutput},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tr := newTranslator(t, zap.NewNop())
+			tr.cfg.InitialCumulMonoValueMode = tc.mode
+			consumer := mockFullConsumer{}
+			tr.mapNumberMonotonicMetrics(ctx, &consumer, exampleDims, tc.input)
+			assert.Equal(t, tc.output, consumer.metrics)
+		})
+	}
+}
+
 func TestMapRuntimeMetricsHasMapping(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
@@ -1353,7 +1413,7 @@ func TestMapIntMonotonicOutOfOrder(t *testing.T) {
 
 	for i, val := range values {
 		point := slice.AppendEmpty()
-		point.SetTimestamp(seconds(stamps[i]))
+		point.SetTimestamp(secondsAfterStart(stamps[i]))
 		point.SetIntValue(val)
 	}
 
@@ -1364,8 +1424,8 @@ func TestMapIntMonotonicOutOfOrder(t *testing.T) {
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
-			newCount(exampleDims, uint64(seconds(2)), 2),
-			newCount(exampleDims, uint64(seconds(3)), 1),
+			newCount(exampleDims, uint64(secondsAfterStart(2)), 2),
+			newCount(exampleDims, uint64(secondsAfterStart(3)), 1),
 		},
 	)
 }
@@ -1382,7 +1442,7 @@ func buildMonotonicDoublePoints(deltas []float64) (slice pmetric.NumberDataPoint
 	for i, val := range cumulative {
 		point := slice.AppendEmpty()
 		point.SetDoubleValue(val)
-		point.SetTimestamp(seconds(i * 10))
+		point.SetTimestamp(secondsAfterStart(i * 10))
 	}
 
 	return
@@ -1395,7 +1455,7 @@ func TestMapDoubleMonotonicMetrics(t *testing.T) {
 
 		expected := make([]metric, len(deltas))
 		for i, val := range deltas {
-			expected[i] = newCount(exampleDims, uint64(seconds(i+1)*10), val)
+			expected[i] = newCount(exampleDims, uint64(secondsAfterStart((i+1)*10)), val)
 		}
 
 		ctx := context.Background()
@@ -1412,7 +1472,7 @@ func TestMapDoubleMonotonicMetrics(t *testing.T) {
 		expected := make([]metric, len(deltas))
 		for i, val := range deltas {
 			// divide val by submission interval (10s)
-			expected[i] = newGauge(rateAsGaugeDims, uint64(seconds((i+1)*10)), val/10.0)
+			expected[i] = newGauge(rateAsGaugeDims, uint64(secondsAfterStart((i+1)*10)), val/10.0)
 		}
 
 		ctx := context.Background()
@@ -1430,30 +1490,30 @@ func TestMapDoubleMonotonicDifferentDimensions(t *testing.T) {
 
 	// No tags
 	point := slice.AppendEmpty()
-	point.SetTimestamp(seconds(0))
+	point.SetTimestamp(secondsAfterStart(0))
 
 	point = slice.AppendEmpty()
 	point.SetDoubleValue(20)
-	point.SetTimestamp(seconds(1))
+	point.SetTimestamp(secondsAfterStart(1))
 
 	// One tag: valA
 	point = slice.AppendEmpty()
-	point.SetTimestamp(seconds(0))
+	point.SetTimestamp(secondsAfterStart(0))
 	point.Attributes().PutStr("key1", "valA")
 
 	point = slice.AppendEmpty()
 	point.SetDoubleValue(30)
-	point.SetTimestamp(seconds(1))
+	point.SetTimestamp(secondsAfterStart(1))
 	point.Attributes().PutStr("key1", "valA")
 
 	// one tag: valB
 	point = slice.AppendEmpty()
-	point.SetTimestamp(seconds(0))
+	point.SetTimestamp(secondsAfterStart(0))
 	point.Attributes().PutStr("key1", "valB")
 
 	point = slice.AppendEmpty()
 	point.SetDoubleValue(40)
-	point.SetTimestamp(seconds(1))
+	point.SetTimestamp(secondsAfterStart(1))
 	point.Attributes().PutStr("key1", "valB")
 
 	ctx := context.Background()
@@ -1464,9 +1524,9 @@ func TestMapDoubleMonotonicDifferentDimensions(t *testing.T) {
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
-			newCount(exampleDims, uint64(seconds(1)), 20),
-			newCount(exampleDims.AddTags("key1:valA"), uint64(seconds(1)), 30),
-			newCount(exampleDims.AddTags("key1:valB"), uint64(seconds(1)), 40),
+			newCount(exampleDims, uint64(secondsAfterStart(1)), 20),
+			newCount(exampleDims.AddTags("key1:valA"), uint64(secondsAfterStart(1)), 30),
+			newCount(exampleDims.AddTags("key1:valB"), uint64(secondsAfterStart(1)), 40),
 		},
 	)
 }
@@ -1478,7 +1538,7 @@ func buildMonotonicDoubleRebootPoints() (slice pmetric.NumberDataPointSlice) {
 
 	for i, val := range values {
 		point := slice.AppendEmpty()
-		point.SetTimestamp(seconds(i * 10))
+		point.SetTimestamp(secondsAfterStart(i * 10))
 		point.SetDoubleValue(val)
 	}
 
@@ -1498,8 +1558,8 @@ func TestMapDoubleMonotonicWithRebootWithinSlice(t *testing.T) {
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
-				newCount(exampleDims, uint64(seconds(10)), 30),
-				newCount(exampleDims, uint64(seconds(30)), 20),
+				newCount(exampleDims, uint64(secondsAfterStart(10)), 30),
+				newCount(exampleDims, uint64(secondsAfterStart(30)), 20),
 			},
 		)
 	})
@@ -1514,8 +1574,8 @@ func TestMapDoubleMonotonicWithRebootWithinSlice(t *testing.T) {
 		assert.ElementsMatch(t,
 			consumer.metrics,
 			[]metric{
-				newGauge(rateAsGaugeDims, uint64(seconds(10)), 3),
-				newGauge(rateAsGaugeDims, uint64(seconds(30)), 2),
+				newGauge(rateAsGaugeDims, uint64(secondsAfterStart(10)), 3),
+				newGauge(rateAsGaugeDims, uint64(secondsAfterStart(30)), 2),
 			},
 		)
 	})
@@ -1974,7 +2034,7 @@ func TestMapDoubleMonotonicOutOfOrder(t *testing.T) {
 
 	for i, val := range values {
 		point := slice.AppendEmpty()
-		point.SetTimestamp(seconds(stamps[i]))
+		point.SetTimestamp(secondsAfterStart(stamps[i]))
 		point.SetDoubleValue(val)
 	}
 
@@ -1985,8 +2045,8 @@ func TestMapDoubleMonotonicOutOfOrder(t *testing.T) {
 	assert.ElementsMatch(t,
 		consumer.metrics,
 		[]metric{
-			newCount(exampleDims, uint64(seconds(2)), 2),
-			newCount(exampleDims, uint64(seconds(3)), 1),
+			newCount(exampleDims, uint64(secondsAfterStart(2)), 2),
+			newCount(exampleDims, uint64(secondsAfterStart(3)), 1),
 		},
 	)
 }
@@ -2020,7 +2080,7 @@ func TestLegacyBucketsTags(t *testing.T) {
 	pointOne := pmetric.NewHistogramDataPoint()
 	pointOne.BucketCounts().FromRaw([]uint64{2, 18})
 	pointOne.ExplicitBounds().FromRaw([]float64{0})
-	pointOne.SetTimestamp(seconds(0))
+	pointOne.SetTimestamp(secondsAfterStart(0))
 	consumer := &mockTimeSeriesConsumer{}
 	dims := &Dimensions{name: "test.histogram.one", tags: tags}
 	tr.getLegacyBuckets(ctx, consumer, dims, pointOne, true)
@@ -2029,7 +2089,7 @@ func TestLegacyBucketsTags(t *testing.T) {
 	pointTwo := pmetric.NewHistogramDataPoint()
 	pointTwo.BucketCounts().FromRaw([]uint64{2, 18})
 	pointTwo.ExplicitBounds().FromRaw([]float64{1})
-	pointTwo.SetTimestamp(seconds(0))
+	pointTwo.SetTimestamp(secondsAfterStart(0))
 	consumer = &mockTimeSeriesConsumer{}
 	dims = &Dimensions{name: "test.histogram.two", tags: tags}
 	tr.getLegacyBuckets(ctx, consumer, dims, pointTwo, true)
