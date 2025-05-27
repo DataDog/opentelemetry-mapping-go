@@ -253,7 +253,6 @@ func TestUpdate(t *testing.T) {
 				conventions.AttributeHostArch:      conventions.AttributeHostArchARM64,
 				"deployment.environment.name":      "staging",
 				"datadog.host.aliases":             []any{"host-2-hostid-alias-1", "host-2-hostid-alias-2", "host-2-hostid-alias-3"},
-
 			},
 			expectedChanged: true,
 		},
