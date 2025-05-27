@@ -276,10 +276,9 @@ pkg/otlp/metrics,go.opentelemetry.io/collector/semconv/v1.6.1,Apache-2.0,Copyrig
 pkg/otlp/metrics,go.opentelemetry.io/contrib/bridges/otelzap,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/otel,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/otel/attribute,Apache-2.0,Copyright The OpenTelemetry Authors
+pkg/otlp/metrics,go.opentelemetry.io/otel/attribute/internal,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/otel/baggage,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/otel/codes,Apache-2.0,Copyright The OpenTelemetry Authors
-pkg/otlp/metrics,go.opentelemetry.io/otel/internal,Apache-2.0,Copyright The OpenTelemetry Authors
-pkg/otlp/metrics,go.opentelemetry.io/otel/internal/attribute,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/otel/internal/baggage,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/otel/internal/global,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/otel/log,Apache-2.0,Copyright The OpenTelemetry Authors
