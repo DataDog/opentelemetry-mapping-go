@@ -13,6 +13,7 @@ import (
 )
 
 func TestGetHostAliases(t *testing.T) {
+	var uninitializedSlice []string
 	tests := []struct {
 		name     string
 		attrs    func() pcommon.Map
@@ -23,7 +24,7 @@ func TestGetHostAliases(t *testing.T) {
 			attrs: func() pcommon.Map {
 				return pcommon.NewMap()
 			},
-			expected: []string{},
+			expected: uninitializedSlice,
 		},
 		{
 			name: "attribute not present",
@@ -32,7 +33,7 @@ func TestGetHostAliases(t *testing.T) {
 				m.PutStr("some.other.key", "value")
 				return m
 			},
-			expected: []string{},
+			expected: uninitializedSlice,
 		},
 		{
 			name: "host aliases present",
@@ -64,7 +65,7 @@ func TestGetHostAliases(t *testing.T) {
 				m.PutStr(hostAliasAttribute, "alias")
 				return m
 			},
-			expected: []string{},
+			expected: uninitializedSlice,
 		},
 		{
 			name: "empty slice",
@@ -73,7 +74,7 @@ func TestGetHostAliases(t *testing.T) {
 				m.PutEmptySlice(hostAliasAttribute)
 				return m
 			},
-			expected: []string{},
+			expected: uninitializedSlice,
 		},
 		{
 			name: "non initialized slice",
@@ -83,7 +84,7 @@ func TestGetHostAliases(t *testing.T) {
 				m.FromRaw(map[string]any{hostAliasAttribute: nonInitializedSlice})
 				return m
 			},
-			expected: []string{},
+			expected: uninitializedSlice,
 		},
 	}
 

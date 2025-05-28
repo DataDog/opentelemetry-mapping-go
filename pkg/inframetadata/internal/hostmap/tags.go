@@ -69,7 +69,7 @@ func getHostTags(m pcommon.Map) ([]string, error) {
 
 // getHostAliases tries to get a host aliases from attribute datadog.host.aliases
 func getHostAliases(attrs pcommon.Map) []string {
-	hostAliases := []string{}
+	var hostAliases []string
 	attrs.Range(func(k string, v pcommon.Value) bool {
 		if k == hostAliasAttribute {
 			if v.Type() != pcommon.ValueTypeSlice {
