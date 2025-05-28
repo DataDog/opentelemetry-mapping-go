@@ -239,6 +239,20 @@ func TestUpdate(t *testing.T) {
 				conventions.AttributeHostName:      "host-2-hostname",
 				conventions.AttributeHostArch:      conventions.AttributeHostArchARM64,
 				"deployment.environment.name":      "staging",
+				"datadog.host.aliases":             []any{"host-2-hostid-alias-1", "host-2-hostid-alias-2"},
+			},
+			expectedChanged: true,
+		},
+		{
+			// Same host, new aliases
+			hostname: "host-2-hostid",
+			attributes: map[string]any{
+				conventions.AttributeCloudProvider: conventions.AttributeCloudProviderAzure,
+				conventions.AttributeHostID:        "host-2-hostid",
+				conventions.AttributeHostName:      "host-2-hostname",
+				conventions.AttributeHostArch:      conventions.AttributeHostArchARM64,
+				"deployment.environment.name":      "staging",
+				"datadog.host.aliases":             []any{"host-2-hostid-alias-1", "host-2-hostid-alias-2", "host-2-hostid-alias-3"},
 			},
 			expectedChanged: true,
 		},
@@ -308,7 +322,8 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, md.InternalHostname, "host-2-hostid")
 		assert.Equal(t, md.Flavor, "otelcol-contrib")
 		assert.Equal(t, md.Meta, &payload.Meta{
-			Hostname: "host-2-hostid",
+			Hostname:    "host-2-hostid",
+			HostAliases: []string{"host-2-hostid-alias-1", "host-2-hostid-alias-2", "host-2-hostid-alias-3"},
 		})
 		assert.ElementsMatch(t, md.Tags.OTel, []string{"cloud_provider:azure", "env:staging"})
 		assert.Equal(t, md.Platform(), map[string]string{
