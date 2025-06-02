@@ -15,7 +15,7 @@
 - `pkg/otlp/metrics`: Fix automatic intial point dropping when converting cumulative monotonic sum metrics (#654)
   This may fix issues with large spikes on Agent/Collector restarts.
   
-- `pkg/infradata`: Send host meta on new hosts. (#652)
+- `pkg/inframetadata`: Send host metadata on new hosts. (#652)
 
 ## v0.27.1
 
