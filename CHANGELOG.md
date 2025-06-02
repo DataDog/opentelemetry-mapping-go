@@ -4,6 +4,19 @@
 
 <!-- next version -->
 
+## v0.28.0
+
+### 💡 Enhancements 💡
+
+- `pkg/inframetadata`: Add support for host aliasing via resource attribute datadog.host.aliases (#661)
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/otlp/metrics`: Fix automatic intial point dropping when converting cumulative monotonic sum metrics (#654)
+  This may fix issues with large spikes on Agent/Collector restarts.
+  
+- `pkg/infradata`: Send host meta on new hosts. (#652)
+
 ## v0.27.1
 
 ### 🧰 Bug fixes 🧰
