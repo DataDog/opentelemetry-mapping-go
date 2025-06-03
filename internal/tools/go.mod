@@ -10,7 +10,7 @@ require (
 	go.opentelemetry.io/build-tools/chloggen v0.23.1
 	go.opentelemetry.io/build-tools/multimod v0.23.1
 	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0 // No tagged version available
-	gotest.tools/gotestsum v1.12.1
+	gotest.tools/gotestsum v1.12.2
 )
 
 require (
