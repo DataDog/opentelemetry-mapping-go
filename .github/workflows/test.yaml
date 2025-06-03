@@ -67,7 +67,7 @@ jobs:
       - uses: datadog/junit-upload-github-action@v2
         if: always()
         with:
-          api-key: ${{ secrets.DD_CI_API_KEY }}
+          api_key: ${{ secrets.DD_CI_API_KEY }}
           service: opentelemetry-mapping-go
           files: testresults/
       - name: Upload coverage reports to Codecov
