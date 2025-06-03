@@ -49,6 +49,8 @@ type translatorConfig struct {
 	fallbackSourceProvider source.Provider
 	// statsOut is the channel where the translator will send its APM statsPayload bytes
 	statsOut chan<- []byte
+
+	ignoreMissingDatadogFields bool
 }
 
 // TranslatorOption is a translator creation option.

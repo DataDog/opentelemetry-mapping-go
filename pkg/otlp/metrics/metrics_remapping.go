@@ -179,9 +179,10 @@ func copyMetricWithAttr(dest pmetric.MetricSlice, m pmetric.Metric, newname stri
 		return newm, false
 	}
 	dps.RemoveIf(func(dp pmetric.NumberDataPoint) bool {
-		if !hasAny(dp, filter...) {
-			return true
-		}
+		return !hasAny(dp, filter...)
+	})
+	for i := 0; i < dps.Len(); i++ {
+		dp := dps.At(i)
 		switch dp.ValueType() {
 		case pmetric.NumberDataPointValueTypeInt:
 			if div >= 1 {
@@ -202,8 +203,7 @@ func copyMetricWithAttr(dest pmetric.MetricSlice, m pmetric.Metric, newname stri
 				v.CopyTo(dp.Attributes().PutEmpty(new))
 			}
 		}
-		return false
-	})
+	}
 	if dps.Len() > 0 {
 		// if we have datapoints, copy it
 		addm := dest.AppendEmpty()

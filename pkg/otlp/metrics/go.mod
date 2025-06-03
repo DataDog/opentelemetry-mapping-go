@@ -6,6 +6,7 @@ require (
 	github.com/DataDog/datadog-agent/pkg/proto v0.68.0-devel
 	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.28.0
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.28.0
+	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/util v0.0.0-00010101000000-000000000000
 	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.28.0
 	github.com/DataDog/sketches-go v1.4.7
 	github.com/golang/protobuf v1.5.4
@@ -61,6 +62,7 @@ require (
 replace (
 	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest => ../../internal/sketchtest
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes => ../attributes
+	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/util => ../util
 	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile => ../../quantile
 )
 
