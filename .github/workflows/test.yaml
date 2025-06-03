@@ -16,14 +16,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5
         with:
           go-version: "1.23.0"
       - name: Cache Go
         id: go-cache
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
         with:
           path: |
             ~/go/bin
@@ -44,30 +44,30 @@ jobs:
     needs: [setup-environment]
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5
         with:
           go-version: ${{ matrix.go-version }}
       - name: Cache Go
         id: go-cache
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
         with:
           path: |
             ~/go/bin
             ~/go/pkg/mod
           key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
       - name: Cache Build
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
         with:
           path: ~/.cache/go-build
           key: unittest-${{ runner.os }}-go-build-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
       - name: Run Unit Tests
         run: make test-junit
-      - uses: datadog/junit-upload-github-action@v1
+      - uses: datadog/junit-upload-github-action@762867566348d59ac9bcf479ebb4ec040db8940a
         if: always()
         with:
-          api-key: ${{ secrets.DD_CI_API_KEY }}
+          api_key: ${{ secrets.DD_CI_API_KEY }}
           service: opentelemetry-mapping-go
           files: testresults/
       - name: Upload coverage reports to Codecov
@@ -84,21 +84,21 @@ jobs:
     needs: [setup-environment]
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5
         with:
           go-version: "1.23.0"
       - name: Cache Go
         id: go-cache
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
         with:
           path: |
             ~/go/bin
             ~/go/pkg/mod
           key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
       - name: Cache Build
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
         with:
           path: ~/.cache/go-build
           key: lint-${{ runner.os }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
@@ -117,20 +117,20 @@ jobs:
     needs: [setup-environment]
     steps:
       - name: Checkout base branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with: 
           ref: ${{ github.base_ref }}
           path: ${{ github.base_ref }}
 
       - name: Checkout HEAD
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with: 
           ref: ${{ github.head_ref }}
           path: ${{ github.head_ref }}
 
       - name: Cache Go
         id: go-cache
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
         with:
           path: |
             ~/go/bin
@@ -138,7 +138,7 @@ jobs:
           key: go-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}-${{ hashFiles('internal/tools/**') }}
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5
         with:
           go-version: "1.23.0"
 
