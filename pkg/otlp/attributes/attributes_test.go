@@ -16,8 +16,9 @@ package attributes
 
 import (
 	"fmt"
-	semconv127 "go.opentelemetry.io/collector/semconv/v1.27.0"
 	"testing"
+
+	semconv127 "go.opentelemetry.io/collector/semconv/v1.27.0"
 
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -45,31 +46,32 @@ func TestTagsFromAttributes(t *testing.T) {
 	attrs := pcommon.NewMap()
 	attrs.FromRaw(attributeMap)
 
-	assert.ElementsMatch(t, []string{
-		fmt.Sprintf("%s:%s", semconv127.AttributeProcessExecutableName, "otelcol"),
-		fmt.Sprintf("%s:%s", semconv127.AttributeOSType, "linux"),
-		fmt.Sprintf("%s:%s", "kube_daemon_set", "daemon_set_name"),
-		fmt.Sprintf("%s:%s", "ecs_cluster_name", "cluster_arn"),
-		fmt.Sprintf("%s:%s", "service", "service_name"),
-		fmt.Sprintf("%s:%s", "runtime", "cro"),
-		fmt.Sprintf("%s:%s", "env", "prod"),
-		fmt.Sprintf("%s:%s", "container_name", "custom"),
-		fmt.Sprintf("%s:%s", "custom.team", "otel"),
-		fmt.Sprintf("%s:%s", "kube_cronjob", "cron"),
-	}, TagsFromAttributes(attrs))
+	expected := map[string]string{
+		semconv127.AttributeProcessExecutableName: "otelcol",
+		conventions.AttributeOSType:               "linux",
+		"kube_daemon_set":                         "daemon_set_name",
+		"ecs_cluster_name":                        "cluster_arn",
+		"service":                                 "service_name",
+		"runtime":                                 "cro",
+		"env":                                     "prod",
+		"container_name":                          "custom",
+		"custom.team":                             "otel",
+		"kube_cronjob":                            "cron",
+	}
+	assert.Equal(t, expected, TagsFromAttributes(attrs, false))
 }
 
 func TestNewDeploymentEnvironmentNameConvention(t *testing.T) {
 	attrs := pcommon.NewMap()
 	attrs.PutStr("deployment.environment.name", "staging")
 
-	assert.Equal(t, []string{"env:staging"}, TagsFromAttributes(attrs))
+	expected := map[string]string{"env": "staging"}
+	assert.Equal(t, expected, TagsFromAttributes(attrs, false))
 }
 
 func TestTagsFromAttributesEmpty(t *testing.T) {
 	attrs := pcommon.NewMap()
-
-	assert.Equal(t, []string{}, TagsFromAttributes(attrs))
+	assert.Equal(t, map[string]string{}, TagsFromAttributes(attrs, false))
 }
 
 func TestContainerTagFromResourceAttributes(t *testing.T) {
@@ -235,4 +237,260 @@ func TestOriginIDFromAttributes(t *testing.T) {
 			assert.Equal(t, testInstance.originID, originID)
 		})
 	}
+}
+
+func TestTagsFromAttributesIncludingDatadogNamespacedKeys(t *testing.T) {
+	attributeMap := map[string]interface{}{
+		// Core tags
+		semconv127.AttributeServiceName:    "svc",
+		semconv127.AttributeServiceVersion: "v1.2.3",
+		"tags.datadoghq.com/env":           "prod",
+		// Container tags
+		semconv127.AttributeContainerID:        "cid",
+		semconv127.AttributeContainerName:      "cname",
+		semconv127.AttributeContainerImageName: "imgname",
+		conventions.AttributeContainerImageTag: "imgtag",
+		semconv127.AttributeContainerRuntime:   "docker",
+		// Cloud tags
+		semconv127.AttributeCloudProvider:         "aws",
+		semconv127.AttributeCloudRegion:           "us-east-1",
+		semconv127.AttributeCloudAvailabilityZone: "az1",
+		// ECS tags
+		semconv127.AttributeAWSECSTaskFamily:   "tfam",
+		semconv127.AttributeAWSECSTaskARN:      "tarn",
+		semconv127.AttributeAWSECSClusterARN:   "clarn",
+		semconv127.AttributeAWSECSTaskRevision: "trev",
+		semconv127.AttributeAWSECSContainerARN: "carn",
+		// K8s tags
+		semconv127.AttributeK8SContainerName:   "k8scont",
+		semconv127.AttributeK8SClusterName:     "k8sclu",
+		semconv127.AttributeK8SDeploymentName:  "k8sdep",
+		semconv127.AttributeK8SReplicaSetName:  "k8srs",
+		semconv127.AttributeK8SStatefulSetName: "k8ssts",
+		semconv127.AttributeK8SDaemonSetName:   "k8sds",
+		semconv127.AttributeK8SJobName:         "k8sj",
+		semconv127.AttributeK8SCronJobName:     "k8scron",
+		semconv127.AttributeK8SNamespaceName:   "k8sns",
+		semconv127.AttributeK8SPodName:         "k8spod",
+		// App tags
+		"app.kubernetes.io/name":       "appname",
+		"app.kubernetes.io/instance":   "appinst",
+		"app.kubernetes.io/version":    "appver",
+		"app.kuberenetes.io/component": "appcomp",
+		"app.kubernetes.io/part-of":    "apppart",
+		"app.kubernetes.io/managed-by": "appman",
+		// All keys from keysToCheckForInDDNamespace as direct datadog.* tags
+		"datadog.env":                 "directenv",
+		"datadog.service":             "directsvc",
+		"datadog.version":             "directver",
+		"datadog.container_id":        "directcid",
+		"datadog.container_name":      "directcname",
+		"datadog.image_name":          "directimgname",
+		"datadog.image_tag":           "directimgtag",
+		"datadog.runtime":             "directruntime",
+		"datadog.cloud_provider":      "directcloud",
+		"datadog.region":              "directregion",
+		"datadog.zone":                "directzone",
+		"datadog.task_family":         "directtfam",
+		"datadog.task_arn":            "directtarn",
+		"datadog.task_version":        "directtrev",
+		"datadog.ecs_cluster_name":    "directclarn",
+		"datadog.ecs_container_name":  "directcarn",
+		"datadog.kube_container_name": "directk8scont",
+		"datadog.kube_cluster_name":   "directk8sclu",
+		"datadog.kube_deployment":     "directk8sdep",
+		"datadog.kube_replica_set":    "directk8srs",
+		"datadog.kube_stateful_set":   "directk8ssts",
+		"datadog.kube_daemon_set":     "directk8sds",
+		"datadog.kube_job":            "directk8sj",
+		"datadog.kube_cronjob":        "directk8scron",
+		"datadog.kube_namespace":      "directk8sns",
+		"datadog.pod_name":            "directk8spod",
+		"datadog.kube_app_name":       "directappname",
+		"datadog.kube_app_instance":   "directappinst",
+		"datadog.kube_app_version":    "directappver",
+		"datadog.kube_app_component":  "directappcomp",
+		"datadog.kube_app_part_of":    "directapppart",
+		"datadog.kube_app_managed_by": "directappman",
+	}
+	attrs := pcommon.NewMap()
+	attrs.FromRaw(attributeMap)
+
+	attributeMapEmptyDD := map[string]interface{}{}
+	for k, v := range attributeMap {
+		if len(k) >= 8 && k[:8] == "datadog." {
+			attributeMapEmptyDD[k] = ""
+		} else {
+			attributeMapEmptyDD[k] = v
+		}
+	}
+	attrsEmptyDD := pcommon.NewMap()
+	attrsEmptyDD.FromRaw(attributeMapEmptyDD)
+
+	t.Run("ignoreMissingDatadogFields=false (fallback enabled)", func(t *testing.T) {
+		tags := TagsFromAttributes(attrs, false)
+		// Should include only the direct datadog.* tags, not fallback
+		expected := map[string]string{
+			"env":                 "directenv",
+			"service":             "directsvc",
+			"version":             "directver",
+			"container_id":        "directcid",
+			"container_name":      "directcname",
+			"image_name":          "directimgname",
+			"image_tag":           "directimgtag",
+			"runtime":             "directruntime",
+			"cloud_provider":      "directcloud",
+			"region":              "directregion",
+			"zone":                "directzone",
+			"task_family":         "directtfam",
+			"task_arn":            "directtarn",
+			"ecs_cluster_name":    "directclarn",
+			"task_version":        "directtrev",
+			"ecs_container_name":  "directcarn",
+			"kube_container_name": "directk8scont",
+			"kube_cluster_name":   "directk8sclu",
+			"kube_deployment":     "directk8sdep",
+			"kube_replica_set":    "directk8srs",
+			"kube_stateful_set":   "directk8ssts",
+			"kube_daemon_set":     "directk8sds",
+			"kube_job":            "directk8sj",
+			"kube_cronjob":        "directk8scron",
+			"kube_namespace":      "directk8sns",
+			"pod_name":            "directk8spod",
+			"kube_app_name":       "directappname",
+			"kube_app_instance":   "directappinst",
+			"kube_app_version":    "directappver",
+			"kube_app_component":  "directappcomp",
+			"kube_app_part_of":    "directapppart",
+			"kube_app_managed_by": "directappman",
+		}
+		for k, v := range expected {
+			assert.Equal(t, v, tags[k], "expected key %s to have value %s", k, v)
+		}
+		// Should not include fallback tags
+	})
+
+	t.Run("ignoreMissingDatadogFields=true (fallback disabled)", func(t *testing.T) {
+		tags := TagsFromAttributes(attrs, true)
+		// Should only include direct datadog.* tags, not fallback
+		expected := map[string]string{
+			"env":                 "directenv",
+			"service":             "directsvc",
+			"version":             "directver",
+			"container_id":        "directcid",
+			"container_name":      "directcname",
+			"image_name":          "directimgname",
+			"image_tag":           "directimgtag",
+			"runtime":             "directruntime",
+			"cloud_provider":      "directcloud",
+			"region":              "directregion",
+			"zone":                "directzone",
+			"task_family":         "directtfam",
+			"task_arn":            "directtarn",
+			"ecs_cluster_name":    "directclarn",
+			"task_version":        "directtrev",
+			"ecs_container_name":  "directcarn",
+			"kube_container_name": "directk8scont",
+			"kube_cluster_name":   "directk8sclu",
+			"kube_deployment":     "directk8sdep",
+			"kube_replica_set":    "directk8srs",
+			"kube_stateful_set":   "directk8ssts",
+			"kube_daemon_set":     "directk8sds",
+			"kube_job":            "directk8sj",
+			"kube_cronjob":        "directk8scron",
+			"kube_namespace":      "directk8sns",
+			"pod_name":            "directk8spod",
+			"kube_app_name":       "directappname",
+			"kube_app_instance":   "directappinst",
+			"kube_app_version":    "directappver",
+			"kube_app_component":  "directappcomp",
+			"kube_app_part_of":    "directapppart",
+			"kube_app_managed_by": "directappman",
+		}
+		for k, v := range expected {
+			assert.Equal(t, v, tags[k], "expected key %s to have value %s", k, v)
+		}
+		// Should not include fallback tags
+	})
+
+	t.Run("empty datadog.* keys, ignoreMissingDatadogFields=true", func(t *testing.T) {
+		tags := TagsFromAttributes(attrsEmptyDD, true)
+		// All datadog.* keys should be present with empty values
+		expected := map[string]string{
+			"env":                 "",
+			"service":             "",
+			"version":             "",
+			"container_id":        "",
+			"container_name":      "",
+			"image_name":          "",
+			"image_tag":           "",
+			"runtime":             "",
+			"cloud_provider":      "",
+			"region":              "",
+			"zone":                "",
+			"task_family":         "",
+			"task_arn":            "",
+			"ecs_cluster_name":    "",
+			"task_version":        "",
+			"ecs_container_name":  "",
+			"kube_container_name": "",
+			"kube_cluster_name":   "",
+			"kube_deployment":     "",
+			"kube_replica_set":    "",
+			"kube_stateful_set":   "",
+			"kube_daemon_set":     "",
+			"kube_job":            "",
+			"kube_cronjob":        "",
+			"kube_namespace":      "",
+			"pod_name":            "",
+			"kube_app_name":       "",
+			"kube_app_instance":   "",
+			"kube_app_version":    "",
+			"kube_app_component":  "",
+			"kube_app_part_of":    "",
+			"kube_app_managed_by": "",
+		}
+		for k, v := range expected {
+			assert.Equal(t, v, tags[k], "expected key %s to have value %s", k, v)
+		}
+	})
+
+	t.Run("empty datadog.* keys, ignoreMissingDatadogFields=false", func(t *testing.T) {
+		tags := TagsFromAttributes(attrsEmptyDD, false)
+		expected := map[string]string{
+			"service":             "svc",
+			"version":             "v1.2.3",
+			"env":                 "prod",
+			"container_id":        "cid",
+			"container_name":      "cname",
+			"image_name":          "imgname",
+			"image_tag":           "imgtag",
+			"runtime":             "docker",
+			"cloud_provider":      "aws",
+			"region":              "us-east-1",
+			"zone":                "az1",
+			"task_family":         "tfam",
+			"task_arn":            "tarn",
+			"ecs_cluster_name":    "clarn",
+			"task_version":        "trev",
+			"ecs_container_name":  "carn",
+			"kube_container_name": "k8scont",
+			"kube_cluster_name":   "k8sclu",
+			"kube_deployment":     "k8sdep",
+			"kube_replica_set":    "k8srs",
+			"kube_stateful_set":   "k8ssts",
+			"kube_daemon_set":     "k8sds",
+			"kube_job":            "k8sj",
+			"kube_cronjob":        "k8scron",
+			"kube_namespace":      "k8sns",
+			"pod_name":            "k8spod",
+			"kube_app_name":       "appname",
+			"kube_app_instance":   "appinst",
+			"kube_app_version":    "appver",
+			"kube_app_component":  "appcomp",
+			"kube_app_part_of":    "apppart",
+			"kube_app_managed_by": "appman",
+		}
+		assert.Equal(t, expected, tags)
+	})
 }

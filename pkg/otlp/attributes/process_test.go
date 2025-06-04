@@ -15,7 +15,6 @@
 package attributes
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -32,8 +31,8 @@ func TestProcessExtractTags(t *testing.T) {
 		Owner:          "root",
 	}
 
-	assert.Equal(t, []string{
-		fmt.Sprintf("%s:%s", conventions.AttributeProcessExecutableName, "otelcol"),
+	assert.Equal(t, map[string]string{
+		conventions.AttributeProcessExecutableName: "otelcol",
 	}, pattrs.extractTags())
 
 	pattrs = processAttributes{
@@ -44,8 +43,8 @@ func TestProcessExtractTags(t *testing.T) {
 		Owner:          "root",
 	}
 
-	assert.Equal(t, []string{
-		fmt.Sprintf("%s:%s", conventions.AttributeProcessExecutablePath, "/usr/bin/cmd/otelcol"),
+	assert.Equal(t, map[string]string{
+		conventions.AttributeProcessExecutablePath: "/usr/bin/cmd/otelcol",
 	}, pattrs.extractTags())
 
 	pattrs = processAttributes{
@@ -55,8 +54,8 @@ func TestProcessExtractTags(t *testing.T) {
 		Owner:       "root",
 	}
 
-	assert.Equal(t, []string{
-		fmt.Sprintf("%s:%s", conventions.AttributeProcessCommand, "cmd/otelcol"),
+	assert.Equal(t, map[string]string{
+		conventions.AttributeProcessCommand: "cmd/otelcol",
 	}, pattrs.extractTags())
 
 	pattrs = processAttributes{
@@ -65,13 +64,13 @@ func TestProcessExtractTags(t *testing.T) {
 		Owner:       "root",
 	}
 
-	assert.Equal(t, []string{
-		fmt.Sprintf("%s:%s", conventions.AttributeProcessCommandLine, "cmd/otelcol --config=\"/path/to/config.yaml\""),
+	assert.Equal(t, map[string]string{
+		conventions.AttributeProcessCommandLine: "cmd/otelcol --config=\"/path/to/config.yaml\"",
 	}, pattrs.extractTags())
 }
 
 func TestProcessExtractTagsEmpty(t *testing.T) {
 	pattrs := processAttributes{}
 
-	assert.Equal(t, []string{}, pattrs.extractTags())
+	assert.Equal(t, map[string]string{}, pattrs.extractTags())
 }

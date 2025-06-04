@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 
@@ -28,7 +29,7 @@ func NewTestTranslator(t testing.TB, options ...TranslatorOption) *Translator {
 	set := componenttest.NewNopTelemetrySettings()
 	attributesTranslator, err := attributes.NewTranslator(set)
 	require.NoError(t, err)
-	translator, err := NewTranslator(set, attributesTranslator, options...)
+	translator, err := NewTranslator(set, attributesTranslator, false, options...)
 	require.NoError(t, err)
 	return translator
 }
@@ -111,6 +112,12 @@ func AssertTranslatorMap(t TestingT, translator *Translator, otlpfilename string
 	_, err = translator.MapMetrics(context.Background(), otlpdata, &consumer, nil)
 	require.NoError(t, err)
 
+	for _, m := range consumer.testMetrics.TimeSeries {
+		sort.Strings(m.Tags)
+	}
+	for _, m := range consumer.testMetrics.Sketches {
+		sort.Strings(m.Tags)
+	}
 	if !assert.Equal(t, expecteddata, consumer.testMetrics) {
 		actualfile := datadogfilename + ".actual"
 		t.Logf("Translator output does not match expected data, saving actual data on %q", actualfile)
