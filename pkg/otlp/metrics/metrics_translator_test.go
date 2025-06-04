@@ -208,7 +208,7 @@ func TestMapIntMetrics(t *testing.T) {
 
 	consumer := &mockFullConsumer{}
 	dims := newDims("int64.test")
-	callback := makeResolveDimsCallback(tr, ctx, dims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+	callback := makeResolveDimsCallback(ctx, tr, dims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 	tr.mapNumberMetrics(ctx, consumer, Gauge, slice, callback)
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -217,7 +217,7 @@ func TestMapIntMetrics(t *testing.T) {
 
 	consumer = &mockFullConsumer{}
 	dims = newDims("int64.delta.test")
-	callback = makeResolveDimsCallback(tr, ctx, dims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+	callback = makeResolveDimsCallback(ctx, tr, dims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 	tr.mapNumberMetrics(ctx, consumer, Count, slice, callback)
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -227,7 +227,7 @@ func TestMapIntMetrics(t *testing.T) {
 	// With attribute tags
 	consumer = &mockFullConsumer{}
 	dims = &Dimensions{name: "int64.test", tags: []string{"attribute_tag:attribute_value"}}
-	callback = makeResolveDimsCallback(tr, ctx, dims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+	callback = makeResolveDimsCallback(ctx, tr, dims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 	tr.mapNumberMetrics(ctx, consumer, Gauge, slice, callback)
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -246,7 +246,7 @@ func TestMapDoubleMetrics(t *testing.T) {
 
 	consumer := &mockFullConsumer{}
 	dims := newDims("float64.test")
-	callback := makeResolveDimsCallback(tr, ctx, dims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+	callback := makeResolveDimsCallback(ctx, tr, dims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 	tr.mapNumberMetrics(ctx, consumer, Gauge, slice, callback)
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -255,7 +255,7 @@ func TestMapDoubleMetrics(t *testing.T) {
 
 	consumer = &mockFullConsumer{}
 	dims = newDims("float64.delta.test")
-	callback = makeResolveDimsCallback(tr, ctx, dims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+	callback = makeResolveDimsCallback(ctx, tr, dims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 	tr.mapNumberMetrics(ctx, consumer, Count, slice, callback)
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -265,7 +265,7 @@ func TestMapDoubleMetrics(t *testing.T) {
 	// With attribute tags
 	consumer = &mockFullConsumer{}
 	dims = &Dimensions{name: "float64.test", tags: []string{"attribute_tag:attribute_value"}}
-	callback = makeResolveDimsCallback(tr, ctx, dims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+	callback = makeResolveDimsCallback(ctx, tr, dims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 	tr.mapNumberMetrics(ctx, consumer, Gauge, slice, callback)
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -312,7 +312,7 @@ func TestMapIntMonotonicMetrics(t *testing.T) {
 		ctx := context.Background()
 		consumer := &mockFullConsumer{}
 		tr := newTranslator(t, zap.NewNop())
-		callback := makeResolveDimsCallback(tr, ctx, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+		callback := makeResolveDimsCallback(ctx, tr, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 		tr.mapNumberMonotonicMetrics(ctx, consumer, exampleDims, slice, callback)
 
 		assert.ElementsMatch(t, expected, consumer.metrics)
@@ -330,7 +330,7 @@ func TestMapIntMonotonicMetrics(t *testing.T) {
 		ctx := context.Background()
 		consumer := &mockFullConsumer{}
 		tr := newTranslator(t, zap.NewNop())
-		callback := makeResolveDimsCallback(tr, ctx, rateAsGaugeDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+		callback := makeResolveDimsCallback(ctx, tr, rateAsGaugeDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 		tr.mapNumberMonotonicMetrics(ctx, consumer, rateAsGaugeDims, slice, callback)
 
 		assert.ElementsMatch(t, expected, consumer.metrics)
@@ -372,7 +372,7 @@ func TestMapIntMonotonicDifferentDimensions(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 
 	consumer := &mockFullConsumer{}
-	callback := makeResolveDimsCallback(tr, ctx, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+	callback := makeResolveDimsCallback(ctx, tr, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 	tr.mapNumberMonotonicMetrics(ctx, consumer, exampleDims, slice, callback)
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -406,7 +406,7 @@ func TestMapIntMonotonicWithRebootWithinSlice(t *testing.T) {
 		ctx := context.Background()
 		tr := newTranslator(t, zap.NewNop())
 		consumer := &mockFullConsumer{}
-		callback := makeResolveDimsCallback(tr, ctx, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+		callback := makeResolveDimsCallback(ctx, tr, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 		tr.mapNumberMonotonicMetrics(ctx, consumer, exampleDims, slice, callback)
 		assert.ElementsMatch(t,
 			consumer.metrics,
@@ -422,7 +422,7 @@ func TestMapIntMonotonicWithRebootWithinSlice(t *testing.T) {
 		ctx := context.Background()
 		tr := newTranslator(t, zap.NewNop())
 		consumer := &mockFullConsumer{}
-		callback := makeResolveDimsCallback(tr, ctx, rateAsGaugeDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+		callback := makeResolveDimsCallback(ctx, tr, rateAsGaugeDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 		tr.mapNumberMonotonicMetrics(ctx, consumer, rateAsGaugeDims, slice, callback)
 		assert.ElementsMatch(t,
 			consumer.metrics,
@@ -458,7 +458,7 @@ func TestMapIntMonotonicWithNoRecordedValueWithinSlice(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	callback := makeResolveDimsCallback(tr, ctx, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+	callback := makeResolveDimsCallback(ctx, tr, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 	tr.mapNumberMonotonicMetrics(ctx, consumer, exampleDims, slice, callback)
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -1037,7 +1037,7 @@ func TestInitialCumulMonoValueMode(t *testing.T) {
 			tr := newTranslator(t, zap.NewNop())
 			tr.cfg.InitialCumulMonoValueMode = tc.mode
 			consumer := &mockFullConsumer{}
-			callback := makeResolveDimsCallback(tr, ctx, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+			callback := makeResolveDimsCallback(ctx, tr, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 			tr.mapNumberMonotonicMetrics(ctx, consumer, exampleDims, tc.input, callback)
 			assert.Equal(t, tc.output, consumer.metrics)
 		})
@@ -1446,7 +1446,7 @@ func TestMapIntMonotonicOutOfOrder(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	callback := makeResolveDimsCallback(tr, ctx, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+	callback := makeResolveDimsCallback(ctx, tr, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 	tr.mapNumberMonotonicMetrics(ctx, consumer, exampleDims, slice, callback)
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -1475,7 +1475,7 @@ func buildMonotonicDoublePoints(deltas []float64) (slice pmetric.NumberDataPoint
 	return
 }
 
-func makeResolveDimsCallback(t *Translator, ctx context.Context, baseDims *Dimensions, resourceTagsMap map[string]string, sourceKindFromResource string, sourceIdentifierFromResource string, hostFromAttributesHandler attributes.HostFromAttributesHandler, consumer Consumer, rattrs pcommon.Map) func(p pcommon.Map) *Dimensions {
+func makeResolveDimsCallback(ctx context.Context, t *Translator, baseDims *Dimensions, resourceTagsMap map[string]string, sourceKindFromResource string, sourceIdentifierFromResource string, hostFromAttributesHandler attributes.HostFromAttributesHandler, consumer Consumer, rattrs pcommon.Map) func(p pcommon.Map) *Dimensions {
 	return func(p pcommon.Map) *Dimensions {
 		signalTagsMap := make(map[string]string)
 		p.Range(func(k string, v pcommon.Value) bool {
@@ -1491,7 +1491,7 @@ func makeResolveDimsCallback(t *Translator, ctx context.Context, baseDims *Dimen
 		pointDims := baseDims.AddTags(tags...)
 		var sourceKind string
 
-		signalSourceKind, signalSourceIdentifier, _ := getSourceFromAttributes(t, ctx, p)
+		signalSourceKind, signalSourceIdentifier, _ := getSourceFromAttributes(ctx, t, p)
 		if signalSourceIdentifier != "" {
 			sourceKind = signalSourceKind
 			pointDims.host = signalSourceIdentifier
@@ -1542,7 +1542,7 @@ func TestMapDoubleMonotonicMetrics(t *testing.T) {
 		ctx := context.Background()
 		consumer := &mockFullConsumer{}
 		tr := newTranslator(t, zap.NewNop())
-		callback := makeResolveDimsCallback(tr, ctx, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+		callback := makeResolveDimsCallback(ctx, tr, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 		tr.mapNumberMonotonicMetrics(ctx, consumer, exampleDims, slice, callback)
 
 		assert.ElementsMatch(t, expected, consumer.metrics)
@@ -1560,7 +1560,7 @@ func TestMapDoubleMonotonicMetrics(t *testing.T) {
 		ctx := context.Background()
 		consumer := &mockFullConsumer{}
 		tr := newTranslator(t, zap.NewNop())
-		callback := makeResolveDimsCallback(tr, ctx, rateAsGaugeDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+		callback := makeResolveDimsCallback(ctx, tr, rateAsGaugeDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 		tr.mapNumberMonotonicMetrics(ctx, consumer, rateAsGaugeDims, slice, callback)
 
 		assert.ElementsMatch(t, expected, consumer.metrics)
@@ -1603,7 +1603,7 @@ func TestMapDoubleMonotonicDifferentDimensions(t *testing.T) {
 	tr := newTranslator(t, zap.NewNop())
 
 	consumer := &mockFullConsumer{}
-	callback := makeResolveDimsCallback(tr, ctx, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+	callback := makeResolveDimsCallback(ctx, tr, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 	tr.mapNumberMonotonicMetrics(ctx, consumer, exampleDims, slice, callback)
 	assert.ElementsMatch(t,
 		consumer.metrics,
@@ -1638,7 +1638,7 @@ func TestMapDoubleMonotonicWithRebootWithinSlice(t *testing.T) {
 		ctx := context.Background()
 		tr := newTranslator(t, zap.NewNop())
 		consumer := &mockFullConsumer{}
-		callback := makeResolveDimsCallback(tr, ctx, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+		callback := makeResolveDimsCallback(ctx, tr, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 		tr.mapNumberMonotonicMetrics(ctx, consumer, exampleDims, slice, callback)
 		assert.ElementsMatch(t,
 			consumer.metrics,
@@ -1655,7 +1655,7 @@ func TestMapDoubleMonotonicWithRebootWithinSlice(t *testing.T) {
 		ctx := context.Background()
 		tr := newTranslator(t, zap.NewNop())
 		consumer := &mockFullConsumer{}
-		callback := makeResolveDimsCallback(tr, ctx, rateAsGaugeDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+		callback := makeResolveDimsCallback(ctx, tr, rateAsGaugeDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 		tr.mapNumberMonotonicMetrics(ctx, consumer, rateAsGaugeDims, slice, callback)
 		assert.ElementsMatch(t,
 			consumer.metrics,
@@ -2127,7 +2127,7 @@ func TestMapDoubleMonotonicOutOfOrder(t *testing.T) {
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
 	consumer := &mockFullConsumer{}
-	callback := makeResolveDimsCallback(tr, ctx, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
+	callback := makeResolveDimsCallback(ctx, tr, exampleDims, nil, "host", "hostname", nil, consumer, pcommon.NewMap())
 	tr.mapNumberMonotonicMetrics(ctx, consumer, exampleDims, slice, callback)
 	assert.ElementsMatch(t,
 		consumer.metrics,

@@ -747,7 +747,7 @@ func mapHistogramRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pme
 	}
 }
 
-func getSourceFromAttributes(t *Translator, ctx context.Context, attrs pcommon.Map) (string, string, error) {
+func getSourceFromAttributes(ctx context.Context, t *Translator, attrs pcommon.Map) (string, string, error) {
 	var sourceKindFromAttributes string
 	var sourceIdentifierFromAttributes string
 
@@ -780,7 +780,7 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 		rm := rms.At(i)
 		rattrs := rm.Resource().Attributes()
 
-		sourceKindFromResource, sourceIdentifierFromResource, err := getSourceFromAttributes(t, ctx, rattrs)
+		sourceKindFromResource, sourceIdentifierFromResource, err := getSourceFromAttributes(ctx, t, rattrs)
 		if err != nil {
 			return metadata, err
 		}
@@ -879,7 +879,7 @@ func (t *Translator) mapToDDFormat(ctx context.Context, md pmetric.Metric, consu
 		pointDims := baseDims.AddTags(tags...)
 		var sourceKind string
 
-		signalSourceKind, signalSourceIdentifier, _ := getSourceFromAttributes(t, ctx, p)
+		signalSourceKind, signalSourceIdentifier, _ := getSourceFromAttributes(ctx, t, p)
 		if signalSourceIdentifier != "" {
 			sourceKind = signalSourceKind
 			pointDims.host = signalSourceIdentifier

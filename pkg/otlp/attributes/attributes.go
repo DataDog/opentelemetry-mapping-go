@@ -185,14 +185,14 @@ var (
 		semconv127.AttributeUserAgentOriginal:      "http.useragent",
 	}
 
-	KeyDatadogHostname              string = "datadog.host.name"
-	KeyDatadogProcessExecutableName string = "datadog.process.executable.name"
-	KeyDatadogProcessExecutablePath string = "datadog.process.executable.path"
-	KeyDatadogProcessCommand        string = "datadog.process.command"
-	KeyDatadogProcessCommandLine    string = "datadog.process.command_line"
-	KeyDatadogProcessPID            string = "datadog.process.pid"
-	KeyDatadogProcessOwner          string = "datadog.process.owner"
-	KeyDatadogOSType                string = "datadog.ostype"
+	KeyDatadogHostname              = "datadog.host.name"
+	KeyDatadogProcessExecutableName = "datadog.process.executable.name"
+	KeyDatadogProcessExecutablePath = "datadog.process.executable.path"
+	KeyDatadogProcessCommand        = "datadog.process.command"
+	KeyDatadogProcessCommandLine    = "datadog.process.command_line"
+	KeyDatadogProcessPID            = "datadog.process.pid"
+	KeyDatadogProcessOwner          = "datadog.process.owner"
+	KeyDatadogOSType                = "datadog.ostype"
 )
 
 const (

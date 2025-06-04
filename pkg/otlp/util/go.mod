@@ -2,9 +2,10 @@ module github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/util
 
 go 1.23.0
 
+require go.opentelemetry.io/collector/pdata v1.32.0
+
 require (
 	github.com/gogo/protobuf v1.3.2 // indirect
-	go.opentelemetry.io/collector/pdata v1.32.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.39.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
