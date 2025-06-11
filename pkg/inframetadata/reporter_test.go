@@ -13,7 +13,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	conventions "go.opentelemetry.io/collector/semconv/v1.18.0"
+	semconv118 "go.opentelemetry.io/otel/semconv/v1.18.0"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
@@ -97,12 +97,12 @@ func TestRun(t *testing.T) {
 	}()
 
 	err = r.ConsumeResource(testutils.NewResourceFromMap(t, map[string]any{
-		AttributeDatadogHostUseAsMetadata:  true,
-		conventions.AttributeCloudProvider: conventions.AttributeCloudProviderAWS,
-		conventions.AttributeHostID:        "host-1-hostid",
-		conventions.AttributeHostName:      "host-1-hostname",
-		conventions.AttributeOSDescription: true,
-		conventions.AttributeHostArch:      conventions.AttributeHostArchAMD64,
+		AttributeDatadogHostUseAsMetadata:   true,
+		string(semconv118.CloudProviderKey): semconv118.CloudProviderAWS.Value.AsString(),
+		string(semconv118.HostIDKey):        "host-1-hostid",
+		string(semconv118.HostNameKey):      "host-1-hostname",
+		string(semconv118.OSDescriptionKey): true,
+		string(semconv118.HostArchKey):      semconv118.HostArchAMD64.Value.AsString(),
 	}))
 	assert.EqualError(t, err, "\"os.description\" has type \"Bool\", expected type \"Str\" instead")
 
