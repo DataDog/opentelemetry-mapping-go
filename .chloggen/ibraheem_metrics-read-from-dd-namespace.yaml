@@ -15,7 +15,7 @@ note: |
   If ignoreMissingDatadogFields is true, it will not add tags that are not present in the Datadog namespace (stop at step 2)
 
 # The PR related to this change
-issues: []
+issues: [680]
 
 # (Optional) One or more lines of additional information to render under the primary note.
 # These lines will be padded with 2 spaces and then inserted directly into the document.
