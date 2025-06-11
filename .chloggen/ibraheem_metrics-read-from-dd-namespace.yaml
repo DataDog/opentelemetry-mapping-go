@@ -1,0 +1,23 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: enhancement
+
+# The name of the component (e.g. pkg/quantile)
+component: pkg/otlp
+
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: |
+  Add GetTagsFromAttributesPreferringDatadogNamespace to attributes package, and deprecate TagsFromAttributes. This new method evaluates all fields using both datapoint level and resource level attributes, and also checks for the Datadog namespace.
+  The following order of precedence is used:
+  1. datadog.* span attributes
+  2. datadog.* resource attributes
+  3. standard span attributes
+  4. standard resource attributes
+  If ignoreMissingDatadogFields is true, it will not add tags that are not present in the Datadog namespace (stop at step 2)
+
+# The PR related to this change
+issues: []
+
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext:
