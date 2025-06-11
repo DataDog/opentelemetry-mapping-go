@@ -27,7 +27,7 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
-	conventions "go.opentelemetry.io/collector/semconv/v1.6.1"
+	semconv16 "go.opentelemetry.io/otel/semconv/v1.6.1"
 	"go.uber.org/zap"
 )
 
@@ -213,13 +213,13 @@ func extractHostNameAndServiceName(resourceAttrs pcommon.Map, logAttrs pcommon.M
 			host = src.Identifier
 		}
 	}
-	if s, ok := resourceAttrs.Get(conventions.AttributeServiceName); ok {
+	if s, ok := resourceAttrs.Get(string(semconv16.ServiceNameKey)); ok {
 		service = s.AsString()
 	}
 	// HACK: Check for service in log record attributes if not present in resource attributes.
 	// This is not aligned with the specification and will be removed in the future.
 	if service == "" {
-		if s, ok := logAttrs.Get(conventions.AttributeServiceName); ok {
+		if s, ok := logAttrs.Get(string(semconv16.ServiceNameKey)); ok {
 			service = s.AsString()
 		}
 	}
