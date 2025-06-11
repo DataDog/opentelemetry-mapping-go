@@ -46,6 +46,54 @@ func TestTagsFromAttributes(t *testing.T) {
 	attrs := pcommon.NewMap()
 	attrs.FromRaw(attributeMap)
 
+	assert.ElementsMatch(t, []string{
+		fmt.Sprintf("%s:%s", semconv127.AttributeProcessExecutableName, "otelcol"),
+		fmt.Sprintf("%s:%s", semconv127.AttributeOSType, "linux"),
+		fmt.Sprintf("%s:%s", "kube_daemon_set", "daemon_set_name"),
+		fmt.Sprintf("%s:%s", "ecs_cluster_name", "cluster_arn"),
+		fmt.Sprintf("%s:%s", "service", "service_name"),
+		fmt.Sprintf("%s:%s", "runtime", "cro"),
+		fmt.Sprintf("%s:%s", "env", "prod"),
+		fmt.Sprintf("%s:%s", "container_name", "custom"),
+		fmt.Sprintf("%s:%s", "custom.team", "otel"),
+		fmt.Sprintf("%s:%s", "kube_cronjob", "cron"),
+	}, TagsFromAttributes(attrs))
+}
+
+func TestNewDeploymentEnvironmentNameConvention_TagsFromAttributes(t *testing.T) {
+	attrs := pcommon.NewMap()
+	attrs.PutStr("deployment.environment.name", "staging")
+
+	assert.Equal(t, []string{"env:staging"}, TagsFromAttributes(attrs))
+}
+
+func TestTagsFromAttributesEmpty_TagsFromAttributes(t *testing.T) {
+	attrs := pcommon.NewMap()
+
+	assert.Equal(t, []string{}, TagsFromAttributes(attrs))
+}
+
+func TestGetTagsFromAttributesPreferringDatadogNamespace(t *testing.T) {
+	attributeMap := map[string]interface{}{
+		semconv127.AttributeProcessExecutableName:  "otelcol",
+		semconv127.AttributeProcessExecutablePath:  "/usr/bin/cmd/otelcol",
+		semconv127.AttributeProcessCommand:         "cmd/otelcol",
+		semconv127.AttributeProcessCommandLine:     "cmd/otelcol --config=\"/path/to/config.yaml\"",
+		semconv127.AttributeProcessPID:             1,
+		semconv127.AttributeProcessOwner:           "root",
+		semconv127.AttributeOSType:                 "linux",
+		semconv127.AttributeK8SDaemonSetName:       "daemon_set_name",
+		semconv127.AttributeAWSECSClusterARN:       "cluster_arn",
+		semconv127.AttributeContainerRuntime:       "cro",
+		"tags.datadoghq.com/service":               "service_name",
+		conventions.AttributeDeploymentEnvironment: "prod",
+		semconv127.AttributeContainerName:          "custom",
+		"datadog.container.tag.custom.team":        "otel",
+		"kube_cronjob":                             "cron",
+	}
+	attrs := pcommon.NewMap()
+	attrs.FromRaw(attributeMap)
+
 	expected := map[string]string{
 		semconv127.AttributeProcessExecutableName: "otelcol",
 		conventions.AttributeOSType:               "linux",
@@ -58,7 +106,7 @@ func TestTagsFromAttributes(t *testing.T) {
 		"custom.team":                             "otel",
 		"kube_cronjob":                            "cron",
 	}
-	assert.Equal(t, expected, TagsFromAttributes(attrs, false))
+	assert.Equal(t, expected, GetTagsFromAttributesPreferringDatadogNamespace(attrs, false))
 }
 
 func TestNewDeploymentEnvironmentNameConvention(t *testing.T) {
@@ -66,12 +114,12 @@ func TestNewDeploymentEnvironmentNameConvention(t *testing.T) {
 	attrs.PutStr("deployment.environment.name", "staging")
 
 	expected := map[string]string{"env": "staging"}
-	assert.Equal(t, expected, TagsFromAttributes(attrs, false))
+	assert.Equal(t, expected, GetTagsFromAttributesPreferringDatadogNamespace(attrs, false))
 }
 
 func TestTagsFromAttributesEmpty(t *testing.T) {
 	attrs := pcommon.NewMap()
-	assert.Equal(t, map[string]string{}, TagsFromAttributes(attrs, false))
+	assert.Equal(t, map[string]string{}, GetTagsFromAttributesPreferringDatadogNamespace(attrs, false))
 }
 
 func TestContainerTagFromResourceAttributes(t *testing.T) {
@@ -328,7 +376,7 @@ func TestTagsFromAttributesIncludingDatadogNamespacedKeys(t *testing.T) {
 	attrsEmptyDD.FromRaw(attributeMapEmptyDD)
 
 	t.Run("ignoreMissingDatadogFields=false (fallback enabled)", func(t *testing.T) {
-		tags := TagsFromAttributes(attrs, false)
+		tags := GetTagsFromAttributesPreferringDatadogNamespace(attrs, false)
 		// Should include only the direct datadog.* tags, not fallback
 		expected := map[string]string{
 			"env":                 "directenv",
@@ -371,7 +419,7 @@ func TestTagsFromAttributesIncludingDatadogNamespacedKeys(t *testing.T) {
 	})
 
 	t.Run("ignoreMissingDatadogFields=true (fallback disabled)", func(t *testing.T) {
-		tags := TagsFromAttributes(attrs, true)
+		tags := GetTagsFromAttributesPreferringDatadogNamespace(attrs, true)
 		// Should only include direct datadog.* tags, not fallback
 		expected := map[string]string{
 			"env":                 "directenv",
@@ -414,7 +462,7 @@ func TestTagsFromAttributesIncludingDatadogNamespacedKeys(t *testing.T) {
 	})
 
 	t.Run("empty datadog.* keys, ignoreMissingDatadogFields=true", func(t *testing.T) {
-		tags := TagsFromAttributes(attrsEmptyDD, true)
+		tags := GetTagsFromAttributesPreferringDatadogNamespace(attrsEmptyDD, true)
 		// All datadog.* keys should be present with empty values
 		expected := map[string]string{
 			"env":                 "",
@@ -456,7 +504,7 @@ func TestTagsFromAttributesIncludingDatadogNamespacedKeys(t *testing.T) {
 	})
 
 	t.Run("empty datadog.* keys, ignoreMissingDatadogFields=false", func(t *testing.T) {
-		tags := TagsFromAttributes(attrsEmptyDD, false)
+		tags := GetTagsFromAttributesPreferringDatadogNamespace(attrsEmptyDD, false)
 		expected := map[string]string{
 			"service":             "svc",
 			"version":             "v1.2.3",

@@ -798,7 +798,7 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 				additionalTags = instrumentationlibrary.TagsFromInstrumentationLibraryMetadata(ilm.Scope())
 			}
 
-			resourceTagsMap := attributes.TagsFromAttributes(rm.Resource().Attributes(), false)
+			resourceTagsMap := attributes.GetTagsFromAttributesPreferringDatadogNamespace(rm.Resource().Attributes(), false)
 
 			scopeName := ilm.Scope().Name()
 
@@ -864,7 +864,7 @@ func (t *Translator) mapToDDFormat(ctx context.Context, md pmetric.Metric, consu
 	}
 
 	resolveDimsFromAttributes := func(p pcommon.Map) *Dimensions {
-		// signalTagsMap := attributes.TagsFromAttributes(p, false)
+		// signalTagsMap := attributes.GetTagsFromAttributesPreferringDatadogNamespace(p, false)
 		signalTagsMap := make(map[string]string)
 		p.Range(func(k string, v pcommon.Value) bool {
 			signalTagsMap[k] = v.AsString()

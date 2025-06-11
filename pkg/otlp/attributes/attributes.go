@@ -15,6 +15,7 @@
 package attributes
 
 import (
+	"fmt"
 	"strings"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -298,9 +299,14 @@ func MergeTagMaps(signalTagsMap, resourceTagsMap map[string]string, ignoreMissin
 	return tagsMap
 }
 
-// TagsFromAttributes converts a selected list of attributes
-// to a tag list that can be added to metrics.
-func TagsFromAttributes(attrs pcommon.Map, ignoreMissingDatadogFields bool) map[string]string {
+// GetTagsFromAttributesPreferringDatadogNamespace converts a selected list of attributes
+// to a tag list that can be added to metrics. It follows this order of precedence:
+// 1. datadog.* span attributes
+// 2. datadog.* resource attributes
+// 3. standard span attributes
+// 4. standard resource attributes
+// If ignoreMissingDatadogFields is true, it will not add tags that are not present in the Datadog namespace.
+func GetTagsFromAttributesPreferringDatadogNamespace(attrs pcommon.Map, ignoreMissingDatadogFields bool) map[string]string {
 	tagsMap := make(map[string]string, attrs.Len())
 
 	var processAttributes processAttributes
@@ -442,6 +448,70 @@ func TagsFromAttributes(attrs pcommon.Map, ignoreMissingDatadogFields bool) map[
 	}
 
 	return tagsMap
+}
+
+// TagsFromAttributes converts a selected list of attributes
+// to a tag list that can be added to metrics.
+// Deprecated: Use GetTagsFromAttributesPreferringDatadogNamespace instead.
+func TagsFromAttributes(attrs pcommon.Map) []string {
+	tags := make([]string, 0, attrs.Len())
+
+	var processAttributes processAttributes
+	var systemAttributes systemAttributes
+
+	attrs.Range(func(key string, value pcommon.Value) bool {
+		switch key {
+		// Process attributes
+		case semconv127.AttributeProcessExecutableName:
+			processAttributes.ExecutableName = value.Str()
+		case semconv127.AttributeProcessExecutablePath:
+			processAttributes.ExecutablePath = value.Str()
+		case semconv127.AttributeProcessCommand:
+			processAttributes.Command = value.Str()
+		case semconv127.AttributeProcessCommandLine:
+			processAttributes.CommandLine = value.Str()
+		case semconv127.AttributeProcessPID:
+			processAttributes.PID = value.Int()
+		case semconv127.AttributeProcessOwner:
+			processAttributes.Owner = value.Str()
+
+		// System attributes
+		case semconv127.AttributeOSType:
+			systemAttributes.OSType = value.Str()
+		}
+
+		// core attributes mapping
+		if datadogKey, found := coreMapping[key]; found && value.Str() != "" {
+			tags = append(tags, fmt.Sprintf("%s:%s", datadogKey, value.Str()))
+		}
+
+		// Kubernetes labels mapping
+		if datadogKey, found := kubernetesMapping[key]; found && value.Str() != "" {
+			tags = append(tags, fmt.Sprintf("%s:%s", datadogKey, value.Str()))
+		}
+
+		// Kubernetes DD tags
+		if _, found := kubernetesDDTags[key]; found {
+			tags = append(tags, fmt.Sprintf("%s:%s", key, value.Str()))
+		}
+		return true
+	})
+
+	// Container Tag mappings
+	ctags := ContainerTagsFromResourceAttributes(attrs)
+	for key, val := range ctags {
+		tags = append(tags, fmt.Sprintf("%s:%s", key, val))
+	}
+
+	// Convert process and system attribute maps to tag strings
+	for key, val := range processAttributes.extractTags() {
+		tags = append(tags, fmt.Sprintf("%s:%s", key, val))
+	}
+	for key, val := range systemAttributes.extractTags() {
+		tags = append(tags, fmt.Sprintf("%s:%s", key, val))
+	}
+
+	return tags
 }
 
 // OriginIDFromAttributes gets the origin IDs from resource attributes.
