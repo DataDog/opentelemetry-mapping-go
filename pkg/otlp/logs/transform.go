@@ -114,7 +114,7 @@ func transform(lr plog.LogRecord, host, service string, res pcommon.Resource, sc
 				l.AdditionalProperties[otelSpanID] = v.AsString()
 			}
 		case "ddtags":
-			var tags = append(attributes.GetTagsFromAttributesPreferringDatadogNamespace(res.Attributes()), v.AsString())
+			var tags = append(attributes.TagsFromAttributes(res.Attributes()), v.AsString())
 			tagStr := strings.Join(tags, ",")
 			l.Ddtags = datadog.PtrString(tagStr)
 		default:
@@ -174,7 +174,7 @@ func transform(lr plog.LogRecord, host, service string, res pcommon.Resource, sc
 	}
 
 	if !l.HasDdtags() {
-		var tags = attributes.GetTagsFromAttributesPreferringDatadogNamespace(res.Attributes())
+		var tags = attributes.TagsFromAttributes(res.Attributes())
 		tagStr := strings.Join(tags, ",")
 		l.Ddtags = datadog.PtrString(tagStr)
 	}
