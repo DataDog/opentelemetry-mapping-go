@@ -32,9 +32,3 @@ func (sattrs *systemAttributes) extractTags() map[string]string {
 
 	return tags
 }
-
-func (sattrs *systemAttributes) updateFrom(other *systemAttributes) {
-	if other.OSType != "" {
-		sattrs.OSType = other.OSType
-	}
-}

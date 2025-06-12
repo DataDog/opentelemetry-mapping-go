@@ -52,18 +52,3 @@ func (pattrs *processAttributes) extractTags() map[string]string {
 
 	return tags
 }
-
-func (pattrs *processAttributes) updateFrom(other *processAttributes) {
-	if other.ExecutableName != "" {
-		pattrs.ExecutableName = other.ExecutableName
-	}
-	if other.ExecutablePath != "" {
-		pattrs.ExecutablePath = other.ExecutablePath
-	}
-	if other.Command != "" {
-		pattrs.Command = other.Command
-	}
-	if other.CommandLine != "" {
-		pattrs.CommandLine = other.CommandLine
-	}
-}

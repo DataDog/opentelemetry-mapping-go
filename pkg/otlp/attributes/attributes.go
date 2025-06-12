@@ -456,28 +456,28 @@ func GetTagsFromAttributesPreferringDatadogNamespace(attrs pcommon.Map, ignoreMi
 func TagsFromAttributes(attrs pcommon.Map) []string {
 	tags := make([]string, 0, attrs.Len())
 
-	var processAttributes processAttributes
-	var systemAttributes systemAttributes
+	var pAttributes processAttributes
+	var sAttributes systemAttributes
 
 	attrs.Range(func(key string, value pcommon.Value) bool {
 		switch key {
 		// Process attributes
 		case semconv127.AttributeProcessExecutableName:
-			processAttributes.ExecutableName = value.Str()
+			pAttributes.ExecutableName = value.Str()
 		case semconv127.AttributeProcessExecutablePath:
-			processAttributes.ExecutablePath = value.Str()
+			pAttributes.ExecutablePath = value.Str()
 		case semconv127.AttributeProcessCommand:
-			processAttributes.Command = value.Str()
+			pAttributes.Command = value.Str()
 		case semconv127.AttributeProcessCommandLine:
-			processAttributes.CommandLine = value.Str()
+			pAttributes.CommandLine = value.Str()
 		case semconv127.AttributeProcessPID:
-			processAttributes.PID = value.Int()
+			pAttributes.PID = value.Int()
 		case semconv127.AttributeProcessOwner:
-			processAttributes.Owner = value.Str()
+			pAttributes.Owner = value.Str()
 
 		// System attributes
 		case semconv127.AttributeOSType:
-			systemAttributes.OSType = value.Str()
+			sAttributes.OSType = value.Str()
 		}
 
 		// core attributes mapping
@@ -504,10 +504,10 @@ func TagsFromAttributes(attrs pcommon.Map) []string {
 	}
 
 	// Convert process and system attribute maps to tag strings
-	for key, val := range processAttributes.extractTags() {
+	for key, val := range pAttributes.extractTags() {
 		tags = append(tags, fmt.Sprintf("%s:%s", key, val))
 	}
-	for key, val := range systemAttributes.extractTags() {
+	for key, val := range sAttributes.extractTags() {
 		tags = append(tags, fmt.Sprintf("%s:%s", key, val))
 	}
 
