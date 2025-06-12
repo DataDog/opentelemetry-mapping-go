@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	conventions "go.opentelemetry.io/collector/semconv/v1.6.1"
+	semconv16 "go.opentelemetry.io/otel/semconv/v1.6.1"
 
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/internal/testutils"
 )
@@ -41,9 +41,9 @@ func TestDefaultHostname(t *testing.T) {
 func TestHostnameFromAttrs(t *testing.T) {
 	t.Run("host id", func(t *testing.T) {
 		attrs := testutils.NewAttributeMap(map[string]string{
-			conventions.AttributeCloudProvider: conventions.AttributeCloudProviderAWS,
-			conventions.AttributeHostID:        testInstanceID,
-			conventions.AttributeHostName:      testIP,
+			string(semconv16.CloudProviderKey): semconv16.CloudProviderAWS.Value.AsString(),
+			string(semconv16.HostIDKey):        testInstanceID,
+			string(semconv16.HostNameKey):      testIP,
 		})
 		hostname, ok := HostnameFromAttrs(attrs)
 		assert.True(t, ok)
@@ -52,8 +52,8 @@ func TestHostnameFromAttrs(t *testing.T) {
 
 	t.Run("no host id", func(t *testing.T) {
 		attrs := testutils.NewAttributeMap(map[string]string{
-			conventions.AttributeCloudProvider: conventions.AttributeCloudProviderAWS,
-			conventions.AttributeHostName:      testIP,
+			string(semconv16.CloudProviderKey): semconv16.CloudProviderAWS.Value.AsString(),
+			string(semconv16.HostNameKey):      testIP,
 		})
 		hostname, ok := HostnameFromAttrs(attrs)
 		assert.False(t, ok)
@@ -63,9 +63,9 @@ func TestHostnameFromAttrs(t *testing.T) {
 
 func TestHostInfoFromAttributes(t *testing.T) {
 	attrs := testutils.NewAttributeMap(map[string]string{
-		conventions.AttributeCloudProvider: conventions.AttributeCloudProviderAWS,
-		conventions.AttributeHostID:        testInstanceID,
-		conventions.AttributeHostName:      testIP,
+		string(semconv16.CloudProviderKey): semconv16.CloudProviderAWS.Value.AsString(),
+		string(semconv16.HostIDKey):        testInstanceID,
+		string(semconv16.HostNameKey):      testIP,
 		"ec2.tag.tag1":                     "val1",
 		"ec2.tag.tag2":                     "val2",
 		"ignored":                          "ignored",

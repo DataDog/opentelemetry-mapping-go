@@ -19,7 +19,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/collector/pdata/pcommon"
-	conventions "go.opentelemetry.io/collector/semconv/v1.6.1"
+	semconv16 "go.opentelemetry.io/otel/semconv/v1.6.1"
 
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/internal/testutils"
 )
@@ -36,21 +36,21 @@ const (
 
 var (
 	testFullMap = testutils.NewAttributeMap(map[string]string{
-		conventions.AttributeCloudProvider:         conventions.AttributeCloudProviderGCP,
-		conventions.AttributeHostID:                testHostID,
-		conventions.AttributeHostName:              testHostname,
-		conventions.AttributeCloudAvailabilityZone: testCloudZone,
-		conventions.AttributeHostType:              testHostType,
-		conventions.AttributeCloudAccountID:        testCloudAccount,
+		string(semconv16.CloudProviderKey):         semconv16.CloudProviderGCP.Value.AsString(),
+		string(semconv16.HostIDKey):                testHostID,
+		string(semconv16.HostNameKey):              testHostname,
+		string(semconv16.CloudAvailabilityZoneKey): testCloudZone,
+		string(semconv16.HostTypeKey):              testHostType,
+		string(semconv16.CloudAccountIDKey):        testCloudAccount,
 	})
 
 	testFullBadMap = testutils.NewAttributeMap(map[string]string{
-		conventions.AttributeCloudProvider:         conventions.AttributeCloudProviderGCP,
-		conventions.AttributeHostID:                testHostID,
-		conventions.AttributeHostName:              testBadHostname,
-		conventions.AttributeCloudAvailabilityZone: testCloudZone,
-		conventions.AttributeHostType:              testHostType,
-		conventions.AttributeCloudAccountID:        testCloudAccount,
+		string(semconv16.CloudProviderKey):         semconv16.CloudProviderGCP.Value.AsString(),
+		string(semconv16.HostIDKey):                testHostID,
+		string(semconv16.HostNameKey):              testBadHostname,
+		string(semconv16.CloudAvailabilityZoneKey): testCloudZone,
+		string(semconv16.HostTypeKey):              testHostType,
+		string(semconv16.CloudAccountIDKey):        testCloudAccount,
 	})
 
 	testGCPIntegrationHostname    = fmt.Sprintf("%s.%s", testShortHostname, testCloudAccount)
