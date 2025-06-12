@@ -210,7 +210,6 @@ func (t *Translator) shouldConsumeInitialValue(startTs, ts uint64) bool {
 func (t *Translator) mapNumberMonotonicMetrics(
 	ctx context.Context,
 	consumer TimeSeriesConsumer,
-	dims *Dimensions,
 	slice pmetric.NumberDataPointSlice,
 	resolveDimsFromAttributes func(p pcommon.Map) *Dimensions,
 ) {
@@ -465,7 +464,6 @@ func (t *Translator) getLegacyBuckets(
 func (t *Translator) mapHistogramMetrics(
 	ctx context.Context,
 	consumer Consumer,
-	dims *Dimensions,
 	slice pmetric.HistogramDataPointSlice,
 	delta bool,
 	resolveDimsFromAttributes func(p pcommon.Map) *Dimensions,
@@ -575,7 +573,6 @@ func getQuantileTag(quantile float64) string {
 func (t *Translator) mapSummaryMetrics(
 	ctx context.Context,
 	consumer TimeSeriesConsumer,
-	dims *Dimensions,
 	slice pmetric.SummaryDataPointSlice,
 	resolveDimsFromAttributes func(p pcommon.Map) *Dimensions,
 ) {
@@ -634,16 +631,19 @@ func (t *Translator) mapSummaryMetrics(
 }
 
 // NOTE: has the side effect of calling hostFromAttributesHandler.OnHost if the source kind is HostnameKind
-func (t *Translator) source(ctx context.Context, attrs pcommon.Map) (source.Source, error) {
+func (t *Translator) source(ctx context.Context, attrs pcommon.Map) (source.Source, bool, error) {
+	var fallbackSourceUsed bool
+
 	src, hasSource := t.attributesTranslator.AttributesMapToSource(ctx, attrs, signalTypeSet, nil)
 	if !hasSource {
 		var err error
 		src, err = t.cfg.fallbackSourceProvider.Source(ctx)
 		if err != nil {
-			return source.Source{}, fmt.Errorf("failed to get fallback source: %w", err)
+			return source.Source{}, false, fmt.Errorf("failed to get fallback source: %w", err)
 		}
+		fallbackSourceUsed = true
 	}
-	return src, nil
+	return src, fallbackSourceUsed, nil
 }
 
 // extractLanguageTag appends a new language tag to languageTags if a new language tag is found from the given name
@@ -747,9 +747,13 @@ func mapHistogramRuntimeMetricWithAttributes(md pmetric.Metric, metricsArray pme
 	}
 }
 
-func getSourceFromAttributes(ctx context.Context, t *Translator, attrs pcommon.Map) (string, string, error) {
+// getSourceFromAttributes returns the source kind and identifier from the attributes.
+// The third return value indicates whether a fallback source was used.
+func getSourceFromAttributes(ctx context.Context, t *Translator, attrs pcommon.Map) (string, string, bool, error) {
 	var sourceKindFromAttributes string
 	var sourceIdentifierFromAttributes string
+	var fallbackSourceUsed bool
+	var err error
 
 	datadogSourceKind, datadogSourceKindOK := attrs.Get("datadog.source.kind")
 	datadogSourceIdentifier, datadogSourceIdentifierOK := attrs.Get("datadog.source.identifier")
@@ -758,16 +762,17 @@ func getSourceFromAttributes(ctx context.Context, t *Translator, attrs pcommon.M
 		sourceKindFromAttributes = datadogSourceKind.AsString()
 		sourceIdentifierFromAttributes = datadogSourceIdentifier.AsString()
 	} else if !t.cfg.ignoreMissingDatadogFields {
-		src, err := t.source(ctx, attrs)
+		var src source.Source
+		src, fallbackSourceUsed, err = t.source(ctx, attrs)
 		if err != nil {
-			return "", "", err
+			return "", "", false, err
 		}
 
 		sourceKindFromAttributes = string(src.Kind)
 		sourceIdentifierFromAttributes = src.Identifier
 	}
 
-	return sourceKindFromAttributes, sourceIdentifierFromAttributes, nil
+	return sourceKindFromAttributes, sourceIdentifierFromAttributes, fallbackSourceUsed, nil
 }
 
 // MapMetrics maps OTLP metrics into the Datadog format
@@ -780,7 +785,7 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 		rm := rms.At(i)
 		rattrs := rm.Resource().Attributes()
 
-		sourceKindFromResource, sourceIdentifierFromResource, err := getSourceFromAttributes(ctx, t, rattrs)
+		sourceKindFromResource, sourceIdentifierFromResource, _, err := getSourceFromAttributes(ctx, t, rattrs)
 		if err != nil {
 			return metadata, err
 		}
@@ -798,7 +803,7 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 				additionalTags = instrumentationlibrary.TagsFromInstrumentationLibraryMetadata(ilm.Scope())
 			}
 
-			resourceTagsMap := attributes.GetTagsFromAttributesPreferringDatadogNamespace(rm.Resource().Attributes(), false)
+			resourceTagsMap := attributes.GetTagsFromAttributesPreferringDatadogNamespace(rm.Resource().Attributes(), t.cfg.ignoreMissingDatadogFields)
 
 			scopeName := ilm.Scope().Name()
 
@@ -864,10 +869,11 @@ func (t *Translator) mapToDDFormat(ctx context.Context, md pmetric.Metric, consu
 	}
 
 	resolveDimsFromAttributes := func(p pcommon.Map) *Dimensions {
-		// signalTagsMap := attributes.GetTagsFromAttributesPreferringDatadogNamespace(p, false)
-		signalTagsMap := make(map[string]string)
+		signalTagsMap := attributes.GetTagsFromAttributesPreferringDatadogNamespace(p, t.cfg.ignoreMissingDatadogFields)
 		p.Range(func(k string, v pcommon.Value) bool {
-			signalTagsMap[k] = v.AsString()
+			if existing, ok := signalTagsMap[k]; !ok || existing == "" {
+				signalTagsMap[k] = v.AsString()
+			}
 			return true
 		})
 		totalTagsMap := attributes.MergeTagMaps(signalTagsMap, resourceTagsMap, false)
@@ -879,8 +885,12 @@ func (t *Translator) mapToDDFormat(ctx context.Context, md pmetric.Metric, consu
 		pointDims := baseDims.AddTags(tags...)
 		var sourceKind string
 
-		signalSourceKind, signalSourceIdentifier, _ := getSourceFromAttributes(ctx, t, p)
-		if signalSourceIdentifier != "" {
+		signalSourceKind, signalSourceIdentifier, fallbackSourceUsed, err := getSourceFromAttributes(ctx, t, p)
+		if err != nil {
+			t.logger.Error("failed to get source from attributes", zap.Error(err))
+		}
+
+		if signalSourceIdentifier != "" && !fallbackSourceUsed {
 			sourceKind = signalSourceKind
 			pointDims.host = signalSourceIdentifier
 		} else {
@@ -925,7 +935,7 @@ func (t *Translator) mapToDDFormat(ctx context.Context, md pmetric.Metric, consu
 			if isCumulativeMonotonic(md) {
 				switch t.cfg.NumberMode {
 				case NumberModeCumulativeToDelta:
-					t.mapNumberMonotonicMetrics(ctx, consumer, baseDims, md.Sum().DataPoints(), resolveDimsFromAttributes)
+					t.mapNumberMonotonicMetrics(ctx, consumer, md.Sum().DataPoints(), resolveDimsFromAttributes)
 				case NumberModeRawValue:
 					t.mapNumberMetrics(ctx, consumer, Gauge, md.Sum().DataPoints(), resolveDimsFromAttributes)
 				}
@@ -944,7 +954,7 @@ func (t *Translator) mapToDDFormat(ctx context.Context, md pmetric.Metric, consu
 		switch md.Histogram().AggregationTemporality() {
 		case pmetric.AggregationTemporalityCumulative, pmetric.AggregationTemporalityDelta:
 			delta := md.Histogram().AggregationTemporality() == pmetric.AggregationTemporalityDelta
-			t.mapHistogramMetrics(ctx, consumer, baseDims, md.Histogram().DataPoints(), delta, resolveDimsFromAttributes)
+			t.mapHistogramMetrics(ctx, consumer, md.Histogram().DataPoints(), delta, resolveDimsFromAttributes)
 		default: // pmetric.AggregationTemporalityUnspecified or any other not supported type
 			t.logger.Debug("Unknown or unsupported aggregation temporality",
 				zap.String("metric name", md.Name()),
@@ -955,7 +965,7 @@ func (t *Translator) mapToDDFormat(ctx context.Context, md pmetric.Metric, consu
 		switch md.ExponentialHistogram().AggregationTemporality() {
 		case pmetric.AggregationTemporalityDelta:
 			delta := md.ExponentialHistogram().AggregationTemporality() == pmetric.AggregationTemporalityDelta
-			t.mapExponentialHistogramMetrics(ctx, consumer, baseDims, md.ExponentialHistogram().DataPoints(), delta, resolveDimsFromAttributes)
+			t.mapExponentialHistogramMetrics(ctx, consumer, md.ExponentialHistogram().DataPoints(), delta, resolveDimsFromAttributes)
 		default: // pmetric.AggregationTemporalityCumulative, pmetric.AggregationTemporalityUnspecified or any other not supported type
 			t.logger.Debug("Unknown or unsupported aggregation temporality",
 				zap.String("metric name", md.Name()),
@@ -963,7 +973,7 @@ func (t *Translator) mapToDDFormat(ctx context.Context, md pmetric.Metric, consu
 			)
 		}
 	case pmetric.MetricTypeSummary:
-		t.mapSummaryMetrics(ctx, consumer, baseDims, md.Summary().DataPoints(), resolveDimsFromAttributes)
+		t.mapSummaryMetrics(ctx, consumer, md.Summary().DataPoints(), resolveDimsFromAttributes)
 	default: // pmetric.MetricDataTypeNone or any other not supported type
 		t.logger.Debug("Unknown or unsupported metric type", zap.String(metricName, md.Name()), zap.Any("data type", md.Type()))
 	}

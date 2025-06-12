@@ -5,6 +5,7 @@
       "Tags": [
         "custom_attribute:custom_value",
         "deployment.environment:dev",
+        "env:dev",
         "instrumentation_scope:foo",
         "instrumentation_scope_version:1.0.0"
       ],
@@ -35,6 +36,7 @@
       "Tags": [
         "custom_attribute:custom_value",
         "deployment.environment:dev",
+        "env:dev",
         "instrumentation_scope:foo",
         "instrumentation_scope_version:1.0.0"
       ],
@@ -52,6 +54,7 @@
       "Tags": [
         "custom_attribute:custom_value",
         "deployment.environment:dev",
+        "env:dev",
         "instrumentation_scope:foo",
         "instrumentation_scope_version:1.0.0"
       ],
@@ -69,6 +72,7 @@
       "Tags": [
         "custom_attribute:custom_value",
         "deployment.environment:dev",
+        "env:dev",
         "instrumentation_scope:foo",
         "instrumentation_scope_version:1.0.0"
       ],
@@ -86,6 +90,7 @@
       "Tags": [
         "custom_attribute:custom_value",
         "deployment.environment:dev",
+        "env:dev",
         "instrumentation_scope:foo",
         "instrumentation_scope_version:1.0.0"
       ],
@@ -103,6 +108,7 @@
       "Tags": [
         "custom_attribute:custom_value",
         "deployment.environment:dev",
+        "env:dev",
         "instrumentation_scope:foo",
         "instrumentation_scope_version:1.0.0"
       ],
@@ -120,6 +126,7 @@
       "Tags": [
         "custom_attribute:custom_value",
         "deployment.environment:dev",
+        "env:dev",
         "instrumentation_scope:foo",
         "instrumentation_scope_version:1.0.0"
       ],
@@ -137,6 +144,7 @@
       "Tags": [
         "custom_attribute:custom_value",
         "deployment.environment:dev",
+        "env:dev",
         "instrumentation_scope:foo",
         "instrumentation_scope_version:1.0.0"
       ],
@@ -154,6 +162,7 @@
       "Tags": [
         "custom_attribute:custom_value",
         "deployment.environment:dev",
+        "env:dev",
         "instrumentation_scope:foo",
         "instrumentation_scope_version:1.0.0"
       ],
@@ -171,6 +180,7 @@
       "Tags": [
         "custom_attribute:custom_value",
         "deployment.environment:dev",
+        "env:dev",
         "instrumentation_scope:foo",
         "instrumentation_scope_version:1.0.0"
       ],
@@ -188,6 +198,7 @@
       "Tags": [
         "custom_attribute:custom_value",
         "deployment.environment:dev",
+        "env:dev",
         "instrumentation_scope:foo",
         "instrumentation_scope_version:1.0.0"
       ],
@@ -205,6 +216,7 @@
       "Tags": [
         "custom_attribute:custom_value",
         "deployment.environment:dev",
+        "env:dev",
         "instrumentation_scope:foo",
         "instrumentation_scope_version:1.0.0"
       ],
@@ -222,6 +234,7 @@
       "Tags": [
         "custom_attribute:custom_value",
         "deployment.environment:dev",
+        "env:dev",
         "instrumentation_scope:foo",
         "instrumentation_scope_version:1.0.0"
       ],
@@ -239,6 +252,7 @@
       "Tags": [
         "custom_attribute:custom_value",
         "deployment.environment:dev",
+        "env:dev",
         "instrumentation_scope:foo",
         "instrumentation_scope_version:1.0.0"
       ],
@@ -256,6 +270,7 @@
       "Tags": [
         "custom_attribute:custom_value",
         "deployment.environment:dev",
+        "env:dev",
         "instrumentation_scope:foo",
         "instrumentation_scope_version:1.0.0"
       ],

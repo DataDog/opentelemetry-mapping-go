@@ -86,7 +86,6 @@ func (t *Translator) exponentialHistogramToDDSketch(
 func (t *Translator) mapExponentialHistogramMetrics(
 	ctx context.Context,
 	consumer Consumer,
-	dims *Dimensions,
 	slice pmetric.ExponentialHistogramDataPointSlice,
 	delta bool,
 	resolveDimsFromAttributes func(p pcommon.Map) *Dimensions,
@@ -141,7 +140,7 @@ func (t *Translator) mapExponentialHistogramMetrics(
 		expHistDDSketch, err := t.exponentialHistogramToDDSketch(p, delta)
 		if err != nil {
 			t.logger.Debug("Failed to convert ExponentialHistogram into DDSketch",
-				zap.String("metric name", dims.name),
+				zap.String("metric name", pointDims.name),
 				zap.Error(err),
 			)
 			continue
@@ -150,7 +149,7 @@ func (t *Translator) mapExponentialHistogramMetrics(
 		agentSketch, err := quantile.ConvertDDSketchIntoSketch(expHistDDSketch)
 		if err != nil {
 			t.logger.Debug("Failed to convert DDSketch into Sketch",
-				zap.String("metric name", dims.name),
+				zap.String("metric name", pointDims.name),
 				zap.Error(err),
 			)
 			continue
