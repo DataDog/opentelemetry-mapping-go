@@ -860,7 +860,7 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 
 func makeResolveDimsCallback(ctx context.Context, t *Translator, baseDims *Dimensions, resourceTagsMap map[string]string, sourceKindFromResource string, sourceIdentifierFromResource string, hostFromAttributesHandler attributes.HostFromAttributesHandler, consumer Consumer, rattrs pcommon.Map) func(p pcommon.Map) *Dimensions {
 	return func(p pcommon.Map) *Dimensions {
-		signalTagsMap := make(map[string]string)
+		signalTagsMap := attributes.GetTagsFromAttributesPreferringDatadogNamespace(p, t.cfg.ignoreMissingDatadogFields)
 		p.Range(func(k string, v pcommon.Value) bool {
 			signalTagsMap[k] = v.AsString()
 			return true
