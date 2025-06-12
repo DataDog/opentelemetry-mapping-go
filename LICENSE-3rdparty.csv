@@ -221,7 +221,6 @@ pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes
 pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/ec2,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
 pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/gcp,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
 pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
-pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/util,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
 pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/quantile,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
 pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
 pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
