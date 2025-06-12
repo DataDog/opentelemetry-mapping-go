@@ -15,7 +15,7 @@
 package attributes
 
 import (
-	conventions "go.opentelemetry.io/collector/semconv/v1.6.1"
+	semconv16 "go.opentelemetry.io/otel/semconv/v1.6.1"
 )
 
 type systemAttributes struct {
@@ -27,7 +27,7 @@ func (sattrs *systemAttributes) extractTags() map[string]string {
 
 	// Add OS type, eg. WINDOWS, LINUX, etc.
 	if sattrs.OSType != "" {
-		tags[conventions.AttributeOSType] = sattrs.OSType
+		tags[string(semconv16.OSTypeKey)] = sattrs.OSType
 	}
 
 	return tags

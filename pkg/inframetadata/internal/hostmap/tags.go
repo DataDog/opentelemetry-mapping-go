@@ -12,7 +12,8 @@ import (
 	"strings"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
-	conventions "go.opentelemetry.io/collector/semconv/v1.21.0"
+	semconv121 "go.opentelemetry.io/otel/semconv/v1.21.0"
+	semconv127 "go.opentelemetry.io/otel/semconv/v1.27.0"
 )
 
 const (
@@ -21,14 +22,12 @@ const (
 )
 
 var hostTagMapping = map[string]string{
-	conventions.AttributeDeploymentEnvironment: "env",
-	conventions.AttributeK8SClusterName:        "cluster_name",
-	conventions.AttributeCloudProvider:         "cloud_provider",
-	conventions.AttributeCloudRegion:           "region",
-	conventions.AttributeCloudAvailabilityZone: "zone",
-
-	// TODO(OTEL-1766): import of semconv 1.27.0 is blocked on Go1.22 support
-	"deployment.environment.name": "env",
+	string(semconv121.DeploymentEnvironmentKey):     "env",
+	string(semconv127.DeploymentEnvironmentNameKey): "env",
+	string(semconv127.K8SClusterNameKey):            "cluster_name",
+	string(semconv127.CloudProviderKey):             "cloud_provider",
+	string(semconv127.CloudRegionKey):               "region",
+	string(semconv127.CloudAvailabilityZoneKey):     "zone",
 }
 
 // assertStringValue returns the string value of the given value, or an error if the value is not a string.

@@ -18,37 +18,36 @@ import (
 	"fmt"
 	"testing"
 
-	semconv127 "go.opentelemetry.io/collector/semconv/v1.27.0"
-
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/collector/pdata/pcommon"
-	conventions "go.opentelemetry.io/collector/semconv/v1.6.1"
+	semconv127 "go.opentelemetry.io/otel/semconv/v1.27.0"
+	semconv16 "go.opentelemetry.io/otel/semconv/v1.6.1"
 )
 
 func TestTagsFromAttributes(t *testing.T) {
 	attributeMap := map[string]interface{}{
-		semconv127.AttributeProcessExecutableName:  "otelcol",
-		semconv127.AttributeProcessExecutablePath:  "/usr/bin/cmd/otelcol",
-		semconv127.AttributeProcessCommand:         "cmd/otelcol",
-		semconv127.AttributeProcessCommandLine:     "cmd/otelcol --config=\"/path/to/config.yaml\"",
-		semconv127.AttributeProcessPID:             1,
-		semconv127.AttributeProcessOwner:           "root",
-		semconv127.AttributeOSType:                 "linux",
-		semconv127.AttributeK8SDaemonSetName:       "daemon_set_name",
-		semconv127.AttributeAWSECSClusterARN:       "cluster_arn",
-		semconv127.AttributeContainerRuntime:       "cro",
-		"tags.datadoghq.com/service":               "service_name",
-		conventions.AttributeDeploymentEnvironment: "prod",
-		semconv127.AttributeContainerName:          "custom",
-		"datadog.container.tag.custom.team":        "otel",
-		"kube_cronjob":                             "cron",
+		string(semconv127.ProcessExecutableNameKey): "otelcol",
+		string(semconv127.ProcessExecutablePathKey): "/usr/bin/cmd/otelcol",
+		string(semconv127.ProcessCommandKey):        "cmd/otelcol",
+		string(semconv127.ProcessCommandLineKey):    "cmd/otelcol --config=\"/path/to/config.yaml\"",
+		string(semconv127.ProcessPIDKey):            1,
+		string(semconv127.ProcessOwnerKey):          "root",
+		string(semconv127.OSTypeKey):                "linux",
+		string(semconv127.K8SDaemonSetNameKey):      "daemon_set_name",
+		string(semconv127.AWSECSClusterARNKey):      "cluster_arn",
+		string(semconv127.ContainerRuntimeKey):      "cro",
+		"tags.datadoghq.com/service":                "service_name",
+		string(semconv16.DeploymentEnvironmentKey):  "prod",
+		string(semconv127.ContainerNameKey):         "custom",
+		"datadog.container.tag.custom.team":         "otel",
+		"kube_cronjob":                              "cron",
 	}
 	attrs := pcommon.NewMap()
 	attrs.FromRaw(attributeMap)
 
 	assert.ElementsMatch(t, []string{
-		fmt.Sprintf("%s:%s", semconv127.AttributeProcessExecutableName, "otelcol"),
-		fmt.Sprintf("%s:%s", semconv127.AttributeOSType, "linux"),
+		fmt.Sprintf("%s:%s", string(semconv127.ProcessExecutableNameKey), "otelcol"),
+		fmt.Sprintf("%s:%s", string(semconv127.OSTypeKey), "linux"),
 		fmt.Sprintf("%s:%s", "kube_daemon_set", "daemon_set_name"),
 		fmt.Sprintf("%s:%s", "ecs_cluster_name", "cluster_arn"),
 		fmt.Sprintf("%s:%s", "service", "service_name"),
@@ -75,36 +74,36 @@ func TestTagsFromAttributesEmpty_TagsFromAttributes(t *testing.T) {
 
 func TestGetTagsFromAttributesPreferringDatadogNamespace(t *testing.T) {
 	attributeMap := map[string]interface{}{
-		semconv127.AttributeProcessExecutableName:  "otelcol",
-		semconv127.AttributeProcessExecutablePath:  "/usr/bin/cmd/otelcol",
-		semconv127.AttributeProcessCommand:         "cmd/otelcol",
-		semconv127.AttributeProcessCommandLine:     "cmd/otelcol --config=\"/path/to/config.yaml\"",
-		semconv127.AttributeProcessPID:             1,
-		semconv127.AttributeProcessOwner:           "root",
-		semconv127.AttributeOSType:                 "linux",
-		semconv127.AttributeK8SDaemonSetName:       "daemon_set_name",
-		semconv127.AttributeAWSECSClusterARN:       "cluster_arn",
-		semconv127.AttributeContainerRuntime:       "cro",
-		"tags.datadoghq.com/service":               "service_name",
-		conventions.AttributeDeploymentEnvironment: "prod",
-		semconv127.AttributeContainerName:          "custom",
-		"datadog.container.tag.custom.team":        "otel",
-		"kube_cronjob":                             "cron",
+		string(semconv127.ProcessExecutableNameKey): "otelcol",
+		string(semconv127.ProcessExecutablePathKey): "/usr/bin/cmd/otelcol",
+		string(semconv127.ProcessCommandKey):        "cmd/otelcol",
+		string(semconv127.ProcessCommandLineKey):    "cmd/otelcol --config=\"/path/to/config.yaml\"",
+		string(semconv127.ProcessPIDKey):            1,
+		string(semconv127.ProcessOwnerKey):          "root",
+		string(semconv127.OSTypeKey):                "linux",
+		string(semconv127.K8SDaemonSetNameKey):      "daemon_set_name",
+		string(semconv127.AWSECSClusterARNKey):      "cluster_arn",
+		string(semconv127.ContainerRuntimeKey):      "cro",
+		"tags.datadoghq.com/service":                "service_name",
+		string(semconv16.DeploymentEnvironmentKey):  "prod",
+		string(semconv127.ContainerNameKey):         "custom",
+		"datadog.container.tag.custom.team":         "otel",
+		"kube_cronjob":                              "cron",
 	}
 	attrs := pcommon.NewMap()
 	attrs.FromRaw(attributeMap)
 
 	expected := map[string]string{
-		semconv127.AttributeProcessExecutableName: "otelcol",
-		conventions.AttributeOSType:               "linux",
-		"kube_daemon_set":                         "daemon_set_name",
-		"ecs_cluster_name":                        "cluster_arn",
-		"service":                                 "service_name",
-		"runtime":                                 "cro",
-		"env":                                     "prod",
-		"container_name":                          "custom",
-		"custom.team":                             "otel",
-		"kube_cronjob":                            "cron",
+		string(semconv127.ProcessExecutableNameKey): "otelcol",
+		string(semconv127.OSTypeKey):                "linux",
+		"kube_daemon_set":                           "daemon_set_name",
+		"ecs_cluster_name":                          "cluster_arn",
+		"service":                                   "service_name",
+		"runtime":                                   "cro",
+		"env":                                       "prod",
+		"container_name":                            "custom",
+		"custom.team":                               "otel",
+		"kube_cronjob":                              "cron",
 	}
 	assert.Equal(t, expected, GetTagsFromAttributesPreferringDatadogNamespace(attrs, false))
 }
@@ -126,20 +125,20 @@ func TestContainerTagFromResourceAttributes(t *testing.T) {
 	t.Run("valid", func(t *testing.T) {
 		attributes := pcommon.NewMap()
 		err := attributes.FromRaw(map[string]interface{}{
-			semconv127.AttributeContainerName:         "sample_app",
-			conventions.AttributeContainerImageTag:    "sample_app_image_tag",
-			semconv127.AttributeContainerRuntime:      "cro",
-			semconv127.AttributeK8SContainerName:      "kube_sample_app",
-			semconv127.AttributeK8SReplicaSetName:     "sample_replica_set",
-			semconv127.AttributeK8SDaemonSetName:      "sample_daemonset_name",
-			semconv127.AttributeK8SPodName:            "sample_pod_name",
-			semconv127.AttributeCloudProvider:         "sample_cloud_provider",
-			semconv127.AttributeCloudRegion:           "sample_region",
-			semconv127.AttributeCloudAvailabilityZone: "sample_zone",
-			semconv127.AttributeAWSECSTaskFamily:      "sample_task_family",
-			semconv127.AttributeAWSECSClusterARN:      "sample_ecs_cluster_name",
-			semconv127.AttributeAWSECSContainerARN:    "sample_ecs_container_name",
-			"datadog.container.tag.custom.team":       "otel",
+			string(semconv127.ContainerNameKey):         "sample_app",
+			string(semconv16.ContainerImageTagKey):      "sample_app_image_tag",
+			string(semconv127.ContainerRuntimeKey):      "cro",
+			string(semconv127.K8SContainerNameKey):      "kube_sample_app",
+			string(semconv127.K8SReplicaSetNameKey):     "sample_replica_set",
+			string(semconv127.K8SDaemonSetNameKey):      "sample_daemonset_name",
+			string(semconv127.K8SPodNameKey):            "sample_pod_name",
+			string(semconv127.CloudProviderKey):         "sample_cloud_provider",
+			string(semconv127.CloudRegionKey):           "sample_region",
+			string(semconv127.CloudAvailabilityZoneKey): "sample_zone",
+			string(semconv127.AWSECSTaskFamilyKey):      "sample_task_family",
+			string(semconv127.AWSECSClusterARNKey):      "sample_ecs_cluster_name",
+			string(semconv127.AWSECSContainerARNKey):    "sample_ecs_container_name",
+			"datadog.container.tag.custom.team":         "otel",
 		})
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
@@ -164,7 +163,7 @@ func TestContainerTagFromResourceAttributes(t *testing.T) {
 	t.Run("conventions vs custom", func(t *testing.T) {
 		attributes := pcommon.NewMap()
 		err := attributes.FromRaw(map[string]interface{}{
-			semconv127.AttributeContainerName:      "ok",
+			string(semconv127.ContainerNameKey):    "ok",
 			"datadog.container.tag.container_name": "nok",
 		})
 		assert.NoError(t, err)
@@ -194,22 +193,22 @@ func TestContainerTagFromResourceAttributes(t *testing.T) {
 
 func TestContainerTagFromAttributes(t *testing.T) {
 	attributeMap := map[string]string{
-		semconv127.AttributeContainerName:         "sample_app",
-		conventions.AttributeContainerImageTag:    "sample_app_image_tag",
-		semconv127.AttributeContainerRuntime:      "cro",
-		semconv127.AttributeK8SContainerName:      "kube_sample_app",
-		semconv127.AttributeK8SReplicaSetName:     "sample_replica_set",
-		semconv127.AttributeK8SDaemonSetName:      "sample_daemonset_name",
-		semconv127.AttributeK8SPodName:            "sample_pod_name",
-		semconv127.AttributeCloudProvider:         "sample_cloud_provider",
-		semconv127.AttributeCloudRegion:           "sample_region",
-		semconv127.AttributeCloudAvailabilityZone: "sample_zone",
-		semconv127.AttributeAWSECSTaskFamily:      "sample_task_family",
-		semconv127.AttributeAWSECSClusterARN:      "sample_ecs_cluster_name",
-		semconv127.AttributeAWSECSContainerARN:    "sample_ecs_container_name",
-		"custom_tag":                              "example_custom_tag",
-		"":                                        "empty_string_key",
-		"empty_string_val":                        "",
+		string(semconv127.ContainerNameKey):         "sample_app",
+		string(semconv16.ContainerImageTagKey):      "sample_app_image_tag",
+		string(semconv127.ContainerRuntimeKey):      "cro",
+		string(semconv127.K8SContainerNameKey):      "kube_sample_app",
+		string(semconv127.K8SReplicaSetNameKey):     "sample_replica_set",
+		string(semconv127.K8SDaemonSetNameKey):      "sample_daemonset_name",
+		string(semconv127.K8SPodNameKey):            "sample_pod_name",
+		string(semconv127.CloudProviderKey):         "sample_cloud_provider",
+		string(semconv127.CloudRegionKey):           "sample_region",
+		string(semconv127.CloudAvailabilityZoneKey): "sample_zone",
+		string(semconv127.AWSECSTaskFamilyKey):      "sample_task_family",
+		string(semconv127.AWSECSClusterARNKey):      "sample_ecs_cluster_name",
+		string(semconv127.AWSECSContainerARNKey):    "sample_ecs_container_name",
+		"custom_tag":                                "example_custom_tag",
+		"":                                          "empty_string_key",
+		"empty_string_val":                          "",
 	}
 
 	assert.Equal(t, map[string]string{
@@ -244,8 +243,8 @@ func TestOriginIDFromAttributes(t *testing.T) {
 			attrs: func() pcommon.Map {
 				attributes := pcommon.NewMap()
 				attributes.FromRaw(map[string]interface{}{
-					semconv127.AttributeContainerID: "container_id_goes_here",
-					semconv127.AttributeK8SPodUID:   "k8s_pod_uid_goes_here",
+					string(semconv127.ContainerIDKey): "container_id_goes_here",
+					string(semconv127.K8SPodUIDKey):   "k8s_pod_uid_goes_here",
 				})
 				return attributes
 			}(),
@@ -256,7 +255,7 @@ func TestOriginIDFromAttributes(t *testing.T) {
 			attrs: func() pcommon.Map {
 				attributes := pcommon.NewMap()
 				attributes.FromRaw(map[string]interface{}{
-					semconv127.AttributeContainerID: "container_id_goes_here",
+					string(semconv127.ContainerIDKey): "container_id_goes_here",
 				})
 				return attributes
 			}(),
@@ -267,7 +266,7 @@ func TestOriginIDFromAttributes(t *testing.T) {
 			attrs: func() pcommon.Map {
 				attributes := pcommon.NewMap()
 				attributes.FromRaw(map[string]interface{}{
-					semconv127.AttributeK8SPodUID: "k8s_pod_uid_goes_here",
+					string(semconv127.K8SPodUIDKey): "k8s_pod_uid_goes_here",
 				})
 				return attributes
 			}(),
@@ -290,36 +289,36 @@ func TestOriginIDFromAttributes(t *testing.T) {
 func TestTagsFromAttributesIncludingDatadogNamespacedKeys(t *testing.T) {
 	attributeMap := map[string]interface{}{
 		// Core tags
-		semconv127.AttributeServiceName:    "svc",
-		semconv127.AttributeServiceVersion: "v1.2.3",
-		"tags.datadoghq.com/env":           "prod",
+		string(semconv127.ServiceNameKey):    "svc",
+		string(semconv127.ServiceVersionKey): "v1.2.3",
+		"tags.datadoghq.com/env":             "prod",
 		// Container tags
-		semconv127.AttributeContainerID:        "cid",
-		semconv127.AttributeContainerName:      "cname",
-		semconv127.AttributeContainerImageName: "imgname",
-		conventions.AttributeContainerImageTag: "imgtag",
-		semconv127.AttributeContainerRuntime:   "docker",
+		string(semconv127.ContainerIDKey):        "cid",
+		string(semconv127.ContainerNameKey):      "cname",
+		string(semconv127.ContainerImageNameKey): "imgname",
+		string(semconv16.ContainerImageTagKey):   "imgtag",
+		string(semconv127.ContainerRuntimeKey):   "docker",
 		// Cloud tags
-		semconv127.AttributeCloudProvider:         "aws",
-		semconv127.AttributeCloudRegion:           "us-east-1",
-		semconv127.AttributeCloudAvailabilityZone: "az1",
+		string(semconv127.CloudProviderKey):         "aws",
+		string(semconv127.CloudRegionKey):           "us-east-1",
+		string(semconv127.CloudAvailabilityZoneKey): "az1",
 		// ECS tags
-		semconv127.AttributeAWSECSTaskFamily:   "tfam",
-		semconv127.AttributeAWSECSTaskARN:      "tarn",
-		semconv127.AttributeAWSECSClusterARN:   "clarn",
-		semconv127.AttributeAWSECSTaskRevision: "trev",
-		semconv127.AttributeAWSECSContainerARN: "carn",
+		string(semconv127.AWSECSTaskFamilyKey):   "tfam",
+		string(semconv127.AWSECSTaskARNKey):      "tarn",
+		string(semconv127.AWSECSClusterARNKey):   "clarn",
+		string(semconv127.AWSECSTaskRevisionKey): "trev",
+		string(semconv127.AWSECSContainerARNKey): "carn",
 		// K8s tags
-		semconv127.AttributeK8SContainerName:   "k8scont",
-		semconv127.AttributeK8SClusterName:     "k8sclu",
-		semconv127.AttributeK8SDeploymentName:  "k8sdep",
-		semconv127.AttributeK8SReplicaSetName:  "k8srs",
-		semconv127.AttributeK8SStatefulSetName: "k8ssts",
-		semconv127.AttributeK8SDaemonSetName:   "k8sds",
-		semconv127.AttributeK8SJobName:         "k8sj",
-		semconv127.AttributeK8SCronJobName:     "k8scron",
-		semconv127.AttributeK8SNamespaceName:   "k8sns",
-		semconv127.AttributeK8SPodName:         "k8spod",
+		string(semconv127.K8SContainerNameKey):   "k8scont",
+		string(semconv127.K8SClusterNameKey):     "k8sclu",
+		string(semconv127.K8SDeploymentNameKey):  "k8sdep",
+		string(semconv127.K8SReplicaSetNameKey):  "k8srs",
+		string(semconv127.K8SStatefulSetNameKey): "k8ssts",
+		string(semconv127.K8SDaemonSetNameKey):   "k8sds",
+		string(semconv127.K8SJobNameKey):         "k8sj",
+		string(semconv127.K8SCronJobNameKey):     "k8scron",
+		string(semconv127.K8SNamespaceNameKey):   "k8sns",
+		string(semconv127.K8SPodNameKey):         "k8spod",
 		// App tags
 		"app.kubernetes.io/name":       "appname",
 		"app.kubernetes.io/instance":   "appinst",
