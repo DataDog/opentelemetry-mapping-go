@@ -5,6 +5,7 @@
       "Tags": [
         "custom_attribute:custom_value",
         "deployment.environment:dev",
+        "env:dev",
         "instrumentation_library:foo",
         "instrumentation_library_version:1.0.0"
       ],
