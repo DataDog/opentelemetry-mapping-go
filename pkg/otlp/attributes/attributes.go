@@ -25,6 +25,7 @@ import (
 
 // customContainerTagPrefix defines the prefix for custom container tags.
 const customContainerTagPrefix = "datadog.container.tag."
+const DDNamespacePrefix = "datadog."
 
 var (
 	// coreMapping defines the mapping between OpenTelemetry semantic conventions
@@ -32,48 +33,48 @@ var (
 	coreMapping = map[string]string{
 		// Datadog conventions
 		// https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/
-		string(semconv16.DeploymentEnvironmentKey):      "env",
-		string(semconv127.ServiceNameKey):               "service",
-		string(semconv127.ServiceVersionKey):            "version",
-		string(semconv127.DeploymentEnvironmentNameKey): "env",
+		string(semconv16.DeploymentEnvironmentKey):      KeyEnv,
+		string(semconv127.ServiceNameKey):               KeyService,
+		string(semconv127.ServiceVersionKey):            KeyVersion,
+		string(semconv127.DeploymentEnvironmentNameKey): KeyEnv,
 	}
 
 	// ContainerMappings defines the mapping between OpenTelemetry semantic conventions
 	// and Datadog Agent conventions for containers.
 	ContainerMappings = map[string]string{
 		// Containers
-		string(semconv127.ContainerIDKey):        "container_id",
-		string(semconv127.ContainerNameKey):      "container_name",
-		string(semconv127.ContainerImageNameKey): "image_name",
-		string(semconv16.ContainerImageTagKey):   "image_tag",
-		string(semconv127.ContainerRuntimeKey):   "runtime",
+		string(semconv127.ContainerIDKey):        KeyContainerID,
+		string(semconv127.ContainerNameKey):      KeyContainerName,
+		string(semconv127.ContainerImageNameKey): KeyImageName,
+		string(semconv16.ContainerImageTagKey):   KeyImageTag,
+		string(semconv127.ContainerRuntimeKey):   KeyRuntime,
 
 		// Cloud conventions
 		// https://www.datadoghq.com/blog/tagging-best-practices/
-		string(semconv127.CloudProviderKey):         "cloud_provider",
-		string(semconv127.CloudRegionKey):           "region",
-		string(semconv127.CloudAvailabilityZoneKey): "zone",
+		string(semconv127.CloudProviderKey):         KeyCloudProvider,
+		string(semconv127.CloudRegionKey):           KeyRegion,
+		string(semconv127.CloudAvailabilityZoneKey): KeyAvailabilityZone,
 
 		// ECS conventions
 		// https://github.com/DataDog/datadog-agent/blob/e081bed/pkg/tagger/collectors/ecs_extract.go
-		string(semconv127.AWSECSTaskFamilyKey):   "task_family",
-		string(semconv127.AWSECSTaskARNKey):      "task_arn",
-		string(semconv127.AWSECSClusterARNKey):   "ecs_cluster_name",
-		string(semconv127.AWSECSTaskRevisionKey): "task_version",
-		string(semconv127.AWSECSContainerARNKey): "ecs_container_name",
+		string(semconv127.AWSECSTaskFamilyKey):   KeyTaskFamily,
+		string(semconv127.AWSECSTaskARNKey):      KeyTaskARN,
+		string(semconv127.AWSECSClusterARNKey):   KeyECSClusterName,
+		string(semconv127.AWSECSTaskRevisionKey): KeyTaskVersion,
+		string(semconv127.AWSECSContainerARNKey): KeyECSContainerName,
 
 		// Kubernetes resource name (via semantic conventions)
 		// https://github.com/DataDog/datadog-agent/blob/e081bed/pkg/util/kubernetes/const.go
-		string(semconv127.K8SContainerNameKey):   "kube_container_name",
-		string(semconv127.K8SClusterNameKey):     "kube_cluster_name",
-		string(semconv127.K8SDeploymentNameKey):  "kube_deployment",
-		string(semconv127.K8SReplicaSetNameKey):  "kube_replica_set",
-		string(semconv127.K8SStatefulSetNameKey): "kube_stateful_set",
-		string(semconv127.K8SDaemonSetNameKey):   "kube_daemon_set",
-		string(semconv127.K8SJobNameKey):         "kube_job",
-		string(semconv127.K8SCronJobNameKey):     "kube_cronjob",
-		string(semconv127.K8SNamespaceNameKey):   "kube_namespace",
-		string(semconv127.K8SPodNameKey):         "pod_name",
+		string(semconv127.K8SContainerNameKey):   KeyKubeContainerName,
+		string(semconv127.K8SClusterNameKey):     KeyKubeClusterName,
+		string(semconv127.K8SDeploymentNameKey):  KeyKubeDeployment,
+		string(semconv127.K8SReplicaSetNameKey):  KeyKubeReplicaSet,
+		string(semconv127.K8SStatefulSetNameKey): KeyKubeStatefulSet,
+		string(semconv127.K8SDaemonSetNameKey):   KeyKubeDaemonSet,
+		string(semconv127.K8SJobNameKey):         KeyKubeJob,
+		string(semconv127.K8SCronJobNameKey):     KeyKubeCronJob,
+		string(semconv127.K8SNamespaceNameKey):   KeyKubeNamespace,
+		string(semconv127.K8SPodNameKey):         KeyPodName,
 	}
 
 	// Kubernetes mappings defines the mapping between Kubernetes conventions (both general and Datadog specific)
@@ -82,17 +83,17 @@ var (
 	// https://github.com/DataDog/datadog-agent/blob/e081bed/pkg/util/kubernetes/const.go
 	kubernetesMapping = map[string]string{
 		// Standard Datadog labels
-		"tags.datadoghq.com/env":     "env",
-		"tags.datadoghq.com/service": "service",
-		"tags.datadoghq.com/version": "version",
+		"tags.datadoghq.com/env":     KeyEnv,
+		"tags.datadoghq.com/service": KeyService,
+		"tags.datadoghq.com/version": KeyVersion,
 
 		// Standard Kubernetes labels
-		"app.kubernetes.io/name":       "kube_app_name",
-		"app.kubernetes.io/instance":   "kube_app_instance",
-		"app.kubernetes.io/version":    "kube_app_version",
-		"app.kuberenetes.io/component": "kube_app_component",
-		"app.kubernetes.io/part-of":    "kube_app_part_of",
-		"app.kubernetes.io/managed-by": "kube_app_managed_by",
+		"app.kubernetes.io/name":       KeyKubeAppName,
+		"app.kubernetes.io/instance":   KeyKubeAppInstance,
+		"app.kubernetes.io/version":    KeyKubeAppVersion,
+		"app.kuberenetes.io/component": KeyKubeAppComponent,
+		"app.kubernetes.io/part-of":    KeyKubeAppPartOf,
+		"app.kubernetes.io/managed-by": KeyKubeAppManagedBy,
 	}
 
 	// Kubernetes out of the box Datadog tags
@@ -185,12 +186,133 @@ var (
 		string(semconv127.URLFullKey):                "http.url",
 		string(semconv127.UserAgentOriginalKey):      "http.useragent",
 	}
+
+	KeyDatadogHostname              = DDNamespacePrefix + "host.name"
+	KeyDatadogProcessExecutableName = DDNamespacePrefix + "process.executable.name"
+	KeyDatadogProcessExecutablePath = DDNamespacePrefix + "process.executable.path"
+	KeyDatadogProcessCommand        = DDNamespacePrefix + "process.command"
+	KeyDatadogProcessCommandLine    = DDNamespacePrefix + "process.command_line"
+	KeyDatadogProcessPID            = DDNamespacePrefix + "process.pid"
+	KeyDatadogProcessOwner          = DDNamespacePrefix + "process.owner"
+	KeyDatadogOSType                = DDNamespacePrefix + "ostype"
+
+	KeyDatadogOriginID         = DDNamespacePrefix + "origin.id"
+	KeyDatadogSourceKind       = DDNamespacePrefix + "source.kind"
+	KeyDatadogSourceIdentifier = DDNamespacePrefix + "source.identifier"
 )
 
-// TagsFromAttributes converts a selected list of attributes
-// to a tag list that can be added to metrics.
-func TagsFromAttributes(attrs pcommon.Map) []string {
-	tags := make([]string, 0, attrs.Len())
+const (
+	KeyEnv     = "env"
+	KeyService = "service"
+	KeyVersion = "version"
+
+	KeyContainerID       = "container_id"
+	KeyContainerName     = "container_name"
+	KeyImageName         = "image_name"
+	KeyImageTag          = "image_tag"
+	KeyRuntime           = "runtime"
+	KeyCloudProvider     = "cloud_provider"
+	KeyRegion            = "region"
+	KeyAvailabilityZone  = "zone"
+	KeyTaskFamily        = "task_family"
+	KeyTaskARN           = "task_arn"
+	KeyTaskVersion       = "task_version"
+	KeyECSClusterName    = "ecs_cluster_name"
+	KeyECSContainerName  = "ecs_container_name"
+	KeyKubeContainerName = "kube_container_name"
+	KeyKubeClusterName   = "kube_cluster_name"
+	KeyKubeDeployment    = "kube_deployment"
+	KeyKubeReplicaSet    = "kube_replica_set"
+	KeyKubeStatefulSet   = "kube_stateful_set"
+	KeyKubeDaemonSet     = "kube_daemon_set"
+	KeyKubeJob           = "kube_job"
+	KeyKubeCronJob       = "kube_cronjob"
+	KeyKubeNamespace     = "kube_namespace"
+	KeyPodName           = "pod_name"
+
+	KeyKubeAppName      = "kube_app_name"
+	KeyKubeAppInstance  = "kube_app_instance"
+	KeyKubeAppVersion   = "kube_app_version"
+	KeyKubeAppComponent = "kube_app_component"
+	KeyKubeAppPartOf    = "kube_app_part_of"
+	KeyKubeAppManagedBy = "kube_app_managed_by"
+)
+
+var keysToCheckForInDDNamespace = map[string]struct{}{
+	KeyEnv:               {},
+	KeyService:           {},
+	KeyVersion:           {},
+	KeyContainerID:       {},
+	KeyContainerName:     {},
+	KeyImageName:         {},
+	KeyImageTag:          {},
+	KeyRuntime:           {},
+	KeyCloudProvider:     {},
+	KeyRegion:            {},
+	KeyAvailabilityZone:  {},
+	KeyTaskFamily:        {},
+	KeyTaskARN:           {},
+	KeyTaskVersion:       {},
+	KeyECSClusterName:    {},
+	KeyECSContainerName:  {},
+	KeyKubeContainerName: {},
+	KeyKubeClusterName:   {},
+	KeyKubeDeployment:    {},
+	KeyKubeReplicaSet:    {},
+	KeyKubeStatefulSet:   {},
+	KeyKubeDaemonSet:     {},
+	KeyKubeJob:           {},
+	KeyKubeCronJob:       {},
+	KeyKubeNamespace:     {},
+	KeyPodName:           {},
+	KeyKubeAppName:       {},
+	KeyKubeAppInstance:   {},
+	KeyKubeAppVersion:    {},
+	KeyKubeAppComponent:  {},
+	KeyKubeAppPartOf:     {},
+	KeyKubeAppManagedBy:  {},
+}
+
+func MergeTagMaps(signalTagsMap, resourceTagsMap map[string]string, ignoreMissingDatadogFields bool) map[string]string {
+	tagsMap := make(map[string]string, len(signalTagsMap)+len(resourceTagsMap))
+
+	for key, val := range resourceTagsMap {
+		tagsMap[key] = val
+	}
+	// signal tags take precedence over resource tags
+	for key, val := range signalTagsMap {
+		tagsMap[key] = val
+	}
+
+	// Only keep the highest-precedence process key in tagsMap
+	processKeys := []string{
+		string(semconv127.ProcessExecutableNameKey),
+		string(semconv127.ProcessExecutablePathKey),
+		string(semconv127.ProcessCommandKey),
+		string(semconv127.ProcessCommandLineKey),
+	}
+	for i, k := range processKeys {
+		if v := tagsMap[k]; v != "" {
+			// Delete all lower-precedence keys
+			for _, lowerK := range processKeys[i+1:] {
+				delete(tagsMap, lowerK)
+			}
+			break
+		}
+	}
+
+	return tagsMap
+}
+
+// GetTagsFromAttributesPreferringDatadogNamespace converts a selected list of attributes
+// to a tag list that can be added to metrics. It follows this order of precedence:
+// 1. datadog.* span attributes
+// 2. datadog.* resource attributes
+// 3. standard span attributes
+// 4. standard resource attributes
+// If ignoreMissingDatadogFields is true, it will not add tags that are not present in the Datadog namespace.
+func GetTagsFromAttributesPreferringDatadogNamespace(attrs pcommon.Map, ignoreMissingDatadogFields bool) map[string]string {
+	tagsMap := make(map[string]string, attrs.Len())
 
 	var processAttributes processAttributes
 	var systemAttributes systemAttributes
@@ -198,22 +320,169 @@ func TagsFromAttributes(attrs pcommon.Map) []string {
 	attrs.Range(func(key string, value pcommon.Value) bool {
 		switch key {
 		// Process attributes
+		case KeyDatadogProcessExecutableName:
+			if processAttributes.ExecutableName == "" {
+				processAttributes.ExecutableName = value.Str()
+			}
+		case KeyDatadogProcessExecutablePath:
+			if processAttributes.ExecutablePath == "" {
+				processAttributes.ExecutablePath = value.Str()
+			}
+		case KeyDatadogProcessCommand:
+			if processAttributes.Command == "" {
+				processAttributes.Command = value.Str()
+			}
+		case KeyDatadogProcessCommandLine:
+			if processAttributes.CommandLine == "" {
+				processAttributes.CommandLine = value.Str()
+			}
+		case KeyDatadogProcessPID:
+			if processAttributes.PID == 0 {
+				processAttributes.PID = value.Int()
+			}
+		case KeyDatadogProcessOwner:
+			if processAttributes.Owner == "" {
+				processAttributes.Owner = value.Str()
+			}
+
+		// System attributes
+		case KeyDatadogOSType:
+			if systemAttributes.OSType == "" {
+				systemAttributes.OSType = value.Str()
+			}
+		}
+
+		if strings.HasPrefix(key, customContainerTagPrefix) {
+			// Custom container tags are checked after all other semantic conventions
+			return true
+		}
+
+		if strings.HasPrefix(key, DDNamespacePrefix) {
+			key = strings.TrimPrefix(key, DDNamespacePrefix)
+			// Kubernetes DD tags
+			_, found1 := kubernetesDDTags[key]
+			_, found2 := keysToCheckForInDDNamespace[key]
+			if found1 || found2 {
+				if tagsMap[key] == "" {
+					tagsMap[key] = value.Str()
+				}
+				return true
+			}
+		}
+
+		return true
+	})
+
+	if !ignoreMissingDatadogFields {
+		attrs.Range(func(key string, value pcommon.Value) bool {
+			switch key {
+			// Process attributes
+			case string(semconv127.ProcessExecutableNameKey):
+				if processAttributes.ExecutableName == "" {
+					processAttributes.ExecutableName = value.Str()
+				}
+			case string(semconv127.ProcessExecutablePathKey):
+				if processAttributes.ExecutablePath == "" {
+					processAttributes.ExecutablePath = value.Str()
+				}
+			case string(semconv127.ProcessCommandKey):
+				if processAttributes.Command == "" {
+					processAttributes.Command = value.Str()
+				}
+			case string(semconv127.ProcessCommandLineKey):
+				if processAttributes.CommandLine == "" {
+					processAttributes.CommandLine = value.Str()
+				}
+			case string(semconv127.ProcessPIDKey):
+				if processAttributes.PID == 0 {
+					processAttributes.PID = value.Int()
+				}
+			case string(semconv127.ProcessOwnerKey):
+				if processAttributes.Owner == "" {
+					processAttributes.Owner = value.Str()
+				}
+
+			// System attributes
+			case string(semconv127.OSTypeKey):
+				if systemAttributes.OSType == "" {
+					systemAttributes.OSType = value.Str()
+				}
+			}
+
+			// core attributes mapping
+			if datadogKey, found := coreMapping[key]; found && value.Str() != "" {
+				if tagsMap[datadogKey] == "" {
+					tagsMap[datadogKey] = value.Str()
+				}
+			}
+
+			// Kubernetes labels mapping
+			if datadogKey, found := kubernetesMapping[key]; found && value.Str() != "" {
+				if tagsMap[datadogKey] == "" {
+					tagsMap[datadogKey] = value.Str()
+				}
+			}
+
+			// Kubernetes DD tags
+			if _, found := kubernetesDDTags[key]; found {
+				if tagsMap[key] == "" {
+					tagsMap[key] = value.Str()
+				}
+			}
+
+			// Container Tag mappings
+			ctags := ContainerTagsFromResourceAttributes(attrs)
+			for key, val := range ctags {
+				if tagsMap[key] == "" {
+					tagsMap[key] = val
+				}
+			}
+			return true
+		})
+	}
+
+	for k, v := range processAttributes.extractTags() {
+		if tagsMap[k] == "" {
+			tagsMap[k] = v
+		}
+	}
+	for k, v := range systemAttributes.extractTags() {
+		if tagsMap[k] == "" {
+			tagsMap[k] = v
+		}
+	}
+
+	return tagsMap
+}
+
+// TagsFromAttributes converts a selected list of attributes
+// to a tag list that can be added to metrics.
+// Deprecated: Use GetTagsFromAttributesPreferringDatadogNamespace instead.
+func TagsFromAttributes(attrs pcommon.Map) []string {
+	tags := make([]string, 0, attrs.Len())
+
+	var pAttributes processAttributes
+	var sAttributes systemAttributes
+
+	attrs.Range(func(key string, value pcommon.Value) bool {
+		switch key {
+		// Process attributes
 		case string(semconv127.ProcessExecutableNameKey):
-			processAttributes.ExecutableName = value.Str()
+			pAttributes.ExecutableName = value.Str()
 		case string(semconv127.ProcessExecutablePathKey):
-			processAttributes.ExecutablePath = value.Str()
+			pAttributes.ExecutablePath = value.Str()
 		case string(semconv127.ProcessCommandKey):
-			processAttributes.Command = value.Str()
+			pAttributes.Command = value.Str()
 		case string(semconv127.ProcessCommandLineKey):
-			processAttributes.CommandLine = value.Str()
+			pAttributes.CommandLine = value.Str()
 		case string(semconv127.ProcessPIDKey):
-			processAttributes.PID = value.Int()
+			pAttributes.PID = value.Int()
 		case string(semconv127.ProcessOwnerKey):
-			processAttributes.Owner = value.Str()
+			pAttributes.Owner = value.Str()
 
 		// System attributes
 		case string(semconv127.OSTypeKey):
-			systemAttributes.OSType = value.Str()
+			sAttributes.OSType = value.Str()
 		}
 
 		// core attributes mapping
@@ -239,8 +508,13 @@ func TagsFromAttributes(attrs pcommon.Map) []string {
 		tags = append(tags, fmt.Sprintf("%s:%s", key, val))
 	}
 
-	tags = append(tags, processAttributes.extractTags()...)
-	tags = append(tags, systemAttributes.extractTags()...)
+	// Convert process and system attribute maps to tag strings
+	for key, val := range pAttributes.extractTags() {
+		tags = append(tags, fmt.Sprintf("%s:%s", key, val))
+	}
+	for key, val := range sAttributes.extractTags() {
+		tags = append(tags, fmt.Sprintf("%s:%s", key, val))
+	}
 
 	return tags
 }
