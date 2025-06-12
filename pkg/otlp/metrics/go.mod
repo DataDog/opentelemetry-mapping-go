@@ -61,7 +61,6 @@ require (
 replace (
 	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest => ../../internal/sketchtest
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes => ../attributes
-	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/util => ../util
 	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile => ../../quantile
 )
 
