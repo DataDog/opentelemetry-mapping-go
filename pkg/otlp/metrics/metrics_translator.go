@@ -35,7 +35,6 @@ import (
 
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics/internal/instrumentationlibrary"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics/internal/instrumentationscope"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/util"
 )
 
 const (
@@ -755,8 +754,8 @@ func getSourceFromAttributes(ctx context.Context, t *Translator, attrs pcommon.M
 	var fallbackSourceUsed bool
 	var err error
 
-	datadogSourceKind, datadogSourceKindOK := attrs.Get("datadog.source.kind")
-	datadogSourceIdentifier, datadogSourceIdentifierOK := attrs.Get("datadog.source.identifier")
+	datadogSourceKind, datadogSourceKindOK := attrs.Get(attributes.KeyDatadogSourceKind)
+	datadogSourceIdentifier, datadogSourceIdentifierOK := attrs.Get(attributes.KeyDatadogSourceIdentifier)
 
 	if datadogSourceKindOK && datadogSourceIdentifierOK && datadogSourceKind.AsString() != "" && datadogSourceIdentifier.AsString() != "" {
 		sourceKindFromAttributes = datadogSourceKind.AsString()
@@ -859,21 +858,11 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 	return metadata, nil
 }
 
-func (t *Translator) mapToDDFormat(ctx context.Context, md pmetric.Metric, consumer Consumer, additionalTags []string, resourceTagsMap map[string]string, sourceKindFromResource string, sourceIdentifierFromResource string, scopeName string, rattrs pcommon.Map, hostFromAttributesHandler attributes.HostFromAttributesHandler) {
-	baseDims := &Dimensions{
-		name:                md.Name(),
-		tags:                additionalTags,
-		originProduct:       t.cfg.originProduct,
-		originSubProduct:    OriginSubProductOTLP,
-		originProductDetail: originProductDetailFromScopeName(scopeName),
-	}
-
-	resolveDimsFromAttributes := func(p pcommon.Map) *Dimensions {
-		signalTagsMap := attributes.GetTagsFromAttributesPreferringDatadogNamespace(p, t.cfg.ignoreMissingDatadogFields)
+func makeResolveDimsCallback(ctx context.Context, t *Translator, baseDims *Dimensions, resourceTagsMap map[string]string, sourceKindFromResource string, sourceIdentifierFromResource string, hostFromAttributesHandler attributes.HostFromAttributesHandler, consumer Consumer, rattrs pcommon.Map) func(p pcommon.Map) *Dimensions {
+	return func(p pcommon.Map) *Dimensions {
+		signalTagsMap := make(map[string]string)
 		p.Range(func(k string, v pcommon.Value) bool {
-			if existing, ok := signalTagsMap[k]; !ok || existing == "" {
-				signalTagsMap[k] = v.AsString()
-			}
+			signalTagsMap[k] = v.AsString()
 			return true
 		})
 		totalTagsMap := attributes.MergeTagMaps(signalTagsMap, resourceTagsMap, false)
@@ -913,18 +902,38 @@ func (t *Translator) mapToDDFormat(ctx context.Context, md pmetric.Metric, consu
 			}
 		}
 
-		originID := util.GetOTelAttrFromEitherMap(rattrs, p, true)
-		if originID == "" {
-			originID = attributes.OriginIDFromAttributes(p)
-			if originID == "" {
-				originID = attributes.OriginIDFromAttributes(rattrs)
+		var originIDStr string
+		originID, ok := p.Get(attributes.KeyDatadogOriginID)
+		if !ok {
+			originID, ok = rattrs.Get(attributes.KeyDatadogOriginID)
+		}
+		if ok {
+			originIDStr = originID.AsString()
+		}
+
+		if originIDStr == "" && !t.cfg.ignoreMissingDatadogFields {
+			originIDStr = attributes.OriginIDFromAttributes(p)
+			if originIDStr == "" {
+				originIDStr = attributes.OriginIDFromAttributes(rattrs)
 			}
 		}
 
-		pointDims.originID = originID
+		pointDims.originID = originIDStr
 
 		return pointDims
 	}
+}
+
+func (t *Translator) mapToDDFormat(ctx context.Context, md pmetric.Metric, consumer Consumer, additionalTags []string, resourceTagsMap map[string]string, sourceKindFromResource string, sourceIdentifierFromResource string, scopeName string, rattrs pcommon.Map, hostFromAttributesHandler attributes.HostFromAttributesHandler) {
+	baseDims := &Dimensions{
+		name:                md.Name(),
+		tags:                additionalTags,
+		originProduct:       t.cfg.originProduct,
+		originSubProduct:    OriginSubProductOTLP,
+		originProductDetail: originProductDetailFromScopeName(scopeName),
+	}
+
+	resolveDimsFromAttributes := makeResolveDimsCallback(ctx, t, baseDims, resourceTagsMap, sourceKindFromResource, sourceIdentifierFromResource, hostFromAttributesHandler, consumer, rattrs)
 
 	switch md.Type() {
 	case pmetric.MetricTypeGauge:

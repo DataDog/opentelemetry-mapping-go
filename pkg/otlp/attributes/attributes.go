@@ -25,6 +25,7 @@ import (
 
 // customContainerTagPrefix defines the prefix for custom container tags.
 const customContainerTagPrefix = "datadog.container.tag."
+const DDNamespacePrefix = "datadog."
 
 var (
 	// coreMapping defines the mapping between OpenTelemetry semantic conventions
@@ -186,14 +187,18 @@ var (
 		semconv127.AttributeUserAgentOriginal:      "http.useragent",
 	}
 
-	KeyDatadogHostname              = "datadog.host.name"
-	KeyDatadogProcessExecutableName = "datadog.process.executable.name"
-	KeyDatadogProcessExecutablePath = "datadog.process.executable.path"
-	KeyDatadogProcessCommand        = "datadog.process.command"
-	KeyDatadogProcessCommandLine    = "datadog.process.command_line"
-	KeyDatadogProcessPID            = "datadog.process.pid"
-	KeyDatadogProcessOwner          = "datadog.process.owner"
-	KeyDatadogOSType                = "datadog.ostype"
+	KeyDatadogHostname              = DDNamespacePrefix + "host.name"
+	KeyDatadogProcessExecutableName = DDNamespacePrefix + "process.executable.name"
+	KeyDatadogProcessExecutablePath = DDNamespacePrefix + "process.executable.path"
+	KeyDatadogProcessCommand        = DDNamespacePrefix + "process.command"
+	KeyDatadogProcessCommandLine    = DDNamespacePrefix + "process.command_line"
+	KeyDatadogProcessPID            = DDNamespacePrefix + "process.pid"
+	KeyDatadogProcessOwner          = DDNamespacePrefix + "process.owner"
+	KeyDatadogOSType                = DDNamespacePrefix + "ostype"
+
+	KeyDatadogOriginID         = DDNamespacePrefix + "origin.id"
+	KeyDatadogSourceKind       = DDNamespacePrefix + "source.kind"
+	KeyDatadogSourceIdentifier = DDNamespacePrefix + "source.identifier"
 )
 
 const (
@@ -352,8 +357,8 @@ func GetTagsFromAttributesPreferringDatadogNamespace(attrs pcommon.Map, ignoreMi
 			return true
 		}
 
-		if strings.HasPrefix(key, "datadog.") {
-			key = strings.TrimPrefix(key, "datadog.")
+		if strings.HasPrefix(key, DDNamespacePrefix) {
+			key = strings.TrimPrefix(key, DDNamespacePrefix)
 			// Kubernetes DD tags
 			_, found1 := kubernetesDDTags[key]
 			_, found2 := keysToCheckForInDDNamespace[key]
