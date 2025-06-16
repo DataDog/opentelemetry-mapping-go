@@ -40,7 +40,15 @@ func createDDSketchWithSketchMapping(c *Config, inputSketch *ddsketch.DDSketch) 
 		return nil, fmt.Errorf("couldn't create LogarithmicMapping for DDSketch: %w", err)
 	}
 
-	newSketch := inputSketch.ChangeMapping(newMapping, positiveStore, negativeStore, 1.0)
+	var newSketch *ddsketch.DDSketch
+	if inputSketch.GetCount() == 1.0 {
+		// We know the exact value of this one point: it is the sum.
+		// Avoid remapping artifacts in that special case.
+		newSketch = ddsketch.NewDDSketch(newMapping, positiveStore, negativeStore)
+		newSketch.Add(inputSketch.GetSum())
+	} else {
+		newSketch = inputSketch.ChangeMapping(newMapping, positiveStore, negativeStore, 1.0)
+	}
 	return newSketch, nil
 }
 
