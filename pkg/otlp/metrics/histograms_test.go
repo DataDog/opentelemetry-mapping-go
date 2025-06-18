@@ -330,6 +330,11 @@ func TestExponentialHistogramTranslatorOptions(t *testing.T) {
 			expectedUnknownMetricType:                 1,
 			expectedUnsupportedAggregationTemporality: 1,
 		},
+		{
+			name:     "single-point-no-min-max",
+			otlpfile: "testdata/otlpdata/histogram/single-point-exponential-no-min-max.json",
+			ddogfile: "testdata/datadogdata/histogram/single-point-exponential-no-min-max.json",
+		},
 	}
 
 	for _, testinstance := range tests {
