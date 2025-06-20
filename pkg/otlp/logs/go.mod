@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	github.com/DataDog/datadog-api-client-go/v2 v2.38.0
-	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.28.0
+	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.29.0
 	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/collector/component v1.34.0
 	go.opentelemetry.io/collector/component/componenttest v0.128.0
