@@ -4,6 +4,17 @@
 
 <!-- next version -->
 
+## v0.29.0
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics, pkg/quantile`: Improve accuracy of exponential histogram conversion when count = 1 (#696)
+  In cases where an exponential histogram only contains one point, we can deduce this point's exact
+  value from the histogram sum. We can convert the histogram into a Datadog sketch more accurately
+  by taking this information into account.
+  
+- `pkg/quantile`: Omit empty buckets when converting exponential histograms (#699)
+
 ## v0.28.0
 
 ### 💡 Enhancements 💡
