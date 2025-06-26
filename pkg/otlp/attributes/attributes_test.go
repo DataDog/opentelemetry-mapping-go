@@ -534,8 +534,6 @@ func TestTagsFromAttributesIncludingDatadogNamespacedKeys(t *testing.T) {
 		DDNamespacePrefix + KeyKubeAppPartOf:     "directapppart",
 		DDNamespacePrefix + KeyKubeAppManagedBy:  "directappman",
 	}
-	attrs := pcommon.NewMap()
-	attrs.FromRaw(attributeMap)
 
 	attributeMapEmptyDD := map[string]interface{}{}
 	for k, v := range attributeMap {
@@ -549,6 +547,8 @@ func TestTagsFromAttributesIncludingDatadogNamespacedKeys(t *testing.T) {
 	attrsEmptyDD.FromRaw(attributeMapEmptyDD)
 
 	t.Run("ignoreMissingDatadogFields=false (fallback enabled)", func(t *testing.T) {
+		attrs := pcommon.NewMap()
+		attrs.FromRaw(attributeMap)
 		tags := GetTagsFromAttributesPreferringDatadogNamespace(&attrs, false)
 		// Should include only the direct datadog.* tags, not fallback
 		expected := map[string]string{
@@ -592,6 +592,8 @@ func TestTagsFromAttributesIncludingDatadogNamespacedKeys(t *testing.T) {
 	})
 
 	t.Run("ignoreMissingDatadogFields=true (fallback disabled)", func(t *testing.T) {
+		attrs := pcommon.NewMap()
+		attrs.FromRaw(attributeMap)
 		tags := GetTagsFromAttributesPreferringDatadogNamespace(&attrs, true)
 		// Should only include direct datadog.* tags, not fallback
 		expected := map[string]string{
@@ -635,6 +637,8 @@ func TestTagsFromAttributesIncludingDatadogNamespacedKeys(t *testing.T) {
 	})
 
 	t.Run("empty datadog.* keys, ignoreMissingDatadogFields=true", func(t *testing.T) {
+		attrs := pcommon.NewMap()
+		attrs.FromRaw(attributeMapEmptyDD)
 		tags := GetTagsFromAttributesPreferringDatadogNamespace(&attrsEmptyDD, true)
 		// All datadog.* keys should be present with empty values
 		expected := map[string]string{
@@ -677,6 +681,8 @@ func TestTagsFromAttributesIncludingDatadogNamespacedKeys(t *testing.T) {
 	})
 
 	t.Run("empty datadog.* keys, ignoreMissingDatadogFields=false", func(t *testing.T) {
+		attrs := pcommon.NewMap()
+		attrs.FromRaw(attributeMapEmptyDD)
 		tags := GetTagsFromAttributesPreferringDatadogNamespace(&attrsEmptyDD, false)
 		expected := map[string]string{
 			"service":             "svc",

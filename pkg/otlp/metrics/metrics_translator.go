@@ -84,8 +84,8 @@ type Metadata struct {
 	Languages []string
 }
 
-// NewTranslator creates a new translator with given options.
-func NewTranslator(set component.TelemetrySettings, attributesTranslator *attributes.Translator, ignoreMissingDatadogFields bool, options ...TranslatorOption) (*Translator, error) {
+// NewTranslatorWithIgnoreMissingDatadogFields creates a new translator with given options.
+func NewTranslatorWithIgnoreMissingDatadogFields(set component.TelemetrySettings, attributesTranslator *attributes.Translator, ignoreMissingDatadogFields bool, options ...TranslatorOption) (*Translator, error) {
 	cfg := translatorConfig{
 		HistMode:                             HistogramModeDistributions,
 		SendHistogramAggregations:            false,
@@ -119,6 +119,11 @@ func NewTranslator(set component.TelemetrySettings, attributesTranslator *attrib
 		attributesTranslator: attributesTranslator,
 		cfg:                  cfg,
 	}, nil
+}
+
+// NewTranslator creates a new translator with given options.
+func NewTranslator(set component.TelemetrySettings, attributesTranslator *attributes.Translator, options ...TranslatorOption) (*Translator, error) {
+	return NewTranslatorWithIgnoreMissingDatadogFields(set, attributesTranslator, false, options...)
 }
 
 // isCumulativeMonotonic checks if a metric is a cumulative monotonic metric
