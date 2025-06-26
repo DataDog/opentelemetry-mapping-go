@@ -18,6 +18,7 @@ import (
 	"context"
 	"math"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -220,7 +221,7 @@ func TestMapIntMetrics(t *testing.T) {
 
 	// With attribute tags
 	consumer = &mockFullConsumer{}
-	dims = &Dimensions{name: "int64.test", tags: []string{"attribute_tag:attribute_value"}}
+	dims = &Dimensions{name: "int64.test", tags: []string{"env:example"}}
 	callback = makeResolveDimsCallbackWithDefaults(ctx, tr, dims, consumer)
 	tr.mapNumberMetrics(ctx, consumer, Gauge, slice, callback)
 	assert.ElementsMatch(t,
@@ -258,7 +259,7 @@ func TestMapDoubleMetrics(t *testing.T) {
 
 	// With attribute tags
 	consumer = &mockFullConsumer{}
-	dims = &Dimensions{name: "float64.test", tags: []string{"attribute_tag:attribute_value"}}
+	dims = &Dimensions{name: "float64.test", tags: []string{"env:example"}}
 	callback = makeResolveDimsCallbackWithDefaults(ctx, tr, dims, consumer)
 	tr.mapNumberMetrics(ctx, consumer, Gauge, slice, callback)
 	assert.ElementsMatch(t,
@@ -345,22 +346,22 @@ func TestMapIntMonotonicDifferentDimensions(t *testing.T) {
 	// One tag: valA
 	point = slice.AppendEmpty()
 	point.SetTimestamp(seconds(0))
-	point.Attributes().PutStr("key1", "valA")
+	point.Attributes().PutStr(attributes.KeyEnv, "valA")
 
 	point = slice.AppendEmpty()
 	point.SetIntValue(30)
 	point.SetTimestamp(seconds(1))
-	point.Attributes().PutStr("key1", "valA")
+	point.Attributes().PutStr(attributes.KeyEnv, "valA")
 
 	// same tag: valB
 	point = slice.AppendEmpty()
 	point.SetTimestamp(seconds(0))
-	point.Attributes().PutStr("key1", "valB")
+	point.Attributes().PutStr(attributes.KeyEnv, "valB")
 
 	point = slice.AppendEmpty()
 	point.SetIntValue(40)
 	point.SetTimestamp(seconds(1))
-	point.Attributes().PutStr("key1", "valB")
+	point.Attributes().PutStr(attributes.KeyEnv, "valB")
 
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
@@ -372,8 +373,8 @@ func TestMapIntMonotonicDifferentDimensions(t *testing.T) {
 		consumer.metrics,
 		[]metric{
 			newCountWithHost(exampleDims, uint64(seconds(1)), 20, fallbackHostname),
-			newCountWithHost(exampleDims.AddTags("key1:valA"), uint64(seconds(1)), 30, fallbackHostname),
-			newCountWithHost(exampleDims.AddTags("key1:valB"), uint64(seconds(1)), 40, fallbackHostname),
+			newCountWithHost(exampleDims.AddTags("env:valA"), uint64(seconds(1)), 30, fallbackHostname),
+			newCountWithHost(exampleDims.AddTags("env:valB"), uint64(seconds(1)), 40, fallbackHostname),
 		},
 	)
 }
@@ -1469,7 +1470,7 @@ func buildMonotonicDoublePoints(deltas []float64) (slice pmetric.NumberDataPoint
 	return
 }
 
-func makeResolveDimsCallbackWithDefaults(ctx context.Context, t *Translator, baseDims *Dimensions, consumer Consumer) func(p pcommon.Map) *Dimensions {
+func makeResolveDimsCallbackWithDefaults(ctx context.Context, t *Translator, baseDims *Dimensions, consumer Consumer) func(p *pcommon.Map) *Dimensions {
 	return makeResolveDimsCallback(ctx, t, baseDims, nil, "host", fallbackHostname, nil, consumer, pcommon.NewMap())
 }
 
@@ -1526,22 +1527,22 @@ func TestMapDoubleMonotonicDifferentDimensions(t *testing.T) {
 	// One tag: valA
 	point = slice.AppendEmpty()
 	point.SetTimestamp(seconds(0))
-	point.Attributes().PutStr("key1", "valA")
+	point.Attributes().PutStr(attributes.KeyEnv, "valA")
 
 	point = slice.AppendEmpty()
 	point.SetDoubleValue(30)
 	point.SetTimestamp(seconds(1))
-	point.Attributes().PutStr("key1", "valA")
+	point.Attributes().PutStr(attributes.KeyEnv, "valA")
 
 	// one tag: valB
 	point = slice.AppendEmpty()
 	point.SetTimestamp(seconds(0))
-	point.Attributes().PutStr("key1", "valB")
+	point.Attributes().PutStr(attributes.KeyEnv, "valB")
 
 	point = slice.AppendEmpty()
 	point.SetDoubleValue(40)
 	point.SetTimestamp(seconds(1))
-	point.Attributes().PutStr("key1", "valB")
+	point.Attributes().PutStr(attributes.KeyEnv, "valB")
 
 	ctx := context.Background()
 	tr := newTranslator(t, zap.NewNop())
@@ -1553,8 +1554,8 @@ func TestMapDoubleMonotonicDifferentDimensions(t *testing.T) {
 		consumer.metrics,
 		[]metric{
 			newCountWithHost(exampleDims, uint64(seconds(1)), 20, fallbackHostname),
-			newCountWithHost(exampleDims.AddTags("key1:valA"), uint64(seconds(1)), 30, fallbackHostname),
-			newCountWithHost(exampleDims.AddTags("key1:valB"), uint64(seconds(1)), 40, fallbackHostname),
+			newCountWithHost(exampleDims.AddTags("env:valA"), uint64(seconds(1)), 30, fallbackHostname),
+			newCountWithHost(exampleDims.AddTags("env:valB"), uint64(seconds(1)), 40, fallbackHostname),
 		},
 	)
 }
@@ -2152,6 +2153,57 @@ func TestFormatFloat(t *testing.T) {
 	for _, test := range tests {
 		assert.Equal(t, test.s, formatFloat(test.f))
 	}
+}
+
+func TestMapAttributesFromDatapoints(t *testing.T) {
+	ctx := context.Background()
+	tr := newTranslator(t, zap.NewNop())
+	consumer := &mockFullConsumer{}
+	md := pmetric.NewMetrics()
+	rm := md.ResourceMetrics().AppendEmpty()
+
+	for key, value := range attributes.ExhaustiveDatadogAttributesMap {
+		rm.Resource().Attributes().PutStr(key, value.(string)+"-res")
+	}
+
+	met := rm.ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
+	met.SetName(metricName)
+	met.SetEmptyGauge()
+	dpsInt := met.Gauge().DataPoints()
+
+	startTs := int(getProcessStartTime()) + 1
+	dpInt := dpsInt.AppendEmpty()
+	for key, value := range attributes.ExhaustiveDatadogAttributesMap {
+		dpInt.Attributes().PutStr(key, value.(string)+"-dp")
+	}
+	dpInt.SetStartTimestamp(seconds(startTs))
+	dpInt.SetTimestamp(seconds(startTs + 1))
+	dpInt.SetIntValue(int64(10))
+	_, err := tr.MapMetrics(ctx, md, consumer, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, m := range consumer.metrics {
+		sort.Strings(m.tags)
+	}
+	got := consumer.metrics[0]
+	gotTags := got.tags
+
+	expectedTags := make(map[string]string)
+	for key, value := range attributes.ExpectedDatadogAttributesMap {
+		expectedTags[key] = value + "-dp"
+	}
+	expectedTags["datadog.container.tag.custom_tag"] = "test-custom-tag-dp"
+
+	gotTagsMap := make(map[string]string, len(gotTags))
+	for _, tag := range gotTags {
+		parts := strings.SplitN(tag, ":", 2)
+		if len(parts) == 2 {
+			gotTagsMap[parts[0]] = parts[1]
+		}
+	}
+
+	assert.Equal(t, expectedTags, gotTagsMap)
 }
 
 const (

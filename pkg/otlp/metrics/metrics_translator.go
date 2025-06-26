@@ -147,7 +147,7 @@ func (t *Translator) mapNumberMetrics(
 	consumer TimeSeriesConsumer,
 	dt DataType,
 	slice pmetric.NumberDataPointSlice,
-	resolveDimsFromAttributes func(p pcommon.Map) *Dimensions,
+	resolveDimsFromAttributes func(p *pcommon.Map) *Dimensions,
 ) {
 
 	for i := 0; i < slice.Len(); i++ {
@@ -157,7 +157,8 @@ func (t *Translator) mapNumberMetrics(
 			continue
 		}
 
-		pointDims := resolveDimsFromAttributes(p.Attributes())
+		attrs := p.Attributes()
+		pointDims := resolveDimsFromAttributes(&attrs)
 		var val float64
 		switch p.ValueType() {
 		case pmetric.NumberDataPointValueTypeDouble:
@@ -210,7 +211,7 @@ func (t *Translator) mapNumberMonotonicMetrics(
 	ctx context.Context,
 	consumer TimeSeriesConsumer,
 	slice pmetric.NumberDataPointSlice,
-	resolveDimsFromAttributes func(p pcommon.Map) *Dimensions,
+	resolveDimsFromAttributes func(p *pcommon.Map) *Dimensions,
 ) {
 	for i := 0; i < slice.Len(); i++ {
 		p := slice.At(i)
@@ -221,10 +222,8 @@ func (t *Translator) mapNumberMonotonicMetrics(
 
 		ts := uint64(p.Timestamp())
 		startTs := uint64(p.StartTimestamp())
-		p.Attributes().Range(func(k string, v pcommon.Value) bool {
-			return true
-		})
-		pointDims := resolveDimsFromAttributes(p.Attributes())
+		attrs := p.Attributes()
+		pointDims := resolveDimsFromAttributes(&attrs)
 
 		var val float64
 		switch p.ValueType() {
@@ -465,7 +464,7 @@ func (t *Translator) mapHistogramMetrics(
 	consumer Consumer,
 	slice pmetric.HistogramDataPointSlice,
 	delta bool,
-	resolveDimsFromAttributes func(p pcommon.Map) *Dimensions,
+	resolveDimsFromAttributes func(p *pcommon.Map) *Dimensions,
 ) {
 	for i := 0; i < slice.Len(); i++ {
 		p := slice.At(i)
@@ -476,7 +475,8 @@ func (t *Translator) mapHistogramMetrics(
 
 		startTs := uint64(p.StartTimestamp())
 		ts := uint64(p.Timestamp())
-		pointDims := resolveDimsFromAttributes(p.Attributes())
+		attrs := p.Attributes()
+		pointDims := resolveDimsFromAttributes(&attrs)
 
 		histInfo := histogramInfo{ok: true}
 
@@ -573,7 +573,7 @@ func (t *Translator) mapSummaryMetrics(
 	ctx context.Context,
 	consumer TimeSeriesConsumer,
 	slice pmetric.SummaryDataPointSlice,
-	resolveDimsFromAttributes func(p pcommon.Map) *Dimensions,
+	resolveDimsFromAttributes func(p *pcommon.Map) *Dimensions,
 ) {
 
 	for i := 0; i < slice.Len(); i++ {
@@ -585,7 +585,8 @@ func (t *Translator) mapSummaryMetrics(
 
 		startTs := uint64(p.StartTimestamp())
 		ts := uint64(p.Timestamp())
-		pointDims := resolveDimsFromAttributes(p.Attributes())
+		attrs := p.Attributes()
+		pointDims := resolveDimsFromAttributes(&attrs)
 		// treat count as a cumulative monotonic metric
 		// and sum as a non-monotonic metric
 		// https://prometheus.io/docs/practices/histograms/#count-and-sum-of-observations
@@ -802,7 +803,8 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 				additionalTags = instrumentationlibrary.TagsFromInstrumentationLibraryMetadata(ilm.Scope())
 			}
 
-			resourceTagsMap := attributes.GetTagsFromAttributesPreferringDatadogNamespace(rm.Resource().Attributes(), t.cfg.ignoreMissingDatadogFields)
+			rattrs := rm.Resource().Attributes()
+			resourceTagsMap := attributes.GetTagsFromAttributesPreferringDatadogNamespace(&rattrs, t.cfg.ignoreMissingDatadogFields)
 
 			scopeName := ilm.Scope().Name()
 
@@ -858,8 +860,8 @@ func (t *Translator) MapMetrics(ctx context.Context, md pmetric.Metrics, consume
 	return metadata, nil
 }
 
-func makeResolveDimsCallback(ctx context.Context, t *Translator, baseDims *Dimensions, resourceTagsMap map[string]string, sourceKindFromResource string, sourceIdentifierFromResource string, hostFromAttributesHandler attributes.HostFromAttributesHandler, consumer Consumer, rattrs pcommon.Map) func(p pcommon.Map) *Dimensions {
-	return func(p pcommon.Map) *Dimensions {
+func makeResolveDimsCallback(ctx context.Context, t *Translator, baseDims *Dimensions, resourceTagsMap map[string]string, sourceKindFromResource string, sourceIdentifierFromResource string, hostFromAttributesHandler attributes.HostFromAttributesHandler, consumer Consumer, rattrs pcommon.Map) func(p *pcommon.Map) *Dimensions {
+	return func(p *pcommon.Map) *Dimensions {
 		signalTagsMap := attributes.GetTagsFromAttributesPreferringDatadogNamespace(p, t.cfg.ignoreMissingDatadogFields)
 		p.Range(func(k string, v pcommon.Value) bool {
 			signalTagsMap[k] = v.AsString()
@@ -874,7 +876,7 @@ func makeResolveDimsCallback(ctx context.Context, t *Translator, baseDims *Dimen
 		pointDims := baseDims.AddTags(tags...)
 		var sourceKind string
 
-		signalSourceKind, signalSourceIdentifier, fallbackSourceUsed, err := getSourceFromAttributes(ctx, t, p)
+		signalSourceKind, signalSourceIdentifier, fallbackSourceUsed, err := getSourceFromAttributes(ctx, t, *p)
 		if err != nil {
 			t.logger.Error("failed to get source from attributes", zap.Error(err))
 		}
@@ -912,7 +914,7 @@ func makeResolveDimsCallback(ctx context.Context, t *Translator, baseDims *Dimen
 		}
 
 		if originIDStr == "" && !t.cfg.ignoreMissingDatadogFields {
-			originIDStr = attributes.OriginIDFromAttributes(p)
+			originIDStr = attributes.OriginIDFromAttributes(*p)
 			if originIDStr == "" {
 				originIDStr = attributes.OriginIDFromAttributes(rattrs)
 			}

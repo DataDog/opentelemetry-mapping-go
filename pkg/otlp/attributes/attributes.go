@@ -101,74 +101,74 @@ var (
 	// https://github.com/DataDog/datadog-agent/blob/d33d042d6786e8b85f72bb627fbf06ad8a658031/comp/core/tagger/taggerimpl/collectors/workloadmeta_extract.go
 	// Note: if any OTel semantics happen to overlap with these tag names, they will also be added as Datadog tags.
 	kubernetesDDTags = map[string]struct{}{
-		"architecture":                {},
-		"availability-zone":           {},
-		"chronos_job":                 {},
-		"chronos_job_owner":           {},
-		"cluster_name":                {},
-		"container_id":                {},
-		"container_name":              {},
-		"dd_remote_config_id":         {},
-		"dd_remote_config_rev":        {},
-		"display_container_name":      {},
-		"docker_image":                {},
-		"ecs_cluster_name":            {},
-		"ecs_container_name":          {},
-		"eks_fargate_node":            {},
-		"env":                         {},
-		"git.commit.sha":              {},
-		"git.repository_url":          {},
-		"image_id":                    {},
-		"image_name":                  {},
-		"image_tag":                   {},
-		"kube_app_component":          {},
-		"kube_app_instance":           {},
-		"kube_app_managed_by":         {},
-		"kube_app_name":               {},
-		"kube_app_part_of":            {},
-		"kube_app_version":            {},
-		"kube_container_name":         {},
-		"kube_cronjob":                {},
-		"kube_daemon_set":             {},
-		"kube_deployment":             {},
-		"kube_job":                    {},
-		"kube_namespace":              {},
-		"kube_ownerref_kind":          {},
-		"kube_ownerref_name":          {},
-		"kube_priority_class":         {},
-		"kube_qos":                    {},
-		"kube_replica_set":            {},
-		"kube_replication_controller": {},
-		"kube_service":                {},
-		"kube_stateful_set":           {},
-		"language":                    {},
-		"marathon_app":                {},
-		"mesos_task":                  {},
-		"nomad_dc":                    {},
-		"nomad_group":                 {},
-		"nomad_job":                   {},
-		"nomad_namespace":             {},
-		"nomad_task":                  {},
-		"oshift_deployment":           {},
-		"oshift_deployment_config":    {},
-		"os_name":                     {},
-		"os_version":                  {},
-		"persistentvolumeclaim":       {},
-		"pod_name":                    {},
-		"pod_phase":                   {},
-		"rancher_container":           {},
-		"rancher_service":             {},
-		"rancher_stack":               {},
-		"region":                      {},
-		"service":                     {},
-		"short_image":                 {},
-		"swarm_namespace":             {},
-		"swarm_service":               {},
-		"task_name":                   {},
-		"task_family":                 {},
-		"task_version":                {},
-		"task_arn":                    {},
-		"version":                     {},
+		KeyArchitecture:              {},
+		KeyAvailabilityZone:          {},
+		KeyChronosJob:                {},
+		KeyChronosJobOwner:           {},
+		KeyClusterName:               {},
+		KeyContainerID:               {},
+		KeyContainerName:             {},
+		KeyDDRemoteConfigID:          {},
+		KeyDDRemoteConfigRev:         {},
+		KeyDisplayContainerName:      {},
+		KeyDockerImage:               {},
+		KeyECSClusterName:            {},
+		KeyECSContainerName:          {},
+		KeyEKSFargateNode:            {},
+		KeyEnv:                       {},
+		KeyGitCommitSHA:              {},
+		KeyGitRepositoryURL:          {},
+		KeyImageID:                   {},
+		KeyImageName:                 {},
+		KeyImageTag:                  {},
+		KeyKubeAppComponent:          {},
+		KeyKubeAppInstance:           {},
+		KeyKubeAppManagedBy:          {},
+		KeyKubeAppName:               {},
+		KeyKubeAppPartOf:             {},
+		KeyKubeAppVersion:            {},
+		KeyKubeContainerName:         {},
+		KeyKubeCronJob:               {},
+		KeyKubeDaemonSet:             {},
+		KeyKubeDeployment:            {},
+		KeyKubeJob:                   {},
+		KeyKubeNamespace:             {},
+		KeyKubeOwnerRefKind:          {},
+		KeyKubeOwnerRefName:          {},
+		KeyKubePriorityClass:         {},
+		KeyKubeQOS:                   {},
+		KeyKubeReplicaSet:            {},
+		KeyKubeReplicationController: {},
+		KeyKubeService:               {},
+		KeyKubeStatefulSet:           {},
+		KeyLanguage:                  {},
+		KeyMarathonApp:               {},
+		KeyMesosTask:                 {},
+		KeyNomadDC:                   {},
+		KeyNomadGroup:                {},
+		KeyNomadJob:                  {},
+		KeyNomadNamespace:            {},
+		KeyNomadTask:                 {},
+		KeyOshiftDeployment:          {},
+		KeyOshiftDeploymentConfig:    {},
+		KeyOSName:                    {},
+		KeyOSVersion:                 {},
+		KeyPersistentVolumeClaim:     {},
+		KeyPodName:                   {},
+		KeyPodPhase:                  {},
+		KeyRancherContainer:          {},
+		KeyRancherService:            {},
+		KeyRancherStack:              {},
+		KeyRegion:                    {},
+		KeyService:                   {},
+		KeyShortImage:                {},
+		KeySwarmNamespace:            {},
+		KeySwarmService:              {},
+		KeyTaskName:                  {},
+		KeyTaskFamily:                {},
+		KeyTaskVersion:               {},
+		KeyTaskARN:                   {},
+		KeyVersion:                   {},
 	}
 
 	// HTTPMappings defines the mapping between OpenTelemetry semantic conventions
@@ -187,14 +187,14 @@ var (
 		string(semconv127.UserAgentOriginalKey):      "http.useragent",
 	}
 
-	KeyDatadogHostname              = DDNamespacePrefix + "host.name"
-	KeyDatadogProcessExecutableName = DDNamespacePrefix + "process.executable.name"
-	KeyDatadogProcessExecutablePath = DDNamespacePrefix + "process.executable.path"
-	KeyDatadogProcessCommand        = DDNamespacePrefix + "process.command"
-	KeyDatadogProcessCommandLine    = DDNamespacePrefix + "process.command_line"
-	KeyDatadogProcessPID            = DDNamespacePrefix + "process.pid"
-	KeyDatadogProcessOwner          = DDNamespacePrefix + "process.owner"
-	KeyDatadogOSType                = DDNamespacePrefix + "ostype"
+	KeyDatadogHostname              = DDNamespacePrefix + string(semconv127.HostNameKey)
+	KeyDatadogProcessExecutableName = DDNamespacePrefix + string(semconv127.ProcessExecutableNameKey)
+	KeyDatadogProcessExecutablePath = DDNamespacePrefix + string(semconv127.ProcessExecutablePathKey)
+	KeyDatadogProcessCommand        = DDNamespacePrefix + string(semconv127.ProcessCommandKey)
+	KeyDatadogProcessCommandLine    = DDNamespacePrefix + string(semconv127.ProcessCommandLineKey)
+	KeyDatadogProcessPID            = DDNamespacePrefix + string(semconv127.ProcessPIDKey)
+	KeyDatadogProcessOwner          = DDNamespacePrefix + string(semconv127.ProcessOwnerKey)
+	KeyDatadogOSType                = DDNamespacePrefix + string(semconv127.OSTypeKey)
 
 	KeyDatadogOriginID         = DDNamespacePrefix + "origin.id"
 	KeyDatadogSourceKind       = DDNamespacePrefix + "source.kind"
@@ -236,41 +236,60 @@ const (
 	KeyKubeAppComponent = "kube_app_component"
 	KeyKubeAppPartOf    = "kube_app_part_of"
 	KeyKubeAppManagedBy = "kube_app_managed_by"
+
+	KeyArchitecture              = "architecture"
+	KeyChronosJob                = "chronos_job"
+	KeyChronosJobOwner           = "chronos_job_owner"
+	KeyClusterName               = "cluster_name"
+	KeyDockerImage               = "docker_image"
+	KeyGitCommitSHA              = "git.commit.sha"
+	KeyGitRepositoryURL          = "git.repository_url"
+	KeyImageID                   = "image_id"
+	KeyLanguage                  = "language"
+	KeyMarathonApp               = "marathon_app"
+	KeyMesosTask                 = "mesos_task"
+	KeyNomadDC                   = "nomad_dc"
+	KeyNomadGroup                = "nomad_group"
+	KeyNomadJob                  = "nomad_job"
+	KeyNomadNamespace            = "nomad_namespace"
+	KeyNomadTask                 = "nomad_task"
+	KeyOshiftDeployment          = "oshift_deployment"
+	KeyOshiftDeploymentConfig    = "oshift_deployment_config"
+	KeyOSName                    = "os_name"
+	KeyOSVersion                 = "os_version"
+	KeyPersistentVolumeClaim     = "persistentvolumeclaim"
+	KeyPodPhase                  = "pod_phase"
+	KeyRancherContainer          = "rancher_container"
+	KeyRancherService            = "rancher_service"
+	KeyRancherStack              = "rancher_stack"
+	KeyShortImage                = "short_image"
+	KeySwarmNamespace            = "swarm_namespace"
+	KeySwarmService              = "swarm_service"
+	KeyTaskName                  = "task_name"
+	KeyDDRemoteConfigID          = "dd_remote_config_id"
+	KeyDDRemoteConfigRev         = "dd_remote_config_rev"
+	KeyDisplayContainerName      = "display_container_name"
+	KeyKubeOwnerRefKind          = "kube_ownerref_kind"
+	KeyKubeOwnerRefName          = "kube_ownerref_name"
+	KeyKubePriorityClass         = "kube_priority_class"
+	KeyKubeQOS                   = "kube_qos"
+	KeyKubeReplicationController = "kube_replication_controller"
+	KeyKubeService               = "kube_service"
+	KeyEKSFargateNode            = "eks_fargate_node"
 )
 
+// Tags that have container mappings but are not part of the Kubernetes OOTB tags
 var keysToCheckForInDDNamespace = map[string]struct{}{
-	KeyEnv:               {},
-	KeyService:           {},
-	KeyVersion:           {},
-	KeyContainerID:       {},
-	KeyContainerName:     {},
-	KeyImageName:         {},
-	KeyImageTag:          {},
-	KeyRuntime:           {},
-	KeyCloudProvider:     {},
-	KeyRegion:            {},
-	KeyAvailabilityZone:  {},
-	KeyTaskFamily:        {},
-	KeyTaskARN:           {},
-	KeyTaskVersion:       {},
-	KeyECSClusterName:    {},
-	KeyECSContainerName:  {},
-	KeyKubeContainerName: {},
-	KeyKubeClusterName:   {},
-	KeyKubeDeployment:    {},
-	KeyKubeReplicaSet:    {},
-	KeyKubeStatefulSet:   {},
-	KeyKubeDaemonSet:     {},
-	KeyKubeJob:           {},
-	KeyKubeCronJob:       {},
-	KeyKubeNamespace:     {},
-	KeyPodName:           {},
-	KeyKubeAppName:       {},
-	KeyKubeAppInstance:   {},
-	KeyKubeAppVersion:    {},
-	KeyKubeAppComponent:  {},
-	KeyKubeAppPartOf:     {},
-	KeyKubeAppManagedBy:  {},
+	KeyRuntime:          {},
+	KeyCloudProvider:    {},
+	KeyAvailabilityZone: {},
+	KeyKubeClusterName:  {},
+}
+
+func init() {
+	for k := range kubernetesDDTags {
+		keysToCheckForInDDNamespace[k] = struct{}{}
+	}
 }
 
 func MergeTagMaps(signalTagsMap, resourceTagsMap map[string]string, ignoreMissingDatadogFields bool) map[string]string {
@@ -311,60 +330,96 @@ func MergeTagMaps(signalTagsMap, resourceTagsMap map[string]string, ignoreMissin
 // 3. standard span attributes
 // 4. standard resource attributes
 // If ignoreMissingDatadogFields is true, it will not add tags that are not present in the Datadog namespace.
-func GetTagsFromAttributesPreferringDatadogNamespace(attrs pcommon.Map, ignoreMissingDatadogFields bool) map[string]string {
+func GetTagsFromAttributesPreferringDatadogNamespace(attrs *pcommon.Map, ignoreMissingDatadogFields bool) map[string]string {
 	tagsMap := make(map[string]string, attrs.Len())
 
 	var processAttributes processAttributes
 	var systemAttributes systemAttributes
 
+	toRemove := make([]string, 0, attrs.Len())
+
 	attrs.Range(func(key string, value pcommon.Value) bool {
 		switch key {
 		// Process attributes
 		case KeyDatadogProcessExecutableName:
+			toRemove = append(toRemove, key)
 			if processAttributes.ExecutableName == "" {
 				processAttributes.ExecutableName = value.Str()
 			}
 		case KeyDatadogProcessExecutablePath:
+			toRemove = append(toRemove, key)
 			if processAttributes.ExecutablePath == "" {
 				processAttributes.ExecutablePath = value.Str()
 			}
 		case KeyDatadogProcessCommand:
+			toRemove = append(toRemove, key)
 			if processAttributes.Command == "" {
 				processAttributes.Command = value.Str()
 			}
 		case KeyDatadogProcessCommandLine:
+			toRemove = append(toRemove, key)
 			if processAttributes.CommandLine == "" {
 				processAttributes.CommandLine = value.Str()
 			}
 		case KeyDatadogProcessPID:
+			toRemove = append(toRemove, key)
 			if processAttributes.PID == 0 {
 				processAttributes.PID = value.Int()
 			}
 		case KeyDatadogProcessOwner:
+			toRemove = append(toRemove, key)
 			if processAttributes.Owner == "" {
 				processAttributes.Owner = value.Str()
 			}
 
 		// System attributes
 		case KeyDatadogOSType:
+			toRemove = append(toRemove, key)
 			if systemAttributes.OSType == "" {
 				systemAttributes.OSType = value.Str()
 			}
 		}
 
-		if strings.HasPrefix(key, customContainerTagPrefix) {
-			// Custom container tags are checked after all other semantic conventions
-			return true
-		}
-
 		if strings.HasPrefix(key, DDNamespacePrefix) {
-			key = strings.TrimPrefix(key, DDNamespacePrefix)
+			if strings.HasPrefix(key, customContainerTagPrefix) {
+				// Custom container tags are checked after all other semantic conventions
+				return true
+			}
+
+			trimmedKey := strings.TrimPrefix(key, DDNamespacePrefix)
+
+			// core attributes mapping
+			if datadogKey, found := coreMapping[trimmedKey]; found && value.Str() != "" {
+				if tagsMap[datadogKey] == "" {
+					tagsMap[datadogKey] = value.Str()
+					toRemove = append(toRemove, key)
+				}
+				return true
+			}
+
+			// Kubernetes labels mapping
+			if datadogKey, found := kubernetesMapping[trimmedKey]; found && value.Str() != "" {
+				if tagsMap[datadogKey] == "" {
+					tagsMap[datadogKey] = value.Str()
+					toRemove = append(toRemove, key)
+				}
+				return true
+			}
+
 			// Kubernetes DD tags
-			_, found1 := kubernetesDDTags[key]
-			_, found2 := keysToCheckForInDDNamespace[key]
-			if found1 || found2 {
-				if tagsMap[key] == "" {
-					tagsMap[key] = value.Str()
+			if _, found := kubernetesDDTags[trimmedKey]; found {
+				if tagsMap[trimmedKey] == "" {
+					tagsMap[trimmedKey] = value.Str()
+					toRemove = append(toRemove, key)
+				}
+				return true
+			}
+
+			// Remaining container tags that aren't in the other mappings
+			if _, found := keysToCheckForInDDNamespace[trimmedKey]; found {
+				if tagsMap[trimmedKey] == "" {
+					tagsMap[trimmedKey] = value.Str()
+					toRemove = append(toRemove, key)
 				}
 				return true
 			}
@@ -430,11 +485,26 @@ func GetTagsFromAttributesPreferringDatadogNamespace(attrs pcommon.Map, ignoreMi
 				}
 			}
 
-			// Container Tag mappings
-			ctags := ContainerTagsFromResourceAttributes(attrs)
-			for key, val := range ctags {
-				if tagsMap[key] == "" {
-					tagsMap[key] = val
+			return true
+		})
+
+		// Container Tag mappings
+		ctags := ContainerTagsFromResourceAttributes(*attrs)
+		for key, val := range ctags {
+			if tagsMap[key] == "" {
+				tagsMap[key] = val
+			}
+		}
+	} else {
+		attrs.Range(func(key string, value pcommon.Value) bool {
+			if strings.HasPrefix(key, customContainerTagPrefix) {
+				customKey := strings.TrimPrefix(key, customContainerTagPrefix)
+				if customKey != "" && value.Str() != "" {
+					// Do not replace if set via semantic conventions mappings.
+					if _, found := tagsMap[customKey]; !found {
+						tagsMap[customKey] = value.Str()
+						toRemove = append(toRemove, key)
+					}
 				}
 			}
 			return true
@@ -450,6 +520,10 @@ func GetTagsFromAttributesPreferringDatadogNamespace(attrs pcommon.Map, ignoreMi
 		if tagsMap[k] == "" {
 			tagsMap[k] = v
 		}
+	}
+
+	for _, k := range toRemove {
+		attrs.Remove(k)
 	}
 
 	return tagsMap

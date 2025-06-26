@@ -88,14 +88,15 @@ func (t *Translator) mapExponentialHistogramMetrics(
 	consumer Consumer,
 	slice pmetric.ExponentialHistogramDataPointSlice,
 	delta bool,
-	resolveDimsFromAttributes func(p pcommon.Map) *Dimensions,
+	resolveDimsFromAttributes func(p *pcommon.Map) *Dimensions,
 ) {
 	for i := 0; i < slice.Len(); i++ {
 		p := slice.At(i)
 		startTs := uint64(p.StartTimestamp())
 		ts := uint64(p.Timestamp())
 
-		pointDims := resolveDimsFromAttributes(p.Attributes())
+		attrs := p.Attributes()
+		pointDims := resolveDimsFromAttributes(&attrs)
 		histInfo := histogramInfo{ok: true}
 
 		countDims := pointDims.WithSuffix("count")
