@@ -115,7 +115,7 @@ func newTranslatorWithStatsChannel(t *testing.T, logger *zap.Logger, ch chan []b
 
 	attributesTranslator, err := attributes.NewTranslator(set)
 	require.NoError(t, err)
-	tr, err := NewTranslatorWithIgnore(
+	tr, err := NewTranslatorWithIgnoreMissingDatadogFields(
 		set,
 		attributesTranslator,
 		false,

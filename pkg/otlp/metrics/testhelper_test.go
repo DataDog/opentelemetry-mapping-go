@@ -29,7 +29,7 @@ func NewTestTranslator(t testing.TB, options ...TranslatorOption) *Translator {
 	set := componenttest.NewNopTelemetrySettings()
 	attributesTranslator, err := attributes.NewTranslator(set)
 	require.NoError(t, err)
-	translator, err := NewTranslatorWithIgnore(set, attributesTranslator, false, options...)
+	translator, err := NewTranslatorWithIgnoreMissingDatadogFields(set, attributesTranslator, false, options...)
 	require.NoError(t, err)
 	return translator
 }
