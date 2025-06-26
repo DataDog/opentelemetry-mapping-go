@@ -4,7 +4,8 @@
       "Name": "double.exponential.delta.histogram",
       "Tags": [
         "custom_attribute:custom_value",
-        "deployment.environment:dev"
+        "deployment.environment:dev",
+        "env:dev"
       ],
       "Host": "res-hostname",
       "OriginID": "",
@@ -46,7 +47,8 @@
       "Name": "double.exponential.delta.histogram.count",
       "Tags": [
         "custom_attribute:custom_value",
-        "deployment.environment:dev"
+        "deployment.environment:dev",
+        "env:dev"
       ],
       "Host": "res-hostname",
       "OriginID": "",
@@ -61,7 +63,8 @@
       "Name": "double.exponential.delta.histogram.sum",
       "Tags": [
         "custom_attribute:custom_value",
-        "deployment.environment:dev"
+        "deployment.environment:dev",
+        "env:dev"
       ],
       "Host": "res-hostname",
       "OriginID": "",
@@ -76,7 +79,8 @@
       "Name": "double.exponential.delta.histogram.min",
       "Tags": [
         "custom_attribute:custom_value",
-        "deployment.environment:dev"
+        "deployment.environment:dev",
+        "env:dev"
       ],
       "Host": "res-hostname",
       "OriginID": "",
@@ -91,7 +95,8 @@
       "Name": "double.exponential.delta.histogram.max",
       "Tags": [
         "custom_attribute:custom_value",
-        "deployment.environment:dev"
+        "deployment.environment:dev",
+        "env:dev"
       ],
       "Host": "res-hostname",
       "OriginID": "",

@@ -15,8 +15,6 @@
 package attributes
 
 import (
-	"fmt"
-
 	semconv16 "go.opentelemetry.io/otel/semconv/v1.6.1"
 )
 
@@ -29,8 +27,8 @@ type processAttributes struct {
 	Owner          string
 }
 
-func (pattrs *processAttributes) extractTags() []string {
-	tags := make([]string, 0, 1)
+func (pattrs *processAttributes) extractTags() map[string]string {
+	tags := make(map[string]string, 1)
 
 	// According to OTel conventions: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/process.md,
 	// a process can be defined by any of the 4 following attributes: process.executable.name, process.executable.path, process.command or process.command_line
@@ -41,13 +39,13 @@ func (pattrs *processAttributes) extractTags() []string {
 	// TODO: check if this order should be changed.
 	switch {
 	case pattrs.ExecutableName != "": // otelcol
-		tags = append(tags, fmt.Sprintf("%s:%s", string(semconv16.ProcessExecutableNameKey), pattrs.ExecutableName))
+		tags[string(semconv16.ProcessExecutableNameKey)] = pattrs.ExecutableName
 	case pattrs.ExecutablePath != "": // /usr/bin/cmd/otelcol
-		tags = append(tags, fmt.Sprintf("%s:%s", string(semconv16.ProcessExecutablePathKey), pattrs.ExecutablePath))
+		tags[string(semconv16.ProcessExecutablePathKey)] = pattrs.ExecutablePath
 	case pattrs.Command != "": // cmd/otelcol
-		tags = append(tags, fmt.Sprintf("%s:%s", string(semconv16.ProcessCommandKey), pattrs.Command))
+		tags[string(semconv16.ProcessCommandKey)] = pattrs.Command
 	case pattrs.CommandLine != "": // cmd/otelcol --config="/path/to/config.yaml"
-		tags = append(tags, fmt.Sprintf("%s:%s", string(semconv16.ProcessCommandLineKey), pattrs.CommandLine))
+		tags[string(semconv16.ProcessCommandLineKey)] = pattrs.CommandLine
 	}
 
 	// For now, we don't care about the process ID nor the process owner.

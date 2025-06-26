@@ -4,9 +4,9 @@
     {
       "Name": "doubleHist.test.bucket",
       "Tags": [
+        "attribute_tag:attribute_value",
         "lower_bound:-inf",
-        "upper_bound:0",
-        "attribute_tag:attribute_value"
+        "upper_bound:0"
       ],
       "Host": "hostname",
       "OriginID": "",
@@ -20,9 +20,9 @@
     {
       "Name": "doubleHist.test.bucket",
       "Tags": [
+        "attribute_tag:attribute_value",
         "lower_bound:0",
-        "upper_bound:inf",
-        "attribute_tag:attribute_value"
+        "upper_bound:inf"
       ],
       "Host": "hostname",
       "OriginID": "",

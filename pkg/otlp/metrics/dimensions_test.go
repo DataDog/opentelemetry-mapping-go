@@ -41,14 +41,14 @@ func TestMetricDimensionsString(t *testing.T) {
 		dims := Dimensions{name: name, tags: tags, host: host}
 		return dims.String()
 	}
-	metricName := "metric.name"
+	mName := "metric.name"
 	hostOne := "host-one"
 	hostTwo := "host-two"
-	noTags := getKey(metricName, []string{}, hostOne)
-	someTags := getKey(metricName, []string{"key1:val1", "key2:val2"}, hostOne)
-	sameTags := getKey(metricName, []string{"key2:val2", "key1:val1"}, hostOne)
-	diffTags := getKey(metricName, []string{"key3:val3"}, hostOne)
-	diffHost := getKey(metricName, []string{"key1:val1", "key2:val2"}, hostTwo)
+	noTags := getKey(mName, []string{}, hostOne)
+	someTags := getKey(mName, []string{"key1:val1", "key2:val2"}, hostOne)
+	sameTags := getKey(mName, []string{"key2:val2", "key1:val1"}, hostOne)
+	diffTags := getKey(mName, []string{"key3:val3"}, hostOne)
+	diffHost := getKey(mName, []string{"key1:val1", "key2:val2"}, hostTwo)
 
 	assert.NotEqual(t, noTags, someTags)
 	assert.NotEqual(t, someTags, diffTags)
