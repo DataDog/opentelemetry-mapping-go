@@ -32,8 +32,8 @@
     {
       "Name": "summary.example.quantile",
       "Tags": [
-        "quantile:0",
-        "attribute_tag:attribute_value"
+        "attribute_tag:attribute_value",
+        "quantile:0"
       ],
       "Host": "hostname",
       "OriginID": "",
@@ -47,8 +47,8 @@
     {
       "Name": "summary.example.quantile",
       "Tags": [
-        "quantile:0.5",
-        "attribute_tag:attribute_value"
+        "attribute_tag:attribute_value",
+        "quantile:0.5"
       ],
       "Host": "hostname",
       "OriginID": "",
@@ -62,8 +62,8 @@
     {
       "Name": "summary.example.quantile",
       "Tags": [
-        "quantile:0.999",
-        "attribute_tag:attribute_value"
+        "attribute_tag:attribute_value",
+        "quantile:0.999"
       ],
       "Host": "hostname",
       "OriginID": "",
@@ -77,8 +77,8 @@
     {
       "Name": "summary.example.quantile",
       "Tags": [
-        "quantile:1.0",
-        "attribute_tag:attribute_value"
+        "attribute_tag:attribute_value",
+        "quantile:1.0"
       ],
       "Host": "hostname",
       "OriginID": "",

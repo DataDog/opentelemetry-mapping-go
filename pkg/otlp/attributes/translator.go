@@ -60,6 +60,16 @@ func (p *Translator) ResourceToSource(ctx context.Context, res pcommon.Resource,
 	return src, ok
 }
 
+// ResourceToSource gets a telemetry signal source from its resource attributes.
+func (p *Translator) AttributesMapToSource(ctx context.Context, attrs pcommon.Map, set attribute.Set, hostFromAttributesHandler HostFromAttributesHandler) (source.Source, bool) {
+	src, ok := SourceFromAttrs(attrs, hostFromAttributesHandler)
+	if !ok {
+		p.missingSources.Add(ctx, 1, metric.WithAttributeSet(set))
+	}
+
+	return src, ok
+}
+
 // AttributesToSource gets a telemetry signal source from a set of attributes.
 // As opposed to ResourceToSource, this does not keep track of failed requests.
 //

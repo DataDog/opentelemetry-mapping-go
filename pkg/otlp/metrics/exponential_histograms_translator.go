@@ -22,6 +22,7 @@ import (
 	"github.com/DataDog/sketches-go/ddsketch"
 	"github.com/DataDog/sketches-go/ddsketch/mapping"
 	"github.com/DataDog/sketches-go/ddsketch/store"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 
@@ -85,16 +86,17 @@ func (t *Translator) exponentialHistogramToDDSketch(
 func (t *Translator) mapExponentialHistogramMetrics(
 	ctx context.Context,
 	consumer Consumer,
-	dims *Dimensions,
 	slice pmetric.ExponentialHistogramDataPointSlice,
 	delta bool,
+	resolveDimsFromAttributes func(p *pcommon.Map) *Dimensions,
 ) {
 	for i := 0; i < slice.Len(); i++ {
 		p := slice.At(i)
 		startTs := uint64(p.StartTimestamp())
 		ts := uint64(p.Timestamp())
-		pointDims := dims.WithAttributeMap(p.Attributes())
 
+		attrs := p.Attributes()
+		pointDims := resolveDimsFromAttributes(&attrs)
 		histInfo := histogramInfo{ok: true}
 
 		countDims := pointDims.WithSuffix("count")
@@ -139,7 +141,7 @@ func (t *Translator) mapExponentialHistogramMetrics(
 		expHistDDSketch, err := t.exponentialHistogramToDDSketch(p, delta)
 		if err != nil {
 			t.logger.Debug("Failed to convert ExponentialHistogram into DDSketch",
-				zap.String("metric name", dims.name),
+				zap.String("metric name", pointDims.name),
 				zap.Error(err),
 			)
 			continue
@@ -148,7 +150,7 @@ func (t *Translator) mapExponentialHistogramMetrics(
 		agentSketch, err := quantile.ConvertDDSketchIntoSketch(expHistDDSketch)
 		if err != nil {
 			t.logger.Debug("Failed to convert DDSketch into Sketch",
-				zap.String("metric name", dims.name),
+				zap.String("metric name", pointDims.name),
 				zap.Error(err),
 			)
 			continue

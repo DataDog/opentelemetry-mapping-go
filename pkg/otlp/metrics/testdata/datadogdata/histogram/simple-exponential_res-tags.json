@@ -4,7 +4,8 @@
       "Name": "double.exponential.delta.histogram",
       "Tags": [
         "custom_attribute:custom_value",
-        "deployment.environment:dev"
+         "deployment.environment:dev",
+        "env:dev"
       ],
       "Host": "res-hostname",
       "OriginID": "",

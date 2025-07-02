@@ -15,7 +15,6 @@
 package attributes
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -27,13 +26,13 @@ func TestSystemExtractTags(t *testing.T) {
 		OSType: "windows",
 	}
 
-	assert.Equal(t, []string{
-		fmt.Sprintf("%s:%s", string(semconv16.OSTypeKey), "windows"),
+	assert.Equal(t, map[string]string{
+		string(semconv16.OSTypeKey): "windows",
 	}, sattrs.extractTags())
 }
 
 func TestSystemExtractTagsEmpty(t *testing.T) {
 	sattrs := systemAttributes{}
 
-	assert.Equal(t, []string{}, sattrs.extractTags())
+	assert.Equal(t, map[string]string{}, sattrs.extractTags())
 }
