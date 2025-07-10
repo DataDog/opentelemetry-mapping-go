@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.29.1
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/otlp/metrics`: Do not consume host or tags for ResourceMetrics that only contain APM metrics. (#721)
+
 ## v0.29.0
 
 ### 💡 Enhancements 💡
