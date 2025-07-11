@@ -69,6 +69,7 @@ type TimeSeriesConsumer interface {
 		dimensions *Dimensions,
 		typ DataType,
 		timestamp uint64,
+		interval int64,
 		value float64,
 	)
 }

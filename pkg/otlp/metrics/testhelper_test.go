@@ -71,6 +71,7 @@ type TestSketch struct {
 type TestTimeSeries struct {
 	TestDimensions
 	Type      DataType
+	Interval  int64
 	Timestamp uint64
 	Value     float64
 }
@@ -153,6 +154,7 @@ func (t *testConsumer) ConsumeTimeSeries(
 	dimensions *Dimensions,
 	typ DataType,
 	timestamp uint64,
+	interval int64,
 	value float64,
 ) {
 	t.data.Metrics.TimeSeries = append(t.data.Metrics.TimeSeries,

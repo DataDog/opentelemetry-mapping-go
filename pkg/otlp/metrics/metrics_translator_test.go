@@ -131,6 +131,7 @@ type metric struct {
 	name      string
 	typ       DataType
 	timestamp uint64
+	interval  int64
 	value     float64
 	tags      []string
 	host      string
@@ -155,6 +156,7 @@ func (m *mockTimeSeriesConsumer) ConsumeTimeSeries(
 	dimensions *Dimensions,
 	typ DataType,
 	ts uint64,
+	interval int64,
 	val float64,
 ) {
 	m.metrics = append(m.metrics,
@@ -162,6 +164,7 @@ func (m *mockTimeSeriesConsumer) ConsumeTimeSeries(
 			name:      dimensions.Name(),
 			typ:       typ,
 			timestamp: ts,
+			interval:  interval,
 			value:     val,
 			tags:      dimensions.Tags(),
 			host:      dimensions.Host(),
