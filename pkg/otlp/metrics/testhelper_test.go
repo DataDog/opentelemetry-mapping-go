@@ -178,6 +178,7 @@ func (t *testConsumer) ConsumeSketch(
 	_ context.Context,
 	dimensions *Dimensions,
 	timestamp uint64,
+	interval int64,
 	sketch *quantile.Sketch,
 ) {
 	k, n := sketch.Cols()

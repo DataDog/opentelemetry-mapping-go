@@ -141,6 +141,7 @@ type sketch struct {
 	name      string
 	basic     summary.Summary
 	timestamp uint64
+	interval  int64
 	tags      []string
 	host      string
 }
@@ -2061,12 +2062,13 @@ type mockFullConsumer struct {
 	sketches []sketch
 }
 
-func (c *mockFullConsumer) ConsumeSketch(_ context.Context, dimensions *Dimensions, ts uint64, sk *quantile.Sketch) {
+func (c *mockFullConsumer) ConsumeSketch(_ context.Context, dimensions *Dimensions, ts uint64, interval int64, sk *quantile.Sketch) {
 	c.sketches = append(c.sketches,
 		sketch{
 			name:      dimensions.Name(),
 			basic:     sk.Basic,
 			timestamp: ts,
+			interval:  interval,
 			tags:      dimensions.Tags(),
 			host:      dimensions.Host(),
 		},

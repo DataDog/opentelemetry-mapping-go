@@ -411,7 +411,7 @@ func (t *Translator) getSketchBuckets(
 			sketch.Basic.Max = math.Min(p.Max(), sketch.Basic.Max)
 		}
 
-		consumer.ConsumeSketch(ctx, pointDims, ts, sketch)
+		consumer.ConsumeSketch(ctx, pointDims, ts, 0, sketch)
 	}
 }
 

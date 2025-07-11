@@ -174,6 +174,6 @@ func (t *Translator) mapExponentialHistogramMetrics(
 			agentSketch.Basic.Max = p.Max()
 		}
 
-		consumer.ConsumeSketch(ctx, pointDims, ts, agentSketch)
+		consumer.ConsumeSketch(ctx, pointDims, ts, 0, agentSketch)
 	}
 }
