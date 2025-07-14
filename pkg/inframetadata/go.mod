@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.29.1
 	github.com/stretchr/testify v1.10.0
-	go.opentelemetry.io/collector/pdata v1.35.0
+	go.opentelemetry.io/collector/pdata v1.36.0
 	go.opentelemetry.io/otel v1.37.0
 	go.uber.org/zap v1.27.0
 )
