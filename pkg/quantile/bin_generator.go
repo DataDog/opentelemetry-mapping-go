@@ -13,9 +13,9 @@ type Bound struct {
 
 type DDSketchBinGenerator struct {
 	// Config is the configuration for the sketch.
-	Config  *Config
-	Bounds  []Bound
-	BondMap map[Key]*Bound
+	Config   *Config
+	Bounds   []Bound
+	BoundMap map[Key]*Bound
 }
 
 func NewDDSketchBinGeneratorForAgent() *DDSketchBinGenerator {
@@ -24,9 +24,9 @@ func NewDDSketchBinGeneratorForAgent() *DDSketchBinGenerator {
 
 func NewDDSketchBinGenerator(config *Config) *DDSketchBinGenerator {
 	dg := &DDSketchBinGenerator{
-		Config:  config,
-		Bounds:  make([]Bound, 0, defaultBinListSize),
-		BondMap: make(map[Key]*Bound, defaultBinLimit),
+		Config:   config,
+		Bounds:   make([]Bound, 0, defaultBinListSize),
+		BoundMap: make(map[Key]*Bound, defaultBinLimit),
 	}
 	dg.generateBounds()
 	return dg
@@ -43,12 +43,12 @@ func (g *DDSketchBinGenerator) generateBounds() {
 		low := g.Config.binLow(key)
 		b := Bound{Key: key, Low: low}
 		g.Bounds = append(g.Bounds, b)
-		g.BondMap[key] = &b
+		g.BoundMap[key] = &b
 	}
 }
 
 func (g *DDSketchBinGenerator) GetBound(key Key) (*Bound, bool) {
-	bound, ok := g.BondMap[key]
+	bound, ok := g.BoundMap[key]
 	if !ok {
 		return nil, false
 	}
