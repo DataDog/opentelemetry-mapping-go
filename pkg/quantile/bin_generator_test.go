@@ -21,8 +21,9 @@ func TestBinGenerator(t *testing.T) {
 		t.Fatal("Expected non-empty bounds")
 	}
 
+	half := generator.Config.binLimit / 2
 	for _, bound := range bounds {
-		if bound.Key < 0 || bound.Key >= Key(generator.Config.binLimit) {
+		if bound.Key < Key(-half) || bound.Key >= Key(half) {
 			t.Errorf("Key %d out of bounds", bound.Key)
 		}
 		if bound.Low < generator.Config.binLow(bound.Key) {
