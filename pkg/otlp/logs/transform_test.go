@@ -72,6 +72,36 @@ func TestTranslator(t *testing.T) {
 			},
 		},
 		{
+			// different attribute types
+			name: "basic",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					l.Attributes().PutStr("app", "test")
+					l.Attributes().PutBool("test_bool", true)
+					l.Attributes().PutInt("test_int", 1234)
+					l.Attributes().PutDouble("test_double", 1.234)
+					l.SetSeverityNumber(5)
+					return l
+				}(),
+				res:   pcommon.NewResource(),
+				scope: pcommon.NewInstrumentationScope(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString("otel_source:test"),
+				Message: *datadog.PtrString(""),
+				AdditionalProperties: map[string]interface{}{
+					"app":              "test",
+					"status":           "debug",
+					"test_bool":        true,
+					"test_int":         1234,
+					"test_double":      1.234,
+					otelSeverityNumber: "5",
+				},
+			},
+		},
+
+		{
 			// log & resource with attribute
 			name: "resource",
 			args: args{
