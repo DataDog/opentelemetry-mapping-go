@@ -4,6 +4,22 @@
 
 <!-- next version -->
 
+## v0.30.0
+
+### 🛑 Breaking changes 🛑
+
+- `pkg/otlp/metrics`: Add interval argument to Consumer methods. (#725)
+  All intervals passed as of this change will be 0, which is equivalent to the previous behavior.
+  
+
+### 💡 Enhancements 💡
+
+- `pkg/quantile`: Add a binary generator to the quantile package to facilitate DDSketch to OTLPHistogram conversion. (#738)
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/otlp/logs`: Log attribute values of type bool, int and double will be represented as such. Previously, they were incorrectly converted to string. (#740)
+
 ## v0.29.1
 
 ### 🧰 Bug fixes 🧰
