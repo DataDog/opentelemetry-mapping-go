@@ -6,12 +6,16 @@
 package metrics
 
 import (
+	"context"
+	"os"
 	"testing"
 
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
@@ -144,6 +148,28 @@ func TestDeltaHistogramTranslatorOptions(t *testing.T) {
 			AssertTranslatorMap(t, translator, testinstance.otlpfile, testinstance.ddogfile)
 		})
 	}
+}
+
+func TestNonMonotonicCount(t *testing.T) {
+	// Unmarshal OTLP data.
+	otlpbytes, err := os.ReadFile("testdata/otlpdata/histogram/simple-delta-non-monotonic-bound.json")
+	require.NoError(t, err, "failed to read OTLP file %q", "testdata/otlpdata/histogram/simple-delta-non-monotonic-bound.json")
+
+	var unmarshaler pmetric.JSONUnmarshaler
+	otlpdata, err := unmarshaler.UnmarshalMetrics(otlpbytes)
+	require.NoError(t, err, "failed to unmarshal OTLP data from file %q", "testdata/otlpdata/histogram/simple-delta-non-monotonic-bound.json")
+	// Map metrics using translator.
+	consumer := NewTestConsumer()
+	options := []TranslatorOption{WithOriginProduct(OriginProductDatadogAgent)}
+	set := componenttest.NewNopTelemetrySettings()
+	attributesTranslator, err := attributes.NewTranslator(set)
+	assert.NoError(t, err)
+
+	translator, err := NewTranslator(set, attributesTranslator, options...)
+	assert.NoError(t, err)
+
+	_, err = translator.MapMetrics(context.Background(), otlpdata, &consumer, nil)
+	assert.EqualError(t, err, quantile.ErrNonMonotonicBoundaries)
 }
 
 func TestCumulativeHistogramTranslatorOptions(t *testing.T) {
