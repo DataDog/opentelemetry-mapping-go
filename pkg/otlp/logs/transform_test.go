@@ -747,6 +747,20 @@ func TestTranslatorWithRUMRouting(t *testing.T) {
 			if !assert.JSONEq(t, string(ws), string(gs)) {
 				t.Errorf("Transform() = %v, want %v", string(gs), string(ws))
 			}
+
+			payloadsNoRouting := translator.MapLogsAndRouteRUMEvents(context.Background(), logs, nil, false)
+			require.Len(t, payloads, 1)
+			got = payloadsNoRouting[0]
+
+			gs, err = got.MarshalJSON()
+			require.NoError(t, err)
+
+			ws, err = tt.want.MarshalJSON()
+			require.NoError(t, err)
+
+			if !assert.JSONEq(t, string(ws), string(gs)) {
+				t.Errorf("Transform() = %v, want %v", string(gs), string(ws))
+			}
 		})
 	}
 }

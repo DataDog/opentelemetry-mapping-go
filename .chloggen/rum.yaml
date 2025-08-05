@@ -5,7 +5,7 @@ change_type: new_component
 component: pkg/otlp/rum
 
 # A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
-note: Add OTLP -> RUM translation and also enhance MapLogs so that it can be used for RUM event handling
+note: Add OTLP -> RUM translation and also deprecate MapLogs in favor of MapLogsAndRouteRUMEvents so that RUM events are handled.
 
 # The PR related to this change
 issues: [745]
