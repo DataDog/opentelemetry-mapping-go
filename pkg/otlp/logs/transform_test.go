@@ -15,8 +15,11 @@
 package logs
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
+	"net/http"
 	"testing"
 
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadog"
@@ -41,15 +44,17 @@ type translatorTestCase struct {
 	want datadogV2.HTTPLogItem
 }
 
+type args struct {
+	lr    plog.LogRecord
+	res   pcommon.Resource
+	scope pcommon.InstrumentationScope
+}
+
 func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, ddSp uint64) []translatorTestCase {
 	return []translatorTestCase{
 		{
 			name: "basic",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().PutStr("app", "test")
@@ -72,11 +77,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		{
 			// log & resource with attribute
 			name: "resource",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().PutStr("app", "test")
@@ -105,11 +106,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		{
 			// appends tags in attributes instead of replacing them
 			name: "append tags",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().PutStr("app", "test")
@@ -139,11 +136,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		{
 			// service name from log
 			name: "service",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().PutStr("app", "test")
@@ -168,11 +161,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		},
 		{
 			name: "trace",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().PutStr("app", "test")
@@ -203,11 +192,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		},
 		{
 			name: "trace from attributes",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().PutStr("app", "test")
@@ -238,11 +223,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		},
 		{
 			name: "trace from attributes (underscore)",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().PutStr("app", "test")
@@ -273,11 +254,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		},
 		{
 			name: "trace from attributes decode error",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().PutStr("app", "test")
@@ -306,11 +283,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		},
 		{
 			name: "trace from attributes size error",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().PutStr("app", "test")
@@ -338,11 +311,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		{
 			// here SeverityText should take precedence for log status
 			name: "SeverityText",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().PutStr("app", "test")
@@ -375,11 +344,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		},
 		{
 			name: "body",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().PutStr("app", "test")
@@ -412,11 +377,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		},
 		{
 			name: "log-level",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().PutStr("app", "test")
@@ -448,11 +409,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		},
 		{
 			name: "resource attributes in additional properties",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().PutStr("app", "test")
@@ -482,11 +439,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		},
 		{
 			name: "DD hostname and service are not overridden by resource attributes",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().PutStr("app", "test")
@@ -515,11 +468,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		},
 		{
 			name: "Nestings",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().FromRaw(
@@ -555,11 +504,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		},
 		{
 			name: "Nil Map",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().FromRaw(nil)
@@ -578,11 +523,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		},
 		{
 			name: "Too many nestings",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Attributes().FromRaw(
@@ -632,11 +573,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		},
 		{
 			name: "Timestamps are formatted properly",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.SetTimestamp(pcommon.Timestamp(uint64(1700499303397000000)))
@@ -659,11 +596,7 @@ func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, 
 		},
 		{
 			name: "scope attributes",
-			args: struct {
-				lr    plog.LogRecord
-				res   pcommon.Resource
-				scope pcommon.InstrumentationScope
-			}{
+			args: args{
 				lr: func() plog.LogRecord {
 					l := plog.NewLogRecord()
 					l.Body().SetStr("hello world")
@@ -734,6 +667,16 @@ func TestTranslator(t *testing.T) {
 	}
 }
 
+type mockHTTPClient struct{}
+
+func (m *mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
+	body := io.NopCloser(bytes.NewReader([]byte(`{"ok": true}`)))
+	return &http.Response{
+		StatusCode: http.StatusAccepted,
+		Body:       body,
+	}, nil
+}
+
 func TestTranslatorWithRUMRouting(t *testing.T) {
 	traceID := [16]byte{0x08, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x0, 0x0, 0x0, 0x0, 0x0a}
 	var spanID [8]byte
@@ -742,12 +685,37 @@ func TestTranslatorWithRUMRouting(t *testing.T) {
 	ddSp := spanIDToUint64(spanID)
 
 	tests := generateTranslatorTestCases(traceID, spanID, ddTr, ddSp)
+	rumTests := []translatorTestCase{
+		{
+			name: "basic-rum",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					l.Attributes().PutStr("session.id", "123")
+					l.Attributes().PutStr("span_id", "2e26da881214cd7c")
+					l.Attributes().PutStr("trace_id", "740112b325075be8c80a48de336ebc67")
+					return l
+				}(),
+				res: func() pcommon.Resource {
+					r := pcommon.NewResource()
+					r.Attributes().PutStr("request_ddforward", "/v1/rum/events")
+					return r
+				}(),
+				scope: pcommon.NewInstrumentationScope(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString("otel_source:test"),
+				Message: *datadog.PtrString(""),
+			},
+		},
+	}
+	tests = append(tests, rumTests...)
 
 	set := componenttest.NewNopTelemetrySettings()
 	set.Logger = zaptest.NewLogger(t)
 	attributesTranslator, err := attributes.NewTranslator(set)
 	require.NoError(t, err)
-	translator, err := NewTranslator(set, attributesTranslator, "test")
+	translator, err := NewTranslatorWithHTTPClient(set, attributesTranslator, "test", &mockHTTPClient{})
 	require.NoError(t, err)
 
 	for _, tt := range tests {
@@ -760,6 +728,13 @@ func TestTranslatorWithRUMRouting(t *testing.T) {
 			tt.args.lr.CopyTo(sl.LogRecords().AppendEmpty())
 
 			payloads := translator.MapLogsAndRouteRUMEvents(context.Background(), logs, nil, true)
+
+			attributes := sl.LogRecords().At(0).Attributes()
+			if _, ok := attributes.Get("session.id"); ok {
+				require.Len(t, payloads, 0)
+				return
+			}
+
 			require.Len(t, payloads, 1)
 			got := payloads[0]
 

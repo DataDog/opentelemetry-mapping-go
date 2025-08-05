@@ -38,11 +38,22 @@ var (
 	signalTypeSet = attribute.NewSet(attribute.String("signal", "logs"))
 )
 
+type HTTPClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 // Translator of OTLP logs to Datadog format
 type Translator struct {
 	set                  component.TelemetrySettings
 	attributesTranslator *attributes.Translator
 	otelTag              string
+}
+
+type TranslatorWithHTTPClient struct {
+	set                  component.TelemetrySettings
+	attributesTranslator *attributes.Translator
+	otelTag              string
+	httpClient           HTTPClient
 }
 
 // NewTranslator returns a new Translator
@@ -51,6 +62,18 @@ func NewTranslator(set component.TelemetrySettings, attributesTranslator *attrib
 		set:                  set,
 		attributesTranslator: attributesTranslator,
 		otelTag:              "otel_source:" + otelSource,
+	}, nil
+}
+
+func NewTranslatorWithHTTPClient(set component.TelemetrySettings, attributesTranslator *attributes.Translator, otelSource string, client HTTPClient) (*TranslatorWithHTTPClient, error) {
+	if client == nil {
+		client = &http.Client{Timeout: 10 * time.Second}
+	}
+	return &TranslatorWithHTTPClient{
+		set:                  set,
+		attributesTranslator: attributesTranslator,
+		otelTag:              "otel_source:" + otelSource,
+		httpClient:           client,
 	}, nil
 }
 
@@ -71,8 +94,25 @@ func (t *Translator) hostFromAttributes(ctx context.Context, attrs pcommon.Map) 
 	return ""
 }
 
+func (t *TranslatorWithHTTPClient) hostNameAndServiceNameFromResource(ctx context.Context, res pcommon.Resource, hostFromAttributesHandler attributes.HostFromAttributesHandler) (host string, service string) {
+	if src, ok := t.attributesTranslator.ResourceToSource(ctx, res, signalTypeSet, hostFromAttributesHandler); ok && src.Kind == source.HostnameKind {
+		host = src.Identifier
+	}
+	if s, ok := res.Attributes().Get(string(conventions.ServiceNameKey)); ok {
+		service = s.AsString()
+	}
+	return host, service
+}
+
+func (t *TranslatorWithHTTPClient) hostFromAttributes(ctx context.Context, attrs pcommon.Map) string {
+	if src, ok := t.attributesTranslator.AttributesToSource(ctx, attrs); ok && src.Kind == source.HostnameKind {
+		return src.Identifier
+	}
+	return ""
+}
+
 // MapLogsAndRouteRUMEvents from OTLP format to Datadog format if shouldForwardOTLPRUMToDDRUM is true.
-func (t *Translator) MapLogsAndRouteRUMEvents(ctx context.Context, ld plog.Logs, hostFromAttributesHandler attributes.HostFromAttributesHandler, shouldForwardOTLPRUMToDDRUM bool) []datadogV2.HTTPLogItem {
+func (t *TranslatorWithHTTPClient) MapLogsAndRouteRUMEvents(ctx context.Context, ld plog.Logs, hostFromAttributesHandler attributes.HostFromAttributesHandler, shouldForwardOTLPRUMToDDRUM bool) []datadogV2.HTTPLogItem {
 	rsl := ld.ResourceLogs()
 	var payloads []datadogV2.HTTPLogItem
 	for i := 0; i < rsl.Len(); i++ {
@@ -89,10 +129,6 @@ func (t *Translator) MapLogsAndRouteRUMEvents(ctx context.Context, ld plog.Logs,
 				logRecord := lsl.At(k)
 				if shouldForwardOTLPRUMToDDRUM {
 					if _, isRum := logRecord.Attributes().Get("session.id"); isRum {
-						client := &http.Client{
-							Timeout: 10 * time.Second,
-						}
-
 						rattr := rl.Resource().Attributes()
 						lattr := logRecord.Attributes()
 
@@ -123,7 +159,7 @@ func (t *Translator) MapLogsAndRouteRUMEvents(ctx context.Context, ld plog.Logs,
 						req.Header.Set("Content-Type", "text/plain;charset=UTF-8")
 
 						// send the request to the Datadog intake URL
-						resp, err := client.Do(req)
+						resp, err := t.httpClient.Do(req)
 						if err != nil {
 							t.set.Logger.Error("failed to send request: %v", zap.Error(err))
 							return []datadogV2.HTTPLogItem{}
