@@ -340,7 +340,7 @@ func (t *Translator) getSketchBuckets(
 		originalLowerBound, originalUpperBound := lowerBound, upperBound
 
 		// Compute temporary bucketTags to have unique keys in the t.prevPts cache for each bucket
-		// The bucketTags are computed from the bounds before the InsertIntrp fix is done,
+		// The bucketTags are computed from the bounds before the InsertInterpolate fix is done,
 		// otherwise in the case where p.MExplicitBounds() has a size of 1 (eg. [0]), the two buckets
 		// would have the same bucketTags (lower_bound:0 and upper_bound:0), resulting in a buggy behavior.
 		bucketDims := pointDims.AddTags(
@@ -348,7 +348,7 @@ func (t *Translator) getSketchBuckets(
 			fmt.Sprintf("upper_bound:%s", formatFloat(upperBound)),
 		)
 
-		// InsertIntrp doesn't work with an infinite bound; insert in to the bucket that contains the non-infinite bound
+		// InsertInterpolate doesn't work with an infinite bound; insert in to the bucket that contains the non-infinite bound
 		// https://github.com/DataDog/datadog-agent/blob/7.31.0/pkg/aggregator/check_sampler.go#L107-L111
 		if math.IsInf(upperBound, 1) {
 			upperBound = lowerBound
@@ -360,13 +360,13 @@ func (t *Translator) getSketchBuckets(
 		var nonZeroBucket bool
 		if delta {
 			nonZeroBucket = count > 0
-			err := as.InsertIntrp(lowerBound, upperBound, uint(count))
+			err := as.InsertInterpolate(lowerBound, upperBound, uint(count))
 			if err != nil {
 				return err
 			}
 		} else if dx, ok := t.prevPts.Diff(bucketDims, startTs, ts, float64(count)); ok {
 			nonZeroBucket = dx > 0
-			err := as.InsertIntrp(lowerBound, upperBound, uint(dx))
+			err := as.InsertInterpolate(lowerBound, upperBound, uint(dx))
 			if err != nil {
 				return err
 			}

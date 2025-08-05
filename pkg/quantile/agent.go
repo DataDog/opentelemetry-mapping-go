@@ -88,55 +88,7 @@ func (a *Agent) Insert(v float64, sampleRate float64) {
 }
 
 // InsertInterpolate linearly interpolates a count from the given lower to upper bounds
-//
-// Deprecated: use InsertIntrp instead.
-func (a *Agent) InsertInterpolate(lower float64, upper float64, count uint) {
-	keys := make([]Key, 0)
-	for k := agentConfig.key(lower); k <= agentConfig.key(upper); k++ {
-		keys = append(keys, k)
-	}
-	whatsLeft := int(count)
-	distance := upper - lower
-	startIdx := 0
-	lowerB := agentConfig.binLow(keys[startIdx])
-	endIdx := 1
-	var remainder float64
-	for endIdx < len(keys) && whatsLeft > 0 {
-		upperB := agentConfig.binLow(keys[endIdx])
-		// ((upperB - lowerB) / distance) is the ratio of the distance between the current buckets to the total distance
-		// which tells us how much of the remaining value to put in this bucket
-		fkn := ((upperB - lowerB) / distance) * float64(count)
-		// only track the remainder if fkn is >1 because we designed this to not store a bunch of 0 count buckets
-		if fkn > 1 {
-			remainder += fkn - float64(int(fkn))
-		}
-		kn := int(fkn)
-		if remainder > 1 {
-			kn++
-			remainder--
-		}
-		if kn > 0 {
-			// Guard against overflow at the end
-			if kn > whatsLeft {
-				kn = whatsLeft
-			}
-			a.Sketch.Basic.InsertN(lowerB, float64(kn))
-			a.CountBuf = append(a.CountBuf, KeyCount{k: keys[startIdx], n: uint(kn)})
-			whatsLeft -= kn
-			startIdx = endIdx
-			lowerB = upperB
-		}
-		endIdx++
-	}
-	if whatsLeft > 0 {
-		a.Sketch.Basic.InsertN(agentConfig.binLow(keys[startIdx]), float64(whatsLeft))
-		a.CountBuf = append(a.CountBuf, KeyCount{k: keys[startIdx], n: uint(whatsLeft)})
-	}
-	a.flush()
-}
-
-// InsertIntrp linearly interpolates a count from the given lower to upper bounds
-func (a *Agent) InsertIntrp(lower float64, upper float64, count uint) error {
+func (a *Agent) InsertInterpolate(lower float64, upper float64, count uint) error {
 	keys := make([]Key, 0)
 	for k := agentConfig.key(lower); k <= agentConfig.key(upper); k++ {
 		keys = append(keys, k)
