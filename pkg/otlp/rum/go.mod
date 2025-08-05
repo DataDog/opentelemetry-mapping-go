@@ -1,4 +1,4 @@
-module github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/rum
+module github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/rum
 
 go 1.23.0
 
