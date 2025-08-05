@@ -21,12 +21,9 @@ func TestBuildRumPayload(t *testing.T) {
 		expected map[string]any
 	}{
 		{
-			name: "string value",
-			key:  "test.key",
-			value: func() pcommon.Value {
-				v := pcommon.NewValueStr("test_value")
-				return v
-			}(),
+			name:  "string value",
+			key:   "test.key",
+			value: pcommon.NewValueStr("test_value"),
 			expected: map[string]any{
 				"test": map[string]any{
 					"key": "test_value",
@@ -34,45 +31,33 @@ func TestBuildRumPayload(t *testing.T) {
 			},
 		},
 		{
-			name: "int value",
-			key:  "count",
-			value: func() pcommon.Value {
-				v := pcommon.NewValueInt(42)
-				return v
-			}(),
+			name:  "int value",
+			key:   "count",
+			value: pcommon.NewValueInt(42),
 			expected: map[string]any{
 				"count": int64(42),
 			},
 		},
 		{
-			name: "double value",
-			key:  "score",
-			value: func() pcommon.Value {
-				v := pcommon.NewValueDouble(3.14)
-				return v
-			}(),
+			name:  "double value",
+			key:   "score",
+			value: pcommon.NewValueDouble(3.14),
 			expected: map[string]any{
 				"score": 3.14,
 			},
 		},
 		{
-			name: "bool value",
-			key:  "enabled",
-			value: func() pcommon.Value {
-				v := pcommon.NewValueBool(true)
-				return v
-			}(),
+			name:  "bool value",
+			key:   "enabled",
+			value: pcommon.NewValueBool(true),
 			expected: map[string]any{
 				"enabled": true,
 			},
 		},
 		{
-			name: "deep nested structure",
-			key:  "a.b.c.d.e",
-			value: func() pcommon.Value {
-				v := pcommon.NewValueStr("test_value")
-				return v
-			}(),
+			name:  "deep nested structure",
+			key:   "a.b.c.d.e",
+			value: pcommon.NewValueStr("test_value"),
 			expected: map[string]any{
 				"a": map[string]any{
 					"b": map[string]any{
@@ -125,6 +110,26 @@ func TestBuildRumPayload(t *testing.T) {
 			}(),
 			expected: map[string]any{
 				"": "empty_key_value",
+			},
+		},
+		{
+			name:  "nil map value",
+			key:   "test.key",
+			value: pcommon.NewValueMap(),
+			expected: map[string]any{
+				"test": map[string]any{
+					"key": nil,
+				},
+			},
+		},
+		{
+			name:  "empty bytes value",
+			key:   "test.key",
+			value: pcommon.NewValueBytes(),
+			expected: map[string]any{
+				"test": map[string]any{
+					"key": nil,
+				},
 			},
 		},
 	}
