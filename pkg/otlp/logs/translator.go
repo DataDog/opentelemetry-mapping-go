@@ -71,8 +71,8 @@ func (t *Translator) hostFromAttributes(ctx context.Context, attrs pcommon.Map) 
 	return ""
 }
 
-// MapLogs from OTLP format to Datadog format.
-func (t *Translator) MapLogs(ctx context.Context, ld plog.Logs, hostFromAttributesHandler attributes.HostFromAttributesHandler) []datadogV2.HTTPLogItem {
+// MapLogsAndRouteRUMEvents from OTLP format to Datadog format if shouldForwardOTLPRUMToDDRUM is true.
+func (t *Translator) MapLogsAndRouteRUMEvents(ctx context.Context, ld plog.Logs, hostFromAttributesHandler attributes.HostFromAttributesHandler, shouldForwardOTLPRUMToDDRUM bool) []datadogV2.HTTPLogItem {
 	rsl := ld.ResourceLogs()
 	var payloads []datadogV2.HTTPLogItem
 	for i := 0; i < rsl.Len(); i++ {
@@ -87,9 +87,7 @@ func (t *Translator) MapLogs(ctx context.Context, ld plog.Logs, hostFromAttribut
 			// iterate over Logs
 			for k := 0; k < lsl.Len(); k++ {
 				logRecord := lsl.At(k)
-				//TODO (OTEL-2731): get forward_otlp_rum_to_dd_rum from config instead of setting to true
-				forward_otlp_rum_to_dd_rum := true
-				if forward_otlp_rum_to_dd_rum {
+				if shouldForwardOTLPRUMToDDRUM {
 					if _, isRum := logRecord.Attributes().Get("session.id"); isRum {
 						client := &http.Client{
 							Timeout: 10 * time.Second,
@@ -133,6 +131,7 @@ func (t *Translator) MapLogs(ctx context.Context, ld plog.Logs, hostFromAttribut
 						defer func(Body io.ReadCloser) {
 							err := Body.Close()
 							if err != nil {
+								t.set.Logger.Error("failed to close response body: %v", zap.Error(err))
 							}
 						}(resp.Body)
 
@@ -164,6 +163,48 @@ func (t *Translator) MapLogs(ctx context.Context, ld plog.Logs, hostFromAttribut
 				}
 
 				payload := transform(logRecord, host, service, res, scope, t.set.Logger)
+				ddtags := payload.GetDdtags()
+				if ddtags != "" {
+					payload.SetDdtags(ddtags + "," + t.otelTag)
+				} else {
+					payload.SetDdtags(t.otelTag)
+				}
+				payloads = append(payloads, payload)
+			}
+		}
+	}
+	return payloads
+}
+
+// MapLogs from OTLP format to Datadog format.
+// Deprecated: Deprecated in favor of MapLogsAndRouteRUMEvents.
+func (t *Translator) MapLogs(ctx context.Context, ld plog.Logs, hostFromAttributesHandler attributes.HostFromAttributesHandler) []datadogV2.HTTPLogItem {
+	rsl := ld.ResourceLogs()
+	var payloads []datadogV2.HTTPLogItem
+	for i := 0; i < rsl.Len(); i++ {
+		rl := rsl.At(i)
+		sls := rl.ScopeLogs()
+		res := rl.Resource()
+		host, service := t.hostNameAndServiceNameFromResource(ctx, res, hostFromAttributesHandler)
+		for j := 0; j < sls.Len(); j++ {
+			sl := sls.At(j)
+			lsl := sl.LogRecords()
+			scope := sl.Scope()
+			// iterate over Logs
+			for k := 0; k < lsl.Len(); k++ {
+				log := lsl.At(k)
+				// HACK: Check for host and service in log record attributes
+				// This is not aligned with the specification and will be removed in the future.
+				if host == "" {
+					host = t.hostFromAttributes(ctx, log.Attributes())
+				}
+				if service == "" {
+					if s, ok := log.Attributes().Get(string(conventions.ServiceNameKey)); ok {
+						service = s.AsString()
+					}
+				}
+
+				payload := transform(log, host, service, res, scope, t.set.Logger)
 				ddtags := payload.GetDdtags()
 				if ddtags != "" {
 					payload.SetDdtags(ddtags + "," + t.otelTag)
