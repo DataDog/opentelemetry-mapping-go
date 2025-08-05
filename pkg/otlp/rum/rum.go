@@ -40,17 +40,14 @@ func buildRumPayload(k string, v pcommon.Value, rumPayload map[string]any) {
 				}
 			}
 		} else {
-			if _, ok := current[part]; !ok {
+			existing, ok := current[part]
+			if !ok {
+				current[part] = make(map[string]any)
+			} else if _, isMap := existing.(map[string]any); !isMap {
+				// force override if it's not a map
 				current[part] = make(map[string]any)
 			}
-
-			// in case the current part is not a map, we should override it with a map to avoid type assertion errors
-			next, ok := current[part].(map[string]any)
-			if !ok {
-				next = make(map[string]any)
-				current[part] = next
-			}
-			current = next
+			current = current[part].(map[string]any)
 		}
 	}
 }
