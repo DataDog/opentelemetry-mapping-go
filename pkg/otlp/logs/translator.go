@@ -128,12 +128,13 @@ func (t *Translator) MapLogsAndRouteRUMEvents(ctx context.Context, ld plog.Logs,
 							t.set.Logger.Error("failed to send request: %v", zap.Error(err))
 							return []datadogV2.HTTPLogItem{}
 						}
-						defer func(Body io.ReadCloser) {
-							err := Body.Close()
-							if err != nil {
-								t.set.Logger.Error("failed to close response body: %v", zap.Error(err))
-							}
-						}(resp.Body)
+						if resp != nil && resp.Body != nil {
+							defer func() {
+								if cerr := resp.Body.Close(); cerr != nil {
+									t.set.Logger.Error("failed to close response body: %v", zap.Error(cerr))
+								}
+							}()
+						}
 
 						// read the response body
 						body, err := io.ReadAll(resp.Body)
