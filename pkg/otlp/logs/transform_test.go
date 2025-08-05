@@ -727,7 +727,9 @@ func TestTranslator(t *testing.T) {
 			ws, err := tt.want.MarshalJSON()
 			require.NoError(t, err)
 
-			assert.JSONEq(t, string(ws), string(gs))
+			if !assert.JSONEq(t, string(ws), string(gs)) {
+				t.Errorf("Transform() = %v, want %v", string(gs), string(ws))
+			}
 		})
 	}
 }
@@ -757,7 +759,7 @@ func TestTranslatorWithRUMRouting(t *testing.T) {
 			tt.args.scope.MoveTo(sl.Scope())
 			tt.args.lr.CopyTo(sl.LogRecords().AppendEmpty())
 
-			payloads := translator.MapLogsAndRouteRUMEvents(context.Background(), logs, nil, false)
+			payloads := translator.MapLogsAndRouteRUMEvents(context.Background(), logs, nil, true)
 			require.Len(t, payloads, 1)
 			got := payloads[0]
 
@@ -767,7 +769,9 @@ func TestTranslatorWithRUMRouting(t *testing.T) {
 			ws, err := tt.want.MarshalJSON()
 			require.NoError(t, err)
 
-			assert.JSONEq(t, string(ws), string(gs))
+			if !assert.JSONEq(t, string(ws), string(gs)) {
+				t.Errorf("Transform() = %v, want %v", string(gs), string(ws))
+			}
 		})
 	}
 }
