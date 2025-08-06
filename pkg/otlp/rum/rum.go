@@ -18,11 +18,14 @@ func buildRumPayload(k string, v pcommon.Value, rumPayload map[string]any) {
 	for i, part := range parts {
 		if i != len(parts)-1 {
 			existing, ok := current[part]
-			if !ok {
+			switch {
+			case !ok:
 				current[part] = make(map[string]any)
-			} else if _, isMap := existing.(map[string]any); !isMap {
-				// force override if it's not a map
-				current[part] = make(map[string]any)
+			default:
+				if _, isMap := existing.(map[string]any); !isMap {
+					// force override if it's not a map
+					current[part] = make(map[string]any)
+				}
 			}
 			current = current[part].(map[string]any)
 			continue
