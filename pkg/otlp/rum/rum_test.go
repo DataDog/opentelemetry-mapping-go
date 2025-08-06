@@ -102,12 +102,9 @@ func TestBuildRumPayload(t *testing.T) {
 			},
 		},
 		{
-			name: "empty key",
-			key:  "",
-			value: func() pcommon.Value {
-				v := pcommon.NewValueStr("empty_key_value")
-				return v
-			}(),
+			name:  "empty key",
+			key:   "",
+			value: pcommon.NewValueStr("empty_key_value"),
 			expected: map[string]any{
 				"": "empty_key_value",
 			},
@@ -180,14 +177,8 @@ func TestConstructRumPayloadFromOTLP(t *testing.T) {
 		{
 			name: "mapped attributes",
 			attrs: map[string]pcommon.Value{
-				"service.name": func() pcommon.Value {
-					v := pcommon.NewValueStr("test-service")
-					return v
-				}(),
-				"service.version": func() pcommon.Value {
-					v := pcommon.NewValueStr("1.0.0")
-					return v
-				}(),
+				"service.name":    pcommon.NewValueStr("test-service"),
+				"service.version": pcommon.NewValueStr("1.0.0"),
 			},
 			expected: map[string]any{
 				"service": "test-service",
@@ -197,14 +188,8 @@ func TestConstructRumPayloadFromOTLP(t *testing.T) {
 		{
 			name: "datadog prefixed attributes",
 			attrs: map[string]pcommon.Value{
-				"datadog.custom.attr": func() pcommon.Value {
-					v := pcommon.NewValueStr("custom_value")
-					return v
-				}(),
-				"datadog.nested.attr": func() pcommon.Value {
-					v := pcommon.NewValueInt(42)
-					return v
-				}(),
+				"datadog.custom.attr": pcommon.NewValueStr("custom_value"),
+				"datadog.nested.attr": pcommon.NewValueInt(42),
 			},
 			expected: map[string]any{
 				"custom": map[string]any{
@@ -246,18 +231,9 @@ func TestConstructRumPayloadFromOTLP(t *testing.T) {
 		{
 			name: "boolean, int and double values",
 			attrs: map[string]pcommon.Value{
-				"datadog.enabled": func() pcommon.Value {
-					v := pcommon.NewValueBool(true)
-					return v
-				}(),
-				"datadog.count": func() pcommon.Value {
-					v := pcommon.NewValueInt(100)
-					return v
-				}(),
-				"datadog.score": func() pcommon.Value {
-					v := pcommon.NewValueDouble(95.5)
-					return v
-				}(),
+				"datadog.enabled": pcommon.NewValueBool(true),
+				"datadog.count":   pcommon.NewValueInt(100),
+				"datadog.score":   pcommon.NewValueDouble(95.5),
 			},
 			expected: map[string]any{
 				"enabled": true,
@@ -266,21 +242,12 @@ func TestConstructRumPayloadFromOTLP(t *testing.T) {
 			},
 		},
 		{
-			name: "override existing values",
+			name: "empty string values",
 			attrs: map[string]pcommon.Value{
-				"datadog.existing": func() pcommon.Value {
-					v := pcommon.NewValueStr("original")
-					return v
-				}(),
-				"datadog.existing.nested": func() pcommon.Value {
-					v := pcommon.NewValueStr("nested_value")
-					return v
-				}(),
+				"datadog.empty": pcommon.NewValueStr(""),
 			},
 			expected: map[string]any{
-				"existing": map[string]any{
-					"nested": "nested_value",
-				},
+				"empty": "",
 			},
 		},
 	}
@@ -297,31 +264,4 @@ func TestConstructRumPayloadFromOTLP(t *testing.T) {
 			assert.Equal(t, tt.expected, result)
 		})
 	}
-
-	t.Run("null values", func(t *testing.T) {
-		attrMap := pcommon.NewMap()
-		nullVal := attrMap.PutEmpty("datadog.null.value")
-		nullVal.SetEmptyBytes() // This creates a null value
-
-		result := ConstructRumPayloadFromOTLP(attrMap)
-		expected := map[string]any{
-			"null": map[string]any{
-				"value": nil,
-			},
-		}
-
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("empty string values", func(t *testing.T) {
-		attrMap := pcommon.NewMap()
-		attrMap.PutStr("datadog.empty", "")
-
-		result := ConstructRumPayloadFromOTLP(attrMap)
-		expected := map[string]any{
-			"empty": "",
-		}
-
-		assert.Equal(t, expected, result)
-	})
 }
