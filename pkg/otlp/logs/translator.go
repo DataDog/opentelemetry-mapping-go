@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -47,12 +48,6 @@ type Translator struct {
 	set                  component.TelemetrySettings
 	attributesTranslator *attributes.Translator
 	otelTag              string
-}
-
-type TranslatorWithHTTPClient struct {
-	set                  component.TelemetrySettings
-	attributesTranslator *attributes.Translator
-	otelTag              string
 	httpClient           HTTPClient
 }
 
@@ -62,14 +57,15 @@ func NewTranslator(set component.TelemetrySettings, attributesTranslator *attrib
 		set:                  set,
 		attributesTranslator: attributesTranslator,
 		otelTag:              "otel_source:" + otelSource,
+		httpClient:           nil,
 	}, nil
 }
 
-func NewTranslatorWithHTTPClient(set component.TelemetrySettings, attributesTranslator *attributes.Translator, otelSource string, client HTTPClient) (*TranslatorWithHTTPClient, error) {
+func NewTranslatorWithHTTPClient(set component.TelemetrySettings, attributesTranslator *attributes.Translator, otelSource string, client HTTPClient) (*Translator, error) {
 	if client == nil {
 		client = &http.Client{Timeout: 10 * time.Second}
 	}
-	return &TranslatorWithHTTPClient{
+	return &Translator{
 		set:                  set,
 		attributesTranslator: attributesTranslator,
 		otelTag:              "otel_source:" + otelSource,
@@ -94,25 +90,12 @@ func (t *Translator) hostFromAttributes(ctx context.Context, attrs pcommon.Map) 
 	return ""
 }
 
-func (t *TranslatorWithHTTPClient) hostNameAndServiceNameFromResource(ctx context.Context, res pcommon.Resource, hostFromAttributesHandler attributes.HostFromAttributesHandler) (host string, service string) {
-	if src, ok := t.attributesTranslator.ResourceToSource(ctx, res, signalTypeSet, hostFromAttributesHandler); ok && src.Kind == source.HostnameKind {
-		host = src.Identifier
-	}
-	if s, ok := res.Attributes().Get(string(conventions.ServiceNameKey)); ok {
-		service = s.AsString()
-	}
-	return host, service
-}
-
-func (t *TranslatorWithHTTPClient) hostFromAttributes(ctx context.Context, attrs pcommon.Map) string {
-	if src, ok := t.attributesTranslator.AttributesToSource(ctx, attrs); ok && src.Kind == source.HostnameKind {
-		return src.Identifier
-	}
-	return ""
-}
-
 // MapLogsAndRouteRUMEvents from OTLP format to Datadog format if shouldForwardOTLPRUMToDDRUM is true.
-func (t *TranslatorWithHTTPClient) MapLogsAndRouteRUMEvents(ctx context.Context, ld plog.Logs, hostFromAttributesHandler attributes.HostFromAttributesHandler, shouldForwardOTLPRUMToDDRUM bool) []datadogV2.HTTPLogItem {
+func (t *Translator) MapLogsAndRouteRUMEvents(ctx context.Context, ld plog.Logs, hostFromAttributesHandler attributes.HostFromAttributesHandler, shouldForwardOTLPRUMToDDRUM bool) ([]datadogV2.HTTPLogItem, error) {
+	if t.httpClient == nil {
+		return nil, fmt.Errorf("httpClient is nil")
+	}
+
 	rsl := ld.ResourceLogs()
 	var payloads []datadogV2.HTTPLogItem
 	for i := 0; i < rsl.Len(); i++ {
@@ -140,14 +123,12 @@ func (t *TranslatorWithHTTPClient) MapLogsAndRouteRUMEvents(ctx context.Context,
 						rumPayload := rum.ConstructRumPayloadFromOTLP(lattr)
 						byts, err := json.Marshal(rumPayload)
 						if err != nil {
-							t.set.Logger.Error("failed to marshal RUM payload: %v", zap.Error(err))
-							return []datadogV2.HTTPLogItem{}
+							return []datadogV2.HTTPLogItem{}, fmt.Errorf("failed to marshal RUM payload: %w", err)
 						}
 
 						req, err := http.NewRequest("POST", outUrlString, bytes.NewBuffer(byts))
 						if err != nil {
-							t.set.Logger.Error("failed to create request: %v", zap.Error(err))
-							return []datadogV2.HTTPLogItem{}
+							return []datadogV2.HTTPLogItem{}, fmt.Errorf("failed to create request: %w", err)
 						}
 
 						// add X-Forwarded-For header containing the request client IP address
@@ -161,8 +142,7 @@ func (t *TranslatorWithHTTPClient) MapLogsAndRouteRUMEvents(ctx context.Context,
 						// send the request to the Datadog intake URL
 						resp, err := t.httpClient.Do(req)
 						if err != nil {
-							t.set.Logger.Error("failed to send request: %v", zap.Error(err))
-							return []datadogV2.HTTPLogItem{}
+							return []datadogV2.HTTPLogItem{}, fmt.Errorf("failed to send request: %w", err)
 						}
 						if resp != nil && resp.Body != nil {
 							defer func() {
@@ -175,14 +155,12 @@ func (t *TranslatorWithHTTPClient) MapLogsAndRouteRUMEvents(ctx context.Context,
 						// read the response body
 						body, err := io.ReadAll(resp.Body)
 						if err != nil {
-							t.set.Logger.Error("failed to read response: %v", zap.Error(err))
-							return []datadogV2.HTTPLogItem{}
+							return []datadogV2.HTTPLogItem{}, fmt.Errorf("failed to read response: %w", err)
 						}
 
 						// check the status code of the response
 						if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
-							t.set.Logger.Error("received non-OK response: status: %s, body: %s", zap.String("status", resp.Status), zap.String("body", string(body)))
-							return []datadogV2.HTTPLogItem{}
+							return []datadogV2.HTTPLogItem{}, fmt.Errorf("received non-OK response: status: %s, body: %s", resp.Status, string(body))
 						}
 						t.set.Logger.Info("Response:", zap.String("body", string(body)))
 						continue
@@ -210,7 +188,7 @@ func (t *TranslatorWithHTTPClient) MapLogsAndRouteRUMEvents(ctx context.Context,
 			}
 		}
 	}
-	return payloads
+	return payloads, nil
 }
 
 // MapLogs from OTLP format to Datadog format.
