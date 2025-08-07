@@ -15,8 +15,11 @@
 package logs
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
+	"net/http"
 	"testing"
 
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadog"
@@ -31,76 +34,46 @@ import (
 	"go.uber.org/zap/zaptest"
 )
 
-func TestTranslator(t *testing.T) {
-	traceID := [16]byte{0x08, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x0, 0x0, 0x0, 0x0, 0x0a}
-	var spanID [8]byte
-	copy(spanID[:], traceID[8:])
-	ddTr := traceIDToUint64(traceID)
-	ddSp := spanIDToUint64(spanID)
-
-	type args struct {
+type translatorTestCase struct {
+	name string
+	args struct {
 		lr    plog.LogRecord
 		res   pcommon.Resource
 		scope pcommon.InstrumentationScope
 	}
-	tests := []struct {
-		name string
-		args args
-		want datadogV2.HTTPLogItem
-	}{
-		{
-			// log with an attribute
-			name: "basic",
-			args: args{
-				lr: func() plog.LogRecord {
-					l := plog.NewLogRecord()
-					l.Attributes().PutStr("app", "test")
-					l.SetSeverityNumber(5)
-					return l
-				}(),
-				res:   pcommon.NewResource(),
-				scope: pcommon.NewInstrumentationScope(),
-			},
-			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString("otel_source:test"),
-				Message: *datadog.PtrString(""),
-				AdditionalProperties: map[string]interface{}{
-					"app":              "test",
-					"status":           "debug",
-					otelSeverityNumber: "5",
-				},
-			},
-		},
-		{
-			// different attribute types
-			name: "basic",
-			args: args{
-				lr: func() plog.LogRecord {
-					l := plog.NewLogRecord()
-					l.Attributes().PutStr("app", "test")
-					l.Attributes().PutBool("test_bool", true)
-					l.Attributes().PutInt("test_int", 1234)
-					l.Attributes().PutDouble("test_double", 1.234)
-					l.SetSeverityNumber(5)
-					return l
-				}(),
-				res:   pcommon.NewResource(),
-				scope: pcommon.NewInstrumentationScope(),
-			},
-			want: datadogV2.HTTPLogItem{
-				Ddtags:  datadog.PtrString("otel_source:test"),
-				Message: *datadog.PtrString(""),
-				AdditionalProperties: map[string]interface{}{
-					"app":              "test",
-					"status":           "debug",
-					"test_bool":        true,
-					"test_int":         1234,
-					"test_double":      1.234,
-					otelSeverityNumber: "5",
-				},
-			},
-		},
+	want datadogV2.HTTPLogItem
+}
 
+type args struct {
+	lr    plog.LogRecord
+	res   pcommon.Resource
+	scope pcommon.InstrumentationScope
+}
+
+func generateTranslatorTestCases(traceID [16]byte, spanID [8]byte, ddTr uint64, ddSp uint64) []translatorTestCase {
+	return []translatorTestCase{
+		{
+			name: "basic",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					l.Attributes().PutStr("app", "test")
+					l.SetSeverityNumber(5)
+					return l
+				}(),
+				res:   pcommon.NewResource(),
+				scope: pcommon.NewInstrumentationScope(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString("otel_source:test"),
+				Message: *datadog.PtrString(""),
+				AdditionalProperties: map[string]interface{}{
+					"app":              "test",
+					"status":           "debug",
+					otelSeverityNumber: "5",
+				},
+			},
+		},
 		{
 			// log & resource with attribute
 			name: "resource",
@@ -651,6 +624,15 @@ func TestTranslator(t *testing.T) {
 			},
 		},
 	}
+}
+func TestTranslator(t *testing.T) {
+	traceID := [16]byte{0x08, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x0, 0x0, 0x0, 0x0, 0x0a}
+	var spanID [8]byte
+	copy(spanID[:], traceID[8:])
+	ddTr := traceIDToUint64(traceID)
+	ddSp := spanIDToUint64(spanID)
+
+	tests := generateTranslatorTestCases(traceID, spanID, ddTr, ddSp)
 
 	set := componenttest.NewNopTelemetrySettings()
 	set.Logger = zaptest.NewLogger(t)
@@ -673,15 +655,111 @@ func TestTranslator(t *testing.T) {
 			got := payloads[0]
 
 			gs, err := got.MarshalJSON()
-			if err != nil {
-				t.Fatal(err)
-				return
-			}
+			require.NoError(t, err)
+
 			ws, err := tt.want.MarshalJSON()
-			if err != nil {
-				t.Fatal(err)
+			require.NoError(t, err)
+
+			if !assert.JSONEq(t, string(ws), string(gs)) {
+				t.Errorf("Transform() = %v, want %v", string(gs), string(ws))
+			}
+		})
+	}
+}
+
+type mockHTTPClient struct{}
+
+func (m *mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
+	body := io.NopCloser(bytes.NewReader([]byte(`{"ok": true}`)))
+	return &http.Response{
+		StatusCode: http.StatusAccepted,
+		Body:       body,
+	}, nil
+}
+
+func TestTranslatorWithRUMRouting(t *testing.T) {
+	traceID := [16]byte{0x08, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x0, 0x0, 0x0, 0x0, 0x0a}
+	var spanID [8]byte
+	copy(spanID[:], traceID[8:])
+	ddTr := traceIDToUint64(traceID)
+	ddSp := spanIDToUint64(spanID)
+
+	tests := generateTranslatorTestCases(traceID, spanID, ddTr, ddSp)
+	rumTests := []translatorTestCase{
+		{
+			name: "basic-rum",
+			args: args{
+				lr: func() plog.LogRecord {
+					l := plog.NewLogRecord()
+					l.Attributes().PutStr("session.id", "123")
+					l.Attributes().PutStr("span_id", "2e26da881214cd7c")
+					l.Attributes().PutStr("trace_id", "740112b325075be8c80a48de336ebc67")
+					return l
+				}(),
+				res: func() pcommon.Resource {
+					r := pcommon.NewResource()
+					r.Attributes().PutStr("request_ddforward", "/v1/rum/events")
+					return r
+				}(),
+				scope: pcommon.NewInstrumentationScope(),
+			},
+			want: datadogV2.HTTPLogItem{
+				Ddtags:  datadog.PtrString("otel_source:test"),
+				Message: *datadog.PtrString(""),
+			},
+		},
+	}
+	tests = append(tests, rumTests...)
+
+	set := componenttest.NewNopTelemetrySettings()
+	set.Logger = zaptest.NewLogger(t)
+	attributesTranslator, err := attributes.NewTranslator(set)
+	require.NoError(t, err)
+	translator, err := NewTranslatorWithHTTPClient(set, attributesTranslator, "test", &mockHTTPClient{})
+	require.NoError(t, err)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			logs := plog.NewLogs()
+			rl := logs.ResourceLogs().AppendEmpty()
+			tt.args.res.MoveTo(rl.Resource())
+			sl := rl.ScopeLogs().AppendEmpty()
+			tt.args.scope.MoveTo(sl.Scope())
+			tt.args.lr.CopyTo(sl.LogRecords().AppendEmpty())
+
+			payloads, err := translator.MapLogsAndRouteRUMEvents(context.Background(), logs, nil, true)
+			require.NoError(t, err)
+
+			attributes := sl.LogRecords().At(0).Attributes()
+			if _, ok := attributes.Get("session.id"); ok {
+				require.Len(t, payloads, 0)
 				return
 			}
+
+			require.Len(t, payloads, 1)
+			got := payloads[0]
+
+			gs, err := got.MarshalJSON()
+			require.NoError(t, err)
+
+			ws, err := tt.want.MarshalJSON()
+			require.NoError(t, err)
+
+			if !assert.JSONEq(t, string(ws), string(gs)) {
+				t.Errorf("Transform() = %v, want %v", string(gs), string(ws))
+			}
+
+			payloadsNoRouting, err := translator.MapLogsAndRouteRUMEvents(context.Background(), logs, nil, false)
+			require.NoError(t, err)
+			require.Len(t, payloads, 1)
+			got = payloadsNoRouting[0]
+
+			gs, err = got.MarshalJSON()
+			require.NoError(t, err)
+
+			ws, err = tt.want.MarshalJSON()
+			require.NoError(t, err)
+
 			if !assert.JSONEq(t, string(ws), string(gs)) {
 				t.Errorf("Transform() = %v, want %v", string(gs), string(ws))
 			}

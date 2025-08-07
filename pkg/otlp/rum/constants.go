@@ -1,0 +1,82 @@
+// Unless explicitly stated otherwise all files in this repository are licensed
+// under the Apache License Version 2.0.
+// This product includes software developed at Datadog (https://www.datadoghq.com/).
+// Copyright 2023-present Datadog, Inc.
+
+package rum
+
+const (
+	// COMMON ATTRIBUTE PREFIXES
+	Datadog = "datadog"
+	Device  = "device"
+	Error   = "error"
+	Os      = "os"
+	Service = "service"
+	Session = "session"
+	User    = "user"
+	Usr     = "usr"
+	Account = "account"
+	DD      = "_dd"
+	Action  = "action"
+
+	// COMMON ATTRIBUTES
+	Name                                = "name"
+	Version                             = "version"
+	Id                                  = "id"
+	AnonymousId                         = "anonymous_id"
+	FullName                            = "full_name"
+	Email                               = "email"
+	Hash                                = "hash"
+	Identifier                          = "identifier"
+	Manufacturer                        = "manufacturer"
+	Model                               = "model"
+	Brand                               = "brand"
+	Build                               = "build"
+	BuildId                             = "build_id"
+	FormatVersion                       = "format_version"
+	Plan                                = "plan"
+	SessionPrecondition                 = "session_precondition"
+	Configuration                       = "configuration"
+	SessionSampleRate                   = "session_sample_rate"
+	SessionReplaySampleRate             = "session_replay_sample_rate"
+	ProfilingSampleRate                 = "profiling_sample_rate"
+	BrowserSDKVersion                   = "browser_sdk_version"
+	SDKName                             = "sdk_name"
+	SpanId                              = "span_id"
+	ParentSpanId                        = "parent_span_id"
+	TraceId                             = "trace_id"
+	RulePSR                             = "rule_psr"
+	ErrorReason                         = "error_reason"
+	Status                              = "status"
+	DocumentVersion                     = "document_version"
+	PageStates                          = "page_states"
+	ReplayStats                         = "replay_stats"
+	StartTime                           = "start_time"
+	State                               = "state"
+	RecordsCount                        = "records_count"
+	SegmentsCount                       = "segments_count"
+	SegmentsTotalRawSize                = "segments_total_raw_size"
+	CLS                                 = "cls"
+	DevicePixelRatio                    = "device_pixel_ratio"
+	StartSessionReplayRecordingManually = "start_session_replay_recording_manually"
+	Vital                               = "vital"
+	ComputedValue                       = "computed_value"
+
+	// ACTION ATTRIBUTES
+	Position   = "position"
+	X          = "x"
+	Y          = "y"
+	Target     = "target"
+	Selector   = "selector"
+	Width      = "width"
+	Height     = "height"
+	NameSource = "name_source"
+
+	// ERROR ATTRIBUTES
+	Message = "message"
+	Type    = "type"
+
+	// LONG TASK ATTRIBUTES
+	Discarded = "discarded"
+	Profiling = "profiling"
+)
