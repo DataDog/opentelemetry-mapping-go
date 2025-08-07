@@ -6,6 +6,8 @@
 package rum
 
 const (
+	InstrumentationScopeName = "datadog.rum-browser-sdk"
+
 	// COMMON ATTRIBUTE PREFIXES
 	Datadog = "datadog"
 	Device  = "device"
