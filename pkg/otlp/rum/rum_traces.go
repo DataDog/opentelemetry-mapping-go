@@ -57,9 +57,7 @@ func setDateForSpan(payload map[string]any, span ptrace.Span) {
 	// default duration to 0 if not found
 	var duration float64 = 0
 	if resource, ok := payload["resource"].(map[string]any); ok {
-		fmt.Println("RESOURCE FOUND", resource)
 		if durationVal, ok := resource["duration"].(float64); ok {
-			fmt.Println("DURATION FOUND", durationVal)
 			duration = durationVal
 		}
 	}
