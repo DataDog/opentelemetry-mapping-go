@@ -34,6 +34,10 @@ func TestToTraces(t *testing.T) {
 				},
 				"service": "test-service",
 				"version": "1.0.0",
+				"usr": map[string]any{
+					"email": "test@test.com",
+				},
+				"test-not-mapped-attribute": "test-value",
 			},
 			validate: func(t *testing.T, traces ptrace.Traces) {
 				assert.Equal(t, 1, traces.ResourceSpans().Len())
@@ -59,6 +63,17 @@ func TestToTraces(t *testing.T) {
 				expectedEndTime := pcommon.Timestamp(1640995200010500000)
 				assert.Equal(t, expectedStartTime, span.StartTimestamp())
 				assert.Equal(t, expectedEndTime, span.EndTimestamp())
+
+				// Check attributes
+				attributes := span.Attributes()
+				serviceName, _ := attributes.Get("service.name")
+				assert.Equal(t, "test-service", serviceName.AsString())
+				serviceVersion, _ := attributes.Get("service.version")
+				assert.Equal(t, "1.0.0", serviceVersion.AsString())
+				usrEmail, _ := attributes.Get("user.email")
+				assert.Equal(t, "test@test.com", usrEmail.AsString())
+				testNotMappedAttribute, _ := attributes.Get("datadog.test-not-mapped-attribute")
+				assert.Equal(t, "test-value", testNotMappedAttribute.AsString())
 			},
 		},
 		{
