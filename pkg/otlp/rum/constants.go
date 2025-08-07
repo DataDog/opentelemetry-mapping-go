@@ -31,6 +31,7 @@ const (
 	Manufacturer                        = "manufacturer"
 	Model                               = "model"
 	Brand                               = "brand"
+	Build                               = "build"
 	BuildId                             = "build_id"
 	FormatVersion                       = "format_version"
 	Plan                                = "plan"

@@ -17,7 +17,7 @@ var OTLPAttributeToRUMPayloadKeyMapping = map[string]string{
 	User + "." + Name:                                       Account + "." + Name,
 	Os + "." + Name:                                         Os + "." + Name,
 	Os + "." + Version:                                      Os + "." + Version,
-	Os + "." + BuildId:                                      Os + "." + BuildId,
+	Os + "." + Build:                                        Os + "." + BuildId,
 	Device + "." + Model + "." + Name:                       Device + "." + Name,
 	Device + "." + Model + "." + Identifier:                 Device + "." + Model,
 	Device + "." + Manufacturer:                             Device + "." + Brand,
