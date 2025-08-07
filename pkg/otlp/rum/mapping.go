@@ -62,7 +62,7 @@ var OTLPAttributeToRUMPayloadKeyMapping = map[string]string{
 	Datadog + "." + ReplayStats + "." + RecordsCount:                          DD + "." + ReplayStats + "." + RecordsCount,
 	Datadog + "." + ReplayStats + "." + SegmentsCount:                         DD + "." + ReplayStats + "." + SegmentsCount,
 	Datadog + "." + ReplayStats + "." + SegmentsTotalRawSize:                  DD + "." + ReplayStats + "." + SegmentsTotalRawSize,
-	Datadog + "." + CLSDevicePixelRatio:                                       DD + "." + CLSDevicePixelRatio,
+	Datadog + "." + CLS + "." + DevicePixelRatio:                              DD + "." + CLS + "." + DevicePixelRatio,
 	Datadog + "." + Configuration + "." + StartSessionReplayRecordingManually: DD + "." + Configuration + "." + StartSessionReplayRecordingManually,
 
 	// vitals-schema.json
