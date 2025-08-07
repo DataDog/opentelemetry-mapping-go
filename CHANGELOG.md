@@ -4,6 +4,12 @@
 
 <!-- next version -->
 
+## v0.31.0
+
+### 🧰 Bug fixes 🧰
+
+- `pkg/quantile`: Return an error on non monotonic bounds for histogram metrics. Previously, this would create a panic. (#744)
+
 ## v0.30.0
 
 ### 🛑 Breaking changes 🛑

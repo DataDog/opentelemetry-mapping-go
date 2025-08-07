@@ -4,9 +4,9 @@ go 1.23.0
 
 require (
 	github.com/DataDog/datadog-agent/pkg/proto v0.70.0-devel
-	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.30.0
-	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.30.0
-	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.30.0
+	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.31.0
+	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.31.0
+	github.com/DataDog/opentelemetry-mapping-go/pkg/quantile v0.31.0
 	github.com/DataDog/sketches-go v1.4.7
 	github.com/golang/protobuf v1.5.4
 	github.com/lightstep/go-expohisto v1.0.0
