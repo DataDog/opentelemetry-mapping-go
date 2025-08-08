@@ -7,7 +7,6 @@ package rum
 
 import (
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -109,24 +108,9 @@ func parseIDs(payload map[string]any, req *http.Request) (pcommon.TraceID, pcomm
 	return uInt64ToTraceID(0, traceID), uInt64ToSpanID(spanID), nil
 }
 
-func parseRUMRequestIntoResource(resource pcommon.Resource, payload map[string]any, req *http.Request) {
+func parseRUMRequestIntoResource(resource pcommon.Resource, payload map[string]any, ddforward string) {
 	resource.Attributes().PutStr(semconv.AttributeServiceName, "browser-rum-sdk")
-
-	prettyPayload, _ := json.MarshalIndent(payload, "", "\t")
-	resource.Attributes().PutStr("pretty_payload", string(prettyPayload))
-
-	// Store URL query parameters as attributes
-	queryAttrs := resource.Attributes().PutEmptyMap("request_query")
-	if req.URL.Query() != nil {
-		for paramName, paramValues := range req.URL.Query() {
-			paramValueList := queryAttrs.PutEmptySlice(paramName)
-			for _, paramValue := range paramValues {
-				paramValueList.AppendEmpty().SetStr(paramValue)
-			}
-		}
-	}
-
-	resource.Attributes().PutStr("request_ddforward", req.URL.Query().Get("ddforward"))
+	resource.Attributes().PutStr("request_ddforward", ddforward)
 }
 
 func uInt64ToTraceID(high, low uint64) pcommon.TraceID {
@@ -167,7 +151,7 @@ func setOTLPAttributes(flatPayload map[string]any, attributes pcommon.Map) {
 		rumKey, exists := RUMPayloadKeyToOTLPAttributeMapping[key]
 
 		if !exists {
-			rumKey = "datadog" + "." + key
+			rumKey = "datadog" + "." + strings.TrimPrefix(key, "_dd.")
 		}
 
 		switch v := val.(type) {

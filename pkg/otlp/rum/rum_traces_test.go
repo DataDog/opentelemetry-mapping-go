@@ -74,6 +74,10 @@ func TestToTraces(t *testing.T) {
 				assert.Equal(t, "test@test.com", usrEmail.AsString())
 				testNotMappedAttribute, _ := attributes.Get("datadog.test-not-mapped-attribute")
 				assert.Equal(t, "test-value", testNotMappedAttribute.AsString())
+				testTraceID, _ := attributes.Get("datadog.trace_id")
+				assert.Equal(t, "16976667969123787577", testTraceID.AsString())
+				testSpanID, _ := attributes.Get("datadog.span_id")
+				assert.Equal(t, "2791337267577444227", testSpanID.AsString())
 			},
 		},
 		{

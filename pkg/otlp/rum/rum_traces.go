@@ -14,7 +14,7 @@ func ToTraces(logger *zap.Logger, payload map[string]any, req *http.Request) (pt
 	results := ptrace.NewTraces()
 	rs := results.ResourceSpans().AppendEmpty()
 	rs.SetSchemaUrl(semconv.SchemaURL)
-	parseRUMRequestIntoResource(rs.Resource(), payload, req)
+	parseRUMRequestIntoResource(rs.Resource(), payload, req.URL.Query().Get("ddforward"))
 
 	in := rs.ScopeSpans().AppendEmpty()
 	in.Scope().SetName(InstrumentationScopeName)
