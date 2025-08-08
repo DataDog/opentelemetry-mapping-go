@@ -68,3 +68,25 @@ var OTLPAttributeToRUMPayloadKeyMapping = map[string]string{
 	// vitals-schema.json
 	Datadog + "." + Vital + "." + ComputedValue: DD + "." + Vital + "." + ComputedValue,
 }
+
+var RUMPayloadKeyToOTLPAttributeMapping = map[string]string{
+	// _common-schema.json
+	Service:                 Service + "." + Name,
+	Version:                 Service + "." + Version,
+	Session + "." + Id:      Session + "." + Id,
+	Usr + "." + Id:          User + "." + Id,
+	Usr + "." + Name:        User + "." + FullName,
+	Usr + "." + Email:       User + "." + Email,
+	Usr + "." + AnonymousId: User + "." + Hash,
+	Account + "." + Name:    User + "." + Name,
+	Os + "." + Name:         Os + "." + Name,
+	Os + "." + Version:      Os + "." + Version,
+	Os + "." + Build:        Os + "." + BuildId,
+	Device + "." + Name:     Device + "." + Model + "." + Name,
+	Device + "." + Model:    Device + "." + Model + "." + Identifier,
+	Device + "." + Brand:    Device + "." + Manufacturer,
+
+	// error-schema.json
+	Error + "." + Message: Error + "." + Message,
+	Error + "." + Type:    Error + "." + Type,
+}
