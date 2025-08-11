@@ -14,12 +14,12 @@ func ToTraces(logger *zap.Logger, payload map[string]any, req *http.Request) (pt
 	results := ptrace.NewTraces()
 	rs := results.ResourceSpans().AppendEmpty()
 	rs.SetSchemaUrl(semconv.SchemaURL)
-	parseRUMRequestIntoResource(rs.Resource(), payload, req.URL.Query().Get("ddforward"))
+	parseRUMRequestIntoResource(rs.Resource(), req.URL.Query().Get("ddforward"))
 
 	in := rs.ScopeSpans().AppendEmpty()
 	in.Scope().SetName(InstrumentationScopeName)
 
-	traceID, spanID, err := parseIDs(payload, req)
+	traceID, spanID, err := parseIDs(payload)
 	if err != nil {
 		return ptrace.NewTraces(), err
 	}

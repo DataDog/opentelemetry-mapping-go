@@ -8,7 +8,6 @@ package rum
 import (
 	"encoding/binary"
 	"fmt"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -81,7 +80,7 @@ type RUMPayload struct {
 	Type string
 }
 
-func parseIDs(payload map[string]any, req *http.Request) (pcommon.TraceID, pcommon.SpanID, error) {
+func parseIDs(payload map[string]any) (pcommon.TraceID, pcommon.SpanID, error) {
 	ddMetadata, ok := payload["_dd"].(map[string]any)
 	if !ok {
 		return pcommon.NewTraceIDEmpty(), pcommon.NewSpanIDEmpty(), fmt.Errorf("failed to find _dd metadata in payload")
@@ -108,7 +107,7 @@ func parseIDs(payload map[string]any, req *http.Request) (pcommon.TraceID, pcomm
 	return uInt64ToTraceID(0, traceID), uInt64ToSpanID(spanID), nil
 }
 
-func parseRUMRequestIntoResource(resource pcommon.Resource, payload map[string]any, ddforward string) {
+func parseRUMRequestIntoResource(resource pcommon.Resource, ddforward string) {
 	resource.Attributes().PutStr(semconv.AttributeServiceName, "browser-rum-sdk")
 	resource.Attributes().PutStr("request_ddforward", ddforward)
 }

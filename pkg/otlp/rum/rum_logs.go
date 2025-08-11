@@ -11,7 +11,7 @@ func ToLogs(payload map[string]any, req *http.Request) plog.Logs {
 	results := plog.NewLogs()
 	rl := results.ResourceLogs().AppendEmpty()
 	rl.SetSchemaUrl(semconv.SchemaURL)
-	parseRUMRequestIntoResource(rl.Resource(), payload, req.URL.Query().Get("ddforward"))
+	parseRUMRequestIntoResource(rl.Resource(), req.URL.Query().Get("ddforward"))
 
 	in := rl.ScopeLogs().AppendEmpty()
 	in.Scope().SetName(InstrumentationScopeName)
