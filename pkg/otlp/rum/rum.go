@@ -8,11 +8,11 @@ package rum
 import (
 	"encoding/binary"
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
-	semconv "go.opentelemetry.io/collector/semconv/v1.5.0"
 )
 
 func buildRumPayload(k string, v pcommon.Value, rumPayload map[string]any) {
@@ -107,9 +107,43 @@ func parseIDs(payload map[string]any) (pcommon.TraceID, pcommon.SpanID, error) {
 	return uInt64ToTraceID(0, traceID), uInt64ToSpanID(spanID), nil
 }
 
-func parseRUMRequestIntoResource(resource pcommon.Resource, ddforward string) {
-	resource.Attributes().PutStr(semconv.AttributeServiceName, "browser-rum-sdk")
-	resource.Attributes().PutStr("request_ddforward", ddforward)
+func parseDDForwardIntoResource(attributes pcommon.Map, ddforward string) {
+	u, err := url.Parse("https://browser-intake-datadoghq.com" + ddforward)
+	if err != nil {
+		return
+	}
+
+	queryParams := u.Query()
+	batchTime := queryParams.Get("batch_time")
+	if batchTime != "" {
+		attributes.PutStr("batch_time", batchTime)
+	}
+
+	ddTags := queryParams.Get("ddtags")
+	if ddTags != "" {
+		ddTagsMap := attributes.PutEmptyMap("ddtags")
+		for _, tag := range strings.Split(ddTags, ",") {
+			parts := strings.SplitN(tag, ":", 2)
+			if len(parts) == 2 {
+				ddTagsMap.PutStr(parts[0], parts[1])
+			}
+		}
+	}
+
+	ddSource := queryParams.Get("ddsource")
+	if ddSource != "" {
+		attributes.PutStr("ddsource", ddSource)
+	}
+
+	ddEvpOrigin := queryParams.Get("dd-evp-origin")
+	if ddEvpOrigin != "" {
+		attributes.PutStr("dd-evp-origin", ddEvpOrigin)
+	}
+
+	ddRequestId := queryParams.Get("dd-request-id")
+	if ddRequestId != "" {
+		attributes.PutStr("dd-request-id", ddRequestId)
+	}
 }
 
 func uInt64ToTraceID(high, low uint64) pcommon.TraceID {
