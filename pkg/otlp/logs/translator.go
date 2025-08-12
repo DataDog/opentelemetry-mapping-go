@@ -17,10 +17,15 @@ package logs
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"sort"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadogV2"
@@ -90,6 +95,96 @@ func (t *Translator) hostFromAttributes(ctx context.Context, attrs pcommon.Map) 
 	return ""
 }
 
+type ParamValue struct {
+	ParamKey string
+	SpanAttr string
+	Fallback string
+}
+
+func getParamValue(rattrs pcommon.Map, lattrs pcommon.Map, param ParamValue) string {
+	if param.SpanAttr != "" {
+		parts := strings.Split(param.SpanAttr, ".")
+		m := lattrs
+		for i, part := range parts {
+			if v, ok := m.Get(part); ok {
+				if i == len(parts)-1 {
+					return v.AsString()
+				}
+				if v.Type() == pcommon.ValueTypeMap {
+					m = v.Map()
+				}
+			}
+		}
+	}
+	if v, ok := rattrs.Get(param.ParamKey); ok {
+		return v.AsString()
+	}
+	return param.Fallback
+}
+
+func buildDDTags(rattrs pcommon.Map, lattrs pcommon.Map) string {
+	requiredTags := []ParamValue{
+		{ParamKey: "service", SpanAttr: "service.name", Fallback: "unknown"},
+		{ParamKey: "version", SpanAttr: "service.version", Fallback: "unknown"},
+		{ParamKey: "sdk_version", SpanAttr: "_dd.sdk_version", Fallback: "unknown"},
+		{ParamKey: "env", Fallback: "unknown"},
+	}
+
+	tagMap := make(map[string]string)
+
+	if v, ok := rattrs.Get("ddtags"); ok && v.Type() == pcommon.ValueTypeMap {
+		v.Map().Range(func(k string, val pcommon.Value) bool {
+			tagMap[k] = val.AsString()
+			return true
+		})
+	}
+
+	for _, tag := range requiredTags {
+		val := getParamValue(rattrs, lattrs, tag)
+		if val != "unknown" {
+			tagMap[tag.ParamKey] = val
+		}
+	}
+
+	var tagParts []string
+	for k, v := range tagMap {
+		tagParts = append(tagParts, k+":"+v)
+	}
+
+	// sort the tags to ensure consistent ordering for testing purposes
+	sort.Strings(tagParts)
+
+	return strings.Join(tagParts, ",")
+}
+
+func randomID() string {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		panic(err)
+	}
+	return hex.EncodeToString(b)
+}
+
+func buildDDForwardURL(rattrs pcommon.Map, lattrs pcommon.Map) string {
+	var parts []string
+
+	batchTimeParam := ParamValue{ParamKey: "batch_time", Fallback: strconv.FormatInt(time.Now().UnixMilli(), 10)}
+	parts = append(parts, batchTimeParam.ParamKey+"="+getParamValue(rattrs, lattrs, batchTimeParam))
+
+	parts = append(parts, "ddtags="+buildDDTags(rattrs, lattrs))
+
+	ddsourceParam := ParamValue{ParamKey: "ddsource", SpanAttr: "source", Fallback: "browser"}
+	parts = append(parts, ddsourceParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddsourceParam))
+
+	ddEvpOriginParam := ParamValue{ParamKey: "dd-evp-origin", SpanAttr: "source", Fallback: "browser"}
+	parts = append(parts, ddEvpOriginParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddEvpOriginParam))
+
+	ddRequestIdParam := ParamValue{ParamKey: "dd-request-id", SpanAttr: "", Fallback: randomID()}
+	parts = append(parts, ddRequestIdParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddRequestIdParam))
+
+	return "/api/v2/rum?" + strings.Join(parts, "&")
+}
+
 // MapLogsAndRouteRUMEvents from OTLP format to Datadog format if shouldForwardOTLPRUMToDDRUM is true.
 func (t *Translator) MapLogsAndRouteRUMEvents(ctx context.Context, ld plog.Logs, hostFromAttributesHandler attributes.HostFromAttributesHandler, shouldForwardOTLPRUMToDDRUM bool) ([]datadogV2.HTTPLogItem, error) {
 	if t.httpClient == nil {
@@ -116,9 +211,9 @@ func (t *Translator) MapLogsAndRouteRUMEvents(ctx context.Context, ld plog.Logs,
 						lattr := logRecord.Attributes()
 
 						// build the Datadog intake URL
-						ddforward, _ := rattr.Get("request_ddforward")
+						ddforward := buildDDForwardURL(rattr, lattr)
 						outUrlString := "https://browser-intake-datadoghq.com" +
-							ddforward.AsString()
+							ddforward
 
 						rumPayload := rum.ConstructRumPayloadFromOTLP(lattr)
 						byts, err := json.Marshal(rumPayload)
