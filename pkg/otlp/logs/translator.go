@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -139,13 +140,19 @@ func buildDDTags(rattrs pcommon.Map, lattrs pcommon.Map) string {
 
 	for _, tag := range requiredTags {
 		val := getParamValue(rattrs, lattrs, tag)
-		tagMap[tag.ParamKey] = val
+		if val != "unknown" {
+			tagMap[tag.ParamKey] = val
+		}
 	}
 
 	var tagParts []string
 	for k, v := range tagMap {
 		tagParts = append(tagParts, k+":"+v)
 	}
+
+	// sort the tags to ensure consistent ordering for testing purposes
+	sort.Strings(tagParts)
+
 	return strings.Join(tagParts, ",")
 }
 

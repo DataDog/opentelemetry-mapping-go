@@ -911,7 +911,7 @@ func TestBuildDDForwardURL(t *testing.T) {
 				serviceMap.PutStr("version", "1.2.3")
 				return lattrs
 			}(),
-			want: "/api/v2/rum?batch_time=123&ddtags=service:service,env:prod,sdk_version:1.2.3,version:1.2.3&ddsource=browser&dd-evp-origin=browser&dd-request-id=456",
+			want: "/api/v2/rum?batch_time=123&ddtags=env:prod,sdk_version:1.2.3,service:service,version:1.2.3&ddsource=browser&dd-evp-origin=browser&dd-request-id=456",
 		},
 	}
 	for _, tt := range tests {
