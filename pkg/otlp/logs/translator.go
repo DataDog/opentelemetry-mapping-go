@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -28,6 +29,7 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/rum"
+	"github.com/google/uuid"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -91,44 +93,78 @@ func (t *Translator) hostFromAttributes(ctx context.Context, attrs pcommon.Map) 
 	return ""
 }
 
+type ParamValue struct {
+	ParamKey string
+	SpanAttr string
+	Fallback string
+}
+
+func getParamValue(rattrs pcommon.Map, lattrs pcommon.Map, param ParamValue) string {
+	if param.SpanAttr != "" {
+		parts := strings.Split(param.SpanAttr, ".")
+		m := lattrs
+		for i, part := range parts {
+			if v, ok := m.Get(part); ok {
+				if i == len(parts)-1 {
+					return v.AsString()
+				}
+				if v.Type() == pcommon.ValueTypeMap {
+					m = v.Map()
+				}
+			}
+		}
+	}
+	if v, ok := rattrs.Get(param.ParamKey); ok {
+		return v.AsString()
+	}
+	return param.Fallback
+}
+
+func buildDDTags(rattrs pcommon.Map, lattrs pcommon.Map) string {
+	requiredTags := []ParamValue{
+		{ParamKey: "service", SpanAttr: "service.name", Fallback: "unknown"},
+		{ParamKey: "version", SpanAttr: "service.version", Fallback: "unknown"},
+		{ParamKey: "sdk_version", SpanAttr: "_dd.sdk_version", Fallback: "unknown"},
+		{ParamKey: "env", Fallback: "unknown"},
+	}
+
+	tagMap := make(map[string]string)
+
+	if v, ok := rattrs.Get("ddtags"); ok && v.Type() == pcommon.ValueTypeMap {
+		v.Map().Range(func(k string, val pcommon.Value) bool {
+			tagMap[k] = val.AsString()
+			return true
+		})
+	}
+
+	for _, tag := range requiredTags {
+		val := getParamValue(rattrs, lattrs, tag)
+		tagMap[tag.ParamKey] = val
+	}
+
+	var tagParts []string
+	for k, v := range tagMap {
+		tagParts = append(tagParts, k+":"+v)
+	}
+	return strings.Join(tagParts, ",")
+}
+
 func buildDDForwardURL(rattrs pcommon.Map, lattrs pcommon.Map) string {
 	var parts []string
 
-	if v, ok := rattrs.Get("batch_time"); ok {
-		parts = append(parts, "batch_time="+v.AsString())
-	}
+	batchTimeParam := ParamValue{ParamKey: "batch_time", Fallback: strconv.FormatInt(time.Now().UnixMilli(), 10)}
+	parts = append(parts, batchTimeParam.ParamKey+"="+getParamValue(rattrs, lattrs, batchTimeParam))
 
-	if v, ok := rattrs.Get("ddtags"); ok && v.Type() == pcommon.ValueTypeMap {
-		var tags []string
-		v.Map().Range(func(k string, val pcommon.Value) bool {
-			if k == "service" {
-				if svc, ok := lattrs.Get("service"); ok {
-					tags = append(tags, "service:"+svc.AsString())
-					return true
-				}
-			}
-			tags = append(tags, k+":"+val.AsString())
-			return true
-		})
-		parts = append(parts, "ddtags="+strings.Join(tags, ","))
-	}
+	parts = append(parts, "ddtags="+buildDDTags(rattrs, lattrs))
 
-	if source, ok := lattrs.Get("source"); ok {
-		src := source.AsString()
-		parts = append(parts, "ddsource="+src)
-		parts = append(parts, "dd-evp-origin="+src)
-	} else {
-		if v, ok := rattrs.Get("ddsource"); ok {
-			parts = append(parts, "ddsource="+v.AsString())
-		}
-		if v, ok := rattrs.Get("dd-evp-origin"); ok {
-			parts = append(parts, "dd-evp-origin="+v.AsString())
-		}
-	}
+	ddsourceParam := ParamValue{ParamKey: "ddsource", SpanAttr: "source", Fallback: "browser"}
+	parts = append(parts, ddsourceParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddsourceParam))
 
-	if v, ok := rattrs.Get("dd-request-id"); ok {
-		parts = append(parts, "dd-request-id="+v.AsString())
-	}
+	ddEvpOriginParam := ParamValue{ParamKey: "dd-evp-origin", SpanAttr: "source", Fallback: "browser"}
+	parts = append(parts, ddEvpOriginParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddEvpOriginParam))
+
+	ddRequestIdParam := ParamValue{ParamKey: "dd-request-id", SpanAttr: "", Fallback: uuid.New().String()}
+	parts = append(parts, ddRequestIdParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddRequestIdParam))
 
 	return "/api/v2/rum?" + strings.Join(parts, "&")
 }

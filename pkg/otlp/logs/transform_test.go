@@ -898,6 +898,7 @@ func TestBuildDDForwardURL(t *testing.T) {
 				ddTagsMap.PutStr("service", "service-rattrs")
 				ddTagsMap.PutStr("env", "prod")
 				ddTagsMap.PutStr("sdk_version", "1.2.3")
+				ddTagsMap.PutStr("version", "1.2.3")
 				rattrs.PutStr("ddsource", "browser")
 				rattrs.PutStr("dd-evp-origin", "browser")
 				rattrs.PutStr("dd-request-id", "456")
@@ -905,10 +906,12 @@ func TestBuildDDForwardURL(t *testing.T) {
 			}(),
 			lattrs: func() pcommon.Map {
 				lattrs := pcommon.NewMap()
-				lattrs.PutStr("service", "service")
+				serviceMap := lattrs.PutEmptyMap("service")
+				serviceMap.PutStr("name", "service")
+				serviceMap.PutStr("version", "1.2.3")
 				return lattrs
 			}(),
-			want: "/api/v2/rum?batch_time=123&ddtags=service:service,env:prod,sdk_version:1.2.3&ddsource=browser&dd-evp-origin=browser&dd-request-id=456",
+			want: "/api/v2/rum?batch_time=123&ddtags=service:service,env:prod,sdk_version:1.2.3,version:1.2.3&ddsource=browser&dd-evp-origin=browser&dd-request-id=456",
 		},
 	}
 	for _, tt := range tests {
