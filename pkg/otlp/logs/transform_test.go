@@ -881,3 +881,43 @@ func TestDeriveStatus(t *testing.T) {
 		})
 	}
 }
+
+func TestBuildDDForwardURL(t *testing.T) {
+	tests := []struct {
+		name   string
+		rattrs pcommon.Map
+		lattrs pcommon.Map
+		want   string
+	}{
+		{
+			name: "successfully build ddforward url",
+			rattrs: func() pcommon.Map {
+				rattrs := pcommon.NewMap()
+				rattrs.PutStr("batch_time", "123")
+				ddTagsMap := rattrs.PutEmptyMap("ddtags")
+				ddTagsMap.PutStr("service", "service-rattrs")
+				ddTagsMap.PutStr("env", "prod")
+				ddTagsMap.PutStr("sdk_version", "1.2.3")
+				ddTagsMap.PutStr("version", "1.2.3")
+				rattrs.PutStr("ddsource", "browser")
+				rattrs.PutStr("dd-evp-origin", "browser")
+				rattrs.PutStr("dd-request-id", "456")
+				return rattrs
+			}(),
+			lattrs: func() pcommon.Map {
+				lattrs := pcommon.NewMap()
+				serviceMap := lattrs.PutEmptyMap("service")
+				serviceMap.PutStr("name", "service")
+				serviceMap.PutStr("version", "1.2.3")
+				return lattrs
+			}(),
+			want: "/api/v2/rum?batch_time=123&ddtags=env:prod,sdk_version:1.2.3,service:service,version:1.2.3&ddsource=browser&dd-evp-origin=browser&dd-request-id=456",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := buildDDForwardURL(tt.rattrs, tt.lattrs)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
