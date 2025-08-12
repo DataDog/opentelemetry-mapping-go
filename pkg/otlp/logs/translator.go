@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadogV2"
@@ -90,6 +91,48 @@ func (t *Translator) hostFromAttributes(ctx context.Context, attrs pcommon.Map) 
 	return ""
 }
 
+func buildDDForwardURL(rattrs pcommon.Map, lattrs pcommon.Map) string {
+	var parts []string
+
+	if v, ok := rattrs.Get("batch_time"); ok {
+		parts = append(parts, "batch_time="+v.AsString())
+	}
+
+	if v, ok := rattrs.Get("ddtags"); ok && v.Type() == pcommon.ValueTypeMap {
+		var tags []string
+		v.Map().Range(func(k string, val pcommon.Value) bool {
+			if k == "service" {
+				if svc, ok := lattrs.Get("service"); ok {
+					tags = append(tags, "service:"+svc.AsString())
+					return true
+				}
+			}
+			tags = append(tags, k+":"+val.AsString())
+			return true
+		})
+		parts = append(parts, "ddtags="+strings.Join(tags, ","))
+	}
+
+	if source, ok := lattrs.Get("source"); ok {
+		src := source.AsString()
+		parts = append(parts, "ddsource="+src)
+		parts = append(parts, "dd-evp-origin="+src)
+	} else {
+		if v, ok := rattrs.Get("ddsource"); ok {
+			parts = append(parts, "ddsource="+v.AsString())
+		}
+		if v, ok := rattrs.Get("dd-evp-origin"); ok {
+			parts = append(parts, "dd-evp-origin="+v.AsString())
+		}
+	}
+
+	if v, ok := rattrs.Get("dd-request-id"); ok {
+		parts = append(parts, "dd-request-id="+v.AsString())
+	}
+
+	return "/api/v2/rum?" + strings.Join(parts, "&")
+}
+
 // MapLogsAndRouteRUMEvents from OTLP format to Datadog format if shouldForwardOTLPRUMToDDRUM is true.
 func (t *Translator) MapLogsAndRouteRUMEvents(ctx context.Context, ld plog.Logs, hostFromAttributesHandler attributes.HostFromAttributesHandler, shouldForwardOTLPRUMToDDRUM bool) ([]datadogV2.HTTPLogItem, error) {
 	if t.httpClient == nil {
@@ -116,9 +159,9 @@ func (t *Translator) MapLogsAndRouteRUMEvents(ctx context.Context, ld plog.Logs,
 						lattr := logRecord.Attributes()
 
 						// build the Datadog intake URL
-						ddforward, _ := rattr.Get("request_ddforward")
+						ddforward := buildDDForwardURL(rattr, lattr)
 						outUrlString := "https://browser-intake-datadoghq.com" +
-							ddforward.AsString()
+							ddforward
 
 						rumPayload := rum.ConstructRumPayloadFromOTLP(lattr)
 						byts, err := json.Marshal(rumPayload)
