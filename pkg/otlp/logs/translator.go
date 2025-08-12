@@ -17,6 +17,8 @@ package logs
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -30,7 +32,6 @@ import (
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/rum"
-	"github.com/google/uuid"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -156,6 +157,14 @@ func buildDDTags(rattrs pcommon.Map, lattrs pcommon.Map) string {
 	return strings.Join(tagParts, ",")
 }
 
+func randomID() string {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		panic(err)
+	}
+	return hex.EncodeToString(b)
+}
+
 func buildDDForwardURL(rattrs pcommon.Map, lattrs pcommon.Map) string {
 	var parts []string
 
@@ -170,7 +179,7 @@ func buildDDForwardURL(rattrs pcommon.Map, lattrs pcommon.Map) string {
 	ddEvpOriginParam := ParamValue{ParamKey: "dd-evp-origin", SpanAttr: "source", Fallback: "browser"}
 	parts = append(parts, ddEvpOriginParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddEvpOriginParam))
 
-	ddRequestIdParam := ParamValue{ParamKey: "dd-request-id", SpanAttr: "", Fallback: uuid.New().String()}
+	ddRequestIdParam := ParamValue{ParamKey: "dd-request-id", SpanAttr: "", Fallback: randomID()}
 	parts = append(parts, ddRequestIdParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddRequestIdParam))
 
 	return "/api/v2/rum?" + strings.Join(parts, "&")
