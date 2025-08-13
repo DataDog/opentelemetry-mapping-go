@@ -144,6 +144,11 @@ func parseDDForwardIntoResource(attributes pcommon.Map, ddforward string) {
 	if ddRequestId != "" {
 		attributes.PutStr("dd-request-id", ddRequestId)
 	}
+
+	ddApiKey := queryParams.Get("dd-api-key")
+	if ddApiKey != "" {
+		attributes.PutStr("dd-api-key", ddApiKey)
+	}
 }
 
 func uInt64ToTraceID(high, low uint64) pcommon.TraceID {
