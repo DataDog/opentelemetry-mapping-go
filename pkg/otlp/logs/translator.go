@@ -186,7 +186,7 @@ func buildDDForwardURL(rattrs pcommon.Map, lattrs pcommon.Map) string {
 }
 
 // MapLogsAndRouteRUMEvents from OTLP format to Datadog format if shouldForwardOTLPRUMToDDRUM is true.
-func (t *Translator) MapLogsAndRouteRUMEvents(ctx context.Context, ld plog.Logs, hostFromAttributesHandler attributes.HostFromAttributesHandler, shouldForwardOTLPRUMToDDRUM bool) ([]datadogV2.HTTPLogItem, error) {
+func (t *Translator) MapLogsAndRouteRUMEvents(ctx context.Context, ld plog.Logs, hostFromAttributesHandler attributes.HostFromAttributesHandler, shouldForwardOTLPRUMToDDRUM bool, rumIntakeUrl string) ([]datadogV2.HTTPLogItem, error) {
 	if t.httpClient == nil {
 		return nil, fmt.Errorf("httpClient is nil")
 	}
@@ -212,8 +212,7 @@ func (t *Translator) MapLogsAndRouteRUMEvents(ctx context.Context, ld plog.Logs,
 
 						// build the Datadog intake URL
 						ddforward := buildDDForwardURL(rattr, lattr)
-						outUrlString := "https://browser-intake-datadoghq.com" +
-							ddforward
+						outUrlString := rumIntakeUrl + ddforward
 
 						rumPayload := rum.ConstructRumPayloadFromOTLP(lattr)
 						byts, err := json.Marshal(rumPayload)
