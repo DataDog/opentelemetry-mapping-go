@@ -108,7 +108,7 @@ func parseIDs(payload map[string]any) (pcommon.TraceID, pcommon.SpanID, error) {
 }
 
 func parseDDForwardIntoResource(attributes pcommon.Map, ddforward string) {
-	u, err := url.Parse("https://browser-intake-datadoghq.com" + ddforward)
+	u, err := url.Parse(ddforward)
 	if err != nil {
 		return
 	}
