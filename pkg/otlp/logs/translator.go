@@ -165,7 +165,7 @@ func randomID() string {
 	return hex.EncodeToString(b)
 }
 
-func buildDDForwardURL(rattrs pcommon.Map, lattrs pcommon.Map) string {
+func buildIntakeUrlPathAndParameters(rattrs pcommon.Map, lattrs pcommon.Map) string {
 	var parts []string
 
 	batchTimeParam := ParamValue{ParamKey: "batch_time", Fallback: strconv.FormatInt(time.Now().UnixMilli(), 10)}
@@ -181,6 +181,9 @@ func buildDDForwardURL(rattrs pcommon.Map, lattrs pcommon.Map) string {
 
 	ddRequestIdParam := ParamValue{ParamKey: "dd-request-id", SpanAttr: "", Fallback: randomID()}
 	parts = append(parts, ddRequestIdParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddRequestIdParam))
+
+	ddApiKeyParam := ParamValue{ParamKey: "dd-api-key", SpanAttr: "", Fallback: ""}
+	parts = append(parts, ddApiKeyParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddApiKeyParam))
 
 	return "/api/v2/rum?" + strings.Join(parts, "&")
 }
@@ -211,8 +214,8 @@ func (t *Translator) MapLogsAndRouteRUMEvents(ctx context.Context, ld plog.Logs,
 						lattr := logRecord.Attributes()
 
 						// build the Datadog intake URL
-						ddforward := buildDDForwardURL(rattr, lattr)
-						outUrlString := rumIntakeUrl + ddforward
+						pathAndParams := buildIntakeUrlPathAndParameters(rattr, lattr)
+						outUrlString := rumIntakeUrl + pathAndParams
 
 						rumPayload := rum.ConstructRumPayloadFromOTLP(lattr)
 						byts, err := json.Marshal(rumPayload)

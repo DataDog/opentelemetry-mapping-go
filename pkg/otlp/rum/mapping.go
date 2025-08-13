@@ -6,7 +6,7 @@
 package rum
 
 var OTLPAttributeToRUMPayloadKeyMapping = map[string]string{
-	// _common-schema.json
+	// _common-schema.json (https://github.com/DataDog/rum-events-format/blob/master/schemas/rum/_common-schema.json)
 	Service + "." + Name:                                    Service,
 	Service + "." + Version:                                 Version,
 	Session + "." + Id:                                      Session + "." + Id,
@@ -30,7 +30,7 @@ var OTLPAttributeToRUMPayloadKeyMapping = map[string]string{
 	Datadog + "." + BrowserSDKVersion:                             DD + "." + BrowserSDKVersion,
 	Datadog + "." + SDKName:                                       DD + "." + SDKName,
 
-	// action-schema.json
+	// action-schema.json (https://github.com/DataDog/rum-events-format/blob/master/schemas/rum/action-schema.json)
 	Datadog + "." + Action + "." + Position + "." + X:      DD + "." + Action + "." + Position + "." + X,
 	Datadog + "." + Action + "." + Position + "." + Y:      DD + "." + Action + "." + Position + "." + Y,
 	Datadog + "." + Action + "." + Target + "." + Selector: DD + "." + Action + "." + Target + "." + Selector,
@@ -38,15 +38,15 @@ var OTLPAttributeToRUMPayloadKeyMapping = map[string]string{
 	Datadog + "." + Action + "." + Target + "." + Height:   DD + "." + Action + "." + Target + "." + Height,
 	Datadog + "." + Action + "." + NameSource:              DD + "." + Action + "." + NameSource,
 
-	// error-schema.json
+	// error-schema.json (https://github.com/DataDog/rum-events-format/blob/master/schemas/rum/error-schema.json)
 	Error + "." + Message: Error + "." + Message,
 	Error + "." + Type:    Error + "." + Type,
 
-	// long_task-schema.json
+	// long_task-schema.json (https://github.com/DataDog/rum-events-format/blob/master/schemas/rum/long_task-schema.json)
 	Datadog + "." + Discarded: DD + "." + Discarded,
 	Datadog + "." + Profiling: DD + "." + Profiling,
 
-	// resource-schema.json
+	// resource-schema.json (https://github.com/DataDog/rum-events-format/blob/master/schemas/rum/resource-schema.json)
 	Datadog + "." + SpanId:                        DD + "." + SpanId,
 	Datadog + "." + ParentSpanId:                  DD + "." + ParentSpanId,
 	Datadog + "." + TraceId:                       DD + "." + TraceId,
@@ -54,7 +54,7 @@ var OTLPAttributeToRUMPayloadKeyMapping = map[string]string{
 	Datadog + "." + Profiling + "." + Status:      DD + "." + Profiling + "." + Status,
 	Datadog + "." + Profiling + "." + ErrorReason: DD + "." + Profiling + "." + ErrorReason,
 
-	// _view-schema.json
+	// view-schema.json (https://github.com/DataDog/rum-events-format/blob/master/schemas/rum/view-schema.json)
 	Datadog + "." + DocumentVersion:                                           DD + "." + DocumentVersion,
 	Datadog + "." + PageStates:                                                DD + "." + PageStates,
 	Datadog + "." + PageStates + "." + State:                                  DD + "." + PageStates + "." + State,
@@ -65,7 +65,7 @@ var OTLPAttributeToRUMPayloadKeyMapping = map[string]string{
 	Datadog + "." + CLS + "." + DevicePixelRatio:                              DD + "." + CLS + "." + DevicePixelRatio,
 	Datadog + "." + Configuration + "." + StartSessionReplayRecordingManually: DD + "." + Configuration + "." + StartSessionReplayRecordingManually,
 
-	// vitals-schema.json
+	// vital-schema.json (https://github.com/DataDog/rum-events-format/blob/master/schemas/rum/vital-schema.json)
 	Datadog + "." + Vital + "." + ComputedValue: DD + "." + Vital + "." + ComputedValue,
 }
 
