@@ -882,7 +882,7 @@ func TestDeriveStatus(t *testing.T) {
 	}
 }
 
-func TestBuildDDForwardURL(t *testing.T) {
+func TestBuildIntakeUrlPathAndParameters(t *testing.T) {
 	tests := []struct {
 		name   string
 		rattrs pcommon.Map
@@ -890,7 +890,7 @@ func TestBuildDDForwardURL(t *testing.T) {
 		want   string
 	}{
 		{
-			name: "successfully build ddforward url",
+			name: "successfully build intake url path and parameters",
 			rattrs: func() pcommon.Map {
 				rattrs := pcommon.NewMap()
 				rattrs.PutStr("batch_time", "123")
@@ -916,7 +916,7 @@ func TestBuildDDForwardURL(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := buildDDForwardURL(tt.rattrs, tt.lattrs)
+			got := buildIntakeUrlPathAndParameters(tt.rattrs, tt.lattrs)
 			assert.Equal(t, tt.want, got)
 		})
 	}
