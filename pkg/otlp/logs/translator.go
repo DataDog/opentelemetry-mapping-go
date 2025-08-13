@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -124,10 +123,10 @@ func getParamValue(rattrs pcommon.Map, lattrs pcommon.Map, param ParamValue) str
 
 func buildDDTags(rattrs pcommon.Map, lattrs pcommon.Map) string {
 	requiredTags := []ParamValue{
-		{ParamKey: "service", SpanAttr: "service.name", Fallback: "unknown"},
-		{ParamKey: "version", SpanAttr: "service.version", Fallback: "unknown"},
-		{ParamKey: "sdk_version", SpanAttr: "_dd.sdk_version", Fallback: "unknown"},
-		{ParamKey: "env", Fallback: "unknown"},
+		{ParamKey: "service", SpanAttr: "service.name", Fallback: "otlpresourcenoservicename"},
+		{ParamKey: "version", SpanAttr: "service.version", Fallback: ""},
+		{ParamKey: "sdk_version", SpanAttr: "_dd.sdk_version", Fallback: ""},
+		{ParamKey: "env", Fallback: "default"},
 	}
 
 	tagMap := make(map[string]string)
@@ -141,7 +140,7 @@ func buildDDTags(rattrs pcommon.Map, lattrs pcommon.Map) string {
 
 	for _, tag := range requiredTags {
 		val := getParamValue(rattrs, lattrs, tag)
-		if val != "unknown" {
+		if val != tag.Fallback {
 			tagMap[tag.ParamKey] = val
 		}
 	}
@@ -151,18 +150,15 @@ func buildDDTags(rattrs pcommon.Map, lattrs pcommon.Map) string {
 		tagParts = append(tagParts, k+":"+v)
 	}
 
-	// sort the tags to ensure consistent ordering for testing purposes
-	sort.Strings(tagParts)
-
 	return strings.Join(tagParts, ",")
 }
 
-func randomID() string {
+func randomID() (string, error) {
 	b := make([]byte, 16)
 	if _, err := rand.Read(b); err != nil {
-		panic(err)
+		return "", err
 	}
-	return hex.EncodeToString(b)
+	return hex.EncodeToString(b), nil
 }
 
 func buildIntakeUrlPathAndParameters(rattrs pcommon.Map, lattrs pcommon.Map) string {
@@ -179,7 +175,11 @@ func buildIntakeUrlPathAndParameters(rattrs pcommon.Map, lattrs pcommon.Map) str
 	ddEvpOriginParam := ParamValue{ParamKey: "dd-evp-origin", SpanAttr: "source", Fallback: "browser"}
 	parts = append(parts, ddEvpOriginParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddEvpOriginParam))
 
-	ddRequestIdParam := ParamValue{ParamKey: "dd-request-id", SpanAttr: "", Fallback: randomID()}
+	ddRequestId, err := randomID()
+	if err != nil {
+		return ""
+	}
+	ddRequestIdParam := ParamValue{ParamKey: "dd-request-id", SpanAttr: "", Fallback: ddRequestId}
 	parts = append(parts, ddRequestIdParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddRequestIdParam))
 
 	ddApiKeyParam := ParamValue{ParamKey: "dd-api-key", SpanAttr: "", Fallback: ""}
