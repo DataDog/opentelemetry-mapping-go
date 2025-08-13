@@ -902,6 +902,7 @@ func TestBuildIntakeUrlPathAndParameters(t *testing.T) {
 				rattrs.PutStr("ddsource", "browser")
 				rattrs.PutStr("dd-evp-origin", "browser")
 				rattrs.PutStr("dd-request-id", "456")
+				rattrs.PutStr("dd-api-key", "1234567890")
 				return rattrs
 			}(),
 			lattrs: func() pcommon.Map {
@@ -911,7 +912,7 @@ func TestBuildIntakeUrlPathAndParameters(t *testing.T) {
 				serviceMap.PutStr("version", "1.2.3")
 				return lattrs
 			}(),
-			want: "/api/v2/rum?batch_time=123&ddtags=env:prod,sdk_version:1.2.3,service:service,version:1.2.3&ddsource=browser&dd-evp-origin=browser&dd-request-id=456",
+			want: "/api/v2/rum?batch_time=123&ddtags=env:prod,sdk_version:1.2.3,service:service,version:1.2.3&ddsource=browser&dd-evp-origin=browser&dd-request-id=456&dd-api-key=1234567890",
 		},
 	}
 	for _, tt := range tests {
