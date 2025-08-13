@@ -182,6 +182,9 @@ func buildIntakeUrlPathAndParameters(rattrs pcommon.Map, lattrs pcommon.Map) str
 	ddRequestIdParam := ParamValue{ParamKey: "dd-request-id", SpanAttr: "", Fallback: randomID()}
 	parts = append(parts, ddRequestIdParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddRequestIdParam))
 
+	ddApiKeyParam := ParamValue{ParamKey: "dd-api-key", SpanAttr: "", Fallback: ""}
+	parts = append(parts, ddApiKeyParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddApiKeyParam))
+
 	return "/api/v2/rum?" + strings.Join(parts, "&")
 }
 
