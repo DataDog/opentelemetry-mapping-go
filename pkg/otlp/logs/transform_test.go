@@ -727,7 +727,7 @@ func TestTranslatorWithRUMRouting(t *testing.T) {
 			tt.args.scope.MoveTo(sl.Scope())
 			tt.args.lr.CopyTo(sl.LogRecords().AppendEmpty())
 
-			payloads, err := translator.MapLogsAndRouteRUMEvents(context.Background(), logs, nil, true)
+			payloads, err := translator.MapLogsAndRouteRUMEvents(context.Background(), logs, nil, true, "https://test-intake-datadoghq.com")
 			require.NoError(t, err)
 
 			attributes := sl.LogRecords().At(0).Attributes()
@@ -749,7 +749,7 @@ func TestTranslatorWithRUMRouting(t *testing.T) {
 				t.Errorf("Transform() = %v, want %v", string(gs), string(ws))
 			}
 
-			payloadsNoRouting, err := translator.MapLogsAndRouteRUMEvents(context.Background(), logs, nil, false)
+			payloadsNoRouting, err := translator.MapLogsAndRouteRUMEvents(context.Background(), logs, nil, false, "https://test-intake-datadoghq.com")
 			require.NoError(t, err)
 			require.Len(t, payloads, 1)
 			got = payloadsNoRouting[0]
