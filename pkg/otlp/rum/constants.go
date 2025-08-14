@@ -6,6 +6,8 @@
 package rum
 
 const (
+	InstrumentationScopeName = "datadog.rum-browser-sdk"
+
 	// _common-schema.json (https://github.com/DataDog/rum-events-format/blob/master/schemas/rum/_common-schema.json)
 	ServiceName                                 = "service.name"
 	ServiceVersion                              = "service.version"
@@ -24,6 +26,7 @@ const (
 	DatadogBrowserSDKVersion                    = "datadog.browser_sdk_version"
 	DatadogSDKName                              = "datadog.sdk_name"
 
+	Service                                = "service"
 	Session                                = "session"
 	Version                                = "version"
 	UsrId                                  = "usr.id"
