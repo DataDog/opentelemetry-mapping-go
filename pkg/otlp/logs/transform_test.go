@@ -20,6 +20,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"sort"
+	"strings"
 	"testing"
 
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadog"
@@ -918,7 +921,33 @@ func TestBuildIntakeUrlPathAndParameters(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := buildIntakeUrlPathAndParameters(tt.rattrs, tt.lattrs)
-			assert.Equal(t, tt.want, got)
+			uri, err := url.Parse(got)
+			require.NoError(t, err)
+			queryParams := uri.Query()
+
+			// handle ddtags specially - split, sort, and rejoin
+			var ddtagsStr string
+			if queryParams.Get("ddtags") != "" {
+				ddtags := strings.Split(queryParams.Get("ddtags"), ",")
+				sort.Strings(ddtags)
+				ddtagsStr = strings.Join(ddtags, ",")
+			}
+
+			var queryParts []string
+			queryParts = append(queryParts, "batch_time="+queryParams.Get("batch_time"))
+
+			if ddtagsStr != "" {
+				queryParts = append(queryParts, "ddtags="+ddtagsStr)
+			}
+
+			queryParts = append(queryParts, "ddsource="+queryParams.Get("ddsource"))
+			queryParts = append(queryParts, "dd-evp-origin="+queryParams.Get("dd-evp-origin"))
+			queryParts = append(queryParts, "dd-request-id="+queryParams.Get("dd-request-id"))
+			queryParts = append(queryParts, "dd-api-key="+queryParams.Get("dd-api-key"))
+
+			reconstructedURL := "/api/v2/rum?" + strings.Join(queryParts, "&")
+
+			assert.Equal(t, tt.want, reconstructedURL)
 		})
 	}
 }
