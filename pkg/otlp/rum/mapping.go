@@ -62,3 +62,19 @@ var OTLPAttributeToRUMPayloadKeyMapping = map[string]string{
 	// vital-schema.json (https://github.com/DataDog/rum-events-format/blob/master/schemas/rum/vital-schema.json)
 	DatadogVitalComputedValue: DDVitalComputedValue,
 }
+
+var RUMPayloadKeyToOTLPAttributeMapping = map[string]string{
+	// _common-schema.json
+	Service:        ServiceName,
+	Version:        ServiceVersion,
+	SessionId:      SessionId,
+	UsrId:          UserId,
+	UsrName:        UserFullName,
+	UsrEmail:       UserEmail,
+	UsrAnonymousId: UserHash,
+	AccountName:    UserName,
+
+	// error-schema.json
+	ErrorMessage: ErrorMessage,
+	ErrorType:    ErrorType,
+}

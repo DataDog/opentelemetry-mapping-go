@@ -42,6 +42,7 @@ const (
 	DDConfigurationProfilingSampleRate     = "_dd.configuration.profiling_sample_rate"
 	DDBrowserSDKVersion                    = "_dd.browser_sdk_version"
 	DDSDKName                              = "_dd.sdk_name"
+	Type                                   = "type"
 
 	// action-schema.json (https://github.com/DataDog/rum-events-format/blob/master/schemas/rum/action-schema.json)
 	DatadogActionPositionX      = "datadog.action.position.x"
