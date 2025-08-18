@@ -5,12 +5,13 @@
 
 module-sets:
   pkgs:
-    version: v0.31.0
+    version: v0.32.0
     modules:
       - github.com/DataDog/opentelemetry-mapping-go/pkg/quantile
       - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes
       - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/logs
       - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/metrics
+      - github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/rum
       - github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest
       - github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata
 excluded-modules:
