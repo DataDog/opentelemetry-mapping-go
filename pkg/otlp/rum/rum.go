@@ -189,7 +189,7 @@ func setOTLPAttributes(flatPayload map[string]any, attributes pcommon.Map) {
 		rumKey, exists := RUMPayloadKeyToOTLPAttributeMapping[key]
 
 		if !exists {
-			rumKey = "datadog" + "." + strings.TrimPrefix(key, "_dd.")
+			rumKey = "datadog" + "." + key
 		}
 
 		switch v := val.(type) {
