@@ -5,6 +5,7 @@ go 1.23.0
 require (
 	github.com/DataDog/datadog-api-client-go/v2 v2.43.0
 	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes v0.31.0
+	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/rum v0.0.0-00010101000000-000000000000
 	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/collector/component v1.38.0
 	go.opentelemetry.io/collector/component/componenttest v0.132.0
@@ -15,7 +16,7 @@ require (
 
 require (
 	github.com/DataDog/zstd v1.5.6 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/goccy/go-json v0.10.4 // indirect
@@ -46,6 +47,9 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes => ../attributes
+replace (
+	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes => ../attributes
+	github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/rum => ../rum
+)
 
 retract v0.4.0 // see #107
