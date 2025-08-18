@@ -235,13 +235,13 @@ func appendToOTLPSlice(slice pcommon.Slice, val any) {
 	}
 }
 
-type ParamValue struct {
+type paramValue struct {
 	ParamKey string
 	SpanAttr string
 	Fallback string
 }
 
-func getParamValue(rattrs pcommon.Map, lattrs pcommon.Map, param ParamValue) string {
+func getParamValue(rattrs pcommon.Map, lattrs pcommon.Map, param paramValue) string {
 	if param.SpanAttr != "" {
 		parts := strings.Split(param.SpanAttr, ".")
 		m := lattrs
@@ -263,7 +263,7 @@ func getParamValue(rattrs pcommon.Map, lattrs pcommon.Map, param ParamValue) str
 }
 
 func buildDDTags(rattrs pcommon.Map, lattrs pcommon.Map) string {
-	requiredTags := []ParamValue{
+	requiredTags := []paramValue{
 		{ParamKey: "service", SpanAttr: "service.name", Fallback: "otlpresourcenoservicename"},
 		{ParamKey: "version", SpanAttr: "service.version", Fallback: ""},
 		{ParamKey: "sdk_version", SpanAttr: "_dd.sdk_version", Fallback: ""},
@@ -305,25 +305,25 @@ func randomID() (string, error) {
 func BuildIntakeUrlPathAndParameters(rattrs pcommon.Map, lattrs pcommon.Map) string {
 	var parts []string
 
-	batchTimeParam := ParamValue{ParamKey: "batch_time", Fallback: strconv.FormatInt(time.Now().UnixMilli(), 10)}
+	batchTimeParam := paramValue{ParamKey: "batch_time", Fallback: strconv.FormatInt(time.Now().UnixMilli(), 10)}
 	parts = append(parts, batchTimeParam.ParamKey+"="+getParamValue(rattrs, lattrs, batchTimeParam))
 
 	parts = append(parts, "ddtags="+buildDDTags(rattrs, lattrs))
 
-	ddsourceParam := ParamValue{ParamKey: "ddsource", SpanAttr: "source", Fallback: "browser"}
+	ddsourceParam := paramValue{ParamKey: "ddsource", SpanAttr: "source", Fallback: "browser"}
 	parts = append(parts, ddsourceParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddsourceParam))
 
-	ddEvpOriginParam := ParamValue{ParamKey: "dd-evp-origin", SpanAttr: "source", Fallback: "browser"}
+	ddEvpOriginParam := paramValue{ParamKey: "dd-evp-origin", SpanAttr: "source", Fallback: "browser"}
 	parts = append(parts, ddEvpOriginParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddEvpOriginParam))
 
 	ddRequestId, err := randomID()
 	if err != nil {
 		return ""
 	}
-	ddRequestIdParam := ParamValue{ParamKey: "dd-request-id", SpanAttr: "", Fallback: ddRequestId}
+	ddRequestIdParam := paramValue{ParamKey: "dd-request-id", SpanAttr: "", Fallback: ddRequestId}
 	parts = append(parts, ddRequestIdParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddRequestIdParam))
 
-	ddApiKeyParam := ParamValue{ParamKey: "dd-api-key", SpanAttr: "", Fallback: ""}
+	ddApiKeyParam := paramValue{ParamKey: "dd-api-key", SpanAttr: "", Fallback: ""}
 	parts = append(parts, ddApiKeyParam.ParamKey+"="+getParamValue(rattrs, lattrs, ddApiKeyParam))
 
 	return "/api/v2/rum?" + strings.Join(parts, "&")
