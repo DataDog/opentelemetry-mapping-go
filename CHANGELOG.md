@@ -4,6 +4,16 @@
 
 <!-- next version -->
 
+## 0.32.0
+
+### 🚀 New components 🚀
+
+- `pkg/otlp/rum`: Add OTLP -> RUM translation and also deprecate MapLogs in favor of MapLogsAndRouteRUMEvents so that RUM events are handled. (#745)
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/rum`: Add RUM -> OTLP translation. (#747)
+
 ## v0.31.0
 
 ### 🧰 Bug fixes 🧰
