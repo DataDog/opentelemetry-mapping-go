@@ -4,6 +4,17 @@
 
 <!-- next version -->
 
+## v0.32.0
+
+### 🚀 New components 🚀
+
+- `pkg/otlp/rum`: Add OTLP -> RUM translation and also deprecate MapLogs in favor of MapLogsAndRouteRUMEvents so that RUM events are handled. (#745)
+
+### 💡 Enhancements 💡
+
+- `pkg/otlp/metrics`: Add `WithInferDeltaInterval` option to infer the interval for delta metrics (#765)
+- `pkg/otlp/rum`: Add RUM -> OTLP translation. (#747)
+
 ## v0.31.0
 
 ### 🧰 Bug fixes 🧰
