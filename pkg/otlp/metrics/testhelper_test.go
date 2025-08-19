@@ -62,6 +62,7 @@ type TestDimensions struct {
 
 type TestSketch struct {
 	TestDimensions
+	Interval  int64
 	Timestamp uint64
 	Summary   summary.Summary
 	Keys      []int32
@@ -170,6 +171,7 @@ func (t *testConsumer) ConsumeTimeSeries(
 			},
 			Type:      typ,
 			Timestamp: timestamp,
+			Interval:  interval,
 			Value:     value,
 		})
 }
@@ -193,6 +195,7 @@ func (t *testConsumer) ConsumeSketch(
 				OriginSubProduct:    dimensions.OriginSubProduct(),
 				OriginProductDetail: dimensions.OriginProductDetail(),
 			},
+			Interval:  interval,
 			Timestamp: timestamp,
 			Summary:   sketch.Basic,
 			Keys:      k,
