@@ -453,7 +453,11 @@ func (t *Translator) getSketchBuckets(
 			sketch.Basic.Max = math.Min(p.Max(), sketch.Basic.Max)
 		}
 
-		consumer.ConsumeSketch(ctx, pointDims, ts, 0, sketch)
+		var interval int64
+		if t.cfg.InferDeltaInterval && delta {
+			interval = inferDeltaInterval(startTs, ts)
+		}
+		consumer.ConsumeSketch(ctx, pointDims, ts, interval, sketch)
 	}
 	return nil
 }
