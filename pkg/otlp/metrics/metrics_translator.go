@@ -75,12 +75,13 @@ func inferDeltaInterval(startTimestamp, timestamp uint64) int64 {
 		return 0
 	}
 
-	// Convert nanoseconds to seconds
-	deltaSeconds := float64(timestamp-startTimestamp) / 1e9
-	if deltaSeconds < 0 {
+	if startTimestamp > timestamp {
 		// malformed data
 		return 0
 	}
+
+	// Convert nanoseconds to seconds
+	deltaSeconds := float64(timestamp-startTimestamp) / 1e9
 	roundedDelta := math.Round(deltaSeconds)
 
 	if math.Abs(roundedDelta-deltaSeconds) < intervalTolerance {
