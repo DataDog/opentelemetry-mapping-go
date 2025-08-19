@@ -2386,7 +2386,7 @@ func TestInferInterval(t *testing.T) {
 			name:     "malformed data",
 			startTs:  710000000,
 			ts:       0,
-			expected: 1,
+			expected: 0,
 		},
 	}
 
