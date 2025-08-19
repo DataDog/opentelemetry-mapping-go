@@ -42,8 +42,8 @@ const (
 	errNoBucketsNoSumCount string = "no buckets mode and no send count sum are incompatible"
 
 	// intervalTolerance is the tolerance for interval calculation in seconds
-	// We use 0.1 seconds as tolerance to allow for some jitter.
-	intervalTolerance float64 = 0.1
+	// We use 0.05 seconds as tolerance to allow for some jitter.
+	intervalTolerance float64 = 0.05
 )
 
 var (

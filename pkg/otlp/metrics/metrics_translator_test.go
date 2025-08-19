@@ -2361,13 +2361,13 @@ func TestInferInterval(t *testing.T) {
 		{
 			name:     "under within tolerance",
 			startTs:  1e9,
-			ts:       11e9 - 50e6,
+			ts:       11e9 - 30e6,
 			expected: 10,
 		},
 		{
 			name:     "over within tolerance",
 			startTs:  1e9,
-			ts:       11e9 + 50e6,
+			ts:       11e9 + 30e6,
 			expected: 10,
 		},
 		{
