@@ -108,7 +108,7 @@ pkg/otlp/attributes,go.opentelemetry.io/otel/trace,Apache-2.0,Copyright The Open
 pkg/otlp/attributes,go.opentelemetry.io/otel/trace/embedded,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/otel/trace/internal/telemetry,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/attributes,go.opentelemetry.io/otel/trace/noop,Apache-2.0,Copyright The OpenTelemetry Authors
-pkg/otlp/attributes,go.uber.org/multierr,MIT,"Copyright (c) 2017-2021 Uber Technologies, Inc | Copyright (c) 2017-2021 Uber Technologies, Inc"
+pkg/otlp/attributes,go.uber.org/multierr,MIT,"Copyright (c) 2017-2021 Uber Technologies, Inc"
 pkg/otlp/attributes,go.uber.org/zap,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/otlp/attributes,go.uber.org/zap/buffer,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/otlp/attributes,go.uber.org/zap/internal,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
@@ -254,7 +254,7 @@ pkg/otlp/metrics,github.com/json-iterator/go,MIT,Copyright (c) 2016 json-iterato
 pkg/otlp/metrics,github.com/modern-go/concurrent,Apache-2.0,Copyright (c) 2018 Tao Wen
 pkg/otlp/metrics,github.com/modern-go/reflect2,Apache-2.0,Copyright (c) 2018 Tao Wen
 pkg/otlp/metrics,github.com/patrickmn/go-cache,MIT,"Copyright (c) 2012-2017 Patrick Mylund Nielsen and the go-cache contributors | This is a list of people who have contributed code to go-cache. They, or their | employers, are the copyright holders of the contributed code. Contributed code | is subject to the license restrictions listed in LICENSE (as they were when the | code was contributed.) | Dustin Sallings <dustin@spy.net> | Jason Mooberry <jasonmoo@me.com> | Sergey Shepelev <temotor@gmail.com> | Alex Edwards <ajmedwards@gmail.com>"
-pkg/otlp/metrics,github.com/philhofer/fwd,MIT,"Copyright (c) 2014-2015, Philip Hofer | Copyright (c) 2014-2015, Philip Hofer"
+pkg/otlp/metrics,github.com/philhofer/fwd,MIT,"Copyright (c) 2014-2015, Philip Hofer"
 pkg/otlp/metrics,github.com/planetscale/vtprotobuf/protohelpers,BSD-3-Clause,"Copyright (c) 2021, PlanetScale Inc. All rights reserved | Copyright (c) 2013, The GoGo Authors. All rights reserved | Copyright (c) 2018 The Go Authors. All rights reserved"
 pkg/otlp/metrics,github.com/tinylib/msgp/msgp,MIT,Copyright (c) 2014 Philip Hofer | Copyright (c) 2009 The Go Authors (license at http://golang.org) where indicated
 pkg/otlp/metrics,go.opentelemetry.io/auto/sdk,Apache-2.0,Copyright The OpenTelemetry Authors
@@ -318,7 +318,7 @@ pkg/otlp/metrics,go.opentelemetry.io/otel/trace,Apache-2.0,Copyright The OpenTel
 pkg/otlp/metrics,go.opentelemetry.io/otel/trace/embedded,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/otel/trace/internal/telemetry,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/otlp/metrics,go.opentelemetry.io/otel/trace/noop,Apache-2.0,Copyright The OpenTelemetry Authors
-pkg/otlp/metrics,go.uber.org/multierr,MIT,"Copyright (c) 2017-2021 Uber Technologies, Inc | Copyright (c) 2017-2021 Uber Technologies, Inc"
+pkg/otlp/metrics,go.uber.org/multierr,MIT,"Copyright (c) 2017-2021 Uber Technologies, Inc"
 pkg/otlp/metrics,go.uber.org/zap,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/otlp/metrics,go.uber.org/zap/buffer,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/otlp/metrics,go.uber.org/zap/internal,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
@@ -520,7 +520,7 @@ pkg/inframetadata,go.opentelemetry.io/otel/trace,Apache-2.0,Copyright The OpenTe
 pkg/inframetadata,go.opentelemetry.io/otel/trace/embedded,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/inframetadata,go.opentelemetry.io/otel/trace/internal/telemetry,Apache-2.0,Copyright The OpenTelemetry Authors
 pkg/inframetadata,go.opentelemetry.io/otel/trace/noop,Apache-2.0,Copyright The OpenTelemetry Authors
-pkg/inframetadata,go.uber.org/multierr,MIT,"Copyright (c) 2017-2021 Uber Technologies, Inc | Copyright (c) 2017-2021 Uber Technologies, Inc"
+pkg/inframetadata,go.uber.org/multierr,MIT,"Copyright (c) 2017-2021 Uber Technologies, Inc"
 pkg/inframetadata,go.uber.org/zap,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/inframetadata,go.uber.org/zap/buffer,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
 pkg/inframetadata,go.uber.org/zap/internal,MIT,"Copyright (c) 2016-2017 Uber Technologies, Inc"
