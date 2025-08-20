@@ -19,8 +19,8 @@ import (
 	"go.uber.org/zap/zaptest/observer"
 
 	"github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/inframetadata"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/internal/testutils"
 	"github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/inframetadata/payload"
+	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/internal/testutils"
 )
 
 func TestHasHostMetadata(t *testing.T) {
