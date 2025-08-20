@@ -1,8 +1,11 @@
 module github.com/DataDog/opentelemetry-mapping-go/pkg/quantile
 
-go 1.23
+go 1.23.0
+
+toolchain go1.24.5
 
 require (
+	github.com/DataDog/datadog-agent/pkg/util/quantile v0.71.0-devel.0.20250820180704-be0d2d237646
 	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.32.0
 	github.com/DataDog/sketches-go v1.4.7
 	github.com/dustin/go-humanize v1.0.1
@@ -10,9 +13,9 @@ require (
 )
 
 require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
-	google.golang.org/protobuf v1.36.1 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
+	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 

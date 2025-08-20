@@ -20,7 +20,7 @@ import (
 	"fmt"
 
 	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/quantile"
+	"github.com/DataDog/datadog-agent/pkg/util/quantile"
 )
 
 // DataType is a timeseries-style metric type.

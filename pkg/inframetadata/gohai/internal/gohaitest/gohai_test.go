@@ -11,7 +11,7 @@ import (
 	"github.com/DataDog/gohai/memory"
 	"github.com/DataDog/gohai/network"
 	"github.com/DataDog/gohai/platform"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/gohai"
+	"github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/inframetadata/gohai"
 	"github.com/stretchr/testify/require"
 )
 

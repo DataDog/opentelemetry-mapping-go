@@ -14,7 +14,7 @@ import (
 	semconv118 "go.opentelemetry.io/otel/semconv/v1.18.0"
 
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/internal/testutils"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/payload"
+	"github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/inframetadata/payload"
 )
 
 func BuildMetric[N int64 | float64](name string, value N) *pmetric.Metric {
