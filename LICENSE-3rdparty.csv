@@ -1,4 +1,5 @@
 Component,Origin,License,Copyright
+pkg/quantile,github.com/DataDog/datadog-agent/pkg/util/quantile/summary,Apache-2.0,"Copyright 2016-present Datadog, Inc"
 pkg/quantile,github.com/DataDog/sketches-go/ddsketch,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
 pkg/quantile,github.com/DataDog/sketches-go/ddsketch/encoding,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
 pkg/quantile,github.com/DataDog/sketches-go/ddsketch/mapping,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
@@ -33,6 +34,10 @@ pkg/quantile,google.golang.org/protobuf/reflect/protoreflect,BSD-3-Clause,Copyri
 pkg/quantile,google.golang.org/protobuf/reflect/protoregistry,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/runtime/protoiface,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/quantile,google.golang.org/protobuf/runtime/protoimpl,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/attributes,github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes/azure,Apache-2.0,"Copyright 2016-present Datadog, Inc"
+pkg/otlp/attributes,github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes/ec2,Apache-2.0,"Copyright 2016-present Datadog, Inc"
+pkg/otlp/attributes,github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes/gcp,Apache-2.0,"Copyright 2016-present Datadog, Inc"
+pkg/otlp/attributes,github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes/source,Apache-2.0,"Copyright 2016-present Datadog, Inc"
 pkg/otlp/attributes,github.com/go-logr/logr,Apache-2.0,Copyright 2019 The logr Authors.
 pkg/otlp/attributes,github.com/go-logr/logr/funcr,Apache-2.0,Copyright 2019 The logr Authors.
 pkg/otlp/attributes,github.com/go-logr/stdr,Apache-2.0,Copyright 2019 The logr Authors.
@@ -221,14 +226,14 @@ pkg/otlp/attributes,google.golang.org/protobuf/runtime/protoimpl,BSD-3-Clause,Co
 pkg/otlp/attributes,google.golang.org/protobuf/types/known/anypb,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/otlp/attributes,google.golang.org/protobuf/types/known/durationpb,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/otlp/attributes,google.golang.org/protobuf/types/known/timestamppb,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
+pkg/otlp/metrics,github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes,Apache-2.0,"Copyright 2016-present Datadog, Inc"
+pkg/otlp/metrics,github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes/azure,Apache-2.0,"Copyright 2016-present Datadog, Inc"
+pkg/otlp/metrics,github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes/ec2,Apache-2.0,"Copyright 2016-present Datadog, Inc"
+pkg/otlp/metrics,github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes/gcp,Apache-2.0,"Copyright 2016-present Datadog, Inc"
+pkg/otlp/metrics,github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes/source,Apache-2.0,"Copyright 2016-present Datadog, Inc"
 pkg/otlp/metrics,github.com/DataDog/datadog-agent/pkg/proto/pbgo/trace,Apache-2.0,"Copyright 2016-present Datadog, Inc"
-pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
-pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/azure,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
-pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/ec2,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
-pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/gcp,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
-pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
-pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/quantile,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
-pkg/otlp/metrics,github.com/DataDog/opentelemetry-mapping-go/pkg/quantile/summary,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
+pkg/otlp/metrics,github.com/DataDog/datadog-agent/pkg/util/quantile,Apache-2.0,"Copyright 2016-present Datadog, Inc"
+pkg/otlp/metrics,github.com/DataDog/datadog-agent/pkg/util/quantile/summary,Apache-2.0,"Copyright 2016-present Datadog, Inc"
 pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
 pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch/encoding,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
 pkg/otlp/metrics,github.com/DataDog/sketches-go/ddsketch/mapping,Apache-2.0,"Copyright 2021 Datadog, Inc | Copyright 2021 Datadog, Inc"
@@ -436,11 +441,14 @@ pkg/otlp/metrics,google.golang.org/protobuf/types/gofeaturespb,BSD-3-Clause,Copy
 pkg/otlp/metrics,google.golang.org/protobuf/types/known/anypb,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/otlp/metrics,google.golang.org/protobuf/types/known/durationpb,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
 pkg/otlp/metrics,google.golang.org/protobuf/types/known/timestamppb,BSD-3-Clause,Copyright (c) 2018 The Go Authors. All rights reserved
-pkg/inframetadata,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
-pkg/inframetadata,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/azure,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
-pkg/inframetadata,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/ec2,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
-pkg/inframetadata,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/gcp,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
-pkg/inframetadata,github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/attributes/source,UNKNOWN,"Copyright [2023-Present] Datadog, Inc."
+pkg/inframetadata,github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/inframetadata/gohai,Apache-2.0,"Copyright 2016-present Datadog, Inc"
+pkg/inframetadata,github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/inframetadata/payload,Apache-2.0,"Copyright 2016-present Datadog, Inc"
+pkg/inframetadata,github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes,Apache-2.0,"Copyright 2016-present Datadog, Inc"
+pkg/inframetadata,github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes/azure,Apache-2.0,"Copyright 2016-present Datadog, Inc"
+pkg/inframetadata,github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes/ec2,Apache-2.0,"Copyright 2016-present Datadog, Inc"
+pkg/inframetadata,github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes/gcp,Apache-2.0,"Copyright 2016-present Datadog, Inc"
+pkg/inframetadata,github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes/source,Apache-2.0,"Copyright 2016-present Datadog, Inc"
+pkg/inframetadata,github.com/DataDog/datadog-agent/pkg/serializer/marshaler,Apache-2.0,"Copyright 2016-present Datadog, Inc"
 pkg/inframetadata,github.com/davecgh/go-spew/spew,ISC,Copyright (c) 2012-2016 Dave Collins <dave@davec.name>
 pkg/inframetadata,github.com/go-logr/logr,Apache-2.0,Copyright 2019 The logr Authors.
 pkg/inframetadata,github.com/go-logr/logr/funcr,Apache-2.0,Copyright 2019 The logr Authors.

@@ -1,0 +1,16 @@
+# One of 'breaking', 'deprecation', 'new_component', 'enhancement', 'bug_fix'
+change_type: breaking
+
+# The name of the component (e.g. pkg/quantile)
+component: pkg/otlp/attributes
+
+# A brief description of the change. Surround your text with quotes ("") if it needs to start with a backtick (`).
+note: changes MeterProvider to be from `github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes` which is a copy of this library
+
+# The PR related to this change
+issues: [768]
+
+# (Optional) One or more lines of additional information to render under the primary note.
+# These lines will be padded with 2 spaces and then inserted directly into the document.
+# Use pipe (|) for multiline entries.
+subtext:

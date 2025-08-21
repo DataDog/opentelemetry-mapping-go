@@ -18,8 +18,9 @@ import (
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
 
+	"github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/inframetadata"
+	"github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/inframetadata/payload"
 	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/internal/testutils"
-	"github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/payload"
 )
 
 func TestHasHostMetadata(t *testing.T) {
@@ -71,7 +72,7 @@ func TestHasHostMetadata(t *testing.T) {
 
 }
 
-var _ Pusher = (*pusher)(nil)
+var _ inframetadata.Pusher = (*pusher)(nil)
 
 type pusher struct {
 	md payload.HostMetadata
@@ -87,7 +88,7 @@ func (p *pusher) Push(_ context.Context, md payload.HostMetadata) error {
 func TestRun(t *testing.T) {
 	p := &pusher{ch: make(chan struct{})}
 	core, observed := observer.New(zapcore.WarnLevel)
-	r, err := NewReporter(zap.New(core), p, 50*time.Millisecond)
+	r, err := inframetadata.NewReporter(zap.New(core), p, 50*time.Millisecond)
 	require.NoError(t, err)
 
 	ch := make(chan struct{})
