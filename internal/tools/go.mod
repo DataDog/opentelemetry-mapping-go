@@ -7,7 +7,7 @@ toolchain go1.24.1
 require (
 	github.com/frapposelli/wwhrd v0.4.0
 	github.com/golangci/golangci-lint v1.64.8
-	go.opentelemetry.io/build-tools/chloggen v0.26.0
+	go.opentelemetry.io/build-tools/chloggen v0.26.2
 	go.opentelemetry.io/build-tools/multimod v0.26.0
 	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0 // No tagged version available
 	gotest.tools/gotestsum v1.12.3
