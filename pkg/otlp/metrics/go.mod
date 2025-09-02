@@ -6,7 +6,7 @@ require (
 	github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes v0.71.0-devel.0.20250820180704-be0d2d237646
 	github.com/DataDog/datadog-agent/pkg/proto v0.71.0-devel
 	github.com/DataDog/datadog-agent/pkg/util/quantile v0.71.0-devel.0.20250820180704-be0d2d237646
-	github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest v0.32.0
+	github.com/DataDog/datadog-agent/pkg/util/quantile/sketchtest v0.71.0-devel.0.20250820180704-be0d2d237646
 	github.com/DataDog/sketches-go v1.4.7
 	github.com/golang/protobuf v1.5.4
 	github.com/lightstep/go-expohisto v1.0.0
@@ -23,7 +23,6 @@ require (
 )
 
 require (
-	github.com/DataDog/datadog-agent/pkg/util/quantile/sketchtest v0.71.0-devel.0.20250820180704-be0d2d237646 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
