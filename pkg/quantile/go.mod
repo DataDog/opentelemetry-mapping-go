@@ -9,7 +9,7 @@ require (
 	github.com/DataDog/datadog-agent/pkg/util/quantile/sketchtest v0.71.0-devel.0.20250820180704-be0d2d237646
 	github.com/DataDog/sketches-go v1.4.7
 	github.com/dustin/go-humanize v1.0.1
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 )
 
 require (
