@@ -2,8 +2,8 @@ github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes v0
 github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes v0.71.0-devel.0.20250820180704-be0d2d237646/go.mod h1:iAo6WH4vhQG6ELJAuFVH73xGnOIFInTyAIxaVBJnw0s=
 github.com/DataDog/datadog-agent/pkg/proto v0.71.0-devel h1:7JYXWbk4o8TuOHLXYi2u7B6mLedX4k6ekeL8kGNQOB0=
 github.com/DataDog/datadog-agent/pkg/proto v0.71.0-devel/go.mod h1:04uBfKTbFuA9muKbgBE6yC/+955fGjnpwkTPV2LjREY=
-github.com/DataDog/datadog-agent/pkg/util/quantile v0.71.0-devel.0.20250820180704-be0d2d237646 h1:DULpin+8A5briAApeWoHsVcTg/MKhSZPG1JO2ezEoOc=
-github.com/DataDog/datadog-agent/pkg/util/quantile v0.71.0-devel.0.20250820180704-be0d2d237646/go.mod h1:5PBiFCtE1/ZNEdGD9+zpV9c+pkz8TweSxiaevrjCAfM=
+github.com/DataDog/datadog-agent/pkg/util/quantile v0.72.0-devel h1:Xg6ZNdA9ye1nOHT8f27QVPOMguTPAx0OuQsqqadW3pM=
+github.com/DataDog/datadog-agent/pkg/util/quantile v0.72.0-devel/go.mod h1:kl+4tUbqroq0cpELnJrd5Z93iDOICOgFgjdXDrBQT1U=
 github.com/DataDog/datadog-agent/pkg/util/quantile/sketchtest v0.71.0-devel.0.20250820180704-be0d2d237646 h1:uWURXoC0zFaQQQJSHzh5fQjuqGjyICB7InVWuHpSx9w=
 github.com/DataDog/datadog-agent/pkg/util/quantile/sketchtest v0.71.0-devel.0.20250820180704-be0d2d237646/go.mod h1:vFb4+SjmguKSk3BoBPQqNyh8heaYcLkc9U0DwvYTshM=
 github.com/DataDog/sketches-go v1.4.7 h1:eHs5/0i2Sdf20Zkj0udVFWuCrXGRFig2Dcfm5rtcTxc=
