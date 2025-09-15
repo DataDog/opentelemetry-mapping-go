@@ -1,5 +1,5 @@
-github.com/DataDog/datadog-agent/pkg/util/quantile v0.71.0-devel.0.20250820180704-be0d2d237646 h1:DULpin+8A5briAApeWoHsVcTg/MKhSZPG1JO2ezEoOc=
-github.com/DataDog/datadog-agent/pkg/util/quantile v0.71.0-devel.0.20250820180704-be0d2d237646/go.mod h1:5PBiFCtE1/ZNEdGD9+zpV9c+pkz8TweSxiaevrjCAfM=
+github.com/DataDog/datadog-agent/pkg/util/quantile v0.72.0-devel h1:Xg6ZNdA9ye1nOHT8f27QVPOMguTPAx0OuQsqqadW3pM=
+github.com/DataDog/datadog-agent/pkg/util/quantile v0.72.0-devel/go.mod h1:kl+4tUbqroq0cpELnJrd5Z93iDOICOgFgjdXDrBQT1U=
 github.com/DataDog/datadog-agent/pkg/util/quantile/sketchtest v0.71.0-devel.0.20250820180704-be0d2d237646 h1:uWURXoC0zFaQQQJSHzh5fQjuqGjyICB7InVWuHpSx9w=
 github.com/DataDog/datadog-agent/pkg/util/quantile/sketchtest v0.71.0-devel.0.20250820180704-be0d2d237646/go.mod h1:vFb4+SjmguKSk3BoBPQqNyh8heaYcLkc9U0DwvYTshM=
 github.com/DataDog/sketches-go v1.4.7 h1:eHs5/0i2Sdf20Zkj0udVFWuCrXGRFig2Dcfm5rtcTxc=
@@ -22,8 +22,8 @@ github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0t
 github.com/rogpeppe/go-internal v1.14.1/go.mod h1:MaRKkUm5W0goXpeCfT7UZI6fk/L7L7so1lCWt35ZSgc=
 github.com/stretchr/testify v1.10.0 h1:Xv5erBjTwe/5IxqUQTdXv5kgmIvbHo3QQyRwhJsOfJA=
 github.com/stretchr/testify v1.10.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
-google.golang.org/protobuf v1.36.6 h1:z1NpPI8ku2WgiWnf+t9wTPsn6eP1L7ksHUlkfLvd9xY=
-google.golang.org/protobuf v1.36.6/go.mod h1:jduwjTPXsFjZGTmRluh+L6NjiWu7pchiJ2/5YcXBHnY=
+google.golang.org/protobuf v1.36.7 h1:IgrO7UwFQGJdRNXH/sQux4R1Dj1WAKcLElzeeRaXV2A=
+google.golang.org/protobuf v1.36.7/go.mod h1:jduwjTPXsFjZGTmRluh+L6NjiWu7pchiJ2/5YcXBHnY=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntNwaWcugrBjAiHlqqRiVk=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c/go.mod h1:JHkPIbrfpd72SG/EVd6muEfDQjcINNoR0C8j2r3qZ4Q=
