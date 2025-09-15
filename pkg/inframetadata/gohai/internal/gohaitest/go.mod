@@ -1,3 +1,4 @@
+// Deprecated: this module is for internal tooling only and will be removed.
 module github.com/DataDog/opentelemetry-mapping-go/pkg/inframetadata/gohai/internal/gohaitest
 
 go 1.23.0

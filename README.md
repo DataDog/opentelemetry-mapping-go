@@ -1,3 +1,11 @@
+## Repository archive
+
+This repository has been archived as of 15 September, 2025. The modules have been migrated to the github.com/DataDog/datadog-agent monorepo.
+- pkg/inframetadata/* -> datadog-agent/pkg/opentelemetry-mapping-go/inframetadata/*
+- pkg/internal/sketchtest -> datadog-agent/pkg/util/quantile/sketchtest
+- pkg/otlp/* -> datadog-agent/pkg/opentelemetry-mapping-go/otlp/*
+- pkg/quantile -> datadog-agent/pkg/util/quantile
+
 # opentelemetry-mapping-go
 
 This repository contains Go modules that implement [OpenTelemetry][1]-to-Datadog mapping for all telemetry signals as well as for semantic conventions.

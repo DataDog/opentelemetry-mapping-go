@@ -1,3 +1,4 @@
+// Deprecated: use github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/logs instead.
 module github.com/DataDog/opentelemetry-mapping-go/pkg/otlp/logs
 
 go 1.23.0

@@ -1,3 +1,4 @@
+// Deprecated: this module is for internal tooling only and will be removed.
 module github.com/DataDog/opentelemetry-mapping-go/internal/tools/generate-license-file
 
 go 1.23

@@ -1,3 +1,4 @@
+// Deprecated: use github.com/DataDog/datadog-agent/pkg/util/quantile/sketchtest instead.
 module github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest
 
 go 1.23

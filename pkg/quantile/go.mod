@@ -1,3 +1,4 @@
+// Deprecated: use github.com/DataDog/datadog-agent/pkg/util/quantile instead.
 module github.com/DataDog/opentelemetry-mapping-go/pkg/quantile
 
 go 1.23.0
