@@ -4,6 +4,19 @@
 
 <!-- next version -->
 
+## v0.33.0
+
+### 🛑 Breaking changes 🛑
+
+- `pkg/otlp/attributes`: changes MeterProvider to be from `github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/otlp/attributes` which is a copy of this library (#768)
+- `pkg/inframetadata`: Changes Pusher type to be from `github.com/DataDog/datadog-agent/pkg/opentelemetry-mapping-go/inframetadata` which is a copy of this library (#768)
+- `pkg/internal/sketchtest`: Changes references to `github.com/DataDog/opentelemetry-mapping-go/pkg/internal/sketchtest` to `github.com/DataDog/datadog-agent/pkg/util/quantile/sketchtest` (#768, #818)
+
+### 🚩 Deprecations 🚩
+
+- `all`: Deprecate all modules in this repository. ()
+  See go.mod files and README.md for replacements.
+
 ## v0.32.0
 
 ### 🚀 New components 🚀
