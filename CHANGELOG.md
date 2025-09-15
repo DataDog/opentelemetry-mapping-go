@@ -14,7 +14,7 @@
 
 ### 🚩 Deprecations 🚩
 
-- `all`: Deprecate all modules in this repository. ()
+- `all`: Deprecate all modules in this repository. (#839)
   See go.mod files and README.md for replacements.
 
 ## v0.32.0
